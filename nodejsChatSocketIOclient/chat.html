@@ -1,0 +1,58 @@
+<html>
+   <head>
+     <script type="text/javascript" language="Javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+     <script>window.jQuery || document.write('<script src="scripts/jquery.min.js"><\/script>')</script>
+      <script src="/ICODEMDAMaps-chat/nodejsChatSocketIOclient/node_modules/socket.io-client/dist/socket.io.js"></script>
+      <script>
+         $(function(){
+            //Get server IP
+            var ip = String(location.host);
+
+            var iosocket = io.connect(ip, {
+               port:8080,
+               'reconnect': true,
+               'reconnection delay': 500,
+               'max reconnection attempts': 50
+            });
+
+            //use 'once' instead of 'on' here to prevent reconnecting old connections
+            // and having multiple connections
+            iosocket.once('connect', function () { 
+               $('#incomingChatMessages').append($('<center><b>Connected</b></center>'));
+
+               iosocket.on('message', function(data) {
+                  $('#incomingChatMessages').append($('<li></li>').html('<b>'+data.id+'</b>:'+data.msg));
+               });
+
+               iosocket.on('servermsg', function(data) {
+                  $('#incomingChatMessages').append($('<center></center>').html(data.msg));
+               });
+
+               iosocket.on('reconnect', function() {
+                  $('#incomingChatMessages').append('<center><b>Reconnected</b></center>');
+               });
+
+               iosocket.on('disconnect', function() {
+                  $('#incomingChatMessages').append('<center><b>Disconnected</b></center>');
+               });
+            });
+
+            $('#outgoingChatMessage').keypress(function(event) {
+               if(event.which == 13) {
+                  event.preventDefault();
+                  iosocket.send($('#outgoingChatMessage').val());
+                  /*
+                  $('#incomingChatMessages').append($('<li></li>').text($('#outgoingChatMessage').val()));
+                  */
+                  $('#outgoingChatMessage').val('');
+               }
+            });
+         });
+      </script>
+   </head>
+   <body>
+      <ul id="incomingChatMessages"></ul>
+
+      <input type="text" id="outgoingChatMessage">
+   </body>
+</html>

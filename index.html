@@ -68,6 +68,8 @@
      </script>
 
      <script>
+        //Unused dialog
+        /*
         $(function() {
            $( "#dialog" ).dialog({
               autoOpen: true,
@@ -76,6 +78,7 @@
            });
            setTimeout(function(){ $( "#dialog" ).dialog("close")}, 2000);
         });
+        */
      </script>
 
      <style>
@@ -140,6 +143,23 @@
                           modal: false,
                           position: [90,110]
                        });
+        });
+
+        $(document).ready(function() {
+           var $setupAlertDialog = $('#chat-modal')
+                       .dialog({
+                          autoOpen: false,
+                          title: 'Incoming chats',
+                          width: 300,
+                          height: 300,
+                          modal: false,
+                          position: [10,660]
+                       });
+
+           $('#chat-modal')
+           .load('nodejsChatSocketIOclient/chat.html', function() {
+           })
+           .dialog('open');
         });
      </script>
 
@@ -523,6 +543,11 @@
 
      <div id="setup-alert-modal">
         <!-- Content here defined in separate alerts/setup-alerts.html file -->
+     </div>
+
+
+     <div id="chat-modal">
+        <!-- Content here defined in separate chat file -->
      </div>
 
 
