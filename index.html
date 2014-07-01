@@ -56,7 +56,9 @@
               heightStyle: "fill"
            });
            $(window).resize(function(){
-              $("#accordion").accordion("refresh");
+              if ($("#accordion").accordion != undefined) {
+                 $("#accordion").accordion("refresh");
+              }
            });           
         });
      </script>
@@ -121,31 +123,29 @@
      <script>
         $(document).ready(function() {
            var $setupAlertDialog = $('#setup-alert-modal')
-                       .dialog({
-                          autoOpen: false,
-                          title: 'Setup an Alert',
-                          width: 700,
-                          height: 500,
-                          modal: false,
-                          position: [90,110]
-                       });
-        });
+           .dialog({
+              autoOpen: false,
+              title: 'Setup an Alert',
+              width: 700,
+              height: 500,
+              modal: false,
+              position: [90,110]
+           });
 
-        $(document).ready(function() {
            var $setupAlertDialog = $('#alert-modal')
-                       .dialog({
-                          autoOpen: false,
-                          title: 'Real-time Alerts',
-                          width: 300,
-                          height: 300,
-                          modal: false,
-                          position: [10,660]
-                       });
-
-           $('#alert-modal')
-           .load('/alerts/', function() {
+           .dialog({
+              autoOpen: false,
+              title: 'Real-time Alerts',
+              width: 300,
+              height: 300,
+              modal: false,
+              position: [10,660]
            })
-           .dialog('open');
+           .load('/alerts/', function() {
+           });
+
+           //Open the alert dialog modal box
+           $setupAlertDialog.dialog('open');
         });
      </script>
 
