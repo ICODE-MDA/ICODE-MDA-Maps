@@ -67,17 +67,6 @@
         });
      </script>
 
-     <script>
-        $(function() {
-           $( "#dialog" ).dialog({
-              autoOpen: true,
-              modal: true,
-              hide: "fade",
-           });
-           setTimeout(function(){ $( "#dialog" ).dialog("close")}, 2000);
-        });
-     </script>
-
      <style>
         #feedback { font-size: 1em; }
         #selectable .ui-selecting { background: #FECA40; }
@@ -140,6 +129,23 @@
                           modal: false,
                           position: [90,110]
                        });
+        });
+
+        $(document).ready(function() {
+           var $setupAlertDialog = $('#alert-modal')
+                       .dialog({
+                          autoOpen: false,
+                          title: 'Real-time Alerts',
+                          width: 300,
+                          height: 300,
+                          modal: false,
+                          position: [10,660]
+                       });
+
+           $('#alert-modal')
+           .load('/alerts/', function() {
+           })
+           .dialog('open');
         });
      </script>
 
@@ -525,6 +531,9 @@
         <!-- Content here defined in separate alerts/setup-alerts.html file -->
      </div>
 
+     <div id="alert-modal">
+        <!-- Content here defined in separate file -->
+     </div>
 
      <div id="geocodepanel">
         <input id="geocodeAddress" type="textbox" value="San Diego, CA">
