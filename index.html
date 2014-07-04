@@ -122,7 +122,7 @@
 
      <script>
         $(document).ready(function() {
-           var $setupAlertDialog = $('#setup-alert-modal')
+           var setupAlertDialog = $('#setup-alert-modal')
            .dialog({
               autoOpen: false,
               title: 'Setup an Alert',
@@ -132,7 +132,9 @@
               position: [90,110]
            });
 
-           var $setupAlertDialog = $('#alert-modal')
+           var alertModal = $('<div/>').html($('#alert-modal'));
+
+           var alertDialog = alertModal
            .dialog({
               autoOpen: false,
               title: 'Real-time Alerts',
@@ -141,11 +143,10 @@
               modal: false,
               position: [10,660]
            })
-           .load('/alerts/', function() {
-           });
-
-           //Open the alert dialog modal box
-           $setupAlertDialog.dialog('open');
+           .load('alerts.html', function() {
+              console.log('Alerts content loaded');
+           })
+           .dialog('open');
         });
      </script>
 
