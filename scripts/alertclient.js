@@ -1,42 +1,82 @@
-$(function () {
+toastr.options = {
+  "closeButton": false,
+  "debug": false,
+  "positionClass": "toast-bottom-left",
+  "onclick": null,
+  "showDuration": "300",
+  "hideDuration": "1000",
+  "timeOut": "5000",
+  "extendedTimeOut": "1000",
+  "showEasing": "swing",
+  "hideEasing": "linear",
+  "showMethod": "fadeIn",
+  "hideMethod": "fadeOut"
+}
+
+$(function start() {
    "use strict";
 
    // for better performance - to avoid searching in DOM
    var content = $('#content');
    var alertLabel = $('#alertLabel');
+   var alertCountLabel = $('#alertCountLabel');
+   var processedCountLabel = $('#processedCountLabel');
 
    var user = 'icodeuser';
 
-   // my color assigned by the server
-   var myColor = false;
-   // my name sent to the server
-   var myName = false;
+   var alertCountTotal = 0;
 
-   // if user is running mozilla then use it's built-in WebSocket
+   //if user is running Mozilla then use its built-in WebSocket
    window.WebSocket = window.WebSocket || window.MozWebSocket;
 
-   // if browser doesn't support WebSocket, just show some notification and exit
+   //if browser doesn't support WebSocket, just show some notification and exit
    if (!window.WebSocket) {
       content.html($('<p>', { text: 'Sorry, but your browser doesn\'t '
          + 'support WebSockets.'} ));
          $('span').hide();
-         return;
+      return;
    }
 
-   // open connection
+   //Open socket connection to server
    var connection = new WebSocket('ws://127.0.0.1:2411');
 
       connection.onopen = function () {
-         // first we want users to enter their names
-         alertLabel.text('Connected to alert server as user: ' + user);
+         //Connected to server success
+         alertLabel.html('<b>Connected to alert server as user: </b>' + user);
          connection.send(user);
       };
 
-      connection.onerror = function (error) {
-         // just in there were some problems with conenction...
-         content.html($('<p>', { text: 'Sorry, but there\'s some problem with your '
-            + 'connection or the server is down.' } ));
+      connection.onclose = function () {
+         console.log('Server went down');
+         alertLabel.text('Server went down');
+         //try to reconnect every 3 seconds
+         setTimeout(function() {
+            console.log('Attempting to reconnect...');
+            start();
+         }, 1000);
       };
+
+      /*
+      connection.onerror = function (error) {
+         //Connection to server error
+         //alertLabel.html($('<p>', { text: 'Connection to the server is down.' } ));
+         alertLabel.html('Cannot connect to server');
+
+         //Attempt to reconnect here
+         setTimeout(function() {
+            console.log('Checking connection');
+            alertLabel.text('Checking connection');
+
+            connection = new WebSocket('ws://127.0.0.1:2411');
+
+               if (connection.readyState !== 1) {
+                  alertLabel.text('Error');
+                  //input.attr('disabled', 'disabled').val('Unable to comminucate '
+                  //+ 'with the WebSocket server.');
+               }
+         }, 3000);
+      };
+      */
 
       // most important part - incoming messages
       connection.onmessage = function (message) {
@@ -55,30 +95,27 @@ $(function () {
             console.log('Server responded with:', serverResponse);
          }
          else if (json.type === 'alertNotification') {
+            var decodedAIS = JSON.parse(json.data);
+
             console.log('Received alert from server');
-            content.append(json.data + '<br>');
+            content.prepend(json.data + '<br>');
+
+            toastr.success(decodedAIS.mmsi + ' detected in ROI!');
+            console.log(decodedAIS);
+
+            alertCountTotal++;
+            alertCountLabel.text(alertCountTotal);
          }
          else if (json.type === 'alertHistory') {
          }
-         else if (json.type === 'progress') {
+         else if (json.type === 'totalDecoded') {
             console.log('Received progress report from server');
-            content.append(json.data + '<br>');
+            //content.prepend(json.data + '<br>');
+            //toastr.info(json.data)
+            processedCountLabel.html(json.data);
          }
          else {
             console.log('Data from server unrecognized', json);
          }
       };
-
-      /**
-      * This method is optional. If the server wasn't able to respond to the
-      * in 3 seconds then show some error message to notify the user that
-      * something is wrong.
-      */
-      setInterval(function() {
-         if (connection.readyState !== 1) {
-            alertLabel.text('Error');
-            //input.attr('disabled', 'disabled').val('Unable to comminucate '
-            //+ 'with the WebSocket server.');
-         }
-      }, 3000);
 });

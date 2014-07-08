@@ -6,7 +6,6 @@
      <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 
      <link rel="stylesheet" type="text/css" href="css/mapstyle.css">
-     <link rel="stylesheet" type="text/css" href="css/alert.css">
 
      <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=geometry,drawing,weather,visualization&sensor=false"> </script>
      <script type="text/javascript" src='scripts/infobubble.js' ></script>
@@ -138,10 +137,10 @@
            .dialog({
               autoOpen: false,
               title: 'Real-time Alerts',
-              width: 300,
-              height: 300,
+              width: 500,
+              height: 400,
               modal: false,
-              position: [10,660]
+              position: [10,560]
            })
            .load('alerts.html', function() {
               console.log('Alerts content loaded');
