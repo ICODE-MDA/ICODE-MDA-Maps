@@ -13,6 +13,30 @@ toastr.options = {
   "hideMethod": "fadeOut"
 }
 
+/**
+ * Function to fade a Google Maps API shape object off the map
+ **/
+function shapeFadeOut(shape, seconds, callback){
+   var fill = 50/(seconds*999);
+   var stroke = 50/(seconds*999);
+   var fadeOut = setInterval(function(){
+      if((shape.get("strokeOpacity") < 0.0) && (shape.get("fillOpacity") < 0.0)){
+         clearInterval(fadeOut);
+         shape.setMap(null);
+         if(typeof(callback) == 'function')
+            callback();
+         return;
+      }
+      shape.setOptions({
+         'fillOpacity': Math.max(0.0, shape.fillOpacity-fill),
+         'strokeOpacity': Math.max(0.0, shape.strokeOpacity-stroke)
+      });
+   }, 50);
+}
+
+/**
+ * Main alert client function
+ **/
 $(function start() {
    "use strict";
 
@@ -38,7 +62,7 @@ $(function start() {
    }
 
    //Open socket connection to server
-   var connection = new WebSocket('ws://127.0.0.1:2411');
+   var connection = new WebSocket('ws://128.49.78.214:2411');
 
       connection.onopen = function () {
          //Connected to server success
@@ -47,36 +71,14 @@ $(function start() {
       };
 
       connection.onclose = function () {
-         console.log('Server went down');
-         alertLabel.text('Server went down');
+         console.log('Server is down');
+         alertLabel.text('Server is down');
          //try to reconnect every 3 seconds
          setTimeout(function() {
             console.log('Attempting to reconnect...');
             start();
          }, 1000);
       };
-
-      /*
-      connection.onerror = function (error) {
-         //Connection to server error
-         //alertLabel.html($('<p>', { text: 'Connection to the server is down.' } ));
-         alertLabel.html('Cannot connect to server');
-
-         //Attempt to reconnect here
-         setTimeout(function() {
-            console.log('Checking connection');
-            alertLabel.text('Checking connection');
-
-            connection = new WebSocket('ws://127.0.0.1:2411');
-
-               if (connection.readyState !== 1) {
-                  alertLabel.text('Error');
-                  //input.attr('disabled', 'disabled').val('Unable to comminucate '
-                  //+ 'with the WebSocket server.');
-               }
-         }, 3000);
-      };
-      */
 
       // most important part - incoming messages
       connection.onmessage = function (message) {
@@ -105,6 +107,26 @@ $(function start() {
 
             alertCountTotal++;
             alertCountLabel.text(alertCountTotal);
+
+            //Draw an indicator on the map where the alert vessel originated from
+            var alertVesselCircle = new google.maps.Circle({
+                                  center:         new google.maps.LatLng(decodedAIS.lat,decodedAIS.lon),
+                                  radius:         2000,
+                                  strokeColor:    '#FF0000',
+                                  strokeOpacity:  1.0,
+                                  strokeWeight:   1,
+                                  fillColor:      '#FF0000',
+                                  fillOpacity:    0.7,
+                                  map:            map
+                              });
+
+            setTimeout(function () {
+               shapeFadeOut(alertVesselCircle, 2, null);
+            }, 3000);
+         }
+         else if (json.type === 'alertMatchingCriteria') {
+            console.log(json.data);
+            content.prepend(json.data + '<br>');
          }
          else if (json.type === 'alertHistory') {
          }
