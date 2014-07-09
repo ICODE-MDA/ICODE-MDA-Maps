@@ -102,6 +102,19 @@ table {
    box-shadow:   -5px 5px 5px #888888;
    background-color: rgb(255, 255, 255);
 }
+#alertPanel {
+   position:     absolute;
+   border:       0px solid red;
+   margin:       0;
+   padding:      0px 0px;
+   width:        290px;
+   height:       30%;
+   bottom:       30px;
+   left:         0px;
+   z-index:      3;
+   box-shadow:   -5px 5px 5px #888888;
+   background-color: rgb(255, 255, 255);
+}
 #results_list {
    position:     absolute;
    border:       0px solid red;

@@ -1,7 +1,7 @@
 toastr.options = {
   "closeButton": false,
   "debug": false,
-  "positionClass": "toast-bottom-left",
+  "positionClass": "toast-bottom-right",
   "onclick": null,
   "showDuration": "300",
   "hideDuration": "1000",
@@ -88,18 +88,18 @@ $(function start() {
          try {
             var json = JSON.parse(message.data);
          } catch (e) {
-            console.log('This doesn\'t look like a valid JSON: ', message.data);
+            console.log('Alert server sent non-JSON formatted data: ', message.data);
             return;
          }
 
          if (json.type === 'response') {
             var serverResponse = json.data;
-            console.log('Server responded with:', serverResponse);
+            console.log('Alert server accepted the connection: ', serverResponse);
          }
          else if (json.type === 'alertNotification') {
             var decodedAIS = JSON.parse(json.data);
 
-            console.log('Received alert from server');
+            console.log('Alert server sent alert');
             content.prepend(json.data + '<br>');
 
             toastr.success(decodedAIS.mmsi + ' detected in ROI!');
@@ -131,13 +131,13 @@ $(function start() {
          else if (json.type === 'alertHistory') {
          }
          else if (json.type === 'totalDecoded') {
-            console.log('Received progress report from server');
+            console.log('Alert server sent progress report');
             //content.prepend(json.data + '<br>');
             //toastr.info(json.data)
             processedCountLabel.html(json.data);
          }
          else {
-            console.log('Data from server unrecognized', json);
+            console.log('Alert server sent unrecognized data', json);
          }
       };
 });

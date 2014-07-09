@@ -135,19 +135,20 @@
               modal: false,
               position: [90,110]
            });
+        });
+     </script>
 
-           var alertModal = $('<div/>').html($('#alert-modal'));
-
-           var alertDialog = alertModal
-           .dialog({
-              autoOpen: false,
-              title: 'Real-time Alerts',
-              width: 500,
-              height: 400,
-              modal: false,
-              position: [10,560]
-           })
-           .dialog('open');
+     <script>
+        $(function() {
+           $( "#alertAccordion" ).accordion({
+              collapsible: false,
+              heightStyle: "fill"
+           });
+           $(window).resize(function(){
+              if ($("#alertAccordion").accordion != undefined) {
+                 $("#alertAccordion").accordion("refresh");
+              }
+           });
         });
      </script>
 
@@ -533,13 +534,19 @@
         <!-- Content here defined in separate alerts/setup-alerts.html file -->
      </div>
 
-     <div id="alert-modal">
-        <div>
-           <span id="alertLabel">Connecting...</span><br>
-           <b>Total decoded:</b> <span id="processedCountLabel">0</span><br>
-           <b>Total alerted:</b> <span id="alertCountLabel">0</span><br>
+
+     <div id="alertPanel">
+        <div id="alertAccordion" class="accordion">
+           <h3>Real-time Alerts</h3>
+           <div id="alertSummary">
+              <div>
+                 <span id="alertLabel">Connecting...</span><br>
+                 <b>Total decoded:</b> <span id="processedCountLabel">0</span><br>
+                 <b>Total alerted:</b> <span id="alertCountLabel">0</span><br>
+              </div>
+              <div id="content"></div>
+           </div>
         </div>
-        <div id="content"></div>
      </div>
 
      <div id="geocodepanel">
