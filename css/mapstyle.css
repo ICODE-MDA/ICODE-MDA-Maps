@@ -107,13 +107,17 @@ table {
    border:       0px solid red;
    margin:       0;
    padding:      0px 0px;
-   width:        290px;
-   height:       30%;
-   bottom:       30px;
+   width:        300px;
+   /*height:       50%;*/
+   bottom:       50px;
    left:         0px;
    z-index:      3;
    box-shadow:   -5px 5px 5px #888888;
    background-color: rgb(255, 255, 255);
+}
+.alertElement {
+   overflow:     scroll;
+   max-height;   100px;
 }
 #results_list {
    position:     absolute;

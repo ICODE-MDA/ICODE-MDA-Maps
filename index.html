@@ -141,8 +141,9 @@
      <script>
         $(function() {
            $( "#alertAccordion" ).accordion({
-              collapsible: false,
-              heightStyle: "fill"
+              collapsible: true,
+              heightStyle: "content",
+              autoHeight: false,
            });
            $(window).resize(function(){
               if ($("#alertAccordion").accordion != undefined) {
@@ -467,15 +468,6 @@
                     <li>Press '?' for Keyboard shortcuts.</li>
                  </ul>
               </div>
-
-              <h3>Geofencing Notifications</h3>
-              <div>
-                 <p align=center>
-                    Setup your email alerts here.
-                    <br>
-                    <input id="setupAlert" type="button" onClick="setupAlertInitialize(); return false;" value="Setup Alert">
-                 </p>
-              </div>
            </div>
            <!-- END ACCORDION -->
 
@@ -538,12 +530,19 @@
      <div id="alertPanel">
         <div id="alertAccordion" class="accordion">
            <h3>Real-time Alerts</h3>
-           <div id="alertSummary">
+           <div id="alertSummary" class="alertElement">
               <div>
                  <span id="alertLabel">Connecting...</span><br>
                  <b>Total decoded:</b> <span id="processedCountLabel">0</span><br>
-                 <b>Total alerted:</b> <span id="alertCountLabel">0</span><br>
+                 <b>Total messages matching alerts:</b> <span id="alertCountLabel">0</span><br>
               </div>
+
+              <p align=center>
+              Setup your email alerts here.
+              <br>
+              <input id="setupAlert" type="button" onClick="setupAlertInitialize(); return false;" value="Setup Alert">
+              </p>
+
               <div id="content"></div>
            </div>
         </div>
