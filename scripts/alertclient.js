@@ -38,6 +38,15 @@ $(function start() {
    var receivedAlertRules = false;
    var alertCountTotal = 0;
    var alertArray = [];
+   var alertPolygon = new google.maps.Polygon({
+            strokeWeight: 2,
+            strokeColor: '#5555FF',
+            strokeOpacity: 0.8,
+            fillColor: '#5555FF',
+            fillOpacity: 0.2,
+            geodesic: true,
+            map: null
+         });
 
    //if user is running Mozilla then use its built-in WebSocket
    window.WebSocket = window.WebSocket || window.MozWebSocket;
@@ -145,22 +154,40 @@ $(function start() {
     * Creates a new element in the alert accordion with a new alert rule received
     **/
    function createAccordionElement(singleAlert) {
+      var id = singleAlert.alert_id;
+
       //Create the accordion element title
       var accordionElement = document.createElement('h3');
-      accordionElement.innerHTML = 'Alert ' + singleAlert.alert_id + ' for ' + singleAlert.user_id + ' (<span id="alertCount-' + singleAlert.alert_id + '">0</span>)';
+      accordionElement.innerHTML = 'Alert ' + id + ' for ' + singleAlert.user_id + ' (<span id="alertCount-' + id + '">0</span>)';
       //Create the accordion element content
       var alertDiv = document.createElement('div');
-      alertDiv.id = 'alert_id' + singleAlert.alert_id;
+      alertDiv.id = 'alert_id' + id;
 
       //Add the new accordion element and refresh the accordion
       $("#alertAccordion").append(accordionElement).append(alertDiv).accordion('destroy').accordion();
 
+      //Add polygon checkbox
+      $('<input />', {type: 'checkbox', id: 'polygon_alert_id'+id, value: 'Show alert polygon' }).appendTo($('#alert_id' + id));
+      $('#alert_id' + id).append('Show Polygon');
+
       //Pretty print the alert rules/properties
-      var elementContent = document.getElementById('alert_id' + singleAlert.alert_id);
-      elementContent.innerHTML += '<b>Alert rules:</b><br>';
+      var elementContent = document.getElementById('alert_id' + id);
+
+      elementContent.innerHTML += '<p><b>Alert rules:</b><br>';
       elementContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(singleAlert, undefined, 1);
       elementContent.innerHTML += '<hr><br>';
       elementContent.innerHTML += '<b>Matching AIS messages:</b><br>';
+
+
+      $('#polygon_alert_id' + id).click(function () {
+         console.log('Show alert polygon toggled');
+         if (this.checked) {
+            showPolygon(id);
+         }
+         else {
+            hidePolygon(id);
+         }
+      });
    }
 
    /* -------------------------------------------------------------------------------- */
@@ -201,6 +228,57 @@ $(function start() {
 
    /* -------------------------------------------------------------------------------- */
    /**
+   * Display the alert polygon based on alert id
+   **/
+   function showPolygon(id) {
+      console.log('Displaying alert polygon for id', id);
+      //console.log(alertArray[id-1].polygon);
+      
+      //Parse polygon
+      var polygonVertices = parsePolyStrings(alertArray[id-1].polygon);
+
+      //Draw the polygon on the map
+      if (polygonVertices.length) {
+         alertPolygon.setPaths(polygonVertices);
+         alertPolygon.setMap(map);
+      }
+   }
+
+   /* -------------------------------------------------------------------------------- */
+   /**
+   * Hide the alert polygon from the map
+   **/
+   function hidePolygon() {
+      alertPolygon.setMap(null);
+   }
+
+   //Function from http://stackoverflow.com/questions/16482303/convert-well-known-text-wkt-from-mysql-to-google-maps-polygons-with-php
+   function parsePolyStrings(ps) {
+      var i, j, lat, lng, tmp, tmpArr,
+      arr = [],
+      //match '(' and ')' plus contents between them which contain anything other than '(' or ')'
+      m = ps.match(/\([^\(\)]+\)/g);
+      if (m !== null) {
+         for (i = 0; i < m.length; i++) {
+            //match all numeric strings
+            tmp = m[i].match(/-?\d+\.?\d*/g);
+            if (tmp !== null) {
+               //convert all the coordinate sets in tmp from strings to Numbers and convert to LatLng objects
+               for (j = 0, tmpArr = []; j < tmp.length; j+=2) {
+                  lat = Number(tmp[j + 1]);
+                  lng = Number(tmp[j]);
+                  tmpArr.push(new google.maps.LatLng(lat, lng));
+               }
+               arr.push(tmpArr);
+            }
+         }
+      }
+      //array of arrays of LatLng objects, or empty array
+      return arr;
+   }
+
+   /* -------------------------------------------------------------------------------- */
+   /**
    * Function to fade a Google Maps API shape object off the map
    **/
    function shapeFadeOut(shape, seconds, callback){
@@ -221,10 +299,17 @@ $(function start() {
       }, 50);
    }   
 
-   /*
    //Handle accordion clicking events
    $("#alertAccordion").on("accordionactivate", function(event, ui) {
-   console.log('Accordion clicked', ui.newPanel);
+      //uncheck all "Show Polygon" checkboxes, then hide the previous polygon
+      $("#alertAccordion").find('[id^=polygon_alert_id]').prop('checked', false)
+      hidePolygon();
+
+      //Find the checkbox for the polygon in the current focused panel and check it, 
+      //assuming it is unchecked to begin with
+      var accordionPanel = ui.newPanel;
+      accordionPanel.find('[id^=polygon_alert_id]').trigger( "click" );
    });
-   */
 });
+
+var test;
