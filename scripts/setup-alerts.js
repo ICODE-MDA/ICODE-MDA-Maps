@@ -32,6 +32,7 @@ function setupAlertInitialize() {
 
    //Hide the panel menu to give more room on the maps
    $('#panel').toggle(false);
+   $('#alertPanel').toggle(false);
 
    initializePolygon();
 
@@ -44,6 +45,7 @@ function setupAlertInitialize() {
       google.maps.event.clearListeners(map, 'click');
       deletePolygon();
       $('#panel').toggle(true);
+      $('#alertPanel').toggle(true);
    });
 }
 

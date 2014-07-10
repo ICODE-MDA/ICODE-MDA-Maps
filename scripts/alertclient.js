@@ -4,7 +4,7 @@
  * @fileoverview
  * Client to receive alerts from alerts server through a WebSocket connection.
  * Displays alerts in a JQueryUI accordion style view and manipulates Google Map API
- * elements on the map.
+ * panels on the map.
  */
 
 /* -------------------------------------------------------------------------------- */
@@ -109,27 +109,28 @@ $(function start() {
          //Set received alertRules to true now that we are receiving the alerts
          receivedAlertRules = true;
 
-         //Create a new menu element content for the alert accordion element
+         //Create a new menu panel content for the alert accordion panel
          var singleAlert = json.data;
          console.log('Received alert:', singleAlert.alert_id);
 
          //store alert rule to array
          alertArray.push(singleAlert);
 
-         //Create the accordion element with new received rule
+         //Create the accordion panel with new received rule
          createAccordionElement(singleAlert);
       }
       //---------------------- Alert received -------------------------------------
       else if (json.type === 'alertNotification') {
          var decodedAIS = JSON.parse(json.data);
+         var timestamp = parseInt(json.timestamp);
 
          console.log('Alert server sent alert');
 
-         //Display the data in the specific alert accordion element
+         //Display the data in the specific alert accordion panel
          var singleAlert = json.alertRule;
 
          //Add notification to appropriate places
-         newAlertReceived(singleAlert, decodedAIS);
+         newAlertReceived(singleAlert, decodedAIS, timestamp);
       }
       //---------------------- Alert History --------------------------------------
       else if (json.type === 'alertHistory') {
@@ -151,19 +152,19 @@ $(function start() {
 
    /* -------------------------------------------------------------------------------- */
    /**
-    * Creates a new element in the alert accordion with a new alert rule received
+    * Creates a new panel in the alert accordion with a new alert rule received
     **/
    function createAccordionElement(singleAlert) {
       var id = singleAlert.alert_id;
 
-      //Create the accordion element title
+      //Create the accordion panel title
       var accordionElement = document.createElement('h3');
       accordionElement.innerHTML = 'Alert ' + id + ' for ' + singleAlert.user_id + ' (<span id="alertCount-' + id + '">0</span>)';
-      //Create the accordion element content
+      //Create the accordion panel content
       var alertDiv = document.createElement('div');
       alertDiv.id = 'alert_id' + id;
 
-      //Add the new accordion element and refresh the accordion
+      //Add the new accordion panel and refresh the accordion
       $("#alertAccordion").append(accordionElement).append(alertDiv).accordion('destroy').accordion();
 
       //Add polygon checkbox
@@ -171,12 +172,14 @@ $(function start() {
       $('#alert_id' + id).append('Show Polygon');
 
       //Pretty print the alert rules/properties
-      var elementContent = document.getElementById('alert_id' + id);
+      var panelContent = document.getElementById('alert_id' + id);
 
-      elementContent.innerHTML += '<p><b>Alert rules:</b><br>';
-      elementContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(singleAlert, undefined, 1);
-      elementContent.innerHTML += '<hr><br>';
-      elementContent.innerHTML += '<b>Matching AIS messages:</b><br>';
+      panelContent.appendChild(document.createElement('fieldset')).innerHTML = '<legend><b>Alert Rules</b></legend><pre>' + JSON.stringify(singleAlert, undefined, 1) + '</pre'; 
+
+      //panelContent.innerHTML += '<p><b>Alert rules:</b><br>';
+      //panelContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(singleAlert, undefined, 1);
+      panelContent.innerHTML += '<br>';
+      panelContent.innerHTML += '<b>Matching AIS messages:</b><br>';
 
 
       $('#polygon_alert_id' + id).click(function () {
@@ -194,11 +197,14 @@ $(function start() {
    /**
     * Perform appropriate actions after receiving an alert with a matching alertRule
     **/
-   function newAlertReceived(singleAlert, decodedAIS) {
-      var elementContent = document.getElementById('alert_id' + singleAlert.alert_id);
-      elementContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(decodedAIS, undefined, 1);
+   function newAlertReceived(singleAlert, decodedAIS, timestamp) {
+      var panelContent = document.getElementById('alert_id' + singleAlert.alert_id);
 
-      //increment count on alert element title
+      console.log(timestamp);
+      panelContent.appendChild(document.createElement('pre')).innerHTML = toHumanTime(timestamp);
+      panelContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(decodedAIS, undefined, 1);
+
+      //increment count on alert panel title
       var alertCountSpan = document.getElementById('alertCount-' + singleAlert.alert_id);
       alertCountSpan.innerHTML = parseInt(alertCountSpan.innerHTML) + 1;
 
@@ -310,6 +316,12 @@ $(function start() {
       var accordionPanel = ui.newPanel;
       accordionPanel.find('[id^=polygon_alert_id]').trigger( "click" );
    });
-});
 
-var test;
+
+   /* -------------------------------------------------------------------------------- */
+   function toHumanTime(unixtime) {
+      var date = new Date(unixtime * 1000);
+      var humanTime = date.toLocaleString("en-US",{timeZone: "UTC"});
+      return humanTime;
+   }
+});
