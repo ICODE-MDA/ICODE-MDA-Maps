@@ -116,23 +116,42 @@ $(function start() {
             var singleAlert = json.data;
             console.log('Received alert:', singleAlert.alert_id);
 
-            var accordionElement = '<h3>Alert ' + singleAlert.alert_id + ' for ' + singleAlert.user_id + ' (<span id="alertCount-' + singleAlert.alert_id + '">0</span>)' + '</h3>';
-            accordionElement += '<div id="' + 'alert_id' + singleAlert.alert_id + '" class="alertElement">';
-            accordionElement += '</div>';
+            //Create the accordion element title
+            var accordionElement = document.createElement('h3');
+            accordionElement.innerHTML = 'Alert ' + singleAlert.alert_id + ' for ' + singleAlert.user_id + ' (<span id="alertCount-' + singleAlert.alert_id + '">0</span>)';
+            //Create the accordion element content
+            var alertDiv = document.createElement('div');
+            alertDiv.id = 'alert_id' + singleAlert.alert_id;
 
-            //Create new accordion element
-            $("#alertAccordion").append(accordionElement).accordion('destroy').accordion();
+            //Add the new accordion element and refresh the accordion
+            $("#alertAccordion").append(accordionElement).append(alertDiv).accordion('destroy').accordion();
 
+            //Pretty print the alert rules/properties
             var elementContent = document.getElementById('alert_id' + singleAlert.alert_id);
-            elementContent.innerHTML += JSON.stringify(singleAlert, null, ' ');
+            elementContent.innerHTML += '<b>Alert rules:</b><br>';
+            elementContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(singleAlert, undefined, 1);
+            elementContent.innerHTML += '<hr><br>';
+            elementContent.innerHTML += '<b>Matching AIS messages:</b><br>';
          }
          //---------------------- Alert received -------------------------------------
          else if (json.type === 'alertNotification') {
             var decodedAIS = JSON.parse(json.data);
 
             console.log('Alert server sent alert');
-            content.prepend(json.data + '<br>');
 
+            //Display data in the summary accordion element
+            //content.prepend(json.data + '<br>');
+
+            //Display the data in the specific alert accordion element
+            var singleAlert = json.alertRule;
+            var elementContent = document.getElementById('alert_id' + singleAlert.alert_id);
+            elementContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(decodedAIS, undefined, 1);
+
+            //increment count on alert element title
+            var alertCountSpan = document.getElementById('alertCount-' + singleAlert.alert_id);
+            alertCountSpan.innerHTML = parseInt(alertCountSpan.innerHTML) + 1;
+
+            //display Growl notification
             toastr.success(decodedAIS.mmsi + ' detected in ROI!');
             console.log(decodedAIS);
 
@@ -154,16 +173,6 @@ $(function start() {
             setTimeout(function () {
                shapeFadeOut(alertVesselCircle, 2, null);
             }, 3000);
-         }
-         //---------------------- Alert Rule matching Alert received -----------------
-         else if (json.type === 'alertMatched') {
-            console.log(json.data);
-            //display on summary accordion element
-            content.prepend(json.data + '<br>');
-
-            //increment count on alert element title
-            var alertCountSpan = document.getElementById('alertCount-'+json.data);
-            alertCountSpan.innerHTML = parseInt(alertCountSpan.innerHTML) + 1;
          }
          //---------------------- Alert History --------------------------------------
          else if (json.type === 'alertHistory') {

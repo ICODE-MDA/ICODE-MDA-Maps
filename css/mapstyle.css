@@ -115,9 +115,8 @@ table {
    box-shadow:   -5px 5px 5px #888888;
    background-color: rgb(255, 255, 255);
 }
-.alertElement {
-   overflow:     scroll;
-   max-height;   100px;
+#alertAccordion .ui-accordion-content {
+    max-height:  200px;
 }
 #results_list {
    position:     absolute;
