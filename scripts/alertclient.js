@@ -73,6 +73,16 @@ $(function start() {
    connection.onclose = function () {
       console.log('Server is down');
       alertLabel.text('Server is down');
+
+      //if alerts have already been received (i.e. server restarted) then
+      // remove old alerts and add the new ones.
+      console.log('Removing old alert panels');
+      //TODO: Set focus to be summary panel first to prevent funky behavior
+      $('.alertPanel').remove();  //Remove all accordion alert titles
+      $('[id^=alert_id]').remove(); //Remove all accordion alert panels
+      receivedAlertRules = false;
+
+
       //try to reconnect every 3 seconds
       setTimeout(function() {
          console.log('Attempting to reconnect...');
@@ -99,13 +109,6 @@ $(function start() {
       }
       //---------------------- Alert Rules received -------------------------------
       else if (json.type === 'alertRules') {
-         //Received an alert that the server retrieved from the database
-         //if alerts have already been received (i.e. server restarted) then
-         // remove old alerts and add the new ones.
-         if (receivedAlertRules) {
-            //TODO: remove old alerts to add the new ones
-         }
-
          //Set received alertRules to true now that we are receiving the alerts
          receivedAlertRules = true;
 
@@ -159,6 +162,7 @@ $(function start() {
 
       //Create the accordion panel title
       var accordionElement = document.createElement('h3');
+      accordionElement.className = 'alertPanel';
       accordionElement.innerHTML = 'Alert ' + id + ' for ' + singleAlert.user_id + ' (<span id="alertCount-' + id + '">0</span>)';
       //Create the accordion panel content
       var alertDiv = document.createElement('div');
@@ -201,7 +205,7 @@ $(function start() {
       var panelContent = document.getElementById('alert_id' + singleAlert.alert_id);
 
       console.log(timestamp);
-      panelContent.appendChild(document.createElement('pre')).innerHTML = toHumanTime(timestamp);
+      panelContent.appendChild(document.createElement('pre')).innerHTML = toHumanTime(timestamp) + ' UTC';
       panelContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(decodedAIS, undefined, 1);
 
       //increment count on alert panel title
