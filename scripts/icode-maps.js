@@ -1604,7 +1604,7 @@ function markerInfoBubble(marker, vessel, infoBubble) {
       }
       //Add a tab for the regular infoBubble info
       infoBubble.addTab(0);
-      infoBubble.updateTab(0,'AIS Based Info',html);
+      infoBubble.updateTab(0,'AIS Based Info',generateInfoHTML(vessel, vesseltype, title));
    }
    //END IHS TABS
 
