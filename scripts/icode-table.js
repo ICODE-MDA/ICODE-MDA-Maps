@@ -68,6 +68,99 @@ function initialize() {
    //Add column and set types to all tables
    initializeTable();
 
+   //OWF
+   $.getScript('http://localhost:8080/owf/js-min/owf-widget-min.js', function()
+   {
+       owfdojo.addOnLoad(initListener);
+         
+         
+         function initListener() {
+             this.widgetEventingController = Ozone.eventing.Widget.getInstance();
+
+             this.widgetEventingController.subscribe('query', queryListener);
+
+             this.widgetEventingController.subscribe('historytrail', historyTrail);
+         }
+
+         function queryListener(sender,msg)
+         {
+            clearAISdata();
+
+            var tempObj = JSON.parse(msg);
+
+            switch (tempObj.source) {
+               case "AIS":
+                  getAISFromDBOWF(tempObj.source, tempObj.query);
+                  $('#raw_ais_container').css({"display": "block"});
+                  $('#laisic_ais_track_container').css({"display": "none"});
+                  $('#laisic_radar_container').css({"display": "none"});
+                  $('#laisic_ais_obs_container').css({"display": "none"});
+                  break;
+
+               case "LAISIC_AIS_TRACK":
+                  getAISFromDBOWF(tempObj.source, tempObj.query);
+                  $('#raw_ais_container').css({"display": "none"});
+                  $('#laisic_ais_track_container').css({"display": "block"});
+                  break;
+
+               case "LAISIC_RADAR":
+                  getAISFromDBOWF(tempObj.source, tempObj.query);
+                  $('#laisic_radar_container').css({"display": "block"});
+                  break;
+
+               case "LAISIC_AIS_OBS":
+                  getAISFromDBOWF(tempObj.source, tempObj.query);
+                  $('#laisic_ais_obs_container').css({"display": "block"});
+                  break;
+               default:
+                  break;
+            }
+         }
+
+         function historyTrail(sender, msg)
+         {
+            var history = JSON.parse(msg);
+
+            addHistoryTrailTab(history);
+         }
+
+         // function queryListener(sender, msg)
+         // {
+         //    //drawTable(msg);
+         //    // query = msg;
+         //    // getAISFromDB("AIS");
+         //    $('#raw_ais_container').css({"display": "block"});
+         //    $('#laisic_ais_track_container').css({"display": "none"});
+         //    $('#laisic_radar_container').css({"display": "none"});
+         //    $('#laisic_ais_obs_container').css({"display": "none"});
+         // }
+
+         // function queryLaisicAisTrackListener(sender, msg)
+         // {
+         //    drawTable(msg);
+         //    // query = msg;
+         //    // getAISFromDB("LAISIC_AIS_TRACK");
+         //    $('#raw_ais_container').css({"display": "none"});
+         //    $('#laisic_ais_track_container').css({"display": "block"});
+         // }
+
+         // function queryLaisicRadarListener(sender, msg)
+         // {
+         //    drawTable(msg);
+         //    // query = msg;
+         //    // getAISFromDB("LAISIC_RADAR");
+         //    $('#laisic_radar_container').css({"display": "block"});
+         // }
+
+         // function queryLaisicObsListener(sender, msg)
+         // {
+         //    drawTable(msg);
+         //    // query = msg;
+         //    // getAISFromDB("LAISIC_AIS_OBS");
+         //    $('#laisic_ais_obs_container').css({"display": "block"});
+         // }
+   });
+
    //Load existing queries
    if (localStorage.getItem('query-timestamp') != null) {
       if (localStorage.getItem('query')) {
@@ -850,18 +943,29 @@ function addTableListeners() {
          //Reset all to visible if nothing selected, or to not-visible if more than 0 selected
          //var visible = (row.length == 0) ? 1 : 0;
 
-         for (var i=0; i < localStorage.length; i++) {
-            key = localStorage.key(i);
-            //if (key.indexOf("vessel-") === 1) {
-               localStorage[key] = 0;//visible;
-            //}
-         }
+         // for (var i=0; i < localStorage.length; i++) {
+         //    key = localStorage.key(i);
+         //    //if (key.indexOf("vessel-") === 1) {
+         //       localStorage[key] = 0;//visible;
+         //    //}
+         // }
 
-         for (var i=0; i < row.length; i++) {
-            var mmsi = AISdata.getValue(row[i].row, 0);
-            //console.log(row[i].row + ' ' + mmsi);
-            localStorage["vessel-" + mmsi] = 1;
-         }
+         // for (var i=0; i < row.length; i++) {
+         //    var mmsi = AISdata.getValue(row[i].row, 0);
+         //    //console.log(row[i].row + ' ' + mmsi);
+         //    localStorage["vessel-" + mmsi] = 1;
+         // }
+
+         // OWF Send Selected MMSI
+         $.getScript('http://localhost:8080/owf/js-min/owf-widget-min.js', function()
+         {
+            owfdojo.addOnLoad(initPublisher);
+            
+            function initPublisher() {
+               this.widgetEventingController = Ozone.eventing.Widget.getInstance();
+               this.widgetEventingController.publish("selectedMMSI", AISdata.getValue(row[0].row, 0));   
+             }
+         });
      });
 
    //LAISICAISTRACKtable listener

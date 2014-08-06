@@ -193,6 +193,14 @@ var portLabel;
 //Traffic layer
 var trafficLayer;
 
+
+// setup-alerts global vars
+var alertPolyon;
+var alertPolyonString;
+var alertMarkers = [];
+var alertPath;
+
+
 /* -------------------------------------------------------------------------------- */
 /** Initialize, called on main page load
 */
@@ -204,6 +212,48 @@ function initialize() {
    //var centerCoord = new google.maps.LatLng(2.0,1.30);     //GoG
    //var centerCoord = new google.maps.LatLng(-33.0, -71.6);   //Valparaiso, Chile
    //var centerCoord = new google.maps.LatLng(17.978677, -16.078958);   //Nouakchott, Mauritania
+
+   // owf
+   $.getScript('http://localhost:8080/owf/js-min/owf-widget-min.js', function()
+   {
+       owfdojo.addOnLoad(initListener);
+
+         var onSuccess = function(obj) {
+         if (obj) {
+                 alert(obj.currentUser);
+             }
+         };
+
+         var onFailure = function(error) {
+             alert(error);
+         };
+
+         Ozone.pref.PrefServer.getCurrentUser({
+             onSuccess:onSuccess,
+             onFailure:onFailure
+         });
+
+         function handleStateEvent(sender, msg) {
+         }
+         
+         function initListener() {
+             this.widgetEventingController = Ozone.eventing.Widget.getInstance();
+             this.widgetEventingController.subscribe('selectedMMSI', vesselListener);
+
+             this.widgetEventingController.subscribe('setupAlert', alertListener)
+         }
+
+         function vesselListener(sender,msg)
+         {
+            selectVessel(msg);
+         }
+
+         function alertListener(sender, msg)
+         {
+            if(msg == "true") initializePolygon();
+            else if(msg == "false") deletePolygon();
+         }
+   });
    
    if(navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function(position) {
@@ -343,6 +393,11 @@ function initialize() {
             Math.round(event.latLng.lat()*10000000)/10000000 + ', ' + Math.round(event.latLng.lng()*10000000)/10000000
    });
 
+
+   //initializePolygon();
+   //Add listeners to drawing events
+   google.maps.event.addListener(map, 'click', addPoint);
+
    google.maps.event.addListenerOnce(map, 'idle', function() {
       //Call all toggle functions on initialize:
 
@@ -455,7 +510,20 @@ function initialize() {
             toggleDistanceTool();
             break;
          case 69: // e
-            $('#setupAlert').trigger( "click" );
+            //$('#setupAlert').trigger( "click" );
+
+            // OWF
+            $.getScript('http://localhost:8080/owf/js-min/owf-widget-min.js', function()
+            {
+                  var widgetEventingController = Ozone.eventing.Widget.getInstance();
+                  var widgetLauncher = Ozone.launcher.WidgetLauncher.getInstance(this.widgetEventingController);
+                  widgetLauncher.launchWidget({
+                      universalName: 'e5494c07-9e2d-0603-e7c0-b8f1fd7b1618', 
+                      guid: 'e5494c07-9e2d-0603-e7c0-b8f1fd7b1618',
+                      title: 'Channel Listener Launched',
+                      launchOnlyIfClosed: true
+                  });
+            });
             break;
          case 71: // g
             if (document.getElementById("enableCluster") != null &&
@@ -626,7 +694,7 @@ function initialize() {
 
    //Trigger localStorage to indicate page refresh or new load
    localStorage.clear();
-   localStorage.setItem('refresh',1);
+   //localStorage.setItem('refresh',1);
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -979,22 +1047,82 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
             markersDisplayed = [];
          }
 
-         localStorage.setItem('query-timestamp', Math.floor((new Date()).getTime()/1000));
+         //localStorage.setItem('query-timestamp', Math.floor((new Date()).getTime()/1000));
 
          //Read global variable sourceType to determine which type to query (AIS, or LAISIC stuff)
          console.log("sourceType: " + sourceType);
          switch (sourceType) {
             case "AIS":
-               localStorage.setItem('query', response.query);
+               //localStorage.setItem('query', response.query);
+               $.getScript('http://localhost:8080/owf/js-min/owf-widget-min.js', function()
+               {
+                  owfdojo.addOnLoad(initPublisher);
+                  
+                  var obj = {
+                           source:sourceType,
+                           query:response.query
+                      };
+                  
+                  function initPublisher() {
+                      this.widgetEventingController = Ozone.eventing.Widget.getInstance();
+
+                      this.widgetEventingController.publish('query', JSON.stringify(obj));    
+                   }
+               });
                break;
             case "LAISIC_AIS_TRACK":
-               localStorage.setItem('query-LAISIC_AIS_TRACK', response.query);
+               //localStorage.setItem('query-LAISIC_AIS_TRACK', response.query);
+               $.getScript('http://localhost:8080/owf/js-min/owf-widget-min.js', function()
+               {
+                  owfdojo.addOnLoad(initPublisher);
+                  
+                  var obj = {
+                           source:sourceType,
+                           query:response.query
+                      };
+                  
+                  function initPublisher() {
+                      this.widgetEventingController = Ozone.eventing.Widget.getInstance();
+
+                      this.widgetEventingController.publish('query', JSON.stringify(obj));    
+                   }
+               });
                break;
             case "LAISIC_RADAR":
-               localStorage.setItem('query-LAISIC_RADAR', response.query);
+               //localStorage.setItem('query-LAISIC_RADAR', response.query);
+               $.getScript('http://localhost:8080/owf/js-min/owf-widget-min.js', function()
+               {
+                  owfdojo.addOnLoad(initPublisher);
+                  
+                  var obj = {
+                           source:sourceType,
+                           query:response.query
+                      };
+                  
+                  function initPublisher() {
+                      this.widgetEventingController = Ozone.eventing.Widget.getInstance();
+
+                      this.widgetEventingController.publish('query', JSON.stringify(obj));    
+                   }
+               });
                break;
             case "LAISIC_AIS_OBS":
-               localStorage.setItem('query-LAISIC_AIS_OBS', response.query);
+               //localStorage.setItem('query-LAISIC_AIS_OBS', response.query);
+               $.getScript('http://localhost:8080/owf/js-min/owf-widget-min.js', function()
+               {
+                  owfdojo.addOnLoad(initPublisher);
+                  
+                  var obj = {
+                           source:sourceType,
+                           query:response.query
+                      };
+                  
+                  function initPublisher() {
+                      this.widgetEventingController = Ozone.eventing.Widget.getInstance();
+
+                      this.widgetEventingController.publish('query', JSON.stringify(obj));    
+                   }
+               });
                break;
             default:
                break;
@@ -1010,16 +1138,16 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                //Push to localStorage for tables to know of change
                switch (sourceType) {
                   case "AIS":
-                     localStorage.setItem('vessel-'+vessel.mmsi, "0");
+                     //localStorage.setItem('vessel-'+vessel.mmsi, "0");
                      break;
                   case "LAISIC_AIS_TRACK":
-                     localStorage.setItem('laisicaistrack-'+vessel.trknum, "1");
+                     //localStorage.setItem('laisicaistrack-'+vessel.trknum, "1");
                      break;
                   case "LAISIC_RADAR":
-                     localStorage.setItem('laisicradar-'+vessel.trknum, "1");
+                     //localStorage.setItem('laisicradar-'+vessel.trknum, "1");
                      break;
                   case "LAISIC_AIS_OBS":
-                     localStorage.setItem('laisicaisobs-'+vessel.obsguid, "1");
+                     //localStorage.setItem('laisicaisobs-'+vessel.obsguid, "1");
                      break;
                   default:
                      break;
@@ -1398,8 +1526,8 @@ function getClustersFromDB(bounds, customQuery) {
 
          //Push query to localStorage
          localStorage.clear();
-         localStorage.setItem('query-cluster', response.query);
-         localStorage.setItem('query-timestamp', (new Date()).getTime());
+         //localStorage.setItem('query-cluster', response.query);
+         //localStorage.setItem('query-timestamp', (new Date()).getTime());
 
          mainQuery = response.basequery;
 
@@ -2423,9 +2551,27 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
 
                      //Notify tables that history trail was acquired for a vessel
                      if (source == "AIS" || source == "LAISIC_AIS_TRACK" || source == "LAISIC_AIS_OBS" || source == "LAISIC_RADAR") {
-                        localStorage.setItem('historytrailquery-'+tracksDisplayedID[tracksDisplayedID.length-1], response.query);
-                        localStorage.setItem('historytrailtype-'+tracksDisplayedID[tracksDisplayedID.length-1], source);
+                        //localStorage.setItem('historytrailquery-'+tracksDisplayedID[tracksDisplayedID.length-1], response.query);
+                        //localStorage.setItem('historytrailtype-'+tracksDisplayedID[tracksDisplayedID.length-1], source);
                      }
+
+                     // OWF: Replace with Channel Publisher
+                        $.getScript('http://localhost:8080/owf/js-min/owf-widget-min.js', function()
+                        {
+                           owfdojo.addOnLoad(initPublisher);
+                           
+                           var history = {
+                                    query:response.query,
+                                    type:source,
+                                    trackID:tracksDisplayedID[tracksDisplayedID.length-1]
+                               };
+                           
+                           function initPublisher() {
+                               this.widgetEventingController = Ozone.eventing.Widget.getInstance();
+
+                               this.widgetEventingController.publish('historytrail', JSON.stringify(history));    
+                            }
+                        });
 
                      //Set up track time slider
                      createTrackTimeControl(map, 251, tracksDisplayed);
@@ -4540,4 +4686,251 @@ function passIMOChecksum(imo) {
    }
 
    return true;
+}
+
+
+
+/*************************************************
+   copy of setup-alerts.js
+
+**************************************************/
+/* -------------------------------------------------------------------------------- */
+/**
+ * End the "setup alert" mode
+ **/
+function setAlertEnd() {
+   $('#setup-alert-modal').dialog('close');
+
+   deletePolygon();
+
+   //Show the panel menu to give more room on the maps
+   $('#panel').toggle(true);
+}
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Initialize the polygon
+ **/
+function initializePolygon() {
+   alertPath = new google.maps.MVCArray;
+
+   //Prepare the alertPolygon
+   alertPolyon = new google.maps.Polygon({
+      strokeWeight: 3,
+      fillColor: '#5555FF',
+      fillOpacity: 0.2,
+      strokeColor: '#5555FF',
+      strokeOpacity: 0.8,
+      geodesic: true
+   });
+   alertPolyon.setMap(map);
+   alertPolyon.setPaths(new google.maps.MVCArray([alertPath]));
+}
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Reset and erase the polygon
+ **/
+function resetPolygon() {
+   if (alertPolyon != null) {
+      alertPolyon.setMap(null);
+      alertPolyon = null;
+   }
+   initializePolygon();
+
+   //Erase alertMarkers
+   for (var i=0; i < alertMarkers.length; i++) {
+      alertMarkers[i].setMap(null);
+   }
+   alertMarkers = [];
+
+   updatePolygonField();
+}
+
+/* -------------------------------------------------------------------------------- */
+function deletePolygon() {
+   alertPath = [];
+
+   if (alertPolyon != null) {
+      alertPolyon.setMap(null);
+      alertPolyon = null;
+   }
+
+   //Erase alertMarkers
+   for (var i=0; i < alertMarkers.length; i++) {
+      alertMarkers[i].setMap(null);
+   }
+   alertMarkers = [];
+}
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Add a polygon vertex
+ **/
+function addPoint(event) {
+
+   // do not add point if polygon is not initialized
+   if(!alertPolyon) return;
+
+   var marker = new google.maps.Marker({
+      position: event.latLng,
+      map: map,
+      draggable: true,
+      icon: 'http://maps.google.com/mapfiles/ms/micons/purple-dot.png'
+   });
+
+   alertPath.insertAt(alertPath.length, event.latLng);
+
+   computeArea();
+   
+   alertMarkers.push(marker);
+   marker.setTitle("#" + alertPath.length);
+
+   google.maps.event.addListener(marker, 'rightclick', function() {
+      marker.setMap(null);
+      for (var i = 0, I = alertMarkers.length; i < I && alertMarkers[i] != marker; ++i);
+      alertMarkers.splice(i, 1);
+      alertPath.removeAt(i);
+      updatePolygonField();
+   });
+
+   google.maps.event.addListener(marker, 'dragend', function() {
+      for (var i = 0, I = alertMarkers.length; i < I && alertMarkers[i] != marker; ++i);
+      alertPath.setAt(i, marker.getPosition());
+      
+      computeArea();
+
+      updatePolygonField();
+   });
+
+   updatePolygonField();
+}
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Compute the area of the drawn polygon
+ **/
+function computeArea() {
+   var area = google.maps.geometry.spherical.computeArea(alertPath);
+   console.log('area = ' + area);
+
+   return area;
+}
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Update the polygon definition in the textarea field of the form
+ **/
+function updatePolygonField()
+{
+   // var formdataObject = document.forms['alert_definition'];
+   // var formdataElement = formdataObject.elements["alertpolygon"];
+   //var formdataElement = $('#alertpolygon');
+
+   if(alertPath.getLength() < 3){
+      //formdataElement.value = '';
+      return;
+   }
+   var coords = '';
+   for(var i = 0; i < alertPath.getLength(); i++){
+      var point = alertPath.getAt(i);
+      coords += point.lat();
+      coords += ' ';
+      coords += point.lng();
+      coords += ',';
+   }
+
+   var point = alertPath.getAt(0); 
+   coords += point.lat();
+   coords += ' ';
+   coords += point.lng();
+
+   //Save polygon string definition
+   alertPolyonString = 'POLYGON((';
+   alertPolyonString += coords;
+   alertPolyonString += '))';
+
+   coords = coords.replace(/,/g,",\n");
+   //formdataElement.value = coords;
+
+   // OWF Get response object and pass it into the channel
+   $.getScript('http://localhost:8080/owf/js-min/owf-widget-min.js', function()
+   {
+      owfdojo.addOnLoad(initPublisher);
+      
+      function initPublisher() {
+          this.widgetEventingController = Ozone.eventing.Widget.getInstance();
+          this.widgetEventingController.publish("updatePolygonField", coords);   
+       }
+   });
+
+   //Increase the size of the textarea showing the coordinates of the alertPolygon
+   //$('#polygon').attr('rows', alertPath.length+1);
+}
+
+/* -------------------------------------------------------------------------------- */
+function saveAlert(){
+   //Obtain user's ROI polygon definition
+   //TODO: check area of polygon to limit size to prevent long queries
+   if (computeArea() > 3000000000) {
+      alert('Please draw a smaller polygon.');
+      return;
+   }       
+   var phpWithArg = 'query_setup_alert.php?alertPolygon="' + alertPolyonString + '"';
+
+   //Obtain user's criteria
+   var field = $('#alertfield').val();
+   var operation = $('#alertoperation').val();
+   var value = $('#alertvalue').val();
+
+   if (field == "all" || value == "") {
+      //User wants all vessels entering ROI, don't add any vessel contraints
+   }
+   else {
+      //User has specific vessel criteria defined
+      phpWithArg += '&field=' + $('#alertfield').val();
+      phpWithArg += '&operation=' + $('#alertoperation').val();
+      phpWithArg += '&value=' + $('#alertvalue').val();
+   }
+
+   var entering = $('#alertentering');
+   var exiting = $('#alertexiting');
+
+   if (entering.is(':checked')) {
+      phpWithArg += '&entering=true';
+   }
+   if (exiting.is(':checked')) {
+      phpWithArg += '&exiting=true';
+   }
+
+   //TODO: check if email is valid and sanitize before using
+   phpWithArg += '&email="' + $('#emailaddress').val() + '"';
+
+   //TODO: add pre-built SQL query statement field
+   var prebuiltquery = '';
+
+   phpWithArg += '&query="' + prebuiltquery + '"';
+
+
+
+   console.log(phpWithArg);
+
+   //Call the PHP script to insert new alert row to alert database
+   $.getJSON(
+         phpWithArg, 
+         function (){ 
+            console.log('success');
+         }
+      )
+   .done(function (response) {
+      console.log('saveAlert(): ' + response.query);
+
+
+      //Exit the "setup alert" mode
+      setAlertEnd();
+   }) // END .done()
+   .fail(function() {
+      console.log('saveAlert(): ' +  'No response from alert database; error in php?'); 
+      return;
+   }); //END .fail()
 }
