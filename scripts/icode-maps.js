@@ -416,6 +416,10 @@ function initialize() {
          return;
       }
 
+      if (event.shiftKey || event.ctrlKey || event.altKey) {
+         return;
+      }
+
       var o = 128; // half a tile's width 
       console.log('Pressed key: ' + event.which);
 

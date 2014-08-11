@@ -95,10 +95,16 @@ if(count($_GET) > 0) {
           else {
              $meridianflag = false;
           }
+          
+          //Check for Time Machine
+          $timemachine = 0;
+          // "WHERE TimeOfFix" is for Time Machine queries
+          if (strpos($query, "WHERE TimeOfFix") !== FALSE) {
+             $timemachine = 1;
+          }
 
           //Check if a 'WHERE' has already been inserted into the query, append 'AND' if so.
-          // "WHERE TimeOfFix" is for Time Machine queries
-          if (strpos($query, "WHERE TimeOfFix") !== FALSE || strpos($query, "where sog") !== FALSE ) {
+          if ($timemachine || strpos($query, "where sog") !== FALSE ) {
              $query = $query . " AND";
           }
           else {  //Append 'WHERE' since there is no previous WHERE
@@ -124,15 +130,15 @@ if(count($_GET) > 0) {
     */
 
     //Add timestamp constraint, only for AIS tracks
-    if (!empty($_GET["vessel_age"]) && ($source === "AIS" || $source === "RADAR")) {
+    if (!empty($_GET["vessel_age"]) && ($source === "AIS" || $source === "RADAR") && !$timemachine) {
        $vessel_age = $_GET["vessel_age"];
        $query = $query . " AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
     }
-    else if (!empty($_GET["vessel_age"]) && ($source === "LIVE_LAISIC")) {
+    else if (!empty($_GET["vessel_age"]) && ($source === "LIVE_LAISIC") && !$timemachine) {
        $vessel_age = $_GET["vessel_age"];
        $query = $query . " AND datetime > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
     }
-    else if (!empty($_GET["vessel_age"]) && !startsWith($source,"LAISIC_")) {
+    else if (!empty($_GET["vessel_age"]) && !startsWith($source,"LAISIC_") && !$timemachine) {
        $vessel_age = $_GET["vessel_age"];
        $query = $query . " AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
     }
@@ -154,10 +160,12 @@ if(count($_GET) > 0) {
        $query = $query . " limit " . $limit;
     }
 
+    /*
     //Limit to messages that show unique RxStnID fields (requires TV32-Seavision.EXE)
     if ($source == 'AIS') {
        $query = $query . " AND Source='vdm0'";
     }
+    */
 
     //?
     if (empty($_GET["query"])) {
@@ -165,7 +173,7 @@ if(count($_GET) > 0) {
     }
 
     //For Time Machine
-    if (strpos($query, "WHERE TimeOfFix") !== FALSE) {
+    if ($timemachine) {
        //$query = $query . " GROUP BY MMSI) B ON A.mmsi = B.mmsi GROUP BY MMSI";
        $query = $query . " GROUP BY MMSI) vm2 ON (vm1.MMSI = vm2.MMSI AND vm1.TimeOfFix = vm2.maxtime)) B ON A.MMSI = B.MMSI GROUP BY MMSI";
     }
