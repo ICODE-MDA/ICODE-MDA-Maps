@@ -416,6 +416,10 @@ function initialize() {
          return;
       }
 
+      if (event.shiftKey || event.ctrlKey || event.altKey) {
+         return;
+      }
+
       var o = 128; // half a tile's width 
       console.log('Pressed key: ' + event.which);
 
@@ -1604,7 +1608,7 @@ function markerInfoBubble(marker, vessel, infoBubble) {
       }
       //Add a tab for the regular infoBubble info
       infoBubble.addTab(0);
-      infoBubble.updateTab(0,'AIS Based Info',html);
+      infoBubble.updateTab(0,'AIS Based Info',generateInfoHTML(vessel, vesseltype, title));
    }
    //END IHS TABS
 
