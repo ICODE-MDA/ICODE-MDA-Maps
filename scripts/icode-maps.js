@@ -315,7 +315,9 @@ function initialize() {
    */
 
    //Add drawing toolbar
-   addDrawingManager();
+   if (!detectMobileBrowser()) {
+      addDrawingManager();
+   }
 
    reloadDelay = 1000;    //set initial delay to 10ms
 
@@ -391,7 +393,10 @@ function initialize() {
 
       geocoder = new google.maps.Geocoder();
 
-      initializePanel();
+      initializePanel();   
+      if (detectMobileBrowser()) {
+         togglePanel();
+      }
 
       toggleEEZLayer();
 
