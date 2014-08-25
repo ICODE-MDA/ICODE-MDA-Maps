@@ -1382,6 +1382,11 @@ function getClustersFromDB(bounds, customQuery) {
       phpWithArg += "&vessel_age=" + vessel_age;
    }
 
+   if (detectMobileBrowser()) {
+      phpWithArg += "&mobile=1";
+   }
+
+
    //Debug query output
    console.log('getClustersFromDB(): ' + phpWithArg);
 
