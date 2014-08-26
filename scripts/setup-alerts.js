@@ -14,6 +14,8 @@ var alertPolyonString;
 var alertMarkers = [];
 var alertPath;
 
+var countCriterion;
+
 /* -------------------------------------------------------------------------------- */
 /**
  * Setup and initalize the alert setup mode
@@ -47,6 +49,8 @@ function setupAlertInitialize() {
       $('#panel').toggle(true);
       $('#alertPanel').toggle(true);
    });
+
+   countCriterion = 0;
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -272,4 +276,188 @@ function saveAlert(){
       console.log('saveAlert(): ' +  'No response from alert database; error in php?'); 
       return;
    }); //END .fail()
+}
+
+/**
+ * Sets the alert dropdown options to hashable values (i.e. strings-like fields)
+ * source: http://stackoverflow.com/questions/1801499/how-to-change-options-of-select-with-jquery
+ **/
+function setHashOptions(selectoperation, alertvalue, addCriterionButton) {
+   var hashOptions = {'equals': 'equals',
+                        'contains': 'contains',
+                        'starts with': 'starts with',
+                        'ends with': 'ends with'};
+
+   selectoperation.show();
+   alertvalue.show();
+   addCriterionButton.show();
+
+   selectoperation.empty();
+   $.each(hashOptions, function(key, value) {
+      selectoperation.append($("<option></option>")
+      .attr("value", value).text(key));
+   });
+}
+
+/**
+ * Sets the alert dropdown options to range type (=, !, <, >)
+ * source: http://stackoverflow.com/questions/1801499/how-to-change-options-of-select-with-jquery
+ **/
+function setRangeOptions(selectoperation, alertvalue, addCriterionButton) {
+   var rangeOptions = {'=': 'equals',
+                       '!': 'not equals',
+                       '>': 'greater than',
+                       '<': 'less than'};
+
+   selectoperation.show();
+   alertvalue.show();
+   addCriterionButton.show();
+
+   selectoperation.empty();
+   $.each(rangeOptions, function(key, value) {
+      selectoperation.append($("<option></option>")
+      .attr("value", value).text(key));
+   });
+}
+
+/**
+ * Sets the vessel type dropdown options
+ **/
+function setVesseltypeOptions(selectoperation, alertvalue, addCriterionButton) {
+   var rangeOptions = {'is': 'equals',
+                       'is not': 'not equals'};
+
+   selectoperation.show();
+   alertvalue.show();
+   addCriterionButton.show();
+
+   selectoperation.empty();
+   $.each(rangeOptions, function(key, value) {
+      selectoperation.append($("<option></option>")
+      .attr("value", value).text(key));
+   });
+}
+
+/**
+ * Sets the appropriate dropdown operators depending on the field selected
+ **/
+function setAlertOptions(index) {
+   var selectoperation = $('#alertoperation'+index);
+   var alertvalue = $('#alertvalue'+index);
+   var selectedField = $('#alertfield'+index+' option:selected').val();
+
+   var addCriterionButton = $('#addcriterion');
+
+   switch (selectedField) {
+      case 'all':
+         selectoperation.hide();
+         alertvalue.hide();
+         addCriterionButton.hide();
+
+         //Delete all other criteria; reset the criteria
+         if (countCriterion > 1) {
+            countCriterion = 0;
+            $('#criteria').empty();
+            addCriterionRow();
+         }
+         
+         break;
+      case 'mmsi':
+         setHashOptions(selectoperation, alertvalue, addCriterionButton);
+         break;
+      case 'imo':
+         setHashOptions(selectoperation, alertvalue, addCriterionButton);
+         break;
+      case 'vesselname':
+         setHashOptions(selectoperation, alertvalue, addCriterionButton);
+         break;
+      case 'callsign':
+         setHashOptions(selectoperation, alertvalue, addCriterionButton);
+         break;
+      case 'destination':
+         setHashOptions(selectoperation, alertvalue, addCriterionButton);
+         break;
+      case 'vesseltype':
+         setVesseltypeOptions(selectoperation, alertvalue, addCriterionButton);
+         break;
+      case 'length':
+         setRangeOptions(selectoperation, alertvalue, addCriterionButton);
+         break;
+      case 'width':
+         setRangeOptions(selectoperation, alertvalue, addCriterionButton);
+         break;
+      case 'draught':
+         setRangeOptions(selectoperation, alertvalue, addCriterionButton);
+         break;
+      default:
+   }
+}
+
+function addCriterionRow() {
+   var divCriteria = $('#criteria');
+
+   countCriterion++;
+
+   //New alert field
+   var newalertfield = $('<select>').attr({
+      class: 'label',
+      id: 'alertfield' + countCriterion,
+      width: '300px',
+      onchange: 'setAlertOptions(' + countCriterion + ')'
+   }).appendTo(divCriteria);
+
+   var alertfieldoptions = {
+                       'MMSI': 'mmsi',
+                       'IMO': 'imo',
+                       'VESSELNAME': 'vesselname',
+                       'CALLSIGN': 'callsign',
+                       'DESTINATION': 'destination',
+                       'VESSELTYPE': 'vesseltype',
+                       'LENGTH': 'length',
+                       'WIDTH': 'width',
+                       'DRAUGHT': 'draught'};
+
+   if (countCriterion == 1) {
+      var alertfieldoptions = {'ALL VESSELS': 'all',
+                               'MMSI': 'mmsi',
+                               'IMO': 'imo',
+                               'VESSELNAME': 'vesselname',
+                               'CALLSIGN': 'callsign',
+                               'DESTINATION': 'destination',
+                               'VESSELTYPE': 'vesseltype',
+                               'LENGTH': 'length',
+                               'WIDTH': 'width',
+                               'DRAUGHT': 'draught'};
+   }
+
+
+   $.each(alertfieldoptions, function(key, value) {
+      newalertfield.append($('<option></option>')
+      .attr("value", value).text(key));
+   });
+
+
+   //New alert operation
+   var newalertfield = $('<select>').attr({
+      id: 'alertoperation' + countCriterion
+   }).appendTo(divCriteria);
+
+   newalertfield.hide();
+  
+   //New alert operation
+   var newalertvalue = $('<input>').attr({
+      type: 'text',
+      id: 'alertvalue' + countCriterion,
+      size: '30'
+   }).appendTo(divCriteria);
+
+   newalertvalue.hide();
+
+   //Add new line
+   $('<br />').appendTo(divCriteria);
+
+   setAlertOptions(countCriterion);
+}
+
+function removeCriterionRow(index) {
 }

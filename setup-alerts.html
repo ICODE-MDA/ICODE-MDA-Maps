@@ -5,6 +5,10 @@
 
       <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.1.38/jquery.form-validator.min.js"></script>
       <script> $.validate({}); </script>
+
+      <script>
+         $(document).ready(addCriterionRow());
+      </script>
    </head>
    <body style="margin:0px; padding:0px;">
         <table>
@@ -38,28 +42,18 @@
                  <fieldset>
 
                     <legend>Region-of-Interest Constraints and Filters:</legend>
-                    <label for="alertpolygon">POLYGON:</label> <textarea type="text" id="alertpolygon" name="alertpolygon" readonly="readonly" cols="50" rows="3" /></textarea /><input type="button" name="resetpolygon" value="Reset" onClick="resetPolygon(); return false;" /><br />
-                       <select class="label" id="alertfield">
-                          <option value='all'>ALL VESSEL</option>
-                          <option value='mmsi'>MMSI</option>
-                          <option value='imo'>IMO</option>
-                          <option value='vesselname'>VESSEL NAME</option>
-                          <option value='callsign'>CALLSIGN</option>
-                          <option value='destination'>DESTINATION</option>
-                          <option value='vesseltype'>VESSEL TYPE</option>
-                          <option value='length'>LENGTH</option>
-                          <option value='width'>WIDTH</option>
-                          <option value='draught'>DRAUGHT</option>
-                       </select>
-                       <select id="alertoperation">
-                          <option value='equals'>equals</option>
-                          <option value='contains'>contains</option>
-                          <option value='starts with'>starts with</option>
-                          <option value='ends with'>ends with</option>
-                       </select>
-                       <input type="text" id="alertvalue" size="30" /><br />
-                       <label for="alertenteringarea">ENTERING ROI:</label> <input id="alertentering" type="checkbox" checked="true" name="entering_area" /><br />
-                       <label for="alertexitingarea">EXITING ROI:</label> <input id="alertexiting" type="checkbox" checked="true" name="exiting_area" /><br />
+                    <label for="alertpolygon">POLYGON:</label>
+                    <textarea type="text" id="alertpolygon" name="alertpolygon" readonly="readonly" cols="50" rows="3" /></textarea>
+                    <input type="button" name="resetpolygon" value="Reset" onClick="resetPolygon(); return false;" /><br />
+
+                    <label for="criteria">CRITERIA:</label>
+                    <div id="criteria">
+                       <!-- User added criteria rows go here -->
+                    </div>
+                    <input type="button" id="addcriterion" name="addcriterion" value="Add criteria" onClick="addCriterionRow(); return false;" /><br />
+
+                    <label for="alertenteringarea">ENTERING REGION:</label> <input id="alertentering" type="checkbox" checked="true" name="entering_area" /><br />
+                    <label for="alertexitingarea">EXITING REGION:</label> <input id="alertexiting" type="checkbox" checked="true" name="exiting_area" /><br />
 
                  </fieldset>
               </form>

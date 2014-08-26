@@ -185,6 +185,13 @@ $(function start() {
       panelContent.innerHTML += '<br>';
       panelContent.innerHTML += '<b>Matching AIS messages:</b><br>';
 
+      var divNewMessages = document.createElement('div');
+      divNewMessages.setAttribute('id', 'alertNewMessages-'+id);
+      var divNewMessagesContent = document.createTextNode('New alerts displayed here.');
+      divNewMessages.appendChild(divNewMessagesContent);
+
+      panelContent.appendChild(divNewMessages);
+
 
       $('#polygon_alert_id' + id).click(function () {
          console.log('Show alert polygon toggled');
@@ -202,11 +209,13 @@ $(function start() {
     * Perform appropriate actions after receiving an alert with a matching alertRule
     **/
    function newAlertReceived(singleAlert, decodedAIS, timestamp) {
-      var panelContent = document.getElementById('alert_id' + singleAlert.alert_id);
+      //var panelContent = document.getElementById('alert_id' + singleAlert.alert_id);
+      var divNewMessages = document.getElementById('alertNewMessages-' + singleAlert.alert_id);
 
       console.log(timestamp);
-      panelContent.appendChild(document.createElement('pre')).innerHTML = toHumanTime(timestamp) + ' UTC';
-      panelContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(decodedAIS, undefined, 1);
+      //panelContent.appendChild(document.createElement('pre')).innerHTML = toHumanTime(timestamp) + ' UTC';
+      //panelContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(decodedAIS, undefined, 1);
+      divNewMessages.innerHTML = JSON.stringify(decodedAIS, undefined, 1);
 
       //increment count on alert panel title
       var alertCountSpan = document.getElementById('alertCount-' + singleAlert.alert_id);
