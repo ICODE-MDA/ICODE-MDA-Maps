@@ -204,6 +204,7 @@ function initialize() {
    //var centerCoord = new google.maps.LatLng(2.0,1.30);     //GoG
    //var centerCoord = new google.maps.LatLng(-33.0, -71.6);   //Valparaiso, Chile
    //var centerCoord = new google.maps.LatLng(17.978677, -16.078958);   //Nouakchott, Mauritania
+   var centerCoord = new google.maps.LatLng(13.273461807246479, -13.465625000000037);   //Zoomed out world view
    
    if(navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function(position) {
@@ -240,12 +241,14 @@ function initialize() {
    var defaultZoom;
    if (detectMobileBrowser()) {
       controlStyle = google.maps.MapTypeControlStyle.DROPDOWN_MENU;
-      defaultZoom = 8;
+      //defaultZoom = 8;
+      defaultZoom = 4;
    }
    else {
       controlStyle = google.maps.MapTypeControlStyle.HORIZONTAL_BAR;
-      defaultZoom = 11;
+      //defaultZoom = 11;
       //defaultZoom = 7;
+      defaultZoom = 2;
    }
       
    var mapOptions = {
@@ -315,7 +318,9 @@ function initialize() {
    */
 
    //Add drawing toolbar
-   addDrawingManager();
+   if (!detectMobileBrowser()) {
+      addDrawingManager();
+   }
 
    reloadDelay = 1000;    //set initial delay to 10ms
 
@@ -391,7 +396,10 @@ function initialize() {
 
       geocoder = new google.maps.Geocoder();
 
-      initializePanel();
+      initializePanel();   
+      if (detectMobileBrowser()) {
+         togglePanel();
+      }
 
       toggleEEZLayer();
 
@@ -1374,6 +1382,11 @@ function getClustersFromDB(bounds, customQuery) {
       phpWithArg += "&vessel_age=" + vessel_age;
    }
 
+   if (detectMobileBrowser()) {
+      phpWithArg += "&mobile=1";
+   }
+
+
    //Debug query output
    console.log('getClustersFromDB(): ' + phpWithArg);
 
@@ -1468,19 +1481,33 @@ function getClustersFromDB(bounds, customQuery) {
                fillOpacity: 0.2,
                map: map,
                bounds: clusterBounds,
-               clickable: false,
+               clickable: true,
                zIndex: 2
             });
 
+            //Add event for rectangle click
+            google.maps.event.addListener(clusterBox, 'click', function (){ map.fitBounds(this.getBounds()); });
 
-            var boxLabel = new MapLabel({
-               text: cluster.clustersum,
+
+            //Cluster box text label
+            var boxLabel = new InfoBox({
+               content: cluster.clustersum,
+               boxStyle: {
+                  border: "0px solid black",
+                  textAlign: "center",
+                  fontSize: "16px",
+                  width: "50px",
+               },
+               disableAutoPan: true,
+               pixelOffset: new google.maps.Size(-25, 5),
                position: new google.maps.LatLng((parseFloat(cluster.bottomLat)+parseFloat(cluster.topLat))/2+15/Math.pow(2,map.getZoom()),(parseFloat(cluster.leftLon)+parseFloat(cluster.rightLon))/2),
-               map: map,
-               fontSize: 20,
-               align: 'center',
-               zIndex: 1
+               closeBoxURL: "",
+               isHidden: false,
+               enableEventPropagation: true,
             });
+
+            //Attach the InfoBox to the map
+            boxLabel.open(map);
 
             clusterBoxes.push(clusterBox);
             clusterBoxesLabels.push(boxLabel);
@@ -1596,7 +1623,13 @@ function markerInfoBubble(marker, vessel, infoBubble) {
       infoBubble.setContent(generateLAISICInfoHTML(vessel, vesseltype, title));
    }
    else {
-      infoBubble.setContent(generateInfoHTML(vessel, vesseltype, title));
+      if (!detectMobileBrowser()) {
+         infoBubble.setContent(generateInfoHTML(vessel, vesseltype, title));
+      }
+      else {
+         infoBubble.setContent(generateInfoHTMLmobile(vessel, vesseltype, title));
+         infoBubble.setMaxWidth(190);
+      }
    }
 
    //LYNNE's IHS TABS
@@ -1692,6 +1725,57 @@ function generateInfoHTML(vessel, vesseltype, title) {
       '<b>Source</b>: ' + vessel.streamid + '<br>' +
       '<b>Risk Security</b>: ' + vessel.risk_score_security + '<br>'+	
       '<b>Risk Safety</b>: ' + vessel.risk_score_safety + '<br>'+	
+      '</div>' +     //close for content-sub
+      '<br><br>' +   
+      '<br>' +   
+      '</div>' +     //close for content-right
+      '</div>' +     //close for bodyContent
+      '</div>';      //close for content
+
+   var html = htmlTitle + htmlLeft + htmlRight;
+   //END Prepare HTML for infoWindow
+   
+   return html;
+}
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Function to generate the HTML for infoBubble/infoWindow
+ * for a AIS or LAISIC vessel marker.
+ */
+function generateInfoHTMLmobile(vessel, vesseltype, title) {
+   var htmlTitle = 
+      '<div id="content">'+
+      '<span style="vertical-align: middle;display:inline-block;height: 30px;"><img title="' + MIDtoCountry(vessel.mmsi) + '" height=26px align="top" src=flags/' + vessel.mmsi.toString().substr(0,3) + '.png>&nbsp;&nbsp;<span id="firstHeading" class="firstHeading">' + title + '</span></span>' +
+      '<div id="bodyContent">';
+
+   var htmlLeft = 
+      '<div id="content-left">' +
+      '<a href="https://marinetraffic.com/ais/shipdetails.aspx?MMSI=' + vessel.mmsi + '"  target="_blank"> '+
+      '<img id="marinetrafficimage" title="Click to open MarineTraffic page" width=180px src="' + imgURL + '">' + 
+      '</a><br>' + 
+      '<div id="content-sub" border=1>' +
+      '<b>MMSI</b>: ' + vessel.mmsi + '<br>' +
+      '<b>IMO</b>: ' + vessel.imo + (passIMOChecksum(vessel.imo)==true?'':' <font color="red">(invalid)</font>') + '<br>' +
+      //'<b>Vessel Type</b>: ' + vesseltype + '<br>' +
+      '<b>Vessel Type</b>: ' + vessel.vesseltypeint + '<br>' +
+      '</div>' +
+      '<div>' + 
+      '<a id="showtracklink" link="" href="javascript:void(0);" onClick="getTrackByTrackIDandSource(\'' + vessel.mmsi + '\', \'' + vesseltype + '\');">Show vessel track history</a>' +
+      '</div>' +
+      '</div>';  //close for content-left div
+
+   var htmlRight = 
+      '<div id="content-right">' +
+      '<div id="content-sub">' +
+      '<b>Report Date</b>: <br>' + toHumanTime(vessel.datetime) + '<br>' +
+      '<div id="vesselLastUpdated">Last Updated on...</div>' + 
+      '<b>Lat</b>: ' + vessel.lat + '  ' +
+      '<b>Lon</b>: ' + vessel.lon + '<br>' +
+      '<b>Navigation Status</b>: ' + vessel.navstatus + '<br>' +
+      '<b>Speed Over Ground</b>: ' + Number(parseFloat(vessel.sog).toFixed(3)) + '<br>' + 
+      '<b>Course Over Ground</b>: ' + Number(parseFloat(vessel.cog).toFixed(3)) + '<br>' + 
+      '<b>Length x Width</b>: ' + vessel.length + ' x ' + vessel.shipwidth + '<br>'+
       '</div>' +     //close for content-sub
       '<br><br>' +   
       '<br>' +   
