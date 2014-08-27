@@ -50,7 +50,7 @@ function createTrackTimeControl(map, initial, tracks) {
 
    for (var i=0; i < tracks.length; i++) {
       //Create the text label once for this track
-      var mapLabel = new InfoBox({
+      var mapLabel = new MapLabel({
          text: '',
          //position: new google.maps.LatLng(5.9,1.30),
          map: map,
