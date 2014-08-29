@@ -6,8 +6,8 @@
      <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 
      <link rel="stylesheet" type="text/css" href="css/mapstyle.css">
-     <link rel="stylesheet" type="text/css" href="css/alert.css">
      <link rel="stylesheet" type="text/css" href="css/mapstyle-mobile.css" media="only screen and (max-device-width: 480px)">
+     <link rel="stylesheet" type="text/css" href="css/alert.css">
 
      <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=geometry,drawing,weather,visualization&sensor=false"> </script>
      <script type="text/javascript" src='scripts/infobubble.js' ></script>
@@ -37,6 +37,8 @@
      <script type="text/javascript" src="scripts/CSJSRequestObject.js"></script>
 
      <script type="text/javascript" src="scripts/fileUpload.js"></script>
+     
+     <script type="text/javascript" src="scripts/maplabel-compiled.js"></script>
 
      <!-- Library for drawing error ellipse: 
      http://www.geocodezip.com/v3_example_eshapes_ellipse_fromBounds.html
@@ -467,6 +469,11 @@
                     <option value="2">2</option>
                     <option value="3">3</option>
                  </select> seconds<br>
+                 <hr>
+                 Vessel Icon Size: 
+                 <input type="button" onclick="decreaseVesselIconSize()" value="-"></input>
+                 <input type="button" onclick="increaseVesselIconSize()" value="+"></input>
+                 <input type="button" onclick="resetVesselIconSize()" value="Reset"></input>
                  <hr>
                  <p>
                  <b>Hidden Tricks:</b><br>

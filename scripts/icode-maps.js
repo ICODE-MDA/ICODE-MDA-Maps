@@ -37,6 +37,10 @@ var vesselLastUpdated;        //time of last vessel report
 
 var distanceLabel;            //text label for distance tool
 
+//Vessel Icon size
+var vesseliconwidth = 4;
+var vesseliconlength = 10;
+
 //info bubble to show vessel particulars (details)
 var infoBubble = new InfoBubble({
        disableAnimation: true,
@@ -193,6 +197,7 @@ var portLabel;
 //Traffic layer
 var trafficLayer;
 
+
 /* -------------------------------------------------------------------------------- */
 /** Initialize, called on main page load
 */
@@ -242,7 +247,7 @@ function initialize() {
    if (detectMobileBrowser()) {
       controlStyle = google.maps.MapTypeControlStyle.DROPDOWN_MENU;
       //defaultZoom = 8;
-      defaultZoom = 4;
+      defaultZoom = 2;
    }
    else {
       controlStyle = google.maps.MapTypeControlStyle.HORIZONTAL_BAR;
@@ -269,7 +274,7 @@ function initialize() {
                      ],
 			style: controlStyle
    	},
-      minZoom: 3,
+      minZoom: detectMobileBrowser() ? 1 : 3,
       maxZoom: 19,
 	};
 
@@ -908,8 +913,8 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
    console.log('getTargetsFromDB(): ' + phpWithArg);
 
    //Ship shape
-   var vw = 4; //vessel width
-   var vl = 10; //vessel length
+   var vw = vesseliconwidth; //4; //vessel width
+   var vl = vesseliconlength; //10; //vessel length
    var markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
    //Indented arrow
    //var markerpath = 'M 0,5 4,8 0,-8 -4,8 z';
@@ -1070,7 +1075,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                      icon: {
                         path:         markerpath, //'M 0,8 4,8 4,-3 0,-8 -4,-3 -4,8 z', //middle rear
                         strokeColor:  riskColorSafety,
-                        strokeWeight: 3,
+                        strokeWeight: vw*3/4,
                         fillColor:    iconColor,
                         fillOpacity:  0.6,
                         optimized:    false,
@@ -1098,7 +1103,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                      icon: {
                         path:         markerpath, //'M 0,8 4,8 4,-3 0,-8 -4,-3 -4,8 z', //middle rear
                         strokeColor:  shadeColor(iconColor,-50),
-                        strokeWeight: 1,
+                        strokeWeight: vw/4,
                         fillColor:    iconColor,
                         fillOpacity:  0.8,
                         rotation:     vessel.heading,
@@ -4599,6 +4604,7 @@ function codeAddress() {
 
 /* -------------------------------------------------------------------------------- */
 /**
+ *
  **/
 function disableCustomQuery() {
    enableCustomQuery = false;
@@ -4610,6 +4616,7 @@ function disableCustomQuery() {
 
 /* -------------------------------------------------------------------------------- */
 /**
+ *
  **/
 function passIMOChecksum(imo) {
    if (imo == null) {
@@ -4628,4 +4635,34 @@ function passIMOChecksum(imo) {
    }
 
    return true;
+}
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * 
+ **/
+function increaseVesselIconSize() {
+   vesseliconwidth += 2;
+   vesseliconlength += 2;
+   refreshMaps(true);
+}
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * 
+ **/
+function decreaseVesselIconSize() {
+   vesseliconwidth -= 2;
+   vesseliconlength -= 2;
+   refreshMaps(true);
+}
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * 
+ **/
+function resetVesselIconSize() {
+   vesseliconwidth = 4;
+   vesseliconlength = 10;
+   refreshMaps(true);
 }
