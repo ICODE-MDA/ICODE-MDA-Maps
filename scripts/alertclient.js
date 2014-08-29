@@ -175,6 +175,12 @@ $(function start() {
       $('<input />', {type: 'checkbox', id: 'polygon_alert_id'+id, value: 'Show alert polygon' }).appendTo($('#alert_id' + id));
       $('#alert_id' + id).append('Show Polygon');
 
+      $('#alert_id' + id).append($('<br />'));
+
+      //Add zoom to polygon link
+      $('<input />', {type: 'button', id: 'show_polygon_id'+id, value: 'Zoom to Polygon' }).appendTo($('#alert_id' + id));
+      //$('#alert_id' + id).append('<a href="" onclick="zoomToPolygon('+id+'); return false;">Zoom into Polygon</a>');
+
       //Pretty print the alert rules/properties
       var panelContent = document.getElementById('alert_id' + id);
 
@@ -201,6 +207,11 @@ $(function start() {
          else {
             hidePolygon(id);
          }
+      });
+
+      $('#show_polygon_id' + id).click(function () {
+         console.log('Zooming into polygon ' + id);
+         zoomToPolygon(id);
       });
    }
 
@@ -241,7 +252,8 @@ $(function start() {
       });
 
       setTimeout(function () {
-         shapeFadeOut(alertVesselCircle, 2, null);
+         //shapeFadeOut(alertVesselCircle, 2, null);     //GPU intensive to fade many alert circles
+         alertVesselCircle.setMap(null);
       }, 3000);
    }
 
@@ -298,6 +310,19 @@ $(function start() {
 
    /* -------------------------------------------------------------------------------- */
    /**
+   * Zoom to the alert polygon based on alert id
+   **/
+   function zoomToPolygon(id) {
+      console.log('Zooming to alert polygon for id', id);
+
+      //Draw the polygon on the map
+      //map.setCenter(alertPolygon.getCenter());
+      var polygonBounds = alertPolygon.getBounds();
+      map.fitBounds(polygonBounds);
+   }
+
+   /* -------------------------------------------------------------------------------- */
+   /**
    * Function to fade a Google Maps API shape object off the map
    **/
    function shapeFadeOut(shape, seconds, callback){
@@ -336,5 +361,18 @@ $(function start() {
       var date = new Date(unixtime * 1000);
       var humanTime = date.toLocaleString("en-US",{timeZone: "UTC"});
       return humanTime;
+   }
+
+   google.maps.Polygon.prototype.getBounds = function() {
+      var bounds = new google.maps.LatLngBounds();
+      var paths = this.getPaths();
+      var path;        
+      for (var i = 0; i < paths.getLength(); i++) {
+         path = paths.getAt(i);
+         for (var ii = 0; ii < path.getLength(); ii++) {
+            bounds.extend(path.getAt(ii));
+         }
+      }
+      return bounds;
    }
 });

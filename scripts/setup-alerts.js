@@ -10,7 +10,7 @@
  *  Global objects 
  */
 var alertPolyon;
-var alertPolyonString;
+var alertPolygonString;
 var alertMarkers = [];
 var alertPath;
 
@@ -61,6 +61,8 @@ function setAlertEnd() {
    $('#setup-alert-modal').dialog('close');
 
    deletePolygon();
+
+   countCriterion = 0;
 
    //Show the panel menu to give more room on the maps
    $('#panel').toggle(true);
@@ -200,9 +202,9 @@ function updatePolygonField()
    coords += point.lat();     //WKT format is (LON, LAT)
 
    //Save polygon string definition
-   alertPolyonString = 'POLYGON((';
-   alertPolyonString += coords;
-   alertPolyonString += '))';
+   alertPolygonString = 'POLYGON((';
+   alertPolygonString += coords;
+   alertPolygonString += '))';
 
    coords = coords.replace(/,/g,",\n");
    formdataElement.value = coords;
@@ -213,31 +215,29 @@ function updatePolygonField()
 
 /* -------------------------------------------------------------------------------- */
 function saveAlert(){
+   //DEBUG TESTING PURPOSE
+   alertPolygonString = '1.56005859375 6.0203850824560226, 1.91162109375 5.779966445034052, 1.56005859375 5.637852598770866, 1.56005859375 6.0203850824560226';
+   $('#alertpolygon').val(alertPolygonString);
+   $('#emailaddress').val('test@test.com');
+
+
+   //========================= ADD ALERT PROPERTIES ==================================
    //Obtain user's ROI polygon definition
-   //TODO: check area of polygon to limit size to prevent long queries
+   //check area of polygon to limit size to prevent long queries
    if (computeArea() > 3000000000) {
       alert('Please draw a smaller polygon.');
       return;
-   }       
-   var phpWithArg = 'query_setup_alert.php?alertPolygon="' + alertPolyonString + '"';
-
-   //Obtain user's criteria
-   var field = $('#alertfield').val();
-   var operation = $('#alertoperation').val();
-   var value = $('#alertvalue').val();
-
-   if (field == "all" || value == "") {
-      //User wants all vessels entering ROI, don't add any vessel contraints
    }
-   else {
-      //User has specific vessel criteria defined
-      phpWithArg += '&field=' + $('#alertfield').val();
-      phpWithArg += '&operation=' + $('#alertoperation').val();
-      phpWithArg += '&value=' + $('#alertvalue').val();
+   //check if polygon is defined
+   if (typeof alertPolygonString === 'undefined') {
+      alert('Please define polygon');
+      return;
    }
 
-   var entering = $('#alertentering');
-   var exiting = $('#alertexiting');
+   var phpWithArg = 'query_setup_alert.php?alertPolygon="' + alertPolygonString + '"';
+
+   var entering = $('#alertenteringarea');
+   var exiting = $('#alertexitingarea');
 
    if (entering.is(':checked')) {
       phpWithArg += '&entering=true';
@@ -246,8 +246,60 @@ function saveAlert(){
       phpWithArg += '&exiting=true';
    }
 
+   var updateinterval = $('#updateinterval').val();
+   phpWithArg += '&interval=' + updateinterval;
+
    //TODO: check if email is valid and sanitize before using
-   phpWithArg += '&email="' + $('#emailaddress').val() + '"';
+   var emailStr = $('#emailaddress').val();
+   if (typeof emailStr === 'undefined' || emailStr === '') {
+      alert('Please define email');
+      return;
+   }
+   phpWithArg += '&email="' + emailStr + '"';
+
+   console.log(phpWithArg);
+
+   //Call the PHP script to insert new alert row to alert database
+   console.log('Calling PHP script to push new alert_properties element...');
+   $.getJSON(
+         phpWithArg, 
+         function (){ 
+            console.log('success');
+         }
+      )
+   .done(function (response) {
+      console.log('saveAlert(): ' + response.query);
+
+
+      //Exit the "setup alert" mode
+      setAlertEnd();
+   }) // END .done()
+   .fail(function() {
+      console.log('saveAlert(): ' +  'No response from alert database; error in php?'); 
+
+      //alert('Alert not saved.  Please try again');
+
+      return;
+   }); //END .fail()
+
+
+   //======================== ADD CRITERIA FOR ALERT ================================
+   phpWithArg = 'query_setup_alert_criteria.php?';
+
+   //Obtain user's criteria
+   //User has specific vessel criteria defined, loop through each of them
+   var fields = $('[id^=alertfield]');    //Find all ids that begin with 'alertfield'
+   var operations = $('[id^=alertoperation]');
+   var value = $('[id^=alertvalue]');
+
+   if (fields[0].value === 'all') {
+      console.log('Skipping operation and value');
+
+   }
+
+   //phpWithArg += '&field=' + $('#alertfield1').val();
+   //phpWithArg += '&operation=' + $('#alertoperation1').val();
+   //phpWithArg += '&value=' + $('#alertvalue1').val();
 
    //TODO: add pre-built SQL query statement field
    var prebuiltquery = '';
@@ -274,6 +326,9 @@ function saveAlert(){
    }) // END .done()
    .fail(function() {
       console.log('saveAlert(): ' +  'No response from alert database; error in php?'); 
+
+      //alert('Alert not saved.  Please try again');
+
       return;
    }); //END .fail()
 }

@@ -15,8 +15,8 @@
            <td>
               <p><b>Instructions for setting up an alert:</b>
               <ul>
-                 <li>Define a ROI.</li>
-                 <li>Add additional criteria(s) if desired.</li>
+                 <li>Define a ROI (see right).</li>
+                 <li>Add additional criteria if desired.</li>
                  <li>Click "Save Alert" button.</li>
               </ul>
               </p>      
@@ -47,13 +47,17 @@
                     <input type="button" name="resetpolygon" value="Reset" onClick="resetPolygon(); return false;" /><br />
 
                     <label for="criteria">CRITERIA:</label>
-                    <div id="criteria">
+                    <div id="criteria" style="float:left">
                        <!-- User added criteria rows go here -->
                     </div>
-                    <input type="button" id="addcriterion" name="addcriterion" value="Add criteria" onClick="addCriterionRow(); return false;" /><br />
-
-                    <label for="alertenteringarea">ENTERING REGION:</label> <input id="alertentering" type="checkbox" checked="true" name="entering_area" /><br />
-                    <label for="alertexitingarea">EXITING REGION:</label> <input id="alertexiting" type="checkbox" checked="true" name="exiting_area" /><br />
+                    <input type="button" id="addcriterion" name="addcriterion" value="Add criteria" onClick="addCriterionRow(); return false;" style="float:right" />
+                    
+                    <br />
+                    <br />
+                    <div id="enterexit" style="clear:left">
+                       <label for="alertenteringarea">ENTERING REGION:</label> <input id="alertenteringarea" type="checkbox" checked="true" name="entering_area" /><br />
+                       <label for="alertexitingarea">EXITING REGION:</label> <input id="alertexitingarea" type="checkbox" checked="true" name="exiting_area" /><br />
+                    </div>
 
                  </fieldset>
               </form>
@@ -64,7 +68,7 @@
                     <legend>Notification Target</legend>
                     <label>E-MAIL:</label><input type="text" id="emailaddress" name="emailaddress" size="50" data-validation="email" data-validation-error-msg="Invalid Email" /><br />
                     <label>UPDATE INTERVAL:</label>
-                    <select id="frequency">
+                    <select id="updateinterval">
                        <option value='15'>every 15 minutes</option>
                        <option value='30'>every 30 minutes</option>
                        <option value='60'>every 1 hour</option>
