@@ -284,7 +284,7 @@ function initialize() {
 	map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 
    //Set default map layer
-   map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+   map.setMapTypeId(google.maps.MapTypeId.HYBRID);
 
    //Define OSM map type pointing at the OpenStreetMap tile server
    map.mapTypes.set("OpenStreetMap", new google.maps.ImageMapType({
@@ -727,6 +727,8 @@ function refreshMaps(forceRedraw) {
    }
 
    toggleCountryBorders();
+
+   refreshDayNightOverlay();
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -2573,7 +2575,7 @@ function refreshLayers() {
 function toggleShowNames() {
    if (document.getElementById("showvesselnames") != null &&
        document.getElementById("showvesselnames").checked) {
-      console.log('showing vessel names');
+      console.log('Showing vessel names');
 
       //loop through markersDisplayed
       for (var i=0; i < markersDisplayed.length; i++) {
@@ -2581,7 +2583,7 @@ function toggleShowNames() {
       }
    }
    else {
-      console.log('hiding vessel names');
+      console.log('Hiding vessel names');
 
       //loop through markersDisplayed
       for (var i=0; i < markersDisplayed.length; i++) {
@@ -2594,25 +2596,38 @@ function toggleShowNames() {
 function toggleDayNightOverlay() {
    if (document.getElementById("showdaynightoverlay") != null &&
        document.getElementById("showdaynightoverlay").checked) {
-      console.log('showing day/night overlay');
+      console.log('Showing day/night overlay');
 
       daynightlayer = new DayNightOverlay({
          map: map
       });
    }
    else {
-      console.log('hiding day/night overlay');
+      console.log('Hiding day/night overlay');
 
       daynightlayer.setMap(null);
    }
 }
 
+/* -------------------------------------------------------------------------------- */
+function refreshDayNightOverlay() {
+   if (document.getElementById("showdaynightoverlay") != null &&
+       document.getElementById("showdaynightoverlay").checked) {
+      console.log('Refreshing day/night overlay');
+
+      daynightlayer.setMap(null);
+
+      daynightlayer = new DayNightOverlay({
+         map: map
+      });
+   }
+}
 
 /* -------------------------------------------------------------------------------- */
 function toggleTrackIcons() {
    if (document.getElementById("showtrackicons") != null &&
        document.getElementById("showtrackicons").checked) {
-      console.log('showing trackIcons');
+      console.log('Showing trackIcons');
 
       showtrackicons = true;
 
@@ -2625,7 +2640,7 @@ function toggleTrackIcons() {
       }
    }
    else {
-      console.log('hiding trackIcons');
+      console.log('Hiding trackIcons');
 
       showtrackicons = false;
 
