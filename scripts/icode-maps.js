@@ -41,6 +41,9 @@ var distanceLabel;            //text label for distance tool
 var vesseliconwidth = 4;
 var vesseliconlength = 10;
 
+//Day/Night Overlay layer
+var daynightlayer;
+
 //info bubble to show vessel particulars (details)
 var infoBubble = new InfoBubble({
        disableAnimation: true,
@@ -326,7 +329,7 @@ function initialize() {
    if (!detectMobileBrowser()) {
       addDrawingManager();
    }
-
+   
    reloadDelay = 1000;    //set initial delay to 10ms
 
    //Map dragged then idle listener
@@ -2586,6 +2589,24 @@ function toggleShowNames() {
       }
    }
 }
+
+/* -------------------------------------------------------------------------------- */
+function toggleDayNightOverlay() {
+   if (document.getElementById("showdaynightoverlay") != null &&
+       document.getElementById("showdaynightoverlay").checked) {
+      console.log('showing day/night overlay');
+
+      daynightlayer = new DayNightOverlay({
+         map: map
+      });
+   }
+   else {
+      console.log('hiding day/night overlay');
+
+      daynightlayer.setMap(null);
+   }
+}
+
 
 /* -------------------------------------------------------------------------------- */
 function toggleTrackIcons() {

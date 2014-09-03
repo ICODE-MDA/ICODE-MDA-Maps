@@ -40,6 +40,8 @@
      
      <script type="text/javascript" src="scripts/maplabel-compiled.js"></script>
 
+     <script type="text/javascript" src="scripts/daynightoverlay.js"></script>
+
      <!-- Library for drawing error ellipse: 
      http://www.geocodezip.com/v3_example_eshapes_ellipse_fromBounds.html
      -->
@@ -452,6 +454,9 @@
                  <input type="button" onclick="decreaseVesselIconSize()" value="-"></input>
                  <input type="button" onclick="increaseVesselIconSize()" value="+"></input>
                  <input type="button" onclick="resetVesselIconSize()" value="Reset"></input>
+                 <hr>
+
+                 <input class="checkbox" id="showdaynightoverlay" name="Show Day/Night Overlay" type="checkbox" onclick="toggleDayNightOverlay();"> Show Day/Night Overlay<br>
                  <hr>
                  <p>
                  <b>Hidden Tricks:</b><br>
