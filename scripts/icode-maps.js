@@ -412,6 +412,8 @@ function initialize() {
       toggleEEZLayer();
 
       reload_delay_changed();
+
+      toggleDayNightOverlay();
    });
 
    //Keyboard shortcuts/
@@ -2598,9 +2600,14 @@ function toggleDayNightOverlay() {
        document.getElementById("showdaynightoverlay").checked) {
       console.log('Showing day/night overlay');
 
-      daynightlayer = new DayNightOverlay({
-         map: map
-      });
+      if (typeof daynightlayer === 'undefined') {
+         daynightlayer = new DayNightOverlay({
+            map: map
+         });
+      }
+      else {
+         daynightlayer.setMap(map);
+      }
    }
    else {
       console.log('Hiding day/night overlay');
