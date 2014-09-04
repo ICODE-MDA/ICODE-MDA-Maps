@@ -867,6 +867,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
    document.getElementById("query").value = "QUERY RUNNING...";
    document.getElementById('stats_nav').innerHTML = '';
    document.getElementById('busy_indicator').style.visibility = 'visible';
+   NProgress.start();   //JS library top progress bar
 
    var phpWithArg;
 
@@ -1339,12 +1340,14 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
             //response.resultcount + " results<br>" + 
             markersDisplayed.length + " results<br>" + //Use markersDisplayed array length to include RADAR and LAISIC markers
             Math.round(response.exectime*1000)/1000 + " secs";
+         NProgress.done();   //JS library top progress bar
       }) //END .done()
       .fail(function() { 
          //Update activity status spinner and results
          console.log('getTargetsFromDB(): ' +  'No response from track query; error in php?'); 
          document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
          document.getElementById('busy_indicator').style.visibility = 'hidden';
+         NProgress.done();   //JS library top progress bar
          return false; 
       }); //END .fail()
    return true;
@@ -1359,6 +1362,7 @@ function getClustersFromDB(bounds, customQuery) {
    document.getElementById("query").value = "QUERY RUNNING...";
    document.getElementById('stats_nav').innerHTML = '';
    document.getElementById('busy_indicator').style.visibility = 'visible';
+   NProgress.start();   //JS library top progress bar
 
    //Set buffer around map bounds to expand queried area slightly outside viewable area
    var latLonBuffer = 0.1 * map.getZoom();
@@ -1548,11 +1552,13 @@ function getClustersFromDB(bounds, customQuery) {
          document.getElementById('stats_nav').innerHTML = 
             totalsum + " results<br>" + 
             Math.round(response.exectime*1000)/1000 + " secs";
+         NProgress.done();   //JS library top progress bar
       }) //end .done()
       .fail(function() { 
          console.log('getClustersFromDB(): ' +  'No response from track query; error in php?'); 
          document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
          document.getElementById('busy_indicator').style.visibility = 'hidden';
+         NProgress.done();   //JS library top progress bar
          return; 
       }); //end .fail()
 }
@@ -1924,11 +1930,7 @@ function generateLAISICInfoHTML(vessel, vesseltype, title) {
  */
 function getPortCalls(mmsi) {
    console.log("Obtaining port calls for MMSI " + mmsi);
-   /*
-   document.getElementById("query").value = "QUERY RUNNING...";
-   document.getElementById('stats_nav').innerHTML = '';
-   document.getElementById('busy_indicator').style.visibility = 'visible';
-   */
+
    document.getElementById('port_calls').innerHTML = '<div id="query_spinner"><div style="width: 24px; height: 24px;"></div></div>';
 
    //Activate the "last 3 port call" spinner
@@ -1962,20 +1964,9 @@ function getPortCalls(mmsi) {
          });
 
          console.log('getPortCalls(): ' + "Total number of port calls = " + response.resultcount);
-
-/*
-         document.getElementById('busy_indicator').style.visibility = 'hidden';
-         document.getElementById('stats_nav').innerHTML = 
-            totalsum + " results<br>" + 
-            Math.round(response.exectime*1000)/1000 + " secs";
-            */
       }) //end .done()
       .fail(function() { 
          console.log('getPortCalls(): ' +  'No response; error in php?'); 
-         /*
-         document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
-         document.getElementById('busy_indicator').style.visibility = 'hidden';
-         */
          return; 
       }); //end .fail()
 }
@@ -2135,6 +2126,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
       document.getElementById("query").value = "QUERY RUNNING FOR TRACK...";
       document.getElementById('stats_nav').innerHTML = '';
       document.getElementById('busy_indicator').style.visibility = 'visible';
+      NProgress.start();   //JS library top progress bar
 
       var phpWithArg = "query_track.php?source=" + source;
 
@@ -2559,11 +2551,13 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
 
                   document.getElementById('busy_indicator').style.visibility = 'hidden';
                   document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+                  NProgress.done();   //JS library top progress bar
                }) //end .done()
             .fail(function() { 
                console.log('GETTRACK(): ' +  'No response from track query; error in php?'); 
                document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
                document.getElementById('busy_indicator').style.visibility = 'hidden';
+               NProgress.done();   //JS library top progress bar
                return; 
             }); //end .fail()
    }
@@ -3150,6 +3144,7 @@ function showPorts() {
    document.getElementById("query").value = "QUERY RUNNING FOR PORTS...";
    document.getElementById('stats_nav').innerHTML = '';
    document.getElementById('busy_indicator').style.visibility = 'visible';
+   NProgress.start();   //JS library top progress bar
 
    var bounds = map.getBounds();
    var ne = bounds.getNorthEast();
@@ -3220,11 +3215,13 @@ function showPorts() {
 
       document.getElementById('busy_indicator').style.visibility = 'hidden';
       document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
       console.log('SHOWPORTS(): ' +  'No response from port query; error in php?'); 
       document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
       document.getElementById('busy_indicator').style.visibility = 'hidden';
+      NProgress.done();   //JS library top progress bar
       return; 
    }); //end .fail()
 
@@ -3289,11 +3286,13 @@ function showPorts() {
 
       document.getElementById('busy_indicator').style.visibility = 'hidden';
       document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
       console.log('SHOWPORTS() part 2: ' +  'No response from port query; error in php?'); 
       document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
       document.getElementById('busy_indicator').style.visibility = 'hidden';
+      NProgress.done();   //JS library top progress bar
       return; 
    }); //end .fail()
 
@@ -3392,11 +3391,13 @@ function showPorts() {
 
       document.getElementById('busy_indicator').style.visibility = 'hidden';
       document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
       console.log('SHOWPORTS() part 3: ' +  'No response from port query; error in php?'); 
       document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
       document.getElementById('busy_indicator').style.visibility = 'hidden';
+      NProgress.done();   //JS library top progress bar
       return; 
    }); //end .fail()   
 }

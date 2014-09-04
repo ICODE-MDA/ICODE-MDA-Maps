@@ -42,6 +42,9 @@
 
      <script type="text/javascript" src="scripts/daynightoverlay.js"></script>
 
+     <script type="text/javascript" src="scripts/nprogress.js"></script>
+     <link rel="stylesheet" type="text/css" href="css/nprogress.css">
+
      <!-- Library for drawing error ellipse: 
      http://www.geocodezip.com/v3_example_eshapes_ellipse_fromBounds.html
      -->
@@ -144,6 +147,17 @@
                           modal: false,
                           position: [90,110]
                        });
+        });
+     </script>
+
+     <script>
+        $(document).ready(function() {
+           NProgress.configure({ 
+              ease: 'ease', 
+              trickleRate: 0.02,
+              trickleSpeed: 50,
+              showSpinner: false,
+           });
         });
      </script>
 
