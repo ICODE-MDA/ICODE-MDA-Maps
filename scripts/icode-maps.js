@@ -200,6 +200,10 @@ var portLabel;
 //Traffic layer
 var trafficLayer;
 
+//Browser focus
+var browserFocus = true;
+var queuedRefresh = false;
+
 
 /* -------------------------------------------------------------------------------- */
 /** Initialize, called on main page load
@@ -414,6 +418,8 @@ function initialize() {
       reload_delay_changed();
 
       toggleDayNightOverlay();
+
+      initializeBrowserFocus();
    });
 
    //Keyboard shortcuts/
@@ -658,6 +664,13 @@ function initialize() {
 function refreshMaps(forceRedraw) {
    //alert("caller is " + arguments.callee.caller.toString()); //Find out who called this function
    console.log("Calling refreshMaps");
+
+   //Check if browser tab is in view before refreshing
+   if (!browserFocus) {
+      console.log('Browser tab not focused; skipping refresh');
+      queuedRefresh = true;
+      return;
+   }
 
    //Update refresh time
    if (forceRedraw) {
@@ -4708,4 +4721,33 @@ function resetVesselIconSize() {
    vesseliconwidth = 4;
    vesseliconlength = 10;
    refreshMaps(true);
+}
+
+
+function initializeBrowserFocus() {
+   function onBlur() {
+      document.body.className = 'blurred';
+      console.log('Browser tab out of focus');
+      browserFocus = false;
+   };
+
+   function onFocus(){
+      document.body.className = 'focused';
+      console.log('Browser tab in focus');
+      browserFocus = true;
+      //Refresh the maps on focus if an attempt to refresh was made while out of focus
+      if (queuedRefresh) {
+         queuedRefresh = false;  //reset flag
+         refreshMaps(true);
+      }
+   };
+
+   if (/*@cc_on!@*/false) { // check for Internet Explorer
+      document.onfocusin = onFocus;
+      document.onfocusout = onBlur;
+   }
+   else {
+      window.onfocus = onFocus;
+      window.onblur = onBlur;
+   }
 }
