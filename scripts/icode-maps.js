@@ -30,7 +30,7 @@ var clusterBoxes = [];
 var clusterBoxesLabels= [];
 var enableCluster;
 
-var autoRefresh;              //interval event handler of map auto refresh
+var autoRefreshHandler;              //interval event handler of map auto refresh
 var autoRefreshRate;          //rate of auto refreshing
 var lastRefresh;              //time of last map refresh
 var vesselLastUpdated;        //time of last vessel report
@@ -3927,8 +3927,8 @@ function reload_delay_changed() {
 /* -------------------------------------------------------------------------------- */
 function refresh_rate_changed(refresh) {
    autoRefreshRate = parseFloat($("#refresh_rate option:selected").val())*1000;
-   autoRefreshOff();   
-   autoRefreshOn();
+   //autoRefreshOff();   
+   //autoRefreshOn();
    if (refresh) {
       refreshMaps(true);
    }
@@ -3946,14 +3946,16 @@ function toggleAutoRefresh() {
 
 /* -------------------------------------------------------------------------------- */
 function autoRefreshOn() {
-   autoRefresh = setInterval(function(){
+   console.log('Turning on auto refresh');
+   autoRefreshHandler = setInterval(function(){
          refreshMaps(true);
       }, autoRefreshRate*60*1);      //millisecs*secs*min
 }
 
 /* -------------------------------------------------------------------------------- */
 function autoRefreshOff() {
-   clearInterval(autoRefresh);
+   console.log('Turning off auto refresh');
+   clearInterval(autoRefreshHandler);
 }
 
 /* -------------------------------------------------------------------------------- */
