@@ -376,6 +376,9 @@ function initialize() {
       toggleTMACSHeadWMSLayer();
       toggleTMACSHistoryWMSLayer();
 
+      //TEMP: disable TMACS layer for now since the layer is not currently available
+      document.getElementById("tmacslayer").style.opacity = '0.5';      
+
       //KML overlay layer
       toggleKMLLayer();
 
