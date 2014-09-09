@@ -3934,8 +3934,15 @@ function reload_delay_changed() {
 /* -------------------------------------------------------------------------------- */
 function refresh_rate_changed(refresh) {
    autoRefreshRate = parseFloat($("#refresh_rate option:selected").val())*1000;
-   //autoRefreshOff();   
-   //autoRefreshOn();
+   //Need to clear the previous interval (if defined), and set a new one with the new refresh rate
+   if (typeof autoRefreshHandler !== 'undefined') {
+      autoRefreshOff();
+      autoRefreshOn();
+   }
+   else {
+      //auto refresh was off, so keep it off.  Just change the refresh rate (above)
+   }
+
    if (refresh) {
       refreshMaps(true);
    }
@@ -3954,15 +3961,23 @@ function toggleAutoRefresh() {
 /* -------------------------------------------------------------------------------- */
 function autoRefreshOn() {
    console.log('Turning on auto refresh');
-   autoRefreshHandler = setInterval(function(){
-         refreshMaps(true);
-      }, autoRefreshRate*60*1);      //millisecs*secs*min
+   if (typeof autoRefreshHandler === 'undefined') {
+      console.log('autoRefreshHandler not defined, creating new interval');
+      autoRefreshHandler = setInterval(function(){
+            console.log('calling refreshMaps from interval');
+            refreshMaps(true);
+         }, autoRefreshRate*60*1);      //millisecs*secs*min
+   }
+   else {
+      console.log('Auto-refresh already set previously with handler: ', autoRefreshHandler);
+   }
 }
 
 /* -------------------------------------------------------------------------------- */
 function autoRefreshOff() {
    console.log('Turning off auto refresh');
    clearInterval(autoRefreshHandler);
+   autoRefreshHandler = undefined;
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -3973,6 +3988,7 @@ function toggleNeverAutoRefresh() {
       document.getElementById("refreshoptions").style.opacity = '0.5';
 
       google.maps.event.clearListeners(map, 'idle');
+      google.maps.event.clearListeners(map, 'bounds_changed');
    }
    else {
       console.log('Turning on auto-refresh capabilities');
