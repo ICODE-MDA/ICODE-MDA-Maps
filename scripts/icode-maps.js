@@ -216,7 +216,7 @@ function initialize() {
    //var centerCoord = new google.maps.LatLng(2.0,1.30);     //GoG
    //var centerCoord = new google.maps.LatLng(-33.0, -71.6);   //Valparaiso, Chile
    //var centerCoord = new google.maps.LatLng(17.978677, -16.078958);   //Nouakchott, Mauritania
-   var centerCoord = new google.maps.LatLng(13.273461807246479, -13.465625000000037);   //Zoomed out world view
+   //var centerCoord = new google.maps.LatLng(13.273461807246479, -13.465625000000037);   //Zoomed out world view
    
    if(navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function(position) {
@@ -258,9 +258,9 @@ function initialize() {
    }
    else {
       controlStyle = google.maps.MapTypeControlStyle.HORIZONTAL_BAR;
-      //defaultZoom = 11;
+      defaultZoom = 11;
       //defaultZoom = 7;
-      defaultZoom = 2;
+      //defaultZoom = 2;
    }
       
    var mapOptions = {
@@ -288,7 +288,7 @@ function initialize() {
 	map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 
    //Set default map layer
-   map.setMapTypeId(google.maps.MapTypeId.HYBRID);
+   map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
 
    //Define OSM map type pointing at the OpenStreetMap tile server
    map.mapTypes.set("OpenStreetMap", new google.maps.ImageMapType({
@@ -395,6 +395,8 @@ function initialize() {
       toggleDistanceTool();
 
       toggleAutoRefresh();
+
+      toggleNeverAutoRefresh();
 
       toggleIHSTabs();
 
@@ -1100,7 +1102,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                         fillColor:    iconColor,
                         fillOpacity:  0.6,
                         optimized:    false,
-                        rotation:     vessel.heading
+                        rotation:     parseInt(vessel.heading)
                      }
                   });
                }
@@ -1113,7 +1115,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                         strokeWeight: 1,
                         fillColor:    iconColor,
                         fillOpacity:  0.8,
-                        rotation:     vessel.heading-90,
+                        rotation:     parseInt(vessel.heading)-90,
                         optimized:    false,
                      }
                   });
@@ -1127,7 +1129,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                         strokeWeight: vw/4,
                         fillColor:    iconColor,
                         fillOpacity:  0.8,
-                        rotation:     vessel.heading,
+                        rotation:     parseInt(vessel.heading),
                         optimized:    false,
                      }
                   });
@@ -1142,7 +1144,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                         strokeWeight: 2,
                         fillColor:    '#FF0000',
                         fillOpacity:  0.8,
-                        rotation:     vessel.heading,
+                        rotation:     parseInt(vessel.heading),
                         optimized:    false,
                      },
                      zIndex:       google.maps.Marker.MAX_ZINDEX + 1
@@ -1158,7 +1160,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                         strokeWeight: 1,
                         fillColor:    iconColor,
                         fillOpacity:  0.8,
-                        rotation:     vessel.heading-90, //-90 degrees to account for SVG drawing rotation
+                        rotation:     parseInt(vessel.heading)-90, //-90 degrees to account for SVG drawing rotation
                         optimized:    false,
                      },
                      zIndex:       google.maps.Marker.MAX_ZINDEX + 1
@@ -1173,7 +1175,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                         strokeWeight: 1,
                         fillColor:    iconColor,
                         fillOpacity:  0.8,
-                        rotation:     vessel.heading-90, //-90 degrees to account for SVG drawing rotation
+                        rotation:     parseInt(vessel.heading)-90, //-90 degrees to account for SVG drawing rotation
                         optimized:    false,
                      },
                      zIndex:       google.maps.Marker.MAX_ZINDEX + 1
@@ -2619,7 +2621,9 @@ function toggleDayNightOverlay() {
    else {
       console.log('Hiding day/night overlay');
 
-      daynightlayer.setMap(null);
+      if (typeof daynightlayer !== 'undefined') {
+         daynightlayer.setMap(null);
+      }
    }
 }
 
@@ -3959,8 +3963,39 @@ function autoRefreshOff() {
 }
 
 /* -------------------------------------------------------------------------------- */
+function toggleNeverAutoRefresh() {
+   if (document.getElementById("neverRefresh") && document.getElementById("neverRefresh").checked) {
+      console.log('Turning off refresh completely');
+      autoRefreshOff();
+      document.getElementById("refreshoptions").style.opacity = '0.5';
+
+      google.maps.event.clearListeners(map, 'idle');
+   }
+   else {
+      console.log('Turning on auto-refresh capabilities');
+      autoRefreshOn();
+      document.getElementById("refreshoptions").style.opacity = '1.0';
+
+      //Map dragged then idle listener
+      google.maps.event.addListener(map, 'idle', function() {
+         google.maps.event.trigger(map, 'resize'); 
+         var idleTimeout = window.setTimeout(
+            function() { 
+               //refreshMaps(false);
+               refreshMaps(true);
+            }, 
+         reloadDelay);   //milliseconds to pause after bounds change
+
+         google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
+            window.clearTimeout(idleTimeout);
+         });
+      });
+   }
+}
+
+/* -------------------------------------------------------------------------------- */
 /** 
- * Handle clicking/selection events in LAISIC table
+* Handle clicking/selection events in LAISIC table
  */
 function handleLocalStorageChange() {
    //test localstorage
