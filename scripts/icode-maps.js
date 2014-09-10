@@ -1629,12 +1629,13 @@ function markerInfoBubble(marker, vessel, infoBubble) {
    var title, vesseltype;
 
    if (vessel.commsid != undefined) {
-      //title = 'RADAR ' + vessel.commsid;
-      title = vessel.source + ' ' + vessel.commsid;
+      title = 'RADAR Contact ' + vessel.commsid;
+      //title = vessel.source + ' ' + vessel.commsid;
       vesseltype = 'RADAR';
    }
-   else if (vessel.commsid != undefined && vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
-      title = 'LAISIC Fusion: ' + vessel.commsid + ' (MMSI ' + vessel.mmsi + ')';
+   //else if (vessel.commsid != undefined && vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
+   else if (vessel.trknum !== undefined && vessel.vesseltypeint == 999 && vessel.sourceid == 'shore-radar') {
+      title = 'LAISIC Fusion: ' + vessel.trknum + ' (MMSI ' + vessel.mmsi + ')';
       vesseltype = 'LIVE_LAISIC';
    }
    else if (vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
@@ -1657,7 +1658,7 @@ function markerInfoBubble(marker, vessel, infoBubble) {
 
    //Prepare HTML for infoWindow
    if (vesseltype == 'RADAR') {
-      infoBubble.setContent(generateRadarInfoHTML(vessel));
+      infoBubble.setContent(generateRadarInfoHTML(vessel, title));
    }
    else if (vesseltype == 'LIVE_LAISIC') {
       infoBubble.setContent(generateLAISICInfoHTML(vessel, vesseltype, title));
@@ -1832,10 +1833,10 @@ function generateInfoHTMLmobile(vessel, vesseltype, title) {
  * Function to generate the HTML for infoBubble/infoWindow
  * for a RADAR vessel marker.
  */
-function generateRadarInfoHTML(vessel) {
+function generateRadarInfoHTML(vessel, title) {
       var htmlTitle = 
       '<div id="content">'+
-      '<span style="vertical-align: middle;display:inline-block;height: 30px;"><span id="firstHeading" class="firstHeading"> ' + vessel.streamid + ' ' + vessel.commsid + '</span></span>' +
+      '<span style="vertical-align: middle;display:inline-block;height: 30px;"><span id="firstHeading" class="firstHeading"> ' + title + '</span></span>' +
       '<div id="bodyContent">';
 
    var htmlLeft = 
