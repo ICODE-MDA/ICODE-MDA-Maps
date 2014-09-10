@@ -269,20 +269,26 @@ function initialize() {
       scaleControl:      true,
       streetViewControl: false,
       overviewMapControl:true,
+      zoomControl:       detectMobileBrowser() ? false : true,
+      zoomControlOptions: {
+         position:       google.maps.ControlPosition.LEFT_CENTER
+      },
       //overviewMapControlOptions: {opened: true},
       //keyboardShortcuts: false,
       mapTypeId:         google.maps.MapTypeId.HYBRID,
       mapTypeControlOptions: {
-         mapTypeIds: [google.maps.MapTypeId.ROADMAP, 
-                      google.maps.MapTypeId.SATELLITE, 
-                      google.maps.MapTypeId.HYBRID, 
-                      google.maps.MapTypeId.TERRAIN,
-                      'OpenStreetMap'
-                     ],
-			style: controlStyle
+         mapTypeIds:     [google.maps.MapTypeId.ROADMAP, 
+                          google.maps.MapTypeId.SATELLITE, 
+                          google.maps.MapTypeId.HYBRID, 
+                          google.maps.MapTypeId.TERRAIN,
+                          'OpenStreetMap'
+                         ],
+			style:          controlStyle,
+         position:       google.maps.ControlPosition.LEFT_BOTTOM
    	},
-      minZoom: detectMobileBrowser() ? 1 : 3,
-      maxZoom: 19,
+      minZoom:           detectMobileBrowser() ? 1 : 3,
+      maxZoom:           19,
+      panControl:        false,
 	};
 
 	map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
@@ -618,7 +624,13 @@ function initialize() {
             //Initialize modal keyboard shortcut dialog box
             $( "#keyboard-shortcut-modal" ).dialog({
                width:  500,
-               modal: true
+               modal:  true,
+               open: function() {
+                  $('.ui-widget-overlay').addClass('custom-overlay');
+               },
+               close: function() {
+                  $('.ui-widget-overlay').removeClass('custom-overlay');
+               }  
             });
             break;
       }
@@ -1919,7 +1931,7 @@ function generateLAISICInfoHTML(vessel, vesseltype, title) {
       '<b>Lon</b>: ' + vessel.lon + '<br>' +
       '<b>Speed Over Ground</b>: ' + Number(parseFloat(vessel.sog).toFixed(3)) + '<br>' + 
       '<b>Course Over Ground</b>: ' + Number(parseFloat(vessel.cog).toFixed(3)) + '<br>' + 
-      '<b>Source</b>: ' + vessel.streamid + '<br>' +
+      '<b>Source</b>: ' + vessel.sourceid + '<br>' +
       '</div>' +     //close for content-sub
       '<br><br>' +   
       '</div>' +     //close for content-right
@@ -3524,7 +3536,7 @@ function addDrawingManager() {
 		drawingMode: null,
 		drawingControl: true,
 		drawingControlOptions: {
-			position: google.maps.ControlPosition.TOP_LEFT,
+			position: google.maps.ControlPosition.LEFT_BOTTOM,
 			drawingModes: [
 			               google.maps.drawing.OverlayType.MARKER,
 			               google.maps.drawing.OverlayType.CIRCLE,
