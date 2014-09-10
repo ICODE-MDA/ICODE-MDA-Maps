@@ -216,7 +216,7 @@ function initialize() {
    //var centerCoord = new google.maps.LatLng(2.0,1.30);     //GoG
    //var centerCoord = new google.maps.LatLng(-33.0, -71.6);   //Valparaiso, Chile
    //var centerCoord = new google.maps.LatLng(17.978677, -16.078958);   //Nouakchott, Mauritania
-   var centerCoord = new google.maps.LatLng(13.273461807246479, -13.465625000000037);   //Zoomed out world view
+   //var centerCoord = new google.maps.LatLng(13.273461807246479, -13.465625000000037);   //Zoomed out world view
    
    if(navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function(position) {
@@ -258,9 +258,9 @@ function initialize() {
    }
    else {
       controlStyle = google.maps.MapTypeControlStyle.HORIZONTAL_BAR;
-      //defaultZoom = 11;
+      defaultZoom = 11;
       //defaultZoom = 7;
-      defaultZoom = 2;
+      //defaultZoom = 2;
    }
       
    var mapOptions = {
@@ -288,7 +288,7 @@ function initialize() {
 	map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 
    //Set default map layer
-   map.setMapTypeId(google.maps.MapTypeId.HYBRID);
+   map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
 
    //Define OSM map type pointing at the OpenStreetMap tile server
    map.mapTypes.set("OpenStreetMap", new google.maps.ImageMapType({
@@ -376,6 +376,9 @@ function initialize() {
       toggleTMACSHeadWMSLayer();
       toggleTMACSHistoryWMSLayer();
 
+      //TEMP: disable TMACS layer for now since the layer is not currently available
+      document.getElementById("tmacslayer").style.opacity = '0.5';      
+
       //KML overlay layer
       toggleKMLLayer();
 
@@ -395,6 +398,8 @@ function initialize() {
       toggleDistanceTool();
 
       toggleAutoRefresh();
+
+      toggleNeverAutoRefresh();
 
       toggleIHSTabs();
 
@@ -760,6 +765,8 @@ function refreshTracks() {
    $.each(trackIDtoRequery, function(index, value) {
       console.log('Requerying track for ' + this);
       getTrackByTrackIDandSource(this, "AIS");
+      //TODO: also query for existing 'RADAR' tracks
+      getTrackByTrackIDandSource(this, "RADAR");   //TEMP: just try for all (even if AIS), since RADAR has different track ID format than AIS's MMSI
    });
 }
 
@@ -1100,7 +1107,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                         fillColor:    iconColor,
                         fillOpacity:  0.6,
                         optimized:    false,
-                        rotation:     vessel.heading
+                        rotation:     parseInt(vessel.heading)
                      }
                   });
                }
@@ -1113,7 +1120,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                         strokeWeight: 1,
                         fillColor:    iconColor,
                         fillOpacity:  0.8,
-                        rotation:     vessel.heading-90,
+                        rotation:     parseInt(vessel.heading)-90,
                         optimized:    false,
                      }
                   });
@@ -1127,7 +1134,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                         strokeWeight: vw/4,
                         fillColor:    iconColor,
                         fillOpacity:  0.8,
-                        rotation:     vessel.heading,
+                        rotation:     parseInt(vessel.heading),
                         optimized:    false,
                      }
                   });
@@ -1142,7 +1149,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                         strokeWeight: 2,
                         fillColor:    '#FF0000',
                         fillOpacity:  0.8,
-                        rotation:     vessel.heading,
+                        rotation:     parseInt(vessel.heading),
                         optimized:    false,
                      },
                      zIndex:       google.maps.Marker.MAX_ZINDEX + 1
@@ -1158,7 +1165,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                         strokeWeight: 1,
                         fillColor:    iconColor,
                         fillOpacity:  0.8,
-                        rotation:     vessel.heading-90, //-90 degrees to account for SVG drawing rotation
+                        rotation:     parseInt(vessel.heading)-90, //-90 degrees to account for SVG drawing rotation
                         optimized:    false,
                      },
                      zIndex:       google.maps.Marker.MAX_ZINDEX + 1
@@ -1173,7 +1180,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                         strokeWeight: 1,
                         fillColor:    iconColor,
                         fillOpacity:  0.8,
-                        rotation:     vessel.heading-90, //-90 degrees to account for SVG drawing rotation
+                        rotation:     parseInt(vessel.heading)-90, //-90 degrees to account for SVG drawing rotation
                         optimized:    false,
                      },
                      zIndex:       google.maps.Marker.MAX_ZINDEX + 1
@@ -1223,7 +1230,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                      marker.setTitle(vessel.commsid);
                   }
                   else if (sourceType == "LIVE_LAISIC") {
-                     marker.setTitle('LAISIC Correlation\nRADAR Track ID: ' + vessel.trknum + '\nAIS MMSI: ' + vessel.mmsi);
+                     marker.setTitle('LAISIC Correlation\nRADAR Track ID: ' + vessel.commsid + '\nAIS MMSI: ' + vessel.mmsi);
                   }
                   else if (vessel.vesselname != null && vessel.vesselname.length != 0) {
                      marker.setTitle(vessel.vesselname.trim());
@@ -1238,9 +1245,11 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                   });
                });
 
+               //Listen for marker right clicks (to query and display track)
                google.maps.event.addListener(marker, 'rightclick', function() {
-                  console.log('Getting track for: ' + vessel.mmsi+','+vessel.vesseltypeint+','+sourceType+','+vessel.datetime+','+vessel.streamid+','+vessel.trknum);
-                  getTrack(vessel.mmsi, vessel.vesseltypeint, sourceType, vessel.datetime, vessel.streamid, vessel.trknum);
+                  console.log('Getting track for: ' + vessel.mmsi+','+vessel.vesseltypeint+','+sourceType+','+vessel.datetime+','+vessel.streamid+','+vessel.commsid);
+                  getTrack(vessel.mmsi, vessel.vesseltypeint, sourceType, vessel.datetime, vessel.streamid, vessel.commsid);
+                  //if LAISIC, use trknum
                });
 
                //Prepare data for creating marker infoWindows/infoBubbles later
@@ -1299,7 +1308,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
 
                markersDisplayed.push({
                   mmsi: vessel.mmsi, 
-                  trknum: vessel.trknum, 
+                  trknum: vessel.commsid, 
                   vessellabel: vessel.vesselname,
                   vesseltypeint: vessel.vesseltypeint,
                   source: sourceType,
@@ -1624,8 +1633,8 @@ function markerInfoBubble(marker, vessel, infoBubble) {
       title = vessel.source + ' ' + vessel.commsid;
       vesseltype = 'RADAR';
    }
-   else if (vessel.trknum != undefined && vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
-      title = 'LAISIC Fusion: ' + vessel.trknum + ' (MMSI ' + vessel.mmsi + ')';
+   else if (vessel.commsid != undefined && vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
+      title = 'LAISIC Fusion: ' + vessel.commsid + ' (MMSI ' + vessel.mmsi + ')';
       vesseltype = 'LIVE_LAISIC';
    }
    else if (vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
@@ -1697,8 +1706,6 @@ function markerInfoBubble(marker, vessel, infoBubble) {
          setTimeout(function(){ getPortCalls(vessel.mmsi); }, 100);   //tiny delay workaround, wait for infoBubble content to be available, domready for infoBubble has strange behavior, different from infoWindow
       });
    }
-
-
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -1839,7 +1846,7 @@ function generateRadarInfoHTML(vessel) {
       '<b>Message Type</b>: ' + vessel.opt4val + '<br>' +
       '</div>' +
       '<div>' + 
-      //'<a id="showtracklink" link="" href="javascript:void(0);" onClick="getTrackByTrackIDandSource(\'' + vessel.mmsi + '\', \'' + vesseltype + '\');">Show vessel track history</a>' +
+      '<a id="showtracklink" link="" href="javascript:void(0);" onClick="getTrackByTrackIDandSource(\'' + vessel.commsid + '\', \'RADAR\');">Show vessel track history</a>' +
       '</div>' +
       '</div>';  //close for content-left div
 
@@ -2091,6 +2098,7 @@ function queryAllTracks() {
 /**
  */
 function getTrackByTrackIDandSource(trackID, source) {
+   console.log('Getting track by id', trackID, 'and source', source);
    $.each(markersDisplayed, function(index, value) {
       if (this.mmsi == trackID && this.source == source) {
          getTrack(this.mmsi, 
@@ -2110,6 +2118,15 @@ function getTrackByTrackIDandSource(trackID, source) {
                   this.trknum
                   );
       }
+      else if (this.commsid == trackID && this.source == source) {
+         getTrack(this.mmsi, 
+                  this.vesseltypeint, 
+                  source, 
+                  this.datetime,
+                  this.streamid,
+                  this.commsid
+                  );
+      }
    });
 }
 
@@ -2118,7 +2135,8 @@ function getTrackByTrackIDandSource(trackID, source) {
  * Function to get track from track query PHP script
  */
 function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
-   console.log($.inArray(mmsi, tracksDisplayedID) == -1);
+   //console.log('Is mmsi in tracksDisplayedID? ', $.inArray(mmsi, tracksDisplayedID) == -1);
+   console.log('trknum:',trknum);
    //Check if track is already displayed or not
    if (($.inArray(mmsi, tracksDisplayedID) == -1 || source == "LAISIC_AIS_TRACK") && 
        ($.inArray(trknum, tracksDisplayedID) == -1 || source == "LAISIC_AIS_TRACK") && 
@@ -2138,7 +2156,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
       }
 
       //if history trail limit was chosen, then add option
-      if (history_trail_length != -1 && source == "AIS") {
+      if (history_trail_length != -1 && (source == "AIS" || source == "RADAR")) {
          phpWithArg += "&history_trail_length=" + history_trail_length;
       }
 
@@ -2513,6 +2531,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
                      else {
                         tracksDisplayedID.push(trknum);
                      }
+
                      var track = {
                         mmsi: mmsi,
                         trknum: trknum,
@@ -2619,7 +2638,9 @@ function toggleDayNightOverlay() {
    else {
       console.log('Hiding day/night overlay');
 
-      daynightlayer.setMap(null);
+      if (typeof daynightlayer !== 'undefined') {
+         daynightlayer.setMap(null);
+      }
    }
 }
 
@@ -3927,8 +3948,15 @@ function reload_delay_changed() {
 /* -------------------------------------------------------------------------------- */
 function refresh_rate_changed(refresh) {
    autoRefreshRate = parseFloat($("#refresh_rate option:selected").val())*1000;
-   //autoRefreshOff();   
-   //autoRefreshOn();
+   //Need to clear the previous interval (if defined), and set a new one with the new refresh rate
+   if (typeof autoRefreshHandler !== 'undefined') {
+      autoRefreshOff();
+      autoRefreshOn();
+   }
+   else {
+      //auto refresh was off, so keep it off.  Just change the refresh rate (above)
+   }
+
    if (refresh) {
       refreshMaps(true);
    }
@@ -3947,20 +3975,60 @@ function toggleAutoRefresh() {
 /* -------------------------------------------------------------------------------- */
 function autoRefreshOn() {
    console.log('Turning on auto refresh');
-   autoRefreshHandler = setInterval(function(){
-         refreshMaps(true);
-      }, autoRefreshRate*60*1);      //millisecs*secs*min
+   if (typeof autoRefreshHandler === 'undefined') {
+      console.log('autoRefreshHandler not defined, creating new interval');
+      autoRefreshHandler = setInterval(function(){
+            console.log('calling refreshMaps from interval');
+            refreshMaps(true);
+         }, autoRefreshRate*60*1);      //millisecs*secs*min
+   }
+   else {
+      console.log('Auto-refresh already set previously with handler: ', autoRefreshHandler);
+   }
 }
 
 /* -------------------------------------------------------------------------------- */
 function autoRefreshOff() {
    console.log('Turning off auto refresh');
    clearInterval(autoRefreshHandler);
+   autoRefreshHandler = undefined;
+}
+
+/* -------------------------------------------------------------------------------- */
+function toggleNeverAutoRefresh() {
+   if (document.getElementById("neverRefresh") && document.getElementById("neverRefresh").checked) {
+      console.log('Turning off refresh completely');
+      autoRefreshOff();
+      document.getElementById("refreshoptions").style.opacity = '0.5';
+
+      google.maps.event.clearListeners(map, 'idle');
+      google.maps.event.clearListeners(map, 'bounds_changed');
+   }
+   else {
+      console.log('Turning on auto-refresh capabilities');
+      autoRefreshOn();
+      document.getElementById("refreshoptions").style.opacity = '1.0';
+
+      //Map dragged then idle listener
+      google.maps.event.addListener(map, 'idle', function() {
+         google.maps.event.trigger(map, 'resize'); 
+         var idleTimeout = window.setTimeout(
+            function() { 
+               //refreshMaps(false);
+               refreshMaps(true);
+            }, 
+         reloadDelay);   //milliseconds to pause after bounds change
+
+         google.maps.event.addListenerOnce(map, 'bounds_changed', function() {
+            window.clearTimeout(idleTimeout);
+         });
+      });
+   }
 }
 
 /* -------------------------------------------------------------------------------- */
 /** 
- * Handle clicking/selection events in LAISIC table
+* Handle clicking/selection events in LAISIC table
  */
 function handleLocalStorageChange() {
    //test localstorage
