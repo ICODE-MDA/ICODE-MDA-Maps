@@ -46,6 +46,11 @@ if(count($_GET) > 0) {
    else if(!empty($_GET["source"]) and (string)$_GET["source"] == "LAISIC_AIS_OBS") {
       $query = "SELECT obsguid, lat as Latitude, lon as Longitude, semiminor, semimajor, orientation, cog, sog, datetime as TimeOfFix, callsign, mmsi, vesselname, imo, streamid FROM icodemaps.aisobservation WHERE mmsi=";
    }
+   else if(!empty($_GET["source"]) and (string)$_GET["source"] == "RADAR") {
+      $query = "SELECT * FROM pvol_pdm_memory WHERE commsid=";
+      //Assume trknum exists
+      $query = $query . "'" . $_GET["trknum"] . "'";
+   }
    else {
       $query = "SELECT * FROM vessel_history WHERE mmsi=";
    }
@@ -54,6 +59,7 @@ if(count($_GET) > 0) {
    if (!empty($_GET["mmsi"])) {
       $query = $query . $_GET["mmsi"];
    }
+
 
    //Add history trail length if defined
    if (!empty($_GET["history_trail_length"])) {
@@ -72,7 +78,10 @@ if(count($_GET) > 0) {
       }
    }
 
-   $query = $query . " ORDER BY TimeOfFix";
+   //Check if request is for RADAR or non-RADAR track
+   if(!empty($_GET["source"]) and (string)$_GET["source"] != "RADAR") {
+      $query = $query . " ORDER BY TimeOfFix";
+   }
 
    //Add a limit if chosen
    if (!empty($_GET["limit"])) {

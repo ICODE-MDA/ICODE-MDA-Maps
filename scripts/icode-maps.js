@@ -765,6 +765,8 @@ function refreshTracks() {
    $.each(trackIDtoRequery, function(index, value) {
       console.log('Requerying track for ' + this);
       getTrackByTrackIDandSource(this, "AIS");
+      //TODO: also query for existing 'RADAR' tracks
+      getTrackByTrackIDandSource(this, "RADAR");   //TEMP: just try for all (even if AIS), since RADAR has different track ID format than AIS's MMSI
    });
 }
 
@@ -1228,7 +1230,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                      marker.setTitle(vessel.commsid);
                   }
                   else if (sourceType == "LIVE_LAISIC") {
-                     marker.setTitle('LAISIC Correlation\nRADAR Track ID: ' + vessel.trknum + '\nAIS MMSI: ' + vessel.mmsi);
+                     marker.setTitle('LAISIC Correlation\nRADAR Track ID: ' + vessel.commsid + '\nAIS MMSI: ' + vessel.mmsi);
                   }
                   else if (vessel.vesselname != null && vessel.vesselname.length != 0) {
                      marker.setTitle(vessel.vesselname.trim());
@@ -1243,9 +1245,11 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                   });
                });
 
+               //Listen for marker right clicks (to query and display track)
                google.maps.event.addListener(marker, 'rightclick', function() {
-                  console.log('Getting track for: ' + vessel.mmsi+','+vessel.vesseltypeint+','+sourceType+','+vessel.datetime+','+vessel.streamid+','+vessel.trknum);
-                  getTrack(vessel.mmsi, vessel.vesseltypeint, sourceType, vessel.datetime, vessel.streamid, vessel.trknum);
+                  console.log('Getting track for: ' + vessel.mmsi+','+vessel.vesseltypeint+','+sourceType+','+vessel.datetime+','+vessel.streamid+','+vessel.commsid);
+                  getTrack(vessel.mmsi, vessel.vesseltypeint, sourceType, vessel.datetime, vessel.streamid, vessel.commsid);
+                  //if LAISIC, use trknum
                });
 
                //Prepare data for creating marker infoWindows/infoBubbles later
@@ -1304,7 +1308,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
 
                markersDisplayed.push({
                   mmsi: vessel.mmsi, 
-                  trknum: vessel.trknum, 
+                  trknum: vessel.commsid, 
                   vessellabel: vessel.vesselname,
                   vesseltypeint: vessel.vesseltypeint,
                   source: sourceType,
@@ -1629,8 +1633,8 @@ function markerInfoBubble(marker, vessel, infoBubble) {
       title = vessel.source + ' ' + vessel.commsid;
       vesseltype = 'RADAR';
    }
-   else if (vessel.trknum != undefined && vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
-      title = 'LAISIC Fusion: ' + vessel.trknum + ' (MMSI ' + vessel.mmsi + ')';
+   else if (vessel.commsid != undefined && vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
+      title = 'LAISIC Fusion: ' + vessel.commsid + ' (MMSI ' + vessel.mmsi + ')';
       vesseltype = 'LIVE_LAISIC';
    }
    else if (vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
@@ -1702,8 +1706,6 @@ function markerInfoBubble(marker, vessel, infoBubble) {
          setTimeout(function(){ getPortCalls(vessel.mmsi); }, 100);   //tiny delay workaround, wait for infoBubble content to be available, domready for infoBubble has strange behavior, different from infoWindow
       });
    }
-
-
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -1844,7 +1846,7 @@ function generateRadarInfoHTML(vessel) {
       '<b>Message Type</b>: ' + vessel.opt4val + '<br>' +
       '</div>' +
       '<div>' + 
-      //'<a id="showtracklink" link="" href="javascript:void(0);" onClick="getTrackByTrackIDandSource(\'' + vessel.mmsi + '\', \'' + vesseltype + '\');">Show vessel track history</a>' +
+      '<a id="showtracklink" link="" href="javascript:void(0);" onClick="getTrackByTrackIDandSource(\'' + vessel.commsid + '\', \'RADAR\');">Show vessel track history</a>' +
       '</div>' +
       '</div>';  //close for content-left div
 
@@ -2096,6 +2098,7 @@ function queryAllTracks() {
 /**
  */
 function getTrackByTrackIDandSource(trackID, source) {
+   console.log('Getting track by id', trackID, 'and source', source);
    $.each(markersDisplayed, function(index, value) {
       if (this.mmsi == trackID && this.source == source) {
          getTrack(this.mmsi, 
@@ -2115,6 +2118,15 @@ function getTrackByTrackIDandSource(trackID, source) {
                   this.trknum
                   );
       }
+      else if (this.commsid == trackID && this.source == source) {
+         getTrack(this.mmsi, 
+                  this.vesseltypeint, 
+                  source, 
+                  this.datetime,
+                  this.streamid,
+                  this.commsid
+                  );
+      }
    });
 }
 
@@ -2123,7 +2135,8 @@ function getTrackByTrackIDandSource(trackID, source) {
  * Function to get track from track query PHP script
  */
 function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
-   console.log($.inArray(mmsi, tracksDisplayedID) == -1);
+   //console.log('Is mmsi in tracksDisplayedID? ', $.inArray(mmsi, tracksDisplayedID) == -1);
+   console.log('trknum:',trknum);
    //Check if track is already displayed or not
    if (($.inArray(mmsi, tracksDisplayedID) == -1 || source == "LAISIC_AIS_TRACK") && 
        ($.inArray(trknum, tracksDisplayedID) == -1 || source == "LAISIC_AIS_TRACK") && 
@@ -2143,7 +2156,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
       }
 
       //if history trail limit was chosen, then add option
-      if (history_trail_length != -1 && source == "AIS") {
+      if (history_trail_length != -1 && (source == "AIS" || source == "RADAR")) {
          phpWithArg += "&history_trail_length=" + history_trail_length;
       }
 
@@ -2518,6 +2531,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
                      else {
                         tracksDisplayedID.push(trknum);
                      }
+
                      var track = {
                         mmsi: mmsi,
                         trknum: trknum,
