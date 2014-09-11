@@ -269,20 +269,26 @@ function initialize() {
       scaleControl:      true,
       streetViewControl: false,
       overviewMapControl:true,
+      zoomControl:       detectMobileBrowser() ? false : true,
+      zoomControlOptions: {
+         position:       google.maps.ControlPosition.LEFT_CENTER
+      },
       //overviewMapControlOptions: {opened: true},
       //keyboardShortcuts: false,
       mapTypeId:         google.maps.MapTypeId.HYBRID,
       mapTypeControlOptions: {
-         mapTypeIds: [google.maps.MapTypeId.ROADMAP, 
-                      google.maps.MapTypeId.SATELLITE, 
-                      google.maps.MapTypeId.HYBRID, 
-                      google.maps.MapTypeId.TERRAIN,
-                      'OpenStreetMap'
-                     ],
-			style: controlStyle
+         mapTypeIds:     [google.maps.MapTypeId.ROADMAP, 
+                          google.maps.MapTypeId.SATELLITE, 
+                          google.maps.MapTypeId.HYBRID, 
+                          google.maps.MapTypeId.TERRAIN,
+                          'OpenStreetMap'
+                         ],
+			style:          controlStyle,
+         position:       google.maps.ControlPosition.LEFT_BOTTOM
    	},
-      minZoom: detectMobileBrowser() ? 1 : 3,
-      maxZoom: 19,
+      minZoom:           detectMobileBrowser() ? 1 : 3,
+      maxZoom:           19,
+      panControl:        false,
 	};
 
 	map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
@@ -618,7 +624,13 @@ function initialize() {
             //Initialize modal keyboard shortcut dialog box
             $( "#keyboard-shortcut-modal" ).dialog({
                width:  500,
-               modal: true
+               modal:  true,
+               open: function() {
+                  $('.ui-widget-overlay').addClass('custom-overlay');
+               },
+               close: function() {
+                  $('.ui-widget-overlay').removeClass('custom-overlay');
+               }  
             });
             break;
       }
@@ -1629,12 +1641,13 @@ function markerInfoBubble(marker, vessel, infoBubble) {
    var title, vesseltype;
 
    if (vessel.commsid != undefined) {
-      //title = 'RADAR ' + vessel.commsid;
-      title = vessel.source + ' ' + vessel.commsid;
+      title = 'RADAR Contact ' + vessel.commsid;
+      //title = vessel.source + ' ' + vessel.commsid;
       vesseltype = 'RADAR';
    }
-   else if (vessel.commsid != undefined && vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
-      title = 'LAISIC Fusion: ' + vessel.commsid + ' (MMSI ' + vessel.mmsi + ')';
+   //else if (vessel.commsid != undefined && vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
+   else if (vessel.trknum !== undefined && vessel.vesseltypeint == 999 && vessel.sourceid == 'shore-radar') {
+      title = 'LAISIC Fusion: ' + vessel.trknum + ' (MMSI ' + vessel.mmsi + ')';
       vesseltype = 'LIVE_LAISIC';
    }
    else if (vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
@@ -1657,7 +1670,7 @@ function markerInfoBubble(marker, vessel, infoBubble) {
 
    //Prepare HTML for infoWindow
    if (vesseltype == 'RADAR') {
-      infoBubble.setContent(generateRadarInfoHTML(vessel));
+      infoBubble.setContent(generateRadarInfoHTML(vessel, title));
    }
    else if (vesseltype == 'LIVE_LAISIC') {
       infoBubble.setContent(generateLAISICInfoHTML(vessel, vesseltype, title));
@@ -1832,10 +1845,10 @@ function generateInfoHTMLmobile(vessel, vesseltype, title) {
  * Function to generate the HTML for infoBubble/infoWindow
  * for a RADAR vessel marker.
  */
-function generateRadarInfoHTML(vessel) {
+function generateRadarInfoHTML(vessel, title) {
       var htmlTitle = 
       '<div id="content">'+
-      '<span style="vertical-align: middle;display:inline-block;height: 30px;"><span id="firstHeading" class="firstHeading"> ' + vessel.streamid + ' ' + vessel.commsid + '</span></span>' +
+      '<span style="vertical-align: middle;display:inline-block;height: 30px;"><span id="firstHeading" class="firstHeading"> ' + title + '</span></span>' +
       '<div id="bodyContent">';
 
    var htmlLeft = 
@@ -1918,7 +1931,7 @@ function generateLAISICInfoHTML(vessel, vesseltype, title) {
       '<b>Lon</b>: ' + vessel.lon + '<br>' +
       '<b>Speed Over Ground</b>: ' + Number(parseFloat(vessel.sog).toFixed(3)) + '<br>' + 
       '<b>Course Over Ground</b>: ' + Number(parseFloat(vessel.cog).toFixed(3)) + '<br>' + 
-      '<b>Source</b>: ' + vessel.streamid + '<br>' +
+      '<b>Source</b>: ' + vessel.sourceid + '<br>' +
       '</div>' +     //close for content-sub
       '<br><br>' +   
       '</div>' +     //close for content-right
@@ -3523,7 +3536,7 @@ function addDrawingManager() {
 		drawingMode: null,
 		drawingControl: true,
 		drawingControlOptions: {
-			position: google.maps.ControlPosition.TOP_LEFT,
+			position: google.maps.ControlPosition.LEFT_BOTTOM,
 			drawingModes: [
 			               google.maps.drawing.OverlayType.MARKER,
 			               google.maps.drawing.OverlayType.CIRCLE,

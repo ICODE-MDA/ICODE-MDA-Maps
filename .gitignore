@@ -1,4 +1,3 @@
-node_modules/
 *.swp
-phpsql_dbinfo.php
-*/Thumbs.db
+*Thumbs.db
+.\phpsql_dbinfo.php
