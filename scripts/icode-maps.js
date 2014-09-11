@@ -1363,10 +1363,16 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
             Math.round(response.exectime*1000)/1000 + " secs";
          NProgress.done();   //JS library top progress bar
       }) //END .done()
-      .fail(function() { 
-         //Update activity status spinner and results
-         console.log('getTargetsFromDB(): ' +  'No response from track query; error in php?'); 
-         document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
+      .fail(function(d, textStatus, error) { 
+         if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+            console.log('getTargetsFromDB(): ' +  'Database is down'); 
+            document.getElementById("query").value = "DATABASE IS DOWN.";
+         }
+         else {
+            //Update activity status spinner and results
+            console.log('getTargetsFromDB(): ' +  'No response from track query; error in php?'); 
+            document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
+         }
          document.getElementById('busy_indicator').style.visibility = 'hidden';
          NProgress.done();   //JS library top progress bar
          return false; 
@@ -1575,9 +1581,16 @@ function getClustersFromDB(bounds, customQuery) {
             Math.round(response.exectime*1000)/1000 + " secs";
          NProgress.done();   //JS library top progress bar
       }) //end .done()
-      .fail(function() { 
-         console.log('getClustersFromDB(): ' +  'No response from track query; error in php?'); 
-         document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
+      .fail(function(d, textStatus, error) { 
+         if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+            console.log('getClustersFromDB(): ' +  'Database is down'); 
+            document.getElementById("query").value = "DATABASE IS DOWN.";
+         }
+         else {
+            //Update activity status spinner and results
+            console.log('getClustersFromDB(): ' +  'No response from track query; error in php?'); 
+            document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
+         }
          document.getElementById('busy_indicator').style.visibility = 'hidden';
          NProgress.done();   //JS library top progress bar
          return; 
