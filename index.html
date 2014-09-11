@@ -6,6 +6,7 @@
      <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
 
      <link rel="stylesheet" type="text/css" href="css/mapstyle.css">
+     <link rel="stylesheet" type="text/css" href="css/mapstyle-mobile.css" media="only screen and (max-device-width: 480px)">
      <link rel="stylesheet" type="text/css" href="css/alert.css">
 
      <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=geometry,drawing,weather,visualization&sensor=false"> </script>
@@ -31,12 +32,18 @@
 
      <script type="text/javascript" src="scripts/ExtDraggableObject.js"></script>
      <script type="text/javascript" src="scripts/trackTimeSlider.js"></script>
-     <script type="text/javascript" src="scripts/maplabel.js"></script>
      <script type="text/javascript" src="scripts/infobox.js"></script>
 
      <script type="text/javascript" src="scripts/CSJSRequestObject.js"></script>
 
      <script type="text/javascript" src="scripts/fileUpload.js"></script>
+     
+     <script type="text/javascript" src="scripts/maplabel-compiled.js"></script>
+
+     <script type="text/javascript" src="scripts/daynightoverlay.js"></script>
+
+     <script type="text/javascript" src="scripts/nprogress.js"></script>
+     <link rel="stylesheet" type="text/css" href="css/nprogress.css">
 
      <!-- Library for drawing error ellipse: 
      http://www.geocodezip.com/v3_example_eshapes_ellipse_fromBounds.html
@@ -140,6 +147,18 @@
                           modal: false,
                           position: [90,110]
                        });
+        });
+     </script>
+
+     <script>
+        $(document).ready(function() {
+           NProgress.configure({ 
+              ease: 'ease', 
+              trickleRate: 0.02,
+              trickleSpeed: 50,
+              showSpinner: false,
+              minimum: 0.3,
+           });
         });
      </script>
 
@@ -309,9 +328,11 @@
 
               <h3>Layer Types</h3>
               <div id="layer_types">
-                 <center><b>TMACS WMS</b></center>
-                 <input class="checkbox" id="TMACShead" name="TMACShead" type="checkbox" onclick="toggleTMACSHeadWMSLayer();"> TMAC Trackheads<br>
-                 <input class="checkbox" id="TMACShistory" name="TMACShistory" type="checkbox" onclick="toggleTMACSHistoryWMSLayer();"> Track History<br>
+                 <div id="tmacslayer">
+                    <center><b>TMACS WMS</b></center>
+                    <input class="checkbox" id="TMACShead" name="TMACShead" type="checkbox" onclick="toggleTMACSHeadWMSLayer();"> TMAC Trackheads<br>
+                    <input class="checkbox" id="TMACShistory" name="TMACShistory" type="checkbox" onclick="toggleTMACSHistoryWMSLayer();"> Track History<br>
+                 </div>
                  <br>
                  <hr>
                  <center><b>Other Information</b></center>
@@ -430,21 +451,32 @@
                  <input class="checkbox" id="showtrackicons" name="showtrackicons" type="checkbox" checked="checked" onclick="toggleTrackIcons();"> Enable track icons<br>
                  <input class="checkbox" id="queryalltracks" name="queryalltracks" type="checkbox" onclick="toggleQueryAllTracks();"> Query tracks for vessels in view<br>
                  <hr>
-                 <input class="checkbox" id="autoRefresh" name="autoRefresh" type="checkbox" checked="checked" onclick="toggleAutoRefresh();"> Automatically refresh (1 min)<br>
-                 Auto-refresh rate: 
-                 <select id="refresh_rate" onChange="refresh_rate_changed(true);">
-                    <option value="0.16">10 seconds</option>
-                    <option value="0.5">30 seconds</option>
-                    <option value="1" selected="selected">1 minute</option>
-                    <option value="5">5 minutes</option>
-                 </select><br>                 
-                 Reload delay: 
-                 <select id="reload_delay" onChange="reload_delay_changed();">
-                    <option value="0" selected="selected">0</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                 </select> seconds<br>
+                 <div id="refreshoptions">
+                    <input class="checkbox" id="autoRefresh" name="autoRefresh" type="checkbox" checked="checked" onclick="toggleAutoRefresh();"> Automatically refresh (1 min)<br>
+                    Auto-refresh rate: 
+                    <select id="refresh_rate" onChange="refresh_rate_changed(true);">
+                       <option value="0.16">10 seconds</option>
+                       <option value="0.5">30 seconds</option>
+                       <option value="1" selected="selected">1 minute</option>
+                       <option value="5">5 minutes</option>
+                    </select><br>                 
+                    Reload delay: 
+                    <select id="reload_delay" onChange="reload_delay_changed();">
+                       <option value="0" selected="selected">0</option>
+                       <option value="1">1</option>
+                       <option value="2">2</option>
+                       <option value="3">3</option>
+                    </select> seconds<br>
+                 </div>
+                 <input class="checkbox" id="neverRefresh" name="neverRefresh" type="checkbox" onclick="toggleNeverAutoRefresh();"> Never refresh unless manually triggered (by hitting spacebar)<br>
+                 <hr>
+                 Vessel Icon Size: 
+                 <input type="button" onclick="decreaseVesselIconSize()" value="-"></input>
+                 <input type="button" onclick="increaseVesselIconSize()" value="+"></input>
+                 <input type="button" onclick="resetVesselIconSize()" value="Reset"></input>
+                 <hr>
+
+                 <input class="checkbox" id="showdaynightoverlay" name="Show Day/Night Overlay" type="checkbox" onclick="toggleDayNightOverlay();"> Show Day/Night Overlay<br>
                  <hr>
                  <p>
                  <b>Hidden Tricks:</b><br>
@@ -502,22 +534,22 @@
      <div id="keyboard-shortcut-modal" title="Keyboard Shortcuts">
         <p>
         <pre>
-  <b>?</b>&#9;&#9; Display this shortcut dialog box<br>
-  <b>Spacebar</b>&#9; Refresh targets in current view<br>
-  <b>A</b>&#9;&#9; Toggle auto-refresh targets<br>
-  <b>C</b>&#9;&#9; Clear all tracks<br>
-  <b>G</b>&#9;&#9; Toggle clustering<br>
-  <b>H</b>&#9;&#9; Hide/show menu panel<br>
-  <b>L</b>&#9;&#9; Toggle LAISIC/AIS targets<br>
-  <b>N</b>&#9;&#9; Toggle showing vessel names<br>
-  <b>P</b>&#9;&#9; Toggle port layer<br>
-  <b>Q</b>&#9;&#9; Select the query bar<br>
-  <b>R</b>&#9;&#9; Refresh browser<br>
-  <b>W</b>&#9;&#9; Toggle weather layer<br>
-  <b>-</b>&#9;&#9; Zoom out<br>
-  <b>+</b>&#9;&#9; Zoom in<br>
-  <b>Arrows keys</b>&#9; Pan around map<br>
-  <b>ESC</b>&#9;&#9; Close this dialog box<br></pre>
+           <b>?</b>&#9;&#9; Display this shortcut dialog box<br>
+           <b>Spacebar</b>&#9; Refresh targets in current view<br>
+           <b>A</b>&#9;&#9; Toggle auto-refresh targets<br>
+           <b>C</b>&#9;&#9; Clear all tracks<br>
+           <b>G</b>&#9;&#9; Toggle clustering<br>
+           <b>H</b>&#9;&#9; Hide/show menu panel<br>
+           <b>L</b>&#9;&#9; Toggle LAISIC/AIS targets<br>
+           <b>N</b>&#9;&#9; Toggle showing vessel names<br>
+           <b>P</b>&#9;&#9; Toggle port layer<br>
+           <b>Q</b>&#9;&#9; Select the query bar<br>
+           <b>R</b>&#9;&#9; Refresh browser<br>
+           <b>W</b>&#9;&#9; Toggle weather layer<br>
+           <b>-</b>&#9;&#9; Zoom out<br>
+           <b>+</b>&#9;&#9; Zoom in<br>
+           <b>Arrows keys</b>&#9; Pan around map<br>
+           <b>ESC</b>&#9;&#9; Close this dialog box<br></pre>
         </p>
      </div>
 

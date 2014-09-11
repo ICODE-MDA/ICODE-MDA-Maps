@@ -19,6 +19,7 @@ var alertPath;
  * Setup and initalize the alert setup mode
  **/
 function setupAlertInitialize() {
+<<<<<<< HEAD
 
    // OWF publish setup alert opened
    $.getScript('http://localhost:8080/owf/js-min/owf-widget-min.js', function()
@@ -78,6 +79,36 @@ function setupAlertInitialize() {
          .dialog('open');
       }
    }
+=======
+   //Don't initialize if the alert dialog window is already opened
+   if ($('#setup-alert-modal').dialog("isOpen")) {
+      return;
+   }
+
+   $('#setup-alert-modal')
+   .load('setup-alerts.html', function() {
+        $("#dialog").dialog("open");
+    })
+   .dialog('open');
+
+   //Hide the panel menu to give more room on the maps
+   $('#panel').toggle(false);
+   $('#alertPanel').toggle(false);
+
+   initializePolygon();
+
+   //Add listeners to drawing events
+   google.maps.event.addListener(map, 'click', addPoint);
+
+
+   //Listen for end setup mode
+   $('#setup-alert-modal').bind('dialogclose', function(event) {
+      google.maps.event.clearListeners(map, 'click');
+      deletePolygon();
+      $('#panel').toggle(true);
+      $('#alertPanel').toggle(true);
+   });
+>>>>>>> master
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -202,12 +233,17 @@ function computeArea() {
 /**
  * Update the polygon definition in the textarea field of the form
  **/
+<<<<<<< HEAD
 function updatePolygonField(coords)
+=======
+function updatePolygonField()
+>>>>>>> master
 {
    var formdataObject = document.forms['alert_definition'];
    var formdataElement = formdataObject.elements["alertpolygon"];
    //var formdataElement = $('#alertpolygon');
 
+<<<<<<< HEAD
    // if(alertPath.getLength() < 3){
    //    formdataElement.value = '';
    //    return;
@@ -233,6 +269,32 @@ function updatePolygonField(coords)
 
    // coords = coords.replace(/,/g,",\n");
 
+=======
+   if(alertPath.getLength() < 3){
+      formdataElement.value = '';
+      return;
+   }
+   var coords = '';
+   for(var i = 0; i < alertPath.getLength(); i++){
+      var point = alertPath.getAt(i);
+      coords += point.lng();
+      coords += ' ';
+      coords += point.lat();
+      coords += ',';
+   }
+
+   var point = alertPath.getAt(0); 
+   coords += point.lng();     //WKT format is (LON, LAT)
+   coords += ' ';
+   coords += point.lat();     //WKT format is (LON, LAT)
+
+   //Save polygon string definition
+   alertPolyonString = 'POLYGON((';
+   alertPolyonString += coords;
+   alertPolyonString += '))';
+
+   coords = coords.replace(/,/g,",\n");
+>>>>>>> master
    formdataElement.value = coords;
 
    //Increase the size of the textarea showing the coordinates of the alertPolygon
@@ -243,10 +305,17 @@ function updatePolygonField(coords)
 function saveAlert(){
    //Obtain user's ROI polygon definition
    //TODO: check area of polygon to limit size to prevent long queries
+<<<<<<< HEAD
    // if (computeArea() > 3000000000) {
    //    alert('Please draw a smaller polygon.');
    //    return;
    // }       
+=======
+   if (computeArea() > 3000000000) {
+      alert('Please draw a smaller polygon.');
+      return;
+   }       
+>>>>>>> master
    var phpWithArg = 'query_setup_alert.php?alertPolygon="' + alertPolyonString + '"';
 
    //Obtain user's criteria

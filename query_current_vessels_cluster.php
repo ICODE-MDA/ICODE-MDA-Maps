@@ -33,6 +33,15 @@ if (!$connection) {
 
 $iGridRows = 16;
 $iGridCols = 32;
+//mobile
+if (!empty($_GET["mobile"])) {
+   $mobile = $_GET["mobile"];
+   if ($mobile) {
+      $iGridRows = 8;
+      $iGridCols = 8;
+   }
+}
+
 
 $iMinClusterSize = 10;
 $latestpositionsfrommemorytable = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local')";
