@@ -218,6 +218,10 @@ function initialize() {
    //var centerCoord = new google.maps.LatLng(17.978677, -16.078958);   //Nouakchott, Mauritania
    //var centerCoord = new google.maps.LatLng(13.273461807246479, -13.465625000000037);   //Zoomed out world view
    
+   /* Uses browser location to fill in more precise user location in the geocode box
+    * currently disabled to prevent annoying browser warning messages
+    */
+   /*
    if(navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function(position) {
          var pos = new google.maps.LatLng(
@@ -247,6 +251,7 @@ function initialize() {
          //handleNoGeolocation(true);
       });
    }
+   */
 
    //Detect iPhone or Android devices and set map to 100%
    var controlStyle;
