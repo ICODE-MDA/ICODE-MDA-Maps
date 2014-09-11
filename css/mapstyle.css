@@ -22,7 +22,7 @@ table {
    width:        20%;
 }
 #panel_top {
-   background-color: rgba(0, 0, 0, 0.8);
+   background-color: rgba(0, 0, 0, 0.7);
    height:       60px;
    color:        #ffffff;
    position:     relative;
@@ -127,7 +127,7 @@ table {
    font-weight:  bold;
    visibility:   visible;
    z-index:      2;
-   background-color: rgba(0, 0, 0, 0.8);
+   background-color: rgba(0, 0, 0, 0.7);
 }
 #content {
    font-size:    10px;
