@@ -45,6 +45,8 @@
      <script type="text/javascript" src="scripts/nprogress.js"></script>
      <link rel="stylesheet" type="text/css" href="css/nprogress.css">
 
+     <script type="text/javascript" src="scripts/togeojson.js"></script>
+
      <!-- Library for drawing error ellipse: 
      http://www.geocodezip.com/v3_example_eshapes_ellipse_fromBounds.html
      -->
@@ -164,10 +166,28 @@
 
      <script>
         //Code below from https://developers.google.com/maps/documentation/javascript/examples/layer-data-dragndrop
+        var geojsonfeatures;
 
         function loadGeoJsonString(geoString) {
            var geojson = JSON.parse(geoString);
-           map.data.addGeoJson(geojson);
+
+           if (typeof geojsonfeatures !== 'undefined') {
+              console.log('Removing previous layer');
+              for (var i = 0; i < geojsonfeatures.length; i++) {
+                 map.data.remove(geojsonfeatures[i]);
+              }
+           }
+
+           geojsonfeatures = map.data.addGeoJson(geojson);
+
+           // Add some style.
+           map.data.setStyle(function(feature) {
+              return /** @type {google.maps.Data.StyleOptions} */({
+                 fillColor: feature.getProperty('color'),
+                 strokeWeight: 1
+              });
+           });
+
            zoom(map);
         }
 
@@ -240,24 +260,41 @@
            hidePanel(e);
 
            var files = e.dataTransfer.files;
+           
            if (files.length) {
               // process file(s) being dropped
               // grab the file data from each file
               for (var i = 0, file; file = files[i]; i++) {
                  var reader = new FileReader();
+                 var filetype = file.type;
+
                  reader.onload = function(e) {
-                    loadGeoJsonString(e.target.result);
+                    //Check if KML file
+                    var geojsonplaintext;
+                    if (filetype === 'application/vnd.google-earth.kml+xml') {
+                       parser=new DOMParser();
+                       xmlDoc=parser.parseFromString(e.target.result,"text/xml");
+                       geojsonplaintext = toGeoJSON.kml(xmlDoc);
+                       loadGeoJsonString(JSON.stringify(geojsonplaintext));
+                    }
+                    else {
+                       loadGeoJsonString(e.target.result);
+                    }
                  };
                  reader.onerror = function(e) {
                     console.error('reading failed');
                  };
                  reader.readAsText(file);
               }
-              } else {
+           } 
+           else {
               // process non-file (e.g. text or html) content being dropped
               // grab the plain text version of the data
               var plainText = e.dataTransfer.getData('text/plain');
+
+              //Load GeoJSON data
               if (plainText) {
+                 //Example plaintext to try: https://storage.googleapis.com/maps-devrel/google.json
                  loadGeoJsonString(plainText);
               }
            }
