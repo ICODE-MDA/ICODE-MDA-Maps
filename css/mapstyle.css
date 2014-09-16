@@ -67,7 +67,7 @@ table
 	text-align: left;
 	vertical-align: middle;
 	width: calc(100% - (420px));
-	width: -webkit-calc(100% - (422px));
+	width: -webkit-calc(100% - (420px));
 }
 #query
 {
@@ -78,7 +78,7 @@ table
 {
 	border: 0px solid blue;
 	display: inline-block;
-	float: right;
+	float: left;
 	height: 60px;
 	line-height: 20px;
 	position: relative;
