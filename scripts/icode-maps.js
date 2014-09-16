@@ -218,6 +218,10 @@ function initialize() {
    //var centerCoord = new google.maps.LatLng(17.978677, -16.078958);   //Nouakchott, Mauritania
    //var centerCoord = new google.maps.LatLng(13.273461807246479, -13.465625000000037);   //Zoomed out world view
    
+   /* Uses browser location to fill in more precise user location in the geocode box
+    * currently disabled to prevent annoying browser warning messages
+    */
+   /*
    if(navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(function(position) {
          var pos = new google.maps.LatLng(
@@ -247,6 +251,7 @@ function initialize() {
          //handleNoGeolocation(true);
       });
    }
+   */
 
    //Detect iPhone or Android devices and set map to 100%
    var controlStyle;
@@ -884,7 +889,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
 
    console.log("Refreshing target points...");
    document.getElementById("query").value = "QUERY RUNNING...";
-   document.getElementById('stats_nav').innerHTML = '';
+   document.getElementById('stats').innerHTML = '';
    document.getElementById('busy_indicator').style.visibility = 'visible';
    NProgress.start();   //JS library top progress bar
 
@@ -1357,16 +1362,22 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
          //Update activity status spinner and results
          console.log('getTargetsFromDB(): ' + "Total number of markers = " + markerArray.length);
          document.getElementById('busy_indicator').style.visibility = 'hidden';
-         document.getElementById('stats_nav').innerHTML = 
+         document.getElementById('stats').innerHTML = 
             //response.resultcount + " results<br>" + 
             markersDisplayed.length + " results<br>" + //Use markersDisplayed array length to include RADAR and LAISIC markers
             Math.round(response.exectime*1000)/1000 + " secs";
          NProgress.done();   //JS library top progress bar
       }) //END .done()
-      .fail(function() { 
-         //Update activity status spinner and results
-         console.log('getTargetsFromDB(): ' +  'No response from track query; error in php?'); 
-         document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
+      .fail(function(d, textStatus, error) { 
+         if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+            console.log('getTargetsFromDB(): ' +  'Database is down'); 
+            document.getElementById("query").value = "DATABASE IS DOWN.";
+         }
+         else {
+            //Update activity status spinner and results
+            console.log('getTargetsFromDB(): ' +  'No response from track query; error in php?'); 
+            document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
+         }
          document.getElementById('busy_indicator').style.visibility = 'hidden';
          NProgress.done();   //JS library top progress bar
          return false; 
@@ -1381,7 +1392,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
 function getClustersFromDB(bounds, customQuery) {
    console.log("Refreshing target points...");
    document.getElementById("query").value = "QUERY RUNNING...";
-   document.getElementById('stats_nav').innerHTML = '';
+   document.getElementById('stats').innerHTML = '';
    document.getElementById('busy_indicator').style.visibility = 'visible';
    NProgress.start();   //JS library top progress bar
 
@@ -1570,14 +1581,21 @@ function getClustersFromDB(bounds, customQuery) {
 
 
          document.getElementById('busy_indicator').style.visibility = 'hidden';
-         document.getElementById('stats_nav').innerHTML = 
+         document.getElementById('stats').innerHTML = 
             totalsum + " results<br>" + 
             Math.round(response.exectime*1000)/1000 + " secs";
          NProgress.done();   //JS library top progress bar
       }) //end .done()
-      .fail(function() { 
-         console.log('getClustersFromDB(): ' +  'No response from track query; error in php?'); 
-         document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
+      .fail(function(d, textStatus, error) { 
+         if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+            console.log('getClustersFromDB(): ' +  'Database is down'); 
+            document.getElementById("query").value = "DATABASE IS DOWN.";
+         }
+         else {
+            //Update activity status spinner and results
+            console.log('getClustersFromDB(): ' +  'No response from track query; error in php?'); 
+            document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
+         }
          document.getElementById('busy_indicator').style.visibility = 'hidden';
          NProgress.done();   //JS library top progress bar
          return; 
@@ -2155,7 +2173,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
        ($.inArray(trknum, tracksDisplayedID) == -1 || source == "LAISIC_AIS_TRACK") && 
        $.inArray(trknum, tracksDisplayedID) == -1) {
       document.getElementById("query").value = "QUERY RUNNING FOR TRACK...";
-      document.getElementById('stats_nav').innerHTML = '';
+      document.getElementById('stats').innerHTML = '';
       document.getElementById('busy_indicator').style.visibility = 'visible';
       NProgress.start();   //JS library top progress bar
 
@@ -2582,7 +2600,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
                   }
 
                   document.getElementById('busy_indicator').style.visibility = 'hidden';
-                  document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+                  document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
                   NProgress.done();   //JS library top progress bar
                }) //end .done()
             .fail(function() { 
@@ -3176,7 +3194,7 @@ function togglePortLayer() {
 /* -------------------------------------------------------------------------------- */
 function showPorts() {
    document.getElementById("query").value = "QUERY RUNNING FOR PORTS...";
-   document.getElementById('stats_nav').innerHTML = '';
+   document.getElementById('stats').innerHTML = '';
    document.getElementById('busy_indicator').style.visibility = 'visible';
    NProgress.start();   //JS library top progress bar
 
@@ -3248,7 +3266,7 @@ function showPorts() {
       });
 
       document.getElementById('busy_indicator').style.visibility = 'hidden';
-      document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
@@ -3319,7 +3337,7 @@ function showPorts() {
       });
 
       document.getElementById('busy_indicator').style.visibility = 'hidden';
-      document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
@@ -3424,7 +3442,7 @@ function showPorts() {
 
 
       document.getElementById('busy_indicator').style.visibility = 'hidden';
-      document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
@@ -4543,7 +4561,7 @@ function togglePanel() {
    $( "#panel" ).toggle("slide", { direction: 'right' }, 180);
    //$( "#panel" ).effect('fade').dequeue().toggle("slide", { direction: 'right' }, 180);
 
-   !panelhidden ? $( "#showpanel" ).html("<<br><<br><") : $( "#showpanel" ).html("><br>><br>>");
+   !panelhidden ? $( "#showpanel" ).html("<div class='arrow-left'></div>") : $( "#showpanel" ).html("<div class='arrow-right'></div>");
    panelhidden = !panelhidden;
    return false;
 }
