@@ -67,7 +67,7 @@ table
 	text-align: left;
 	vertical-align: middle;
 	width: calc(100% - (420px));
-	width: -webkit-calc(100% - (420px));
+	width: -webkit-calc(100% - (422px));
 }
 #query
 {
@@ -125,12 +125,42 @@ table
 #login_nav img 
 {
 	display: block;
-   border-radius: 5px 5px 5px 5px;
-  -moz-border-radius: 5px 5px 5px 5px;
-  -webkit-border-radius: 5px 5px 5px 5px;
+   border-radius: 8px 8px 8px 8px;
+  -moz-border-radius: 8px 8px 8px 8px;
+  -webkit-border-radius: 8px 8px 8px 8px;
    margin-left: auto;
    margin-right: auto;
    padding-bottom: 4px;
+}
+#login_menu
+{
+	border: 1px solid gray;
+	background-color: rgb(50, 50, 50);
+   cursor: pointer;
+   display: none;
+   position: absolute;
+   top: 60px;
+	line-height: 40px;
+   right: 0px;
+   width: 150px;
+	text-align: center;
+	vertical-align: middle;
+   z-index: 2;
+}
+#login_menu_element
+{
+   display: none;
+	background-color: rgb(50, 50, 50);
+   width: 100%;
+   height: 40px;
+}
+#login_menu_element:hover
+{
+	background-color: #0fa1e0;
+}
+#login_nav:hover + #login_menu, #login_menu:hover, #login_menu_element
+{
+   display: block;
 }
 .arrow-down 
 {
@@ -168,7 +198,7 @@ table
 	right: 14px;
 	top: 80px;
 	width: 290px;
-	z-index: 3;
+	z-index: 1;
 }
 #map_canvas
 {
@@ -196,7 +226,7 @@ table
 	top: 60px;
 	visibility: visible;
 	width: 14px;
-	z-index: 2;
+	z-index: 1;
    -webkit-touch-callout: none;
    -webkit-user-select: none;
    -khtml-user-select: none;
