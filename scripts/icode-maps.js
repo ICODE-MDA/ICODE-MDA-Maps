@@ -889,7 +889,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
 
    console.log("Refreshing target points...");
    document.getElementById("query").value = "QUERY RUNNING...";
-   document.getElementById('stats_nav').innerHTML = '';
+   document.getElementById('stats').innerHTML = '';
    document.getElementById('busy_indicator').style.visibility = 'visible';
    NProgress.start();   //JS library top progress bar
 
@@ -1362,7 +1362,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
          //Update activity status spinner and results
          console.log('getTargetsFromDB(): ' + "Total number of markers = " + markerArray.length);
          document.getElementById('busy_indicator').style.visibility = 'hidden';
-         document.getElementById('stats_nav').innerHTML = 
+         document.getElementById('stats').innerHTML = 
             //response.resultcount + " results<br>" + 
             markersDisplayed.length + " results<br>" + //Use markersDisplayed array length to include RADAR and LAISIC markers
             Math.round(response.exectime*1000)/1000 + " secs";
@@ -1392,7 +1392,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
 function getClustersFromDB(bounds, customQuery) {
    console.log("Refreshing target points...");
    document.getElementById("query").value = "QUERY RUNNING...";
-   document.getElementById('stats_nav').innerHTML = '';
+   document.getElementById('stats').innerHTML = '';
    document.getElementById('busy_indicator').style.visibility = 'visible';
    NProgress.start();   //JS library top progress bar
 
@@ -1581,7 +1581,7 @@ function getClustersFromDB(bounds, customQuery) {
 
 
          document.getElementById('busy_indicator').style.visibility = 'hidden';
-         document.getElementById('stats_nav').innerHTML = 
+         document.getElementById('stats').innerHTML = 
             totalsum + " results<br>" + 
             Math.round(response.exectime*1000)/1000 + " secs";
          NProgress.done();   //JS library top progress bar
@@ -2173,7 +2173,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
        ($.inArray(trknum, tracksDisplayedID) == -1 || source == "LAISIC_AIS_TRACK") && 
        $.inArray(trknum, tracksDisplayedID) == -1) {
       document.getElementById("query").value = "QUERY RUNNING FOR TRACK...";
-      document.getElementById('stats_nav').innerHTML = '';
+      document.getElementById('stats').innerHTML = '';
       document.getElementById('busy_indicator').style.visibility = 'visible';
       NProgress.start();   //JS library top progress bar
 
@@ -2600,7 +2600,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
                   }
 
                   document.getElementById('busy_indicator').style.visibility = 'hidden';
-                  document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+                  document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
                   NProgress.done();   //JS library top progress bar
                }) //end .done()
             .fail(function() { 
@@ -3194,7 +3194,7 @@ function togglePortLayer() {
 /* -------------------------------------------------------------------------------- */
 function showPorts() {
    document.getElementById("query").value = "QUERY RUNNING FOR PORTS...";
-   document.getElementById('stats_nav').innerHTML = '';
+   document.getElementById('stats').innerHTML = '';
    document.getElementById('busy_indicator').style.visibility = 'visible';
    NProgress.start();   //JS library top progress bar
 
@@ -3266,7 +3266,7 @@ function showPorts() {
       });
 
       document.getElementById('busy_indicator').style.visibility = 'hidden';
-      document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
@@ -3337,7 +3337,7 @@ function showPorts() {
       });
 
       document.getElementById('busy_indicator').style.visibility = 'hidden';
-      document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
@@ -3442,7 +3442,7 @@ function showPorts() {
 
 
       document.getElementById('busy_indicator').style.visibility = 'hidden';
-      document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
@@ -4561,7 +4561,7 @@ function togglePanel() {
    $( "#panel" ).toggle("slide", { direction: 'right' }, 180);
    //$( "#panel" ).effect('fade').dequeue().toggle("slide", { direction: 'right' }, 180);
 
-   !panelhidden ? $( "#showpanel" ).html("<<br><<br><") : $( "#showpanel" ).html("><br>><br>>");
+   !panelhidden ? $( "#showpanel" ).html("<div class='arrow-left'></div>") : $( "#showpanel" ).html("<div class='arrow-right'></div>");
    panelhidden = !panelhidden;
    return false;
 }

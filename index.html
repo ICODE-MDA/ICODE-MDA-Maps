@@ -183,13 +183,21 @@
         <div id="logo">
            <h2><a style="color: rgb(255,255,255)" href=".">ICODE-MDA</a></h2>
         </div>
-        <div id="top_nav">
-           <div>
-              <form name="query_form"><input id="query" type="text" name="query" style="width:100%" onkeypress="if (event.which == 13) {enteredQuery();return false;}" value="QUERY RUNNING..."><input hidden="true" type="hidden"></form>
-           </div>
+
+        <div id="login_nav">
+           <img src="icons\loginavatar.gif" alt="Avatar" width="35px" height="35px">
+           <div class="arrow-down"></div>
         </div>
         <div id="stats_nav">
-           <!-- result count and query time to be shown here -->
+           <div id="stats">
+              <!-- result count and query time to be shown here -->
+           </div>
+           <div id="busy_indicator"><div style="width: 32px; height: 32px;"></div></div>
+        </div>
+        <div id="query_bar">
+           <div>
+              <form name="query_form"><input id="query" type="text" name="query" onkeypress="if (event.which == 13) {enteredQuery();return false;}" value="QUERY RUNNING..."><input hidden="true" type="hidden"></form>
+           </div>
         </div>
      </div>
 
@@ -515,12 +523,10 @@
 
         <div id="drop-container"><div id="drop-silhouette"></div></div>
 
-        <div id="showpanel" onmouseover="" style="cursor: pointer;">
-           ><br>><br>>
+        <div id="showpanel" onmouseover="">
+           <div class="arrow-right"></div>
         </div>
      </div>
-
-     <div id="busy_indicator"><div style="width: 32px; height: 32px;"></div></div>
 
      <div id="shipdetails">
      </div>
