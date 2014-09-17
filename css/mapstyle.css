@@ -121,6 +121,7 @@ table
 	text-align: left;
 	vertical-align: middle;
 	width: 50px;
+   border-left: 1px dotted gray;   
 }
 #login_nav img 
 {
