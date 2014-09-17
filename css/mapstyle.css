@@ -120,6 +120,13 @@ table
 
    border-left: 1px dotted gray;
    border-right: 1px dotted gray;
+
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
 }
 #alerts_nav:hover
 {
@@ -138,7 +145,7 @@ table
 
 	text-align: center;
 }
-#alertsCount
+#alertsCountBubble
 {
    display: inline-block;
    position: relative;
@@ -149,7 +156,7 @@ table
    height: 20px;
    padding: 4px;
 
-   background: #ff0000;
+   background: gray;
    color: #fff;
    text-align: center;
 }
@@ -160,20 +167,21 @@ table
 }
 #alertPanel 
 {
+   display: none;
    position: absolute;
    border: 0px solid red;
    margin: 0px;
    padding: 0px 0px;
    width: 300px;
-   bottom: 50px;
-   left: 0px;
+   top: 60px;
+   right: 70px;
    z-index: 3;
    box-shadow: -5px 5px 5px #888888;
    background-color: rgb(255, 255, 255);
 }
 #alertAccordion .ui-accordion-content 
 {
-    max-height: 200px;
+    max-height: 300px;
 }
 #login_nav
 {
@@ -309,6 +317,10 @@ table
    -moz-user-select: none;
    -ms-user-select: none;
    user-select: none;
+}
+#showpanel:hover
+{
+   background-color: rgb(100, 100, 100);
 }
 .arrow-left 
 {

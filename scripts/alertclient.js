@@ -238,6 +238,7 @@ $(function start() {
 
       alertCountTotal++;
       alertCountLabel.text(alertCountTotal);
+      setCountBubbleColor();
 
       //Draw an indicator on the map where the alert vessel originated from
       var alertVesselCircle = new google.maps.Circle({
@@ -375,4 +376,26 @@ $(function start() {
       }
       return bounds;
    }
+  
+   /* -------------------------------------------------------------------------------- */
+   function setCountBubbleColor() {
+      if (alertCountTotal > 0) {
+         $('#alertsCountBubble').css('background-color', 'red');
+      }
+      else {
+         $('#alertsCountBubble').css('background-color', 'gray');
+      }
+   }
 });
+
+/* -------------------------------------------------------------------------------- */
+function toggleAlertsPanel() {
+   $('#alertPanel').toggle();
+   
+   var visibleAlertPanel = $('#alertPanel:visible');
+   if (visibleAlertPanel) {
+      if ($("#alertAccordion").accordion != undefined) {
+         $("#alertAccordion").accordion("refresh");
+      }
+   }
+}
