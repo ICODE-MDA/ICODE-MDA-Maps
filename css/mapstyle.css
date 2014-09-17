@@ -201,7 +201,7 @@ table
    width: 300px;
    top: 60px;
    right: 70px;
-   z-index: 3;
+   z-index: 1;
    box-shadow: -5px 5px 5px #888888;
    background-color: rgb(255, 255, 255);
 }

@@ -105,6 +105,10 @@ table
 	width: 32px;
 	z-index: 2;
 }
+#alerts_nav
+{
+	display: none; /*hide alerts from mobile for now*/
+}
 #login_nav
 {
    display: none;
@@ -176,6 +180,10 @@ table
 	visibility: visible;
 	width: 14px;
 	z-index: 2;
+}
+#showpanel:hover
+{
+	background-color: rgba(0, 0, 0, 0.8);  /*need to set here to prevent highlighting on mobile*/
 }
 #content
 {
