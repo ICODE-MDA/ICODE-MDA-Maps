@@ -392,10 +392,16 @@ $(function start() {
 function toggleAlertsPanel() {
    $('#alertPanel').toggle();
    
-   var visibleAlertPanel = $('#alertPanel:visible');
-   if (visibleAlertPanel) {
+   if ($('#alertPanel:visible').length !== 0) {
       if ($("#alertAccordion").accordion != undefined) {
          $("#alertAccordion").accordion("refresh");
       }
+
+      //highlight the nav button with color
+      $('#alerts_nav').css('background-color', 'rgb(100, 100, 100)');
+   }
+   else {
+      //reset the nav button color
+      $('#alerts_nav').css('background-color', '');
    }
 }
