@@ -218,6 +218,7 @@
               Logout
            </div>
         </div>
+
         <div id="query_bar">
            <div>
               <form name="query_form"><input id="query" type="text" name="query" onkeypress="if (event.which == 13) {enteredQuery();return false;}" value="QUERY RUNNING..."><input hidden="true" type="hidden"></form>
@@ -228,6 +229,16 @@
               <!-- result count and query time to be shown here -->
            </div>
            <div id="busy_indicator"><div style="width: 32px; height: 32px;"></div></div>
+        </div>
+        <div id="alerts_nav">
+           <div id="alertsContainer">
+              <div id="alertsCount">
+                 <span class="alertCountLabel">0</span>
+              </div>
+              <div id="alertText">
+                 Alerts
+              </div>
+           </div>
         </div>
      </div>
 
@@ -595,9 +606,9 @@
            <h3><b>Real-time Alerts</b></h3>
            <div id="alertSummary">
               <div>
-                 <span id="alertLabel">Connecting...</span><br>
-                 <b>Total decoded:</b> <span id="processedCountLabel">0</span><br>
-                 <b>Total messages matching alerts:</b> <span id="alertCountLabel">0</span><br>
+                 <span class="alertLabel">Connecting...</span><br>
+                 <b>Total decoded:</b> <span class="processedCountLabel">0</span><br>
+                 <b>Total messages matching alerts:</b> <span class="alertCountLabel">0</span><br>
               </div>
 
               <p align=center>

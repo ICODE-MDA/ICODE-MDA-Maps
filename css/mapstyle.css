@@ -66,8 +66,8 @@ table
 	position: relative;
 	text-align: left;
 	vertical-align: middle;
-	width: calc(100% - (420px));
-	width: -webkit-calc(100% - (420px));
+	width: calc(100% - (540px));
+	width: -webkit-calc(100% - (540px));
 }
 #query
 {
@@ -109,28 +109,54 @@ table
 	width: 32px;
 	z-index: 2;
 }
-#login_nav
+#alerts_nav
 {
-	border: 0px solid blue;
 	display: inline-block;
 	float: right;
-	height: 40px;
-	line-height: 40px;
-	padding: 10px;
 	position: relative;
-	text-align: left;
 	vertical-align: middle;
-	width: 50px;
+   height: 60px;
+	width: 100px;
+
+   border-left: 1px dotted gray;
+   border-right: 1px dotted gray;
 }
-#login_nav img 
+#alerts_nav:hover
 {
-	display: block;
-   border-radius: 8px 8px 8px 8px;
-  -moz-border-radius: 8px 8px 8px 8px;
-  -webkit-border-radius: 8px 8px 8px 8px;
-   margin-left: auto;
-   margin-right: auto;
-   padding-bottom: 4px;
+   background-color: rgb(100, 100, 100);
+}
+#alertsContainer
+{
+   display: inline-block;
+   position: absolute;
+   top: 0px;
+   bottom: 0px;
+   left: 0px;
+   right: 0px;
+   height: 50%;
+   margin: auto;
+
+	text-align: center;
+}
+#alertsCount
+{
+   display: inline-block;
+   position: relative;
+   border-radius: 50%;
+   behavior: url(PIE.htc); /* remove if you don't care about IE8 */
+
+   width: 20px;
+   height: 20px;
+   padding: 4px;
+
+   background: #ff0000;
+   color: #fff;
+   text-align: center;
+}
+#alertText
+{
+   display: inline-block;
+   position: relative;
 }
 #alertPanel 
 {
@@ -148,6 +174,33 @@ table
 #alertAccordion .ui-accordion-content 
 {
     max-height: 200px;
+}
+#login_nav
+{
+	border: 0px solid blue;
+	display: inline-block;
+	float: right;
+	height: 40px;
+	line-height: 40px;
+	padding: 10px;
+	position: relative;
+	text-align: left;
+	vertical-align: middle;
+	width: 50px;
+}
+#login_nav:hover
+{
+   background-color: rgb(100, 100, 100);
+}
+#login_nav img 
+{
+	display: block;
+   border-radius: 8px 8px 8px 8px;
+  -moz-border-radius: 8px 8px 8px 8px;
+  -webkit-border-radius: 8px 8px 8px 8px;
+   margin-left: auto;
+   margin-right: auto;
+   padding-bottom: 4px;
 }
 #login_menu
 {

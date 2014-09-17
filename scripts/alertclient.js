@@ -31,9 +31,9 @@ $(function start() {
 
    // for better performance - to avoid searching in DOM
    var content = $('#content');
-   var alertLabel = $('#alertLabel');
-   var alertCountLabel = $('#alertCountLabel');
-   var processedCountLabel = $('#processedCountLabel');
+   var alertLabel = $('.alertLabel');
+   var alertCountLabel = $('.alertCountLabel');
+   var processedCountLabel = $('.processedCountLabel');
    var user = 'icodeuser';
    var receivedAlertRules = false;
    var alertCountTotal = 0;
