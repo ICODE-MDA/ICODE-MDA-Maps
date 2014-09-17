@@ -158,6 +158,33 @@ table
    background: gray;
    color: #fff;
    text-align: center;
+   font-weight: bold;
+}
+#alertStatus
+{
+   display: block;
+   position: absolute;
+   font-size: 10px;
+   bottom: 0px;
+   right: 0px;
+   width: 100%;
+   text-align: center;
+}
+#alertStatusBubble
+{
+   display: block;
+   position: absolute;
+   border-radius: 50%;
+   behavior: url(PIE.htc); /* remove if you don't care about IE8 */
+
+   width: 5px;
+   height: 5px;
+
+   bottom: 6px;
+   right: 5px;
+
+   background: yellow;
+   color: #fff;
 }
 #alertText
 {

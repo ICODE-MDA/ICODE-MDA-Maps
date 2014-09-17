@@ -230,13 +230,20 @@
            </div>
            <div id="busy_indicator"><div style="width: 32px; height: 32px;"></div></div>
         </div>
-        <div id="alerts_nav" onclick="toggleAlertsPanel()">
+        <div id="alerts_nav" onclick="toggleAlertsPanel()" onmouseenter="$('#alertStatusConnection').show()" onmouseleave="$('#alertStatusConnection').hide()">
            <div id="alertsContainer">
               <div id="alertsCountBubble">
                  <span class="alertCountLabel">0</span>
               </div>
               <div id="alertText">
                  Alerts
+              </div>
+           </div>
+           <div id="alertStatus">
+              <span id="alertStatusConnection">
+                 Not Connected
+              </span>
+              <div id="alertStatusBubble">
               </div>
            </div>
         </div>

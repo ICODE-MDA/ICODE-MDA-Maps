@@ -66,6 +66,13 @@ $(function start() {
    connection.onopen = function () {
       //Connected to server success
       alertLabel.html('<b>Connected to alert server as user: </b>' + user);
+      $('#alertStatusConnection').text('Connected');
+      $('#alertStatusBubble').css('background','#66ff66');
+      setTimeout(function() {
+         $('#alertStatusConnection').fadeOut('slow');
+      }, 3000);
+
+      //Send response (username)
       connection.send(user);
    };
 
@@ -73,6 +80,9 @@ $(function start() {
    connection.onclose = function () {
       console.log('Server is down');
       alertLabel.text('Server is down');
+      $('#alertStatusConnection').fadeIn('fast');
+      $('#alertStatusConnection').text('Not Connected');
+      $('#alertStatusBubble').css('background','red');
 
       //if alerts have already been received (i.e. server restarted) then
       // remove old alerts and add the new ones.
@@ -398,7 +408,9 @@ function toggleAlertsPanel() {
       }
 
       //highlight the nav button with color
-      $('#alerts_nav').css('background-color', 'rgb(100, 100, 100)');
+      if ($('#alerts_nav').length !== 0) {
+         $('#alerts_nav').css('background-color', 'rgb(100, 100, 100)');
+      }
    }
    else {
       //reset the nav button color
