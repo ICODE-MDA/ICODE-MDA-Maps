@@ -33,8 +33,9 @@ $(function start() {
    var content = $('#content');
    var alertLabel = $('.alertLabel');
    var alertCountLabel = $('.alertCountLabel');
+   var alertCountNavbar = $('#alertCountLabel_navbar');
    var processedCountLabel = $('.processedCountLabel');
-   var user = 'icodeuser';
+   var user = userid;
    var receivedAlertRules = false;
    var alertCountTotal = 0;
    var alertArray = [];
@@ -248,6 +249,9 @@ $(function start() {
 
       alertCountTotal++;
       alertCountLabel.text(alertCountTotal);
+      if (alertCountTotal > 100) {
+         alertCountNavbar.text('+99');
+      }
       setCountBubbleColor();
 
       //Draw an indicator on the map where the alert vessel originated from

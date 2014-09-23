@@ -1,20 +1,21 @@
-textarea[readonly="readonly"] {
+textarea[readonly="readonly"]
+{
     background-color:#E0E0E0;
 }
-
-legend {
+legend
+{
    font-weight: bold;
    text-decoration: none;
 }
-
-label {
+label
+{
    width: 10em;
    float: left;
    text-align: right;
    margin-right: 0.5em;
    display: inline-block;
 }
-
-.submit input {
+.submit input
+{
    margin-left: 4.5em;
 }

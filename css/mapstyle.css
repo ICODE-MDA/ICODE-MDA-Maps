@@ -126,6 +126,8 @@ table
    -moz-user-select: none;
    -ms-user-select: none;
    user-select: none;
+
+   cursor: pointer;
 }
 #alerts_nav:hover
 {
@@ -148,11 +150,13 @@ table
 {
    display: inline-block;
    position: relative;
-   border-radius: 50%;
-   behavior: url(PIE.htc); /* remove if you don't care about IE8 */
+   /* border-radius: 50%; */ /* circle */
+   /* behavior: url(PIE.htc); */ /* remove if you don't care about IE8 */
+   border-radius: 15px; /* square with rounded corners */
 
-   width: 20px;
-   height: 20px;
+   /* width: 20px;  Grow with number */
+   height: 15px;
+   line-height: 15px;
    padding: 4px;
 
    background: gray;
@@ -272,6 +276,16 @@ table
 #login_nav:hover + #login_menu, #login_menu:hover, #login_menu_element
 {
    display: block;
+}
+#loginusername
+{
+   display: none;
+   position: absolute;
+   font-size: 10px;
+	text-align: center;
+   bottom: -10px;
+   right: 0px;
+   width: 100%;
 }
 .arrow-down 
 {

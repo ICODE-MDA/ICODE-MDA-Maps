@@ -174,7 +174,7 @@
 
      <script>
         $(function() {
-           $( "#alertAccordion" ).accordion({
+           $("#alertAccordion").accordion({
               collapsible: true,
               heightStyle: "content",
               autoHeight: false,
@@ -184,6 +184,24 @@
                  $("#alertAccordion").accordion("refresh");
               }
            });
+        });
+     </script>
+
+     <script>
+        var userid = 'icodeuser';
+
+        $(document).ready(function() {
+           $('#login_nav')
+           .mouseover(function() {
+              $('#loginarrow').hide();
+              $('#loginusername').text(userid);
+              $('#loginusername').show();
+           })
+           .mouseout(function() {
+              $('#loginarrow').show();
+              $('#loginusername').hide();
+           })
+           ;
         });
      </script>
 
@@ -208,7 +226,8 @@
 
         <div id="login_nav">
            <img src="icons/loginavatar.gif" alt="Avatar" width="35px" height="35px">
-           <div class="arrow-down"></div>
+           <div id="loginarrow" class="arrow-down"></div>
+           <div id="loginusername"></div>
         </div>
         <div id="login_menu" onclick="alert('Login features not yet implemented')">
            <div id="login_menu_element">
@@ -233,7 +252,7 @@
         <div id="alerts_nav" onclick="toggleAlertsPanel()" onmouseenter="$('#alertStatusConnection').show()" onmouseleave="$('#alertStatusConnection').hide()">
            <div id="alertsContainer">
               <div id="alertsCountBubble">
-                 <span class="alertCountLabel">0</span>
+                 <span id="alertCountLabel_navbar" class="alertCountLabel">0</span>
               </div>
               <div id="alertText">
                  Alerts
