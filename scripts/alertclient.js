@@ -195,21 +195,14 @@ $(function start() {
       //Pretty print the alert rules/properties
       var panelContent = document.getElementById('alert_id' + id);
 
-      panelContent.appendChild(document.createElement('fieldset')).innerHTML = '<legend><b>Alert Rules</b></legend><pre>' + JSON.stringify(singleAlert, undefined, 1) + '</pre'; 
-
-      //panelContent.innerHTML += '<p><b>Alert rules:</b><br>';
-      //panelContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(singleAlert, undefined, 1);
-      panelContent.innerHTML += '<br>';
-      panelContent.innerHTML += '<b>Matching AIS messages:</b><br>';
-
-      var divNewMessages = document.createElement('div');
-      divNewMessages.setAttribute('id', 'alertNewMessages-'+id);
-      var divNewMessagesContent = document.createTextNode('New alerts displayed here.');
-      divNewMessages.appendChild(divNewMessagesContent);
-
-      panelContent.appendChild(divNewMessages);
+      panelContent.appendChild(document.createElement('fieldset')).innerHTML = '<legend><b>Alert Rules</b></legend><pre><div id="alertRule-'+id+'">' + JSON.stringify(singleAlert, undefined, 1) + '</div></pre>'; 
 
 
+      //Pretty print latest matching AIS message
+      panelContent.appendChild(document.createElement('fieldset')).innerHTML = '<legend><b>Matching AIS messages</b></legend><pre><div id="alertNewMessages-'+id+'"></div></pre>'; 
+
+
+      //Handle button/checkbox clicks
       $('#polygon_alert_id' + id).click(function () {
          console.log('Show alert polygon toggled');
          if (this.checked) {
@@ -221,6 +214,12 @@ $(function start() {
       });
 
       $('#show_polygon_id' + id).click(function () {
+         console.log('Zooming into polygon ' + id);
+         zoomToPolygon(id);
+      });
+
+      $('#alertRule-' + id).css('cursor', 'pointer');
+      $('#alertRule-' + id).click(function () {
          console.log('Zooming into polygon ' + id);
          zoomToPolygon(id);
       });
@@ -237,7 +236,7 @@ $(function start() {
       console.log(timestamp);
       //panelContent.appendChild(document.createElement('pre')).innerHTML = toHumanTime(timestamp) + ' UTC';
       //panelContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(decodedAIS, undefined, 1);
-      divNewMessages.innerHTML = JSON.stringify(decodedAIS, undefined, 1);
+      divNewMessages.innerHTML = toHumanTime(timestamp) + '<br>' + JSON.stringify(decodedAIS, undefined, 1);
 
       //increment count on alert panel title
       var alertCountSpan = document.getElementById('alertCount-' + singleAlert.alert_id);
@@ -270,6 +269,33 @@ $(function start() {
          //shapeFadeOut(alertVesselCircle, 2, null);     //GPU intensive to fade many alert circles
          alertVesselCircle.setMap(null);
       }, 3000);
+
+      //Handle click
+      //TODO: Need to remove click listener if the message is overwritten!
+      $('#alertNewMessages-' + singleAlert.alert_id).unbind( "click" );
+
+      $('#alertNewMessages-' + singleAlert.alert_id).css('cursor', 'pointer');
+      $('#alertNewMessages-' + singleAlert.alert_id).click(function () {
+         google.maps.Map.prototype.setCenterWithOffset = function(latlng, offsetX, offsetY) {
+            var map = this;
+            var ov = new google.maps.OverlayView();
+            ov.onAdd = function() {
+               var proj = this.getProjection();
+               var aPoint = proj.fromLatLngToContainerPixel(latlng);
+               aPoint.x = aPoint.x+offsetX;
+               aPoint.y = aPoint.y+offsetY;
+               map.setCenter(proj.fromContainerPixelToLatLng(aPoint));
+            }; 
+            ov.draw = function() {}; 
+            ov.setMap(this); 
+         };
+
+         map.setCenterWithOffset(new google.maps.LatLng(decodedAIS.lat,decodedAIS.lon), 0, -100);
+
+         setTimeout(function() {
+            selectVessel(decodedAIS.mmsi);
+         }, 1000);
+      });
    }
 
    /* -------------------------------------------------------------------------------- */
@@ -374,7 +400,7 @@ $(function start() {
    /* -------------------------------------------------------------------------------- */
    function toHumanTime(unixtime) {
       var date = new Date(unixtime * 1000);
-      var humanTime = date.toLocaleString("en-US",{timeZone: "UTC"});
+      var humanTime = date.toLocaleString("en-US",{timeZone: "UTC"}) + ' UTC';
       return humanTime;
    }
 

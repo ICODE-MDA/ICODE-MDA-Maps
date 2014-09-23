@@ -211,7 +211,7 @@ table
 }
 #alertAccordion .ui-accordion-content 
 {
-    max-height: 300px;
+    max-height: 500px;
 }
 #login_nav
 {
