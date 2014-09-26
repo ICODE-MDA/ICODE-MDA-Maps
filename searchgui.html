@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ICODE-MDA Query Builder</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	
+	<link rel="stylesheet" type="text/css" href="css/searchgui.css">
+	
+	<!-- OWF library -->
+	<script type="text/javascript" src="/ICODEMDAMaps-Julie/owf/js-min/owf-widget-debug.js"></script>
+	 
+	<!-- jquery library -->
+    <script type="text/javascript" language="Javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+
+	<!-- accordion UI library -->
+	<script type="text/javascript" src="scripts/jquery-ui-1.10.3.custom.js"></script>
+    <link rel="stylesheet" href="css/custom-theme/jquery-ui-1.10.3.custom.css">
+	
+	<script type="text/javascript" src="scripts/searchgui.js"></script>
+	
+	<!-- call accordion -->
+	<script>
+    $(function() {
+        $( "#accordion" ).accordion({
+            collapsible: true,
+            heightStyle: "fill"
+        });
+        $(window).resize(function(){
+            $("#accordion").accordion("refresh");
+        });           
+    });
+    </script>
+</head>
+
+<body>
+<div class="outerContainer">
+	<div class="title"><center>Query Builder</center></div>
+	<div class="leftPanel">
+		<div class="subtitle">Query Options</div>
+		<div id="accordion" class="accordion">
+			
+			<h3>Geographic Coordinates</h3>
+			<div id="">
+				<b>Latitude:</b><br />
+				Between <input id="minLat" name="minLat" type="text" value="1.1" style="width: 50px">
+				to <input id="maxLat" name="maxLat" type="text" value="1.2" style="width: 50px"><br /><br />
+				<b>Longitude:</b><br />
+				Between <input id="minLon" name="minLon" type="text" value="1.1" style="width: 50px">
+				to <input id="maxLon" name="maxLon" type="text" value="1.2" style="width: 50px"><br /><br />				
+			</div>
+			<h3>Order by</h3>
+			<div id="orderBy">
+				<input id="mmsi" name="mmsi" checked="checked" type="checkbox" onclick="uncheckRest();">
+				MMSI<br />
+				<input id="sog" name="sog" type="checkbox" onclick="uncheckRest();">
+				SOG<br />
+				<input id="lon" name="lon" type="checkbox" onclick="uncheckRest();">
+				Longitude<br />
+				<input id="lat" name="lat" type="checkbox" onclick="uncheckRest();">
+				Latitude<br />
+				<input id="cog" name="cog" type="checkbox" onclick="uncheckRest();">
+				COG<br />
+				<input id="dateTime" name="dateTime" type="checkbox" onclick="uncheckRest();">
+				Date Time<br />
+				<input id="streamId" name="streamId" type="checkbox" onclick="uncheckRest();">
+				Stream ID<br />
+				<input id="targetStatus" name="targetStatus" type="checkbox" onclick="uncheckRest();">
+				Target Status<br />
+				<input id="targetAcq" name="targetAcq" type="checkbox" onclick="uncheckRest();">
+				Target Acquired<br />
+				<input id="trackNo" name="trackNo" type="checkbox" onclick="uncheckRest();">
+				Track Number<br />
+				<input id="sourceId" name="sourceId" type="checkbox" onclick="uncheckRest();">
+				Source ID<br />
+			</div>
+			<h3>Category 3</h3>
+			<div id="">
+				<input id="" name="" checked="checked" type="checkbox" onclick="">
+				Field<br />
+			</div>		
+		</div>
+	</div>
+	<div class="rightPanel">
+		<!-- search panel for searching specific info in database -->
+		<div class="search">
+			<input type="text" id="searchguiQuery" placeholder=" Type search term here (e.g. MMSI, Ship Name, etc.)"></input>
+			<span><button onClick="searchguiResults();">Search</button>
+		</div>
+		<div class="mainPanel">
+			<div class="subtitle" style="margin-top: 10px;">Search Results</div>
+			<div id="queryString"></div>
+			<div id="results"></div>
+		</div>
+	</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<html> 
+<head> 
+<title>ICODE-MDA Query</title> 
+
+<link rel="stylesheet" type="text/css" href="css/tablestyle.css">
+
+<!-- Main JavaScript for controlling map -->
+<!-- <script type="text/javascript" src='scripts/icode-maps.js' ></script> -->
+	 
+<script type="text/javascript" src="/ICODEMDAMaps-Julie/owf/js-min/owf-widget-debug.js"></script>
+<script type="text/javascript" language="Javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+
+<script type="text/javascript">
+function queryHandler() {
+	var userQuery = $('#query').val();
+	$('#query').val(userQuery);
+	OWF.Eventing.publish("queryChannel", userQuery);
+}
+</script>
+
+</head> 
+
+<body> 
+<div id="panel_top">
+    <div id="logo">
+		<h2><a style="color: rgb(255,255,255)" href=".">ICODE-MDA</a></h2>
+    </div>
+    
+	<div id="top_nav">
+        <div>
+            <form name="query_form"><input id="query" type="text" name="query" style="width:100%" onkeypress="if (event.which == 13) {queryHandler();return false;}" value="QUERY RUNNING..."><input hidden="true" type="hidden"></form>
+        </div>
+    </div>
+        
+	<div id="stats_nav">
+		<!-- result count and query time to be shown here -->
+    </div>
+</div>
+
+<div id="geocodepanel">
+    <input id="geocodeAddress" type="textbox" value="San Diego, CA">
+    <input type="button" value="Set Map Center" onclick="codeAddress()">
+</div>
+</body>
+<html>

@@ -1,0 +1,58 @@
+<html> 
+<head> 
+<title>ICODE-MDA Legend</title> 
+
+<link rel="stylesheet" type="text/css" href="css/tablestyle.css">
+
+<script type="text/javascript" src="/ICODEMDAMaps-Julie/owf/js-min/owf-widget-debug.js"></script>
+<script type="text/javascript" language="Javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+ 
+<script type="text/javascript"> 
+// OWF Eventing Handlers to publish on Channels
+function toggleTimeMachineHandler() {
+	$('#enabletimemachine').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("timeMachine_toggleTimeMachine", check);
+	});
+}
+
+
+</script> 
+
+</head> 
+
+<body> 
+<div id="panel_top">
+	<div id="logo">
+        <h2><a style="color: rgb(255,255,255)" href=".">ICODE-MDA</a></h2>
+    </div>
+</div>
+		
+<h3>Time Machine</h3>
+    <div>
+    <input class="checkbox" id="enabletimemachine" name="Enable Time Machine" type="checkbox" onclick="toggleTimeMachineHandler();"> Enable Time Machine
+    <br>
+    <br>
+    <!-- http://trentrichardson.com/examples/timepicker/ -->
+    <script src="scripts/jquery-ui-timepicker-addon-cus.js"></script>
+    <script>
+    $(function() {
+        $('#datetimestart').datetimepicker({timeFormat: 'hh:mm tt z'});
+        $('#datetimeend').datetimepicker({timeFormat: 'hh:mm tt z'});
+    });
+    </script>
+    Pick a date range:
+    <p align="center">
+    <input type="text" id="datetimestart" size="18" />
+    <br /> to <br />
+    <input type="text" id="datetimeend" size="18" />
+
+    <br />
+    <br />
+    <input id="queryTimeMachineButton" type="button" onClick="if ($('#datetimestart').datetimepicker('getDate') == null || $('#datetimeend').datetimepicker('getDate') == null) {$('#datetimestart').datetimepicker('setDate', (new Date(Math.round(new Date().getTime()/1000/86400)*86400*1000 + new Date().getTimezoneOffset()*60*1000 - 86400*1000)));$('#datetimeend').datetimepicker('setDate', (new Date(Math.round(new Date().getTime()/1000/86400)*86400*1000 + new Date().getTimezoneOffset()*60*1000)));} TimeMachineLookup(($('#datetimestart').datetimepicker('getDate').getTime()/1000), ($('#datetimeend').datetimepicker('getDate').getTime()/1000)); return false;" value="Query">
+    </p>
+    Filtering MMSI: <input id="filterMMSITimeMachine" type="textbox" value="Enter MMSI to filter" onClick="document.getElementById('filterMMSITimeMachine').value= '';" onkeydown="if (event.keyCode == 13) {$('#queryTimeMachineButton').trigger('click');}"><br>
+    Custom filter: <input id="customQueryTimeMachine" type="textbox" value="i.e. 'SOG < 1'" onClick="document.getElementById('customQueryTimeMachine').value= '';" onkeydown="if (event.keyCode == 13) {$('#queryTimeMachineButton').trigger('click');}"><br>
+</div>
+</body> 
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ICODE-MDA Maps</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+
+    <link rel="stylesheet" type="text/css" href="css/mapstyle.css">
+    <link rel="stylesheet" type="text/css" href="css/mapstyle-mobile.css" media="only screen and (max-device-width: 480px)">
+	<link rel="stylesheet" type="text/css" href="css/vesselDetails.css">
+	
+	<!-- OWF library -->
+	<script type="text/javascript" src="/ICODEMDAMaps-Julie/owf/js-min/owf-widget-debug.js"></script>
+	 
+	<!-- jquery library -->
+    <script type="text/javascript" language="Javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+	
+	<!-- accordion UI library -->
+	<script type="text/javascript" src="scripts/jquery-ui-1.10.3.custom.js"></script>
+    <link rel="stylesheet" href="css/custom-theme/jquery-ui-1.10.3.custom.css">
+    
+	<!-- slideshow UI library -->
+	<link rel="stylesheet" type="text/css" href="css/lightSlider.css">
+	<script type="text/javascript" src="scripts/jquery.lightSlider.js"></script>
+	
+	<!-- testing: fake database info -->
+	<script>
+		function init() {
+		$("#name").html("ID COPENHAGEN");
+		$("#shipName").html("ID COPENHAGEN");
+		$("#imo").html("9624328");
+		$("#callSign").html("3EUN3");
+		$("#mmsi").html("373843000");
+		$("#flag").html("Panama");
+		$("#operator").html("Bidsted & Co A/S");
+		$("#shiptype").html("Bulk Carrier");
+		$("#gross").html("17,027");
+		$("#deadweight").html("28,206");
+		$("#yearOfBuild").html("2012");
+		$("#status").html("In Service/Commission");
+		$("#shipbuilder").html("I-S Shipyard Co Ltd");
+		
+		$("#portOfRegistry").html("Panama");
+		$("#officialNumber").html("4426312");
+		$("#satComAnsBack").html("");
+		$("#regFlag").html("Panama");
+		$("#satComId").html("");
+		$("#fishingNumber").html("");
+		
+		$("#ownershipGroupOwner").html("Unknown");
+		$("#ownershipShipManager").html("Bidsted & Co A/S");
+		$("#ownershipOperator").html("Bidsted & Co A/S");
+		$("#ownershipDocCompany").html("First Steamship SA");
+		$("#ownershipRegisteredOwner").html("Ship Bulker Steamship SA");
+		$("#ownershipTechnicalManager").html("First Steamship SA");
+		$("#ownershipBareboatOwner").html("");
+		$("#location1").html("");
+		$("#location2").html("Denmark");
+		$("#location3").html("Denmark");
+		$("#location4").html("Chinese Taipei");
+		$("#location5").html("Denmark");
+		$("#location6").html("Chinese Taipei");
+		$("#location7").html("");
+		$("#imoCompanyNo").html("1581022");
+		$("#imoRegisteredOwnerNo").html("5688396");
+
+		$("#commDate").html("2012-08");
+		$("#commName").html("ID COPENHAGEN");
+		$("#commFlag").html("Panama");
+		$("#commGroupOwner").html("Unknown");
+		$("#commOperator").html("Bidsted & Co A/S");
+		$("#commManager").html("Bidsted & Co A/S");
+		$("#commRegisteredOwner").html("Ship Bulker Steamship SA");
+		$("#commDoc").html("First Steamship SA");
+		$("#commPrice").html("");
+	}
+	</script>
+	
+	<!-- call accordion -->
+	<script>
+    $(function() {
+        $( "#accordion" ).accordion({
+            collapsible: true,
+            heightStyle: "fill"
+        });
+        $(window).resize(function(){
+            $("#accordion").accordion("refresh");
+        });           
+    });
+    </script>
+	
+	<!-- call lightSlider -->
+	<script>
+	$(document).ready(function() {
+		$("#lightSlider").lightSlider({
+			gallery: true,
+			minSlide: 1,
+			maxSlide: 1,
+			currentPagerPosition: 'left'
+		}); 
+	});
+	</script>
+		
+</head>
+
+<body onload="init();">
+	<center><h1>Ship Details</h1></center>
+	<div id="shipDetails" class="shipDetailsContainer">
+		<div class="shipDetailsCols">
+			<div class="shipDetailsLabel">Ship Name</div>
+			<div class="shipDetailsLabel">LR/IMO No.</div>
+			<div class="shipDetailsLabel">Call Sign</div>
+			<div class="shipDetailsLabel">MMSI No.</div>
+			<div class="shipDetailsLabel">Flag</div>
+			<div class="shipDetailsLabel">Operator</div>
+		</div>
+		<div class="shipDetailsCols">
+			<div id="shipName"></div>
+			<div id="imo"></div>
+			<div id="callSign"></div>
+			<div id="mmsi"></div>
+			<div id="flag"></div>
+			<div id="operator"></div>
+		</div>
+		<div class="shipDetailsCols">
+			<div class="shipDetailsLabel">Shiptype</div>
+			<div class="shipDetailsLabel">Gross</div>
+			<div class="shipDetailsLabel">Deadweight</div>
+			<div class="shipDetailsLabel">Year of Build</div>
+			<div class="shipDetailsLabel">Status</div>
+			<div class="shipDetailsLabel">Shipbuilder</div>
+		</div>
+		<div class="shipDetailsCols">
+			<div id="shiptype"></div>
+			<div id="gross"></div>
+			<div id="deadweight"></div>
+			<div id="yearOfBuild"></div>
+			<div id="status"></div>
+			<div id="shipbuilder"></div>
+		</div>
+		<div class="shipDetailsCols">
+			<img src="img/1411693.simg" width="300" height="200" style="margin-right: 20px;" />
+		</div>
+	</div> 
+	<div>&nbsp;</div>
+	
+	<div id="accordion" class="accordion">
+		<h3>Registration</h3>
+		<div id="registration" class="fourColsContainer">
+			<div class="fourCols">
+				<div class="fourColsLabel">Port of Registry</div>
+				<div class="fourColsLabel">Official Number</div>
+				<div class="fourColsLabel">Sat Com Ans Back</div>
+			</div>
+			<div class="fourCols">
+				<div id="portOfRegistry"></div>
+				<div id="officialNumber"></div>
+				<div id="satComAnsBack"></div>
+			</div>
+			<div class="fourCols">
+				<div class="fourColsLabel">Flag</div>
+				<div class="fourColsLabel">Sat Com ID</div>
+				<div class="fourColsLabel">Fishing Number</div>
+			</div>
+			<div class="fourCols">
+				<div id="regFlag"></div>
+				<div id="satComId"></div>
+				<div id="fishingNumber"></div>
+			</div>
+		</div>
+		<h3>Ownership</h3>
+		<div id="ownership" class="fourColsContainer">
+			<div class="fourCols">
+				<div class="fourColsLabel">Group Owner</div>
+				<div class="fourColsLabel">Ship Manager</div>
+				<div class="fourColsLabel">Operator</div>
+				<div class="fourColsLabel">DOC Company</div>
+				<div class="fourColsLabel">Registered Owner</div>
+				<div class="fourColsLabel">Technical Manager</div>
+				<div class="fourColsLabel">Bareboat Owner</div>
+			</div>
+			<div class="fourCols">
+				<div id="ownershipGroupOwner"></div>
+				<div id="ownershipShipManager"></div>
+				<div id="ownershipOperator"></div>
+				<div id="ownershipDocCompany"></div>
+				<div id="ownershipRegisteredOwner"></div>
+				<div id="ownershipTechnicalManager"></div>
+				<div id="ownershipBareboatOwner"></div>
+			</div>
+			<div class="fourCols">
+				<div class="fourColsLabel">Location</div>
+				<div class="fourColsLabel">Location</div>
+				<div class="fourColsLabel">Location</div>
+				<div class="fourColsLabel">Location</div>
+				<div class="fourColsLabel">Location</div>
+				<div class="fourColsLabel">Location</div>
+				<div class="fourColsLabel">Location</div>
+			</div>
+			<div class="fourCols">
+				<div id="location1"></div>
+				<div id="location2"></div>
+				<div id="location3"></div>
+				<div id="location4"></div>
+				<div id="location5"></div>
+				<div id="location6"></div>
+				<div id="location7"></div>
+			</div>
+			<div class="fourCols">
+				<div class="fourColsLabel">IMO Company No (DOC)</div>
+				<div class="fourColsLabel">IMO Registered Owner No</div>
+			</div>
+			<div class="fourCols">
+				<div id="imoCompanyNo"></div>
+				<div id="imoRegisteredOwnerNo"></div>
+			</div>
+		</div> 
+		<h3>Commercial History</h3>
+		<div id="commercialHistory" class="fourColsContainer">
+			<div class="fourCols">
+				<div class="fourColsLabel">Date</div>
+				<div class="fourColsLabel">Name</div>
+				<div class="fourColsLabel">Flag</div>
+				<div class="fourColsLabel">Group Owner</div>
+				<div class="fourColsLabel">Operator</div>
+				<div class="fourColsLabel">Manager</div>
+				<div class="fourColsLabel">Registered Owner</div>
+				<div class="fourColsLabel">DOC</div>
+				<div class="fourColsLabel">Price</div>
+			</div>
+			<div class="fourCols">
+				<div id="commDate"></div>
+				<div id="commName"></div>
+				<div id="commFlag"></div>
+				<div id="commGroupOwner"></div>
+				<div id="commOperator"></div>
+				<div id="commManager"></div>
+				<div id="commRegisteredOwner"></div>
+				<div id="commDoc"></div>
+				<div id="commPrice"></div>				
+			</div>
+		</div>
+		<h3>Class</h3>
+		<div id="">
+		</div>
+		<h3>Surveys</h3>
+		<div id="">
+		</div> 	
+		<h3>Construction</h3>
+		<div id="">
+		</div> 
+		<h3>Cargo & Gear</h3>
+		<div id="">
+		</div>
+		<h3>Machinery</h3>
+		<div id="">
+		</div> 
+		<h3>Classified</h3>
+		<div id="">
+		</div> 
+		<h3>Event Timeline</h3>
+		<div id="">
+		</div>
+		<h3>Photographs</h3>
+		<div id="photographs">
+			<!-- get thumbnails -->
+			<!-- links for slideshow -->
+			<!-- main slideshow content -->
+			<ul id="lightSlider">
+				<li data-thumb="img/1367473.simg">
+					<img src="img/1367473.simg" />
+				</li>
+				<li data-thumb="img/1411693.simg">
+					<img src="img/1411693.simg" />
+				</li>
+				<li data-thumb="img/1519290.simg">
+					<img src="img/1519290.simg" />
+				</li>
+				<li data-thumb="img/1519292.simg">
+					<img src="img/1519292.simg" />
+				</li>
+				<li data-thumb="img/1519294.simg">
+					<img src="img/1519294.simg" />
+				</li>
+				<li data-thumb="img/1519296.simg">
+					<img src="img/1519296.simg" />
+				</li>
+			</ul>
+		</div>
+		<h3>Movements</h3>
+		<div id="movements">
+		</div>  
+		<h3>Ship Performance</h3>
+		<div id="">
+		</div> 	
+	</div>
+</body>
+</html>
+

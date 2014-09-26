@@ -1,0 +1,94 @@
+<html> 
+<head> 
+<title>ICODE-MDA Legend</title> 
+
+<link rel="stylesheet" type="text/css" href="css/tablestyle.css">
+
+<script type="text/javascript" src="/ICODEMDAMaps-Julie/owf/js-min/owf-widget-debug.js"></script>
+<script type="text/javascript" language="Javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+
+<script type="text/javascript"> 
+// OWF Eventing Handlers to publish on Channels
+function toggleTMACSHeadWMSLayerHandler() {
+	$('#TMACShead').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("layerTypes_toggleTMACSHeadWMSLayer", check);
+	});
+}
+function toggleTMACSHistoryWMSLayerHandler() {
+	$('#TMACShistory').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("layerTypes_toggleTMACSHistoryWMSLayer", check);
+	});
+}
+
+function toggleCountryBordersHandler() {
+	$('#enableCountryBorders').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("layerTypes_toggleCountryBorders", check);
+	});
+}
+
+function toggleClusterHandler() {
+	$('#enableCluster').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("layerTypes_toggleCluster", check);
+	});
+}
+function toggleEEZLayerHandler() {
+	$('#EEZLayer').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("layerTypes_toggleEEZLayer", check);
+	});
+}
+function toggleWeatherLayerHandler() {
+	$('#WeatherLayer').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("layerTypes_toggleWeatherLayer", check);
+	});
+}
+function togglePortLayerHandler() {
+	$('#PortLayer').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("layerTypes_togglePortLayer", check);
+	});
+}
+function toggleHeatmapLayerHandler() {
+	$('#HeatmapLayer').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("layerTypes_toggleHeatmapLayer", check);
+	});
+}
+
+</script>
+</head> 
+
+<body> 
+<div id="panel_top">
+	<div id="logo">
+        <h2><a style="color: rgb(255,255,255)" href=".">ICODE-MDA</a></h2>
+    </div>
+</div>
+
+<h3>Layer Types</h3>
+<div id="layer_types">
+	<div id="tmacslayer">
+		<center><b>TMACS WMS</b></center>
+		<input class="checkbox" id="TMACShead" name="TMACShead" type="checkbox" onclick="toggleTMACSHeadWMSLayerHandler();"> TMAC Trackheads<br>
+		<input class="checkbox" id="TMACShistory" name="TMACShistory" type="checkbox" onclick="toggleTMACSHistoryWMSLayerHandler();"> Track History<br>
+	</div>
+	<br>
+	<hr>
+	<center><b>Other Information</b></center>
+	<input class="checkbox" id="enableCountryBorders" name="enableCountryBorders" type="checkbox" onclick="toggleCountryBordersHandler();"> Enable country borders<br>
+	<input class="checkbox" id="enableCluster" name="Enable Clusters" type="checkbox" checked="checked" onclick="toggleClusterHandler();"> Enable Clusters when zoomed out<br>
+	<!-- <input class="checkbox" id="HeatmapLayer" name="HeatmapLayer" type="checkbox" onclick="toggleHeatmapLayer();"> <img align="top" width="20px" src="icons/heatmap.png" style="padding-bottom: 4px; vertical-align: middle;"> Heatmap Layer<br> -->
+	<input class="checkbox" id="EEZLayer" name="EEZLayer" type="checkbox" onclick="toggleEEZLayerHandler();"> EEZ Layer<br>
+	<input class="checkbox" id="WeatherLayer" name="WeatherLayer" type="checkbox" onclick="toggleWeatherLayerHandler();"> <img align="top" width="20px" src="icons/weather_icon.png" style="padding-bottom: 4px; vertical-align: middle;"> Weather Layer<br>
+	<!-- input class="checkbox" id="KMLLayer" name="KMLLayer" type="checkbox" onclick="toggleKMLLayer();"> <img align="top" width="20px" src="icons/kml.png" style="padding-bottom: 4px; vertical-align: middle;"> KML Layer<br> -->
+	<input class="checkbox" id="PortLayer" name="PortLayer" type="checkbox" onclick="togglePortLayerHandler();"> <img align="top" height="20px" src="icons/anchor_port.png" style="padding-bottom: 4px; vertical-align: middle;"> Port Layer<br>
+	<input class="checkbox" id="HeatmapLayer" name="HeatmapLayer" type="checkbox" onclick="toggleHeatmapLayerHandler();"> Heatmap Layer<br>
+	</p>
+</div>
+</body>
+<html>

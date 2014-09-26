@@ -1,0 +1,82 @@
+<html> 
+<head> 
+<title>ICODE-MDA Upload KMZ</title> 
+
+<link rel="stylesheet" type="text/css" href="css/tablestyle.css">
+
+<script type="text/javascript" src="/ICODEMDAMaps-Julie/owf/js-min/owf-widget-debug.js"></script>
+<script type="text/javascript" language="Javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+
+<script type="text/javascript"> 
+function toggleTMACSHeadWMSLayerHandler() {
+	$('#TMACShead').change(function(){
+		var check = this.checked ? 'true' : 'false';
+		OWF.Eventing.publish("layerTypesChannel1", check);
+	});
+}
+function toggleTMACSHistoryWMSLayerHandler() {
+	$('#TMACShistory').change(function(){
+		var check = this.checked ? 'true' : 'false';
+		OWF.Eventing.publish("layerTypesChannel2", check);
+	});
+}
+
+function toggleCountryBordersHandler() {
+	$('#enableCountryBorders').change(function(){
+		var check = this.checked ? 'true' : 'false';
+		OWF.Eventing.publish("layerTypesChannel3", check);
+	});
+}
+
+function toggleClusterHandler() {
+	$('#enableCluster').change(function(){
+		var check = this.checked ? 'true' : 'false';
+		OWF.Eventing.publish("layerTypesChannel4", check);
+	});
+}
+function toggleEEZLayerHandler() {
+	$('#EEZLayer').change(function(){
+		var check = this.checked ? 'true' : 'false';
+		OWF.Eventing.publish("layerTypesChannel5", check);
+	});
+}
+function toggleWeatherLayerHandler() {
+	$('#WeatherLayer').change(function(){
+		var check = this.checked ? 'true' : 'false';
+		OWF.Eventing.publish("layerTypesChannel6", check);
+	});
+}
+function togglePortLayerHandler() {
+	$('#PortLayer').change(function(){
+		var check = this.checked ? 'true' : 'false';
+		OWF.Eventing.publish("layerTypesChannel7", check);
+	});
+}
+function toggleHeatmapLayerHandler() {
+	$('#HeatmapLayer').change(function(){
+		var check = this.checked ? 'true' : 'false';
+		OWF.Eventing.publish("layerTypesChannel8", check);
+	});
+}
+
+</script>
+</head> 
+
+<body> 
+<div id="panel_top">
+	<div id="logo">
+        <h2><a style="color: rgb(255,255,255)" href=".">ICODE-MDA</a></h2>
+    </div>
+</div>
+
+<h3>Upload KMZ</h3>
+<div>
+	Upload KMZ: <br />
+	<form id="kmlform" >
+		<input class="inputfilebutton" type="file" name="file" size="5" />
+		<input class="inputfilebutton" type="button" onClick="fileUpload(this.form,'kml/kmzextract.php','upload'); return false;" value="Upload">
+	</form>
+	<div id="upload"></div>
+</div>
+</body>
+<html>

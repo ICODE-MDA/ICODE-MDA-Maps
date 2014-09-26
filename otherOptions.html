@@ -1,0 +1,202 @@
+<html> 
+<head> 
+<title>ICODE-MDA Other Options</title> 
+
+<link rel="stylesheet" type="text/css" href="css/tablestyle.css">
+
+<script type="text/javascript" src="/ICODEMDAMaps-Julie/owf/js-min/owf-widget-debug.js"></script>
+<script type="text/javascript" language="Javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+ 
+<script type="text/javascript"> 
+// OWF Eventing Handlers to publish on Channels
+function toggleShowNamesHandler() {
+	$('#showvesselnames').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("otherOptions_toggleShowNames", check);
+	});
+}
+
+function toggleDistanceToolHandler() {
+	$('#distancetooltoggle').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("otherOptions_toggleDistanceTool", check);
+	});
+}
+
+function toggleIHSTabsHandler() {
+	$('#IHSTabs').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("otherOptions_toggleIHSTabs", check);
+	});
+}
+
+function vessel_age_changed_Handler() {
+	$('#vessel_age').change(function(){
+		var option = $('#vessel_age option:selected').val();
+		OWF.Eventing.publish("otherOptions_vessel_age_changed", option);
+	});
+}
+
+function history_trail_length_changed_Handler() {
+	$('#history_trail_length').change(function() {
+		var option = $('#history_trail_length option:selected').val();
+		OWF.Eventing.publish("otherOptions_history_trail_length_changed", option);
+	});
+}
+function toggleTrackIconsHandler() {
+	$('#showtrackicons').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("otherOptions_toggleTrackIcons", check);
+	});
+}
+function toggleQueryAllTracksHandler() {
+	$('#queryalltracks').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("otherOptions_toggleQueryAllTracks", check);
+	});
+}
+
+function toggleAutoRefreshHandler() {
+	$('#autoRefresh').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("otherOptions_toggleAutoRefresh", check);
+	});
+}
+
+function refresh_rate_changed_Handler() {
+	$('#refresh_rate').change(function() {
+		var option = $('#refresh_rate option:selected').val();
+		OWF.Eventing.publish("otherOptions_refresh_rate_changed", option);
+	});
+}
+
+function reload_delay_changed_Handler() {
+	$('#reload_delay').change(function() {
+		var option = $('#reload_delay option:selected').val();
+		OWF.Eventing.publish("otherOptions_reload_delay_changed", option);
+	});
+}
+
+function toggleNeverAutoRefreshHandler() {
+	$('#neverRefresh').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("otherOptions_toggleNeverAutoRefresh", check);
+	});
+}
+function toggleDayNightOverlayHandler() {
+	$('#showdaynightoverlay').change(function(){
+		var check = this.checked ? true : false;
+		OWF.Eventing.publish("otherOptions_toggleDayNightOverlay", check);
+	});
+}
+</script> 
+
+</head> 
+
+<body> 
+<div id="panel_top">
+	<div id="logo">
+        <h2><a style="color: rgb(255,255,255)" href=".">ICODE-MDA</a></h2>
+    </div>
+</div>
+		
+<h3>Other Options</h3>
+<div>
+	<!--
+	<form id="distancetoolform" >
+		<input class="inputfilebutton" id="distancetooltoggle" type="button" onClick="toggleDistanceTool();" value="Enable distance tool">
+	</form>
+	-->
+    <input class="checkbox" id="showvesselnames" name="Show Vessel Names" type="checkbox" checked="checked" onclick="toggleShowNamesHandler();"> Show vessel names<br>
+    <input class="checkbox" id="distancetooltoggle" name="distancetooltoggle" type="checkbox" onclick="toggleDistanceToolHandler();"> Enable distance tool<br>
+    <input class="checkbox" id="IHSTabs" name="IHSTabs" type="checkbox" onclick="toggleIHSTabsHandler();"> Enable IHS Tabs<br>
+	<hr>
+	Only show vessels up to 
+	<select id="vessel_age" onChange="vessel_age_changed_Handler();">
+		<option value="no limit">No limit</option>
+		<option value="0.0833333333333333">5 mins</option>
+		<option value="0.25" selected="selected">15 mins</option>
+		<option value="1">1 hours</option>
+		<option value="2">2 hours</option>
+		<option value="3">3 hours</option>
+		<option value="4">4 hours</option>
+		<option value="5">5 hours</option>
+		<option value="6">6 hours</option>
+		<option value="7">7 hours</option>
+		<option value="8">8 hours</option>
+		<option value="9">9 hours</option>
+		<option value="10">10 hours</option>
+		<option value="11">11 hours</option>
+		<option value="12">12 hours</option>
+		<option value="24">24 hours</option>
+		<option value="48">48 hours</option>
+		<option value="72">72 hours</option>
+	</select>
+	<hr>
+	History trail length: 
+	<select id="history_trail_length" onChange="history_trail_length_changed_Handler();">
+		<option value="no limit">No limit</option>
+		<option value="0.25" selected="selected">6 hours</option>
+		<option value="0.5" selected="selected">12 hours</option>
+		<option value="1" selected="selected">1 day</option>
+		<option value="2">2 days</option>
+		<option value="3">3 days</option>
+		<option value="4">4 days</option>
+		<option value="5">5 days</option>
+		<option value="6">6 days</option>
+		<option value="7">7 days</option>
+		<option value="8">8 days</option>
+		<option value="9">9 days</option>
+		<option value="10">10 days</option>
+		<option value="11">11 days</option>
+		<option value="12">12 days</option>
+		<option value="13">13 days</option>
+		<option value="14">14 days</option>
+		<option value="15">15 days</option>
+		<option value="31">31 days</option>
+	</select>
+	<br>
+	<input class="checkbox" id="showtrackicons" name="showtrackicons" type="checkbox" checked="checked" onclick="toggleTrackIconsHandler();"> Enable track icons<br>
+	<input class="checkbox" id="queryalltracks" name="queryalltracks" type="checkbox" onclick="toggleQueryAllTracksHandler();"> Query tracks for vessels in view<br>
+	<hr>
+	<div id="refreshoptions">
+		<input class="checkbox" id="autoRefresh" name="autoRefresh" type="checkbox" checked="checked" onclick="toggleAutoRefreshHandler();"> Automatically refresh (1 min)<br>
+		Auto-refresh rate: 
+		<select id="refresh_rate" onChange="refresh_rate_changedHandler();">
+			<option value="0.16">10 seconds</option>
+            <option value="0.5">30 seconds</option>
+            <option value="1" selected="selected">1 minute</option>
+            <option value="5">5 minutes</option>
+        </select><br>                 
+        Reload delay: 
+        <select id="reload_delay" onChange="reload_delay_changed_Handler();">
+            <option value="0" selected="selected">0</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+        </select> seconds<br>
+    </div>
+    <input class="checkbox" id="neverRefresh" name="neverRefresh" type="checkbox" onclick="toggleNeverAutoRefreshHandler();"> Never refresh unless manually triggered (by hitting spacebar)<br>
+    <hr>
+    Vessel Icon Size: 
+    <input type="button" onclick="decreaseVesselIconSize()" value="-"></input>
+    <input type="button" onclick="increaseVesselIconSize()" value="+"></input>
+    <input type="button" onclick="resetVesselIconSize()" value="Reset"></input>
+    <hr>
+
+    <input class="checkbox" id="showdaynightoverlay" name="Show Day/Night Overlay" type="checkbox" onclick="toggleDayNightOverlayHandler();"> Show Day/Night Overlay<br>
+    <hr>
+    <p>
+    <b>Hidden Tricks:</b><br>
+    <ul>
+        <li>Right click a target to quickly acquire track history.</li>
+        <li>Right click track history to delete.</li>
+        <li>Don't query tracks for vessels in view if many vessels are in view!</li>
+        <li>Click the black vertical bar on the right to hide this menu.</li>
+        <li>Click anywhere on the map to hide a visible infoBubble.</li>
+        <li>Click on track history markers to display dead-reckoning prediction to next point in history.</li>
+        <li>Press '?' for Keyboard shortcuts.</li>
+     </ul>
+</div>
+</body> 
+</html>
