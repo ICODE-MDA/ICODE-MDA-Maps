@@ -30,10 +30,11 @@ if (!$connection) {
 }
 
 
-//DEBUG
-$userid = "testuser";
 
 if(count($_GET) > 0) { 
+   if (!empty($_GET["userid"])) { 
+      $userid = (string)$_GET["userid"];
+   }
    if (!empty($_GET["alertPolygon"])) { 
       $polygon = (string)$_GET["alertPolygon"];
    }

@@ -245,7 +245,9 @@ function saveAlert(){
       return;
    }
 
-   var phpWithArg = 'query_alert_setup.php?alertPolygon=' + alertPolygonString;
+   var phpWithArg = 'query_alert_setup.php?userid=' + userid;
+
+   phpWithArg += '&alertPolygon=' + alertPolygonString;
 
    var entering = $('#alertenteringarea');
    var exiting = $('#alertexitingarea');
@@ -284,9 +286,9 @@ function saveAlert(){
       console.log('saveAlert(): Added new alert id ' + response.alert_id);
 
       //TODO: Add criteria to database here
+
       
-      //TODO: notify server about newly added alert so that it can be added for monitoring
-      //TEST
+      //Notify server about newly added alert so that it can be added for monitoring
       var connection = new WebSocket('ws://128.49.78.214:2411');
 
       //==================== Opened connection to the server =========================
@@ -299,7 +301,6 @@ function saveAlert(){
          //TODO: listen for success response from server
          connection.close();
       };
-      //TEST
 
       //Exit the "setup alert" mode
       setAlertEnd();

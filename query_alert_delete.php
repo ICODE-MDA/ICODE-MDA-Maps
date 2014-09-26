@@ -69,10 +69,10 @@ header('Content-type: application/json');
 $memused = memory_get_usage(false);
 
 //Returned data (includes queries used for debugging/development -> UNSAFE!)
-$data = array(query => $query, exectime => $totaltime, memused => $memused, alert_id => $alert_id);
+$data = array(query => $query, exectime => $totaltime, memused => $memused, alert_id => $id);
 
 //Returned data, SAFE  
-//$data = array(exectime => $totaltime, memused => $memused, alert_id => $alert_id);
+//$data = array(exectime => $totaltime, memused => $memused, alert_id => $id);
 
 echo json_encode($data, JSON_PRETTY_PRINT);
 ?>
