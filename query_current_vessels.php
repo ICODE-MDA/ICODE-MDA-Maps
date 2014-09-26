@@ -104,7 +104,7 @@ if(count($_GET) > 0) {
           }
 
           //Check if a 'WHERE' has already been inserted into the query, append 'AND' if so.
-          if ($timemachine || strpos($query, "where sog") !== FALSE ) {
+          if ($timemachine || strpos($query, "where") !== FALSE ) {
              $query = $query . " AND";
           }
           else {  //Append 'WHERE' since there is no previous WHERE
