@@ -1,0 +1,55 @@
+﻿Merge branch 'master' into Widgets
+
+Conflicts:
+	css/mapstyle.css
+	index.html
+	scripts/icode-maps.js
+	scripts/setup-alerts.js
+	setup-alerts.html
+#
+# It looks like you may be committing a merge.
+# If this is not correct, please remove the file
+#	.git/MERGE_HEAD
+# and try again.
+
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch Widgets
+# Your branch is up-to-date with 'origin/Widgets'.
+#
+# All conflicts fixed but you are still merging.
+#
+# Changes to be committed:
+#	modified:   css/alert.css
+#	modified:   css/mapstyle-mobile.css
+#	modified:   css/mapstyle.css
+#	new file:   css/toastr.css
+#	new file:   icons/loginavatar.gif
+#	modified:   index.html
+#	new file:   query_alert_delete.php
+#	new file:   query_alert_setup.php
+#	modified:   query_current_vessels.php
+#	new file:   scripts/GeoJSON.js
+#	new file:   scripts/alertclient.js
+#	new file:   scripts/alertsetup.js
+#	new file:   scripts/dragdrop.js
+#	modified:   scripts/icode-maps.js
+#	modified:   scripts/searchgui.js
+#	new file:   scripts/toastr.js
+#	new file:   scripts/togeojson.js
+#	modified:   setup-alerts.html
+#
+# Changes not staged for commit:
+#	modified:   css/mapstyle.css
+#	modified:   index.html
+#	modified:   scripts/icode-maps.js
+#	modified:   setup-alerts.html
+#
+# Untracked files:
+#	scripts/setup-alerts.js.BACKUP.8324.js
+#	scripts/setup-alerts.js.BASE.8324.js
+#	scripts/setup-alerts.js.LOCAL.8324.js
+#	scripts/setup-alerts.js.REMOTE.8324.js
+#
+

@@ -175,7 +175,9 @@ function doQuerySearch() {
 	var qStr = "SELECT * ";
 	if (customQuerySplit != "none") {
 		qStr = qStr + "FROM icodemda.vessels_memory VESSELS ";
-		qStr = qStr + "WHERE(MMSI like ('%" + customQuerySplit +"%') ";
+		qStr = qStr + "WHERE Latitude BETWEEN " + latSplit[0] + " AND " + latSplit[1] +" ";
+		qStr = qStr + "AND Longitude BETWEEN " + lonSplit[0] + " AND " + lonSplit[1] + " ";
+		qStr = qStr + "AND (MMSI like ('%" + customQuerySplit +"%') ";
 		qStr = qStr + "OR IMONumber like ('%" + customQuerySplit +"%') ";
 		qStr = qStr + "OR Name like ('%" + customQuerySplit +"%') ";
 		qStr = qStr + "OR Destination like ('%" + customQuerySplit +"%') ";
@@ -183,9 +185,12 @@ function doQuerySearch() {
 		qStr = qStr + "OR RxStnID like ('%" + customQuerySplit +"%')) ";
 		qStr = qStr + "ORDER BY VESSELS.MMSI";
 		
-		qStr = customQuerySplit;
+		//qStr = customQuerySplit;
 	} else {
 		qStr = qStr + "FROM icodemda.vessels_memory VESSELS ";
+		qStr = qStr + "WHERE Latitude BETWEEN " + latSplit[0] + " AND " + latSplit[1] +" ";
+		qStr = qStr + "AND Longitude BETWEEN " + lonSplit[0] + " AND " + lonSplit[1] + " ";
+		qStr = qStr + "ORDER BY VESSELS.MMSI";
 	}
 	
 	// send query to maps widget; maps will refresh

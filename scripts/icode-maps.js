@@ -211,41 +211,15 @@ function initialize() {
    //Set up map properties
    //var centerCoord = new google.maps.LatLng(0,0);
    //var centerCoord = new google.maps.LatLng(32.72,-117.2319);   //Point Loma
-   //var centerCoord = new google.maps.LatLng(6.0,1.30);   //Lome, Togo
+   var centerCoord = new google.maps.LatLng(6.0,1.30);   //Lome, Togo
    //var centerCoord = new google.maps.LatLng(2.0,1.30);     //GoG
-   var centerCoord = new google.maps.LatLng(-33.0, -71.6);   //Valparaiso, Chile
+   //var centerCoord = new google.maps.LatLng(-33.0, -71.6);   //Valparaiso, Chile
    //var centerCoord = new google.maps.LatLng(17.978677, -16.078958);   //Nouakchott, Mauritania
    //var centerCoord = new google.maps.LatLng(13.273461807246479, -13.465625000000037);   //Zoomed out world view
    
-   if(navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(position) {
-         var pos = new google.maps.LatLng(
-            position.coords.latitude,
-            position.coords.longitude
-         );
-
-         //Set the center location
-         centerCoords = pos;
-         //map.setCenter(centerCoords);
-
-         var geocoder = new google.maps.Geocoder();
-         geocoder.geocode({'latLng': pos}, function(results, status) {
-            if (status == google.maps.GeocoderStatus.OK) {
-               if (results[1]) {
-                  $('#geocodeAddress').val(results[1].formatted_address);
-               } else {
-                  console.log('Geocoded address not found');
-                  $('#geocodeAddress').val('San Diego, CA');
-               }
-            } else {
-               console.log('Geocoder failed due to: ' + status);
-            }            
-         });
-      }, function() {
-         console.log('Browser does not support geolocation');
-         //handleNoGeolocation(true);
-      });
-   }
+   /* Uses browser location to fill in more precise user location in the geocode box
+    * currently disabled to prevent annoying browser warning messages
+    */
 
    //Detect iPhone or Android devices and set map to 100%
    var controlStyle;
@@ -493,7 +467,9 @@ function initialize() {
             toggleDistanceTool();
             break;
          case 69: // e
-            $('#setupAlert').trigger( "click" );
+            if ($('#alertPanel').is(":visible")) {
+               $('#setupAlert').trigger( "click" );
+            }
             break;
          case 71: // g
             if (document.getElementById("enableCluster") != null &&
@@ -883,7 +859,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
 
    console.log("Refreshing target points...");
    document.getElementById("query").value = "QUERY RUNNING...";
-   document.getElementById('stats_nav').innerHTML = '';
+   document.getElementById('stats').innerHTML = '';
    document.getElementById('busy_indicator').style.visibility = 'visible';
    NProgress.start();   //JS library top progress bar
 
@@ -924,13 +900,19 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
       else {
          console.log('Entered custom query: ' + customQuery);
 
-         if (customQuery.indexOf('WHERE Latitude') != -1) {
-            customQuery = customQuery.substring(0, customQuery.indexOf('WHERE Latitude')-1)
-         }
-         console.log('Performing custom query on: ' + customQuery);
+         //If custom query supplies a lat/lon bound, then don't append
+         if (customQuery.toLowerCase().indexOf('where l') != -1) {
+            //customQuery = customQuery.substring(0, customQuery.indexOf('WHERE Latitude')-1)
 
-         //Custom SQL query statement
-         phpWithArg = "query_current_vessels.php?query=" + customQuery + boundStr;
+            console.log('Not appending anything to custom query');
+            phpWithArg = 'query_current_vessels.php?query=' + customQuery + '&noappend=1';
+         }
+         else {
+            //Custom SQL query statement
+            phpWithArg = "query_current_vessels.php?query=" + customQuery + boundStr;
+         }
+
+         console.log('Performing custom query on: ' + customQuery);
          
          //if vessel age limit was chosen, then add option
          if (vessel_age != -1) {
@@ -1356,16 +1338,22 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
          //Update activity status spinner and results
          console.log('getTargetsFromDB(): ' + "Total number of markers = " + markerArray.length);
          document.getElementById('busy_indicator').style.visibility = 'hidden';
-         document.getElementById('stats_nav').innerHTML = 
+         document.getElementById('stats').innerHTML = 
             //response.resultcount + " results<br>" + 
             markersDisplayed.length + " results<br>" + //Use markersDisplayed array length to include RADAR and LAISIC markers
             Math.round(response.exectime*1000)/1000 + " secs";
          NProgress.done();   //JS library top progress bar
       }) //END .done()
-      .fail(function() { 
-         //Update activity status spinner and results
-         console.log('getTargetsFromDB(): ' +  'No response from track query; error in php?'); 
-         document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
+      .fail(function(d, textStatus, error) { 
+         if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+            console.log('getTargetsFromDB(): ' +  'Database is down'); 
+            document.getElementById("query").value = "DATABASE IS DOWN.";
+         }
+         else {
+            //Update activity status spinner and results
+            console.log('getTargetsFromDB(): ' +  'No response from track query; error in php?'); 
+            document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
+         }
          document.getElementById('busy_indicator').style.visibility = 'hidden';
          NProgress.done();   //JS library top progress bar
          return false; 
@@ -1380,7 +1368,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
 function getClustersFromDB(bounds, customQuery) {
    console.log("Refreshing target points...");
    document.getElementById("query").value = "QUERY RUNNING...";
-   document.getElementById('stats_nav').innerHTML = '';
+   document.getElementById('stats').innerHTML = '';
    document.getElementById('busy_indicator').style.visibility = 'visible';
    NProgress.start();   //JS library top progress bar
 
@@ -1569,14 +1557,21 @@ function getClustersFromDB(bounds, customQuery) {
 
 
          document.getElementById('busy_indicator').style.visibility = 'hidden';
-         document.getElementById('stats_nav').innerHTML = 
+         document.getElementById('stats').innerHTML = 
             totalsum + " results<br>" + 
             Math.round(response.exectime*1000)/1000 + " secs";
          NProgress.done();   //JS library top progress bar
       }) //end .done()
-      .fail(function() { 
-         console.log('getClustersFromDB(): ' +  'No response from track query; error in php?'); 
-         document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
+      .fail(function(d, textStatus, error) { 
+         if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+            console.log('getClustersFromDB(): ' +  'Database is down'); 
+            document.getElementById("query").value = "DATABASE IS DOWN.";
+         }
+         else {
+            //Update activity status spinner and results
+            console.log('getClustersFromDB(): ' +  'No response from track query; error in php?'); 
+            document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
+         }
          document.getElementById('busy_indicator').style.visibility = 'hidden';
          NProgress.done();   //JS library top progress bar
          return; 
@@ -1736,7 +1731,7 @@ function generateInfoHTML(vessel, vesseltype, title) {
       '<a href="https://marinetraffic.com/ais/shipdetails.aspx?MMSI=' + vessel.mmsi + '"  target="_blank"> '+
       '<img id="marinetrafficimage" title="Click to open MarineTraffic page" width=180px src="' + imgURL + '">' + 
       '</a><br>' + 
-      '<a href="http://www.sea-web.com/lrupdate.aspx?param1=%73%70%61%73%74%61%32%35%30&param2=%37%31%34%36%38%37&script_name=authenticated/authenticated_handler.aspx&control=list&SearchString=MMSI+=+' + vessel.mmsi + '&ListType=Ships" target="_blank">Sea-Web link</a><br>' + 
+      '<a href="http://www.sea-web.com/lrupdate.aspx?param1=spatab833&param2=719766&script_name=authenticated/authenticated_handler.aspx&control=list&SearchString=MMSI+=+' + vessel.mmsi + '&ListType=Ships" target="_blank">Sea-Web link (broken)</a><br>' + 
       '<div id="content-sub" border=1>' +
       '<b>MMSI</b>: ' + vessel.mmsi + '<br>' +
       '<b>IMO</b>: ' + vessel.imo + (passIMOChecksum(vessel.imo)==true?'':' <font color="red">(invalid)</font>') + '<br>' +
@@ -2154,7 +2149,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
        ($.inArray(trknum, tracksDisplayedID) == -1 || source == "LAISIC_AIS_TRACK") && 
        $.inArray(trknum, tracksDisplayedID) == -1) {
       document.getElementById("query").value = "QUERY RUNNING FOR TRACK...";
-      document.getElementById('stats_nav').innerHTML = '';
+      document.getElementById('stats').innerHTML = '';
       document.getElementById('busy_indicator').style.visibility = 'visible';
       NProgress.start();   //JS library top progress bar
 
@@ -2581,7 +2576,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
                   }
 
                   document.getElementById('busy_indicator').style.visibility = 'hidden';
-                  document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+                  document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
                   NProgress.done();   //JS library top progress bar
                }) //end .done()
             .fail(function() { 
@@ -3175,7 +3170,7 @@ function togglePortLayer() {
 /* -------------------------------------------------------------------------------- */
 function showPorts() {
    document.getElementById("query").value = "QUERY RUNNING FOR PORTS...";
-   document.getElementById('stats_nav').innerHTML = '';
+   document.getElementById('stats').innerHTML = '';
    document.getElementById('busy_indicator').style.visibility = 'visible';
    NProgress.start();   //JS library top progress bar
 
@@ -3247,7 +3242,7 @@ function showPorts() {
       });
 
       document.getElementById('busy_indicator').style.visibility = 'hidden';
-      document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
@@ -3318,7 +3313,7 @@ function showPorts() {
       });
 
       document.getElementById('busy_indicator').style.visibility = 'hidden';
-      document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
@@ -3423,7 +3418,7 @@ function showPorts() {
 
 
       document.getElementById('busy_indicator').style.visibility = 'hidden';
-      document.getElementById('stats_nav').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
@@ -3835,16 +3830,17 @@ function abortTimer() { // to be called when you want to stop the timer
 }
     */
 
-	//Track head
-	if (document.getElementById("TMACShead") && document.getElementById("TMACShead").checked) {
-		//TMACS WMS
-		tmacsHeadWMS = new google.maps.ImageMapType(wmsTMACSheadOptions);
-		map.overlayMapTypes.insertAt(0, tmacsHeadWMS);
-		//map.overlayMapTypes.push(tmacsHeadWMS);
-	} else {
-		map.overlayMapTypes.setAt(0,null);
-		//map.overlayMapTypes.removeAt(0);
-	}
+   //Track head
+   if (document.getElementById("TMACShead") && document.getElementById("TMACShead").checked) {
+      //TMACS WMS
+      tmacsHeadWMS = new google.maps.ImageMapType(wmsTMACSheadOptions);
+      map.overlayMapTypes.insertAt(0, tmacsHeadWMS);
+      //map.overlayMapTypes.push(tmacsHeadWMS);
+   }
+   else {
+      map.overlayMapTypes.setAt(0,null);
+      //map.overlayMapTypes.removeAt(0);
+   }
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -4541,7 +4537,7 @@ function togglePanel() {
    $( "#panel" ).toggle("slide", { direction: 'right' }, 180);
    //$( "#panel" ).effect('fade').dequeue().toggle("slide", { direction: 'right' }, 180);
 
-   !panelhidden ? $( "#showpanel" ).html("<<br><<br><") : $( "#showpanel" ).html("><br>><br>>");
+   !panelhidden ? $( "#showpanel" ).html("<div class='arrow-left'></div>") : $( "#showpanel" ).html("<div class='arrow-right'></div>");
    panelhidden = !panelhidden;
    return false;
 }
@@ -4805,7 +4801,10 @@ function resetVesselIconSize() {
    refreshMaps(true);
 }
 
-
+/* -------------------------------------------------------------------------------- */
+/**
+ * 
+ **/
 function initializeBrowserFocus() {
    function onBlur() {
       document.body.className = 'blurred';
@@ -4833,4 +4832,3 @@ function initializeBrowserFocus() {
       window.onblur = onBlur;
    }
 }
-
