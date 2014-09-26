@@ -932,13 +932,19 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
       else {
          console.log('Entered custom query: ' + customQuery);
 
-         if (customQuery.indexOf('WHERE Latitude') != -1) {
-            customQuery = customQuery.substring(0, customQuery.indexOf('WHERE Latitude')-1)
-         }
-         console.log('Performing custom query on: ' + customQuery);
+         //If custom query supplies a lat/lon bound, then don't append
+         if (customQuery.toLowerCase().indexOf('where l') != -1) {
+            //customQuery = customQuery.substring(0, customQuery.indexOf('WHERE Latitude')-1)
 
-         //Custom SQL query statement
-         phpWithArg = "query_current_vessels.php?query=" + customQuery + boundStr;
+            console.log('Not appending anything to custom query');
+            phpWithArg = 'query_current_vessels.php?query=' + customQuery + '&noappend=1';
+         }
+         else {
+            //Custom SQL query statement
+            phpWithArg = "query_current_vessels.php?query=" + customQuery + boundStr;
+         }
+
+         console.log('Performing custom query on: ' + customQuery);
          
          //if vessel age limit was chosen, then add option
          if (vessel_age != -1) {
@@ -1757,7 +1763,7 @@ function generateInfoHTML(vessel, vesseltype, title) {
       '<a href="https://marinetraffic.com/ais/shipdetails.aspx?MMSI=' + vessel.mmsi + '"  target="_blank"> '+
       '<img id="marinetrafficimage" title="Click to open MarineTraffic page" width=180px src="' + imgURL + '">' + 
       '</a><br>' + 
-      '<a href="http://www.sea-web.com/lrupdate.aspx?param1=spatab833&param2=719766&script_name=authenticated/authenticated_handler.aspx&control=list&SearchString=MMSI+=+' + vessel.mmsi + '&ListType=Ships" target="_blank">Sea-Web link</a><br>' + 
+      '<a href="http://www.sea-web.com/lrupdate.aspx?param1=spatab833&param2=719766&script_name=authenticated/authenticated_handler.aspx&control=list&SearchString=MMSI+=+' + vessel.mmsi + '&ListType=Ships" target="_blank">Sea-Web link (broken)</a><br>' + 
       '<div id="content-sub" border=1>' +
       '<b>MMSI</b>: ' + vessel.mmsi + '<br>' +
       '<b>IMO</b>: ' + vessel.imo + (passIMOChecksum(vessel.imo)==true?'':' <font color="red">(invalid)</font>') + '<br>' +

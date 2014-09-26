@@ -82,7 +82,7 @@ if(count($_GET) > 0) {
     $basequery = $query;
 
     //Add geo bounding box constraint
-    if (strpos($query, "WHERE Latitude") !== FALSE) {
+    if (strpos($query, "WHERE Latitude") !== FALSE || !empty($_GET["noappend"])) {
        //don't add anything to query
     }
     else {

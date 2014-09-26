@@ -212,6 +212,10 @@ $(function start() {
       $('<input />', {type: 'button', id: 'show_polygon_id'+id, value: 'Zoom to Polygon' }).appendTo($('#alert_id' + id));
       //$('#alert_id' + id).append('<a href="" onclick="zoomToPolygon('+id+'); return false;">Zoom into Polygon</a>');
 
+      $('#alert_id' + id).append('<br>');
+
+      //Edit alert
+      $('<input />', {type: 'button', id: 'edit_alert_button'+id, value: 'Edit Alert' }).appendTo($('#alert_id' + id));
       //Delete alert
       $('<input />', {type: 'button', id: 'delete_alert_button'+id, value: 'Delete Alert' }).appendTo($('#alert_id' + id));
 
@@ -239,6 +243,10 @@ $(function start() {
       $('#show_polygon_id' + id).click(function () {
          console.log('Zooming into polygon ' + id);
          zoomToPolygon(id);
+      });
+
+      $('#edit_alert_button' + id).click(function () {
+         alert('Edit alert not yet implemented');
       });
 
       $('#delete_alert_button' + id).click(function () {
@@ -502,8 +510,8 @@ $(function start() {
                connection.close();
             };
 
-            //Exit the "setup alert" mode
-            setAlertEnd();
+            //Send visual alert of deletion success
+            alert('Alert ' + id + ' successfully deleted.');
          }) // END .done()
       .fail(function() {
          console.log('deleteAlertFromDB(): ' +  'No response from alert database; error in php?'); 
