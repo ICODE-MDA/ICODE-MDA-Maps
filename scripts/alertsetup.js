@@ -41,6 +41,12 @@ function setupAlertInitialize() {
    //Add listeners to drawing events
    google.maps.event.addListener(map, 'click', addPoint);
 
+   //Auto populate the email field based on the global userid
+   if (userid == 'icodeuser') {
+      setTimeout(function() {
+      $('#emailaddress').val('icodemda@gmail.com');
+      }, 100);
+   }
 
    //Listen for end setup mode
    $('#setup-alert-modal').bind('dialogclose', function(event) {

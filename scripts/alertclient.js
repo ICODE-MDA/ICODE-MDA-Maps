@@ -110,6 +110,7 @@ $(function start() {
       // the massage is not chunked or otherwise damaged.
       try {
          var json = JSON.parse(message.data);
+         console.log('Message from alertServer:', json);
       } catch (e) {
          console.log('Alert server sent non-JSON formatted data: ', message.data);
          return;
@@ -119,6 +120,14 @@ $(function start() {
       if (json.type === 'response') {
          var serverResponse = json.data;
          console.log('Alert server accepted the connection: ', serverResponse);
+      }
+      else if (json.type === 'resetRules') {
+         //Reset received alertRules
+         receivedAlertRules = false;
+         console.log('Removing old alert panels');
+         //TODO: Set focus to be summary panel first to prevent funky behavior
+         $('.alertPanel').remove();  //Remove all accordion alert titles
+         $('[id^=alert_id]').remove(); //Remove all accordion alert panels
       }
       //---------------------- Alert Rules received -------------------------------
       else if (json.type === 'alertRule') {
@@ -236,6 +245,7 @@ $(function start() {
          console.log('Deleting alert ' + id);
 
          hidePolygon();
+         $('#alertSummaryheading').click();
 
          //TODO: call PHP to delete from database
          deleteAlertFromDB(id);
@@ -468,13 +478,13 @@ $(function start() {
       $.getJSON(
             phpWithArg, 
             function (){ 
-               console.log('deleteAlertFromDB(): Success on adding new alert');
+               console.log('deleteAlertFromDB(): Success on deleting alert');
             }
             )
          .done(function (response) {
             //console.log('saveAlert(): ' + response.query);
 
-            console.log('deleteAlertFromDB(): Added new alert id ' + response.alert_id);
+            console.log('deleteAlertFromDB(): Deleted alert id ' + response.alert_id);
 
             //TODO: Add criteria to database here
 
