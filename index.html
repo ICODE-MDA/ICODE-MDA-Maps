@@ -54,7 +54,7 @@
      <script src="scripts/v3_eshapes.js" type="text/javascript"></script>
 
      <!-- Email Alerts -->
-     <script src="scripts/setup-alerts.js" type="text/javascript"></script>
+     <script src="scripts/alertsetup.js" type="text/javascript"></script>
 
      <link href="css/toastr.css" rel="stylesheet"/>
      <script src="scripts/toastr.js"></script>
@@ -629,7 +629,7 @@
 
      <div id="alertPanel">
         <div id="alertAccordion" class="accordion">
-           <h3><b>Real-time Alerts</b></h3>
+           <h3 id="alertSummaryheading"><b>Real-time Alerts</b></h3>
            <div id="alertSummary">
               <div>
                  <span class="alertLabel">Connecting...</span><br>
@@ -640,7 +640,7 @@
               <p align=center>
               Setup your email alerts here.
               <br>
-              <input id="setupAlert" type="button" onClick="setupAlertInitialize(); return false;" value="Setup Alert">
+              <input id="setupAlert" type="button" onClick="$('#alertSummaryheading').click();setupAlertInitialize(); return false;" value="Setup Alert">
               </p>
 
               <div id="content"></div>

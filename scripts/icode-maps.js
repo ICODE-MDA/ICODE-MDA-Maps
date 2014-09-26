@@ -499,7 +499,9 @@ function initialize() {
             toggleDistanceTool();
             break;
          case 69: // e
-            $('#setupAlert').trigger( "click" );
+            if ($('#alertPanel').is(":visible")) {
+               $('#setupAlert').trigger( "click" );
+            }
             break;
          case 71: // g
             if (document.getElementById("enableCluster") != null &&

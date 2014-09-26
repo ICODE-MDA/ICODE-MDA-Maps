@@ -14,10 +14,11 @@
 $(function start() {
    "use strict";
 
+   /*
    toastr.options = {
       "closeButton": false,
       "debug": false,
-      "positionClass": "toast-bottom-right",
+      "positionClass": "toast-bottom-left",
       "onclick": null,
       "showDuration": "300",
       "hideDuration": "1000",
@@ -28,6 +29,7 @@ $(function start() {
       "showMethod": "fadeIn",
       "hideMethod": "fadeOut"
    }
+   */
 
    // for better performance - to avoid searching in DOM
    var content = $('#content');
@@ -74,7 +76,7 @@ $(function start() {
       }, 3000);
 
       //Send response (username)
-      connection.send(user);
+      connection.send(JSON.stringify({type:'username', data: user }));
    };
 
    //==================== Closed connection to server =============================
@@ -119,7 +121,7 @@ $(function start() {
          console.log('Alert server accepted the connection: ', serverResponse);
       }
       //---------------------- Alert Rules received -------------------------------
-      else if (json.type === 'alertRules') {
+      else if (json.type === 'alertRule') {
          //Set received alertRules to true now that we are receiving the alerts
          receivedAlertRules = true;
 
@@ -132,6 +134,14 @@ $(function start() {
 
          //Create the accordion panel with new received rule
          createAccordionElement(singleAlert);
+      }
+      //---------------------- Alert deleted --------------------------------------
+      else if (json.type === 'deleteRule') {
+         //TODO: handle deleted alert rule -> remove accordion based on received ID
+         var id = json.data;
+         $('#alert_heading_id'+id).remove();  //Remove all accordion alert titles
+         $('#alert_id'+id).remove(); //Remove all accordion alert panels
+         alertArray.splice(alertArrayIndexByID(id), 1);
       }
       //---------------------- Alert received -------------------------------------
       else if (json.type === 'alertNotification') {
@@ -160,7 +170,7 @@ $(function start() {
       //---------------------- Unknown message received ---------------------------
       else {
          console.log('Alert server sent unrecognized data', json);
-         toastr.error('Unrecognized data received: ', json);
+         //toastr.error('Unrecognized data received: ', json);
       }
    };
 
@@ -174,6 +184,7 @@ $(function start() {
       //Create the accordion panel title
       var accordionElement = document.createElement('h3');
       accordionElement.className = 'alertPanel';
+      accordionElement.id = 'alert_heading_id' + id;
       accordionElement.innerHTML = 'Alert ' + id + ' for ' + singleAlert.user_id + ' (<span id="alertCount-' + id + '">0</span>)';
       //Create the accordion panel content
       var alertDiv = document.createElement('div');
@@ -192,6 +203,9 @@ $(function start() {
       $('<input />', {type: 'button', id: 'show_polygon_id'+id, value: 'Zoom to Polygon' }).appendTo($('#alert_id' + id));
       //$('#alert_id' + id).append('<a href="" onclick="zoomToPolygon('+id+'); return false;">Zoom into Polygon</a>');
 
+      //Delete alert
+      $('<input />', {type: 'button', id: 'delete_alert_button'+id, value: 'Delete Alert' }).appendTo($('#alert_id' + id));
+
       //Pretty print the alert rules/properties
       var panelContent = document.getElementById('alert_id' + id);
 
@@ -209,13 +223,22 @@ $(function start() {
             showPolygon(id);
          }
          else {
-            hidePolygon(id);
+            hidePolygon();
          }
       });
 
       $('#show_polygon_id' + id).click(function () {
          console.log('Zooming into polygon ' + id);
          zoomToPolygon(id);
+      });
+
+      $('#delete_alert_button' + id).click(function () {
+         console.log('Deleting alert ' + id);
+
+         hidePolygon();
+
+         //TODO: call PHP to delete from database
+         deleteAlertFromDB(id);
       });
 
       $('#alertRule-' + id).css('cursor', 'pointer');
@@ -233,7 +256,13 @@ $(function start() {
       //var panelContent = document.getElementById('alert_id' + singleAlert.alert_id);
       var divNewMessages = document.getElementById('alertNewMessages-' + singleAlert.alert_id);
 
-      console.log(timestamp);
+      if (typeof divNewMessages === 'undefined') {
+         console.log('newAlertReceived(): ERROR - accordion element for received alert does not exist');
+         return;
+      }
+
+      //console.log(timestamp);
+
       //panelContent.appendChild(document.createElement('pre')).innerHTML = toHumanTime(timestamp) + ' UTC';
       //panelContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(decodedAIS, undefined, 1);
       divNewMessages.innerHTML = toHumanTime(timestamp) + '<br>' + JSON.stringify(decodedAIS, undefined, 1);
@@ -243,8 +272,8 @@ $(function start() {
       alertCountSpan.innerHTML = parseInt(alertCountSpan.innerHTML) + 1;
 
       //display Growl notification
-      toastr.success(decodedAIS.mmsi + ' detected in ROI!');
-      console.log(decodedAIS);
+      //toastr.success(decodedAIS.mmsi + ' detected in ROI!');
+      //console.log(decodedAIS);
 
       alertCountTotal++;
       alertCountLabel.text(alertCountTotal);
@@ -304,10 +333,11 @@ $(function start() {
    **/
    function showPolygon(id) {
       console.log('Displaying alert polygon for id', id);
-      //console.log(alertArray[id-1].polygon);
       
       //Parse polygon
-      var polygonVertices = parsePolyStrings(alertArray[id-1].polygon);
+      //find the right polygon
+
+      var polygonVertices = parsePolyStrings(alertArray[alertArrayIndexByID(id)].polygon);
 
       //Draw the polygon on the map
       if (polygonVertices.length) {
@@ -426,13 +456,75 @@ $(function start() {
          $('#alertsCountBubble').css('background-color', 'gray');
       }
    }
+
+   /* -------------------------------------------------------------------------------- */
+   function deleteAlertFromDB(id) {
+      var phpWithArg = 'query_alert_delete.php?alertid=' + id;
+
+      console.log(phpWithArg);      
+
+      //Call the PHP script to insert new alert row to alert database
+      console.log('Calling PHP script to push new alert_properties element...');
+      $.getJSON(
+            phpWithArg, 
+            function (){ 
+               console.log('deleteAlertFromDB(): Success on adding new alert');
+            }
+            )
+         .done(function (response) {
+            //console.log('saveAlert(): ' + response.query);
+
+            console.log('deleteAlertFromDB(): Added new alert id ' + response.alert_id);
+
+            //TODO: Add criteria to database here
+
+            //TODO: notify server about newly added alert so that it can be added for monitoring
+            var connection = new WebSocket('ws://128.49.78.214:2411');
+
+            //==================== Opened connection to the server =========================
+            connection.onopen = function () {
+               //Connected to server success
+
+               //TODO: send message to server of deleted alert id
+               connection.send(JSON.stringify({type:'deletealert', data: id }));         
+
+               //TODO: listen for success response from server
+               connection.close();
+            };
+
+            //Exit the "setup alert" mode
+            setAlertEnd();
+         }) // END .done()
+      .fail(function() {
+         console.log('deleteAlertFromDB(): ' +  'No response from alert database; error in php?'); 
+
+         //alert('Alert not saved.  Please try again');
+
+         return;
+      }); //END .fail()
+   }
+
+   /* -------------------------------------------------------------------------------- */
+   /**
+   * Returns the element index number given an alert ID
+   **/
+   function alertArrayIndexByID(id) {
+      for (var i=0; i < alertArray.length; i++) {
+         if (alertArray[i].alert_id == id) {
+            return i;
+         }
+      };
+   }
 });
 
 /* -------------------------------------------------------------------------------- */
 function toggleAlertsPanel() {
    $('#alertPanel').toggle();
-   
+
    if ($('#alertPanel:visible').length !== 0) {
+      //Panel is shown
+
+      //If alertPanel is visible
       if ($("#alertAccordion").accordion != undefined) {
          $("#alertAccordion").accordion("refresh");
       }
@@ -443,6 +535,8 @@ function toggleAlertsPanel() {
       }
    }
    else {
+      //Panel got hidden
+
       //reset the nav button color
       $('#alerts_nav').css('background-color', '');
    }

@@ -58,13 +58,14 @@ function setupAlertInitialize() {
  * End the "setup alert" mode
  **/
 function setAlertEnd() {
+   console.log('setAlertEnd(): Exiting alert setup mode');
    $('#setup-alert-modal').dialog('close');
 
    deletePolygon();
 
    countCriterion = 0;
 
-   //Show the panel menu to give more room on the maps
+   //Unhide the panel menu
    $('#panel').toggle(true);
 }
 
@@ -215,26 +216,30 @@ function updatePolygonField()
 
 /* -------------------------------------------------------------------------------- */
 function saveAlert(){
+   /*
    //DEBUG TESTING PURPOSE
    alertPolygonString = '1.56005859375 6.0203850824560226, 1.91162109375 5.779966445034052, 1.56005859375 5.637852598770866, 1.56005859375 6.0203850824560226';
    $('#alertpolygon').val(alertPolygonString);
    $('#emailaddress').val('test@test.com');
-
+   */
 
    //========================= ADD ALERT PROPERTIES ==================================
    //Obtain user's ROI polygon definition
    //check area of polygon to limit size to prevent long queries
+   /*
    if (computeArea() > 3000000000) {
       alert('Please draw a smaller polygon.');
       return;
    }
+   */
+
    //check if polygon is defined
    if (typeof alertPolygonString === 'undefined') {
       alert('Please define polygon');
       return;
    }
 
-   var phpWithArg = 'query_setup_alert.php?alertPolygon="' + alertPolygonString + '"';
+   var phpWithArg = 'query_alert_setup.php?alertPolygon=' + alertPolygonString;
 
    var entering = $('#alertenteringarea');
    var exiting = $('#alertexitingarea');
@@ -264,12 +269,31 @@ function saveAlert(){
    $.getJSON(
          phpWithArg, 
          function (){ 
-            console.log('success');
+            console.log('saveAlert(): Success on adding new alert');
          }
       )
    .done(function (response) {
-      console.log('saveAlert(): ' + response.query);
+      //console.log('saveAlert(): ' + response.query);
 
+      console.log('saveAlert(): Added new alert id ' + response.alert_id);
+
+      //TODO: Add criteria to database here
+      
+      //TODO: notify server about newly added alert so that it can be added for monitoring
+      //TEST
+      var connection = new WebSocket('ws://128.49.78.214:2411');
+
+      //==================== Opened connection to the server =========================
+      connection.onopen = function () {
+         //Connected to server success
+
+         //Send notification of new alert
+         connection.send(JSON.stringify({type:'newalert', data: response.alert_id }));
+
+         //TODO: listen for success response from server
+         connection.close();
+      };
+      //TEST
 
       //Exit the "setup alert" mode
       setAlertEnd();
@@ -282,7 +306,8 @@ function saveAlert(){
       return;
    }); //END .fail()
 
-
+/*
+   //TODO: move to above, after successful response from adding alert_properties
    //======================== ADD CRITERIA FOR ALERT ================================
    phpWithArg = 'query_setup_alert_criteria.php?';
 
@@ -331,6 +356,7 @@ function saveAlert(){
 
       return;
    }); //END .fail()
+*/
 }
 
 /**
