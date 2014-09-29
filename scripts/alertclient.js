@@ -39,7 +39,6 @@ $(function start() {
    var processedCountLabel = $('.processedCountLabel');
    var user = userid;
    var receivedAlertRules = false;
-   var alertCountTotal = 0;
    var alertArray = [];
    var alertPolygon = new google.maps.Polygon({
             strokeWeight: 2,
@@ -122,12 +121,16 @@ $(function start() {
          console.log('Alert server accepted the connection: ', serverResponse);
       }
       else if (json.type === 'resetRules') {
+         console.log('Resetting alert rules as signaled by alert server');
+
          //Reset received alertRules
          receivedAlertRules = false;
          console.log('Removing old alert panels');
          //TODO: Set focus to be summary panel first to prevent funky behavior
          $('.alertPanel').remove();  //Remove all accordion alert titles
          $('[id^=alert_id]').remove(); //Remove all accordion alert panels
+
+         alertArray = [];
       }
       //---------------------- Alert Rules received -------------------------------
       else if (json.type === 'alertRule') {
@@ -143,14 +146,6 @@ $(function start() {
 
          //Create the accordion panel with new received rule
          createAccordionElement(singleAlert);
-      }
-      //---------------------- Alert deleted --------------------------------------
-      else if (json.type === 'deleteRule') {
-         //TODO: handle deleted alert rule -> remove accordion based on received ID
-         var id = json.data;
-         $('#alert_heading_id'+id).remove();  //Remove all accordion alert titles
-         $('#alert_id'+id).remove(); //Remove all accordion alert panels
-         alertArray.splice(alertArrayIndexByID(id), 1);
       }
       //---------------------- Alert received -------------------------------------
       else if (json.type === 'alertNotification') {
@@ -293,9 +288,8 @@ $(function start() {
       //toastr.success(decodedAIS.mmsi + ' detected in ROI!');
       //console.log(decodedAIS);
 
-      alertCountTotal++;
-      alertCountLabel.text(alertCountTotal);
-      if (alertCountTotal > 100) {
+      alertCountLabel.text(alertArray.length);
+      if (alertArray.length > 100) {
          alertCountNavbar.text('+99');
       }
       setCountBubbleColor();
@@ -467,7 +461,7 @@ $(function start() {
   
    /* -------------------------------------------------------------------------------- */
    function setCountBubbleColor() {
-      if (alertCountTotal > 0) {
+      if (alertArray.length> 0) {
          $('#alertsCountBubble').css('background-color', 'red');
       }
       else {
