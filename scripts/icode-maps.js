@@ -2834,61 +2834,6 @@ function typeSelectUpdated() {
 
    //getTargetsFromDB() will check vesseltypeFilterPHPStr for filtering
    refreshMaps(true);
-
-   /*
-   var types = getTypesSelected();
-
-   //var entered_query = document.getElementById("query").value;
-   var entered_query;
-
-   if ($.inArray(999, types) == -1) {
-      //Massage mainQuery to add VesType filtering based on checkboxes selected
-      entered_query = "SELECT * from (" + mainQuery.substring(0,mainQuery.indexOf(' VESSELS')) + " WHERE VesType IN (";
-   
-      for (var i=0; i < types.length; i++) {
-         entered_query = entered_query + types[i];
-         if (i != types.length-1) {
-            entered_query = entered_query + ",";
-         }
-      }
-      entered_query += ")) VESSELS";
-      //Set entered query to default to AIS data
-      getTargetsFromDB(map.getBounds(), entered_query, "AIS", true);
-   }
-   else {
-      refreshMaps(true);
-   }
-   */
-}
-
-/* -------------------------------------------------------------------------------- */
-function typeSelectedAllShips() {
-   setAllTypesChecked();
-   typeSelectUpdated();
-}
-
-/* -------------------------------------------------------------------------------- */
-/**
- * Forces all vessel type checkboxes to be checked, used when All Ships is checked
- **/
-function setAllTypesChecked() {
-   if ( document.getElementById("All Ships").checked ) {
-      console.log('setting all check boxes true');
-      document.getElementById("0-Unspecified Ships").checked = true;
-      document.getElementById("30-Fishing").checked = true;
-      document.getElementById("31-Towing").checked = true;
-      document.getElementById("32-Big Tow").checked = true;
-      document.getElementById("33-Dredge").checked = true;
-      document.getElementById("35-Military").checked = true;
-      document.getElementById("37-Pleasure Craft").checked = true;
-      document.getElementById("50-Pilot").checked = true;
-      document.getElementById("51-Search and Rescue").checked = true;
-      document.getElementById("52-Tug").checked = true;
-      document.getElementById("55-Law Enforcement").checked = true;
-      document.getElementById("6x-Passenger Vessels").checked = true;
-      document.getElementById("7x-Cargo Vessels").checked = true;
-      document.getElementById("8x-Tankers").checked = true;
-   }
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -2898,19 +2843,8 @@ function setAllTypesChecked() {
 function getTypesNotSelected() {
 	var types = [];
 
-   //Check if any of the specific types are unchecked
-   var checkboxtype = $('.checkboxtype');//document.getElementsByClassName("checkboxtype");
-
-   for (var i=0; i < checkboxtype.length; i++) {
-      //If there are any unchecked types, then uncheck the "All Ships" checkbox as well
-      if (checkboxtype[i].checked == false) {
-         document.getElementById("All Ships").checked = false;
-         document.getElementById("All Ships").removeAttribute('checked');
-      }
-   }
-
    //Check which boxes are still checked
-   if(!document.getElementById("All Ships").checked) {
+   if(!document.getElementById("All Other Vessels").checked) {
       //Push all types not equal to the ones below; Use the '-1' flag to indicate
       types.push(-1);
    }
@@ -2956,15 +2890,6 @@ function getTypesNotSelected() {
    if(!document.getElementById("8x-Tankers").checked) {
       types.push(8);   //covers 80-89
    }
-
-   /*
-   //Default to all ships if no types selected
-   if (types.length == 0 || document.getElementById("All Ships").checked) {
-      types.push(999);
-      document.getElementById("All Ships").checked = true;
-      setAllTypesChecked();
-   }
-   */
 
    return types;
 }

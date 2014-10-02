@@ -5,6 +5,33 @@ $mtime = explode(" ",$mtime);
 $mtime = $mtime[1] + $mtime[0]; 
 $starttime = $mtime; 
 
+/* Types not included in legend
+1-Reserved
+2-WIG
+20-WIG
+21-Pusher
+22-Push+Brg
+23-LightBt
+24-MODU
+25-OSV
+26-Process
+27-Training
+28-Gov
+29-Auto
+34-Diving
+36-Sailing
+38-Reserved
+39-Reserved
+4-HSC
+53-Tender
+54-AntiPol
+56-Spare
+57-Spare
+58-Medical
+59-Resol-18
+9-Other
+ */
+$typesNotIncluded = [null, 1, 2, 34, 36, 38, 39, 4, 53, 54, 56, 57, 58, 59, 9];
 
 //-----------------------------------------------------------------------------
 //Database execution
@@ -63,16 +90,38 @@ if (!empty($_GET["vthide"])) {
    $vthideArray = $_GET["vthide"];
 
    for ($i=0; $i < sizeof($vthideArray) ; $i++) {
-      if ($criteriaListStarted) {
-         $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . ' AND ';
+      $type = $vthideArray[$i];
+
+      if ($type === "-1") {
+         for ($j=0; $j < sizeof($typesNotIncluded); $j++) {
+            if ($criteriaListStarted) {
+               $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . ' AND ';
+            }
+            else {
+         $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local') AND ";
+
+               $criteriaListStarted = 1;
+            }
+            $type = $typesNotIncluded[$j];
+            if ($type === null) {
+               $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . "VesType not like ('')";
+            }
+            else {
+               $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . "VesType not like ('$type%')";
+            }
+         }
       }
       else {
+         if ($criteriaListStarted) {
+            $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . ' AND ';
+         }
+         else {
          $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local') AND ";
-         $criteriaListStarted = 1;
-      }
 
-      $nottype = $vthideArray[$i];
-      $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . "VesType not like ('$nottype%')";
+            $criteriaListStarted = 1;
+         }                        
+         $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . "VesType not like ('$type%')";
+      }
    }
 }
 

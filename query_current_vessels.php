@@ -37,7 +37,7 @@ function startsWith($haystack, $needle)
 59-Resol-18
 9-Other
  */
-$typesNotIncluded = [1, 2, 34, 36, 38, 39, 4, 53, 54, 56, 57, 58, 59, 9];
+$typesNotIncluded = [null, 1, 2, 34, 36, 38, 39, 4, 53, 54, 56, 57, 58, 59, 9];
 
 
 //-----------------------------------------------------------------------------
@@ -121,7 +121,12 @@ if(count($_GET) > 0) {
                               $criteriaListStarted = 1;
                            }
                            $type = $typesNotIncluded[$j];
-                           $sourceStr = $sourceStr . "VesType not like ('$type%')";
+                           if ($type === null) {
+                              $sourceStr = $sourceStr . "VesType not like ('')";
+                           }
+                           else {               
+                              $sourceStr = $sourceStr . "VesType not like ('$type%')";
+                           }
                         }
                      }
                      else {
