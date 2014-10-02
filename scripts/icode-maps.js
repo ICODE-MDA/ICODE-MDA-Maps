@@ -196,6 +196,7 @@ var geocoder;
 
 //Port labels
 var portLabel;
+var portPolygons = [];
 
 //Traffic layer
 var trafficLayer;
@@ -216,7 +217,7 @@ function initialize() {
    //var centerCoord = new google.maps.LatLng(2.0,1.30);     //GoG
    //var centerCoord = new google.maps.LatLng(-33.0, -71.6);   //Valparaiso, Chile
    //var centerCoord = new google.maps.LatLng(17.978677, -16.078958);   //Nouakchott, Mauritania
-   //var centerCoord = new google.maps.LatLng(13.273461807246479, -13.465625000000037);   //Zoomed out world view
+   var centerCoord = new google.maps.LatLng(13.273461807246479, -13.465625000000037);   //Zoomed out world view
    
    /* Uses browser location to fill in more precise user location in the geocode box
     * currently disabled to prevent annoying browser warning messages
@@ -263,9 +264,9 @@ function initialize() {
    }
    else {
       controlStyle = google.maps.MapTypeControlStyle.HORIZONTAL_BAR;
-      defaultZoom = 11;
+      //defaultZoom = 11;
       //defaultZoom = 7;
-      //defaultZoom = 2;
+      defaultZoom = 2;
    }
       
    var mapOptions = {
@@ -386,6 +387,9 @@ function initialize() {
       //Check for TMACS layer toggle on load
       toggleTMACSHeadWMSLayer();
       toggleTMACSHistoryWMSLayer();
+
+      //TEST
+      testWMSLayers();
 
       //TEMP: disable TMACS layer for now since the layer is not currently available
       document.getElementById("tmacslayer").style.opacity = '0.5';      
@@ -909,6 +913,13 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
          phpWithArg += "&risk=1";
       }
 
+      if ($('#mssisonly:checked').length != 0) {
+         phpWithArg += "&mssisonly=1";
+      }
+      if ($('#sataisonly:checked').length != 0) {
+         phpWithArg += "&sataisonly=1";
+      }
+
       phpWithArg += boundStr;
 
       //if vessel age limit was chosen, then add option
@@ -986,7 +997,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
          for (var i=0; i < markersDisplayed.length; i++) {
             markersDisplayed[i].vesselnameLabel.setMap(null);
          }
-         markersDisplayed = [];
+         emptyArray(markersDisplayed);
       }
    }
 
@@ -1033,7 +1044,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                for (var i=0; i < markersDisplayed.length; i++) {
                   markersDisplayed[i].vesselnameLabel.setMap(null);
                }
-               markersDisplayed = [];
+               emptyArray(markersDisplayed);
             }
 
             //Set new queryid so other concurrent PHP returns don't clear the new markers
@@ -1046,7 +1057,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
             for (var i=0; i < markersDisplayed.length; i++) {
                markersDisplayed[i].vesselnameLabel.setMap(null);
             }
-            markersDisplayed = [];
+            emptyArray(markersDisplayed);
          }
 
          localStorage.setItem('query-timestamp', Math.floor((new Date()).getTime()/1000));
@@ -1455,6 +1466,13 @@ function getClustersFromDB(bounds, customQuery) {
       phpWithArg += "&mobile=1";
    }
 
+   if ($('#mssisonly:checked').length != 0) {
+      phpWithArg += "&mssisonly=1";
+   }
+   if ($('#sataisonly:checked').length != 0) {
+      phpWithArg += "&sataisonly=1";
+   }
+
 
    //Debug query output
    console.log('getClustersFromDB(): ' + phpWithArg);
@@ -1498,8 +1516,7 @@ function getClustersFromDB(bounds, customQuery) {
          for (var i=0; i < markersDisplayed.length; i++) {
             markersDisplayed[i].vesselnameLabel.setMap(null);
          }
-         markersDisplayed = [];
-         markersQueried = [];
+         emptyArray(markersDisplayed);
 
          var totalsum = 0;
 
@@ -1623,8 +1640,8 @@ function clearMarkerAndClusters() {
       clusterBoxes[i].setMap(null);
       clusterBoxesLabels[i].setMap(null);
    }
-   clusterBoxes = [];
-   clusterBoxesLabels = [];
+   emptyArray(clusterBoxes);
+   emptyArray(clusterBoxesLabels);
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -3087,9 +3104,9 @@ function clearVesselMarkerArray() {
          vesselArray[i] = null;
 		}
 		markerArray.length = 0;
-      markerArray = [];
+      emptyArray(markerArray);
       vesselArray.length = 0;
-      vesselArray = [];
+      emptyArray(vesselArray);
 	}
 }
 
@@ -3102,7 +3119,7 @@ function clearOutBoundMarkers() {
          markerArray[i] = null;
 		}
 		markerArray.length = 0;
-         markerArray = [];
+      emptyArray(markerArray);
 	}
 }
 
@@ -3121,7 +3138,7 @@ function toggleKMLLayer() {
          for (var i in kmlparser.docs[0].markers) {
             kmlparser.docs[0].markers[i].setMap(null);
          }
-         kmlparser.docs[0].markers = [];
+         emptyArray(kmlparser.docs[0].markers);
          kmlparser.docs[0].overlays[0].setMap(null);
          kmlparser.docs[0].overlays[0] = null;
          kmlparser.docs[0] = null
@@ -3158,7 +3175,7 @@ function deleteKMLLayer(index) {
          for (var i in tempkmlparser.docs[0].markers) {
             tempkmlparser.docs[0].markers[i].setMap(null);
          }
-         tempkmlparser.docs[0].markers = [];
+         emptyArray(tempkmlparser.docs[0].markers);
          tempkmlparser.docs[0].overlays[0].setMap(null);
          tempkmlparser.docs[0].overlays[0] = null;
          tempkmlparser.docs[0] = null
@@ -3391,7 +3408,7 @@ function showPorts() {
          //Start of all ports
          if (prevPortName == null) {
             portPolygon = null;
-            portCoords = [];
+            emptyArray(portCoords);
             //Set to new name
             prevPortName = port_name;
          }
@@ -3421,7 +3438,7 @@ function showPorts() {
             portPolygons.push(portPolygon);
 
             portPolygon = null;
-            portCoords = [];
+            emptyArray(portCoords);
 
             portCoords.push(new google.maps.LatLng(lat, lon));
             prevPortName = port_name;
@@ -3462,8 +3479,6 @@ function showPorts() {
    }); //end .fail()   
 }
 
-var portPolygons = [];
-
 /* -------------------------------------------------------------------------------- */
 function hidePorts() {
    var portIcon;
@@ -3474,8 +3489,8 @@ function hidePorts() {
       portCircle = portCircles[i];
       portCircle.setMap(null);
    }
-   portIcons = [];
-   portCircles = [];
+   emptyArray(portIcons);
+   emptyArray(portCircles);
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -3835,6 +3850,15 @@ function WMSOpenLayersGetTileUrl(tile, zoom) {
    //Establish the baseURL.  Several elements, including &EXCEPTIONS=INIMAGE and &Service are unique to openLayers addresses.
    var url = baseURL + "Layers=" + layers + "&version=" + version + "&EXCEPTIONS=INIMAGE" + "&Service=" + service + "&request=" + request + "&Styles=" + styles + "&format=" + format + "&CRS=" + crs + "&BBOX=" + bbox + "&width=" + width + "&height=" + height;
    return url;
+}
+
+/* -------------------------------------------------------------------------------- */
+function testWMSLayers() {
+   //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:states&", null);
+   //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:world_shorelines_Project_with_SD_BA&", null);
+   loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:alert_properties&", null);
+   //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:pointlatlon&", null);
+   //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/nurc/wms?layers=nurc:Img_Sample&", null);
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -4862,5 +4886,13 @@ function initializeBrowserFocus() {
    else {
       window.onfocus = onFocus;
       window.onblur = onBlur;
+   }
+}
+
+function emptyArray(arr) {
+   if (typeof array !== 'undefined') {
+      while(arr.length > 0) {
+         arr.pop();
+      }
    }
 }

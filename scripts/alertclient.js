@@ -205,7 +205,6 @@ $(function start() {
 
       //Add zoom to polygon link
       $('<input />', {type: 'button', id: 'show_polygon_id'+id, value: 'Zoom to Polygon' }).appendTo($('#alert_id' + id));
-      //$('#alert_id' + id).append('<a href="" onclick="zoomToPolygon('+id+'); return false;">Zoom into Polygon</a>');
 
       $('#alert_id' + id).append('<br>');
 
@@ -315,8 +314,29 @@ $(function start() {
       //TODO: Need to remove click listener if the message is overwritten!
       $('#alertNewMessages-' + singleAlert.alert_id).unbind( "click" );
 
-      $('#alertNewMessages-' + singleAlert.alert_id).css('cursor', 'pointer');
-      $('#alertNewMessages-' + singleAlert.alert_id).click(function () {
+      $('#alertNewMessages-' + singleAlert.alert_id).unbind( "mouseenter" );      
+      $('#alertNewMessages-' + singleAlert.alert_id).unbind( "mouseleave" );      
+
+      var alertVesselTempCircle = new google.maps.Circle({
+          center:         new google.maps.LatLng(decodedAIS.lat,decodedAIS.lon),
+          radius:         500,
+          strokeColor:    '#FF0000',
+          strokeOpacity:  1.0,
+          strokeWeight:   1,
+          fillColor:      '#FF0000',
+          fillOpacity:    0.7,
+      });
+
+      $('#alertNewMessages-' + singleAlert.alert_id).css('cursor', 'pointer')
+      //Handle hover action
+      .mouseenter(function () {
+         alertVesselTempCircle.setMap(map);
+      })
+      .mouseleave(function() {
+         alertVesselTempCircle.setMap(null);
+      })
+      //Handle click action
+      .click(function () {
          google.maps.Map.prototype.setCenterWithOffset = function(latlng, offsetX, offsetY) {
             var map = this;
             var ov = new google.maps.OverlayView();

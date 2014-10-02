@@ -58,10 +58,22 @@ if(count($_GET) > 0) {
                //$fromSources = "(SELECT `MMSI`, `CommsID`, `IMONumber`, `CallSign`, `Name`, `VesType`, `Cargo`, `AISClass`, `Length`, `Beam`, `Draft`, `AntOffsetBow`, `AntOffsetPort`, `Destination`, `ETADest`, `PosSource`, `PosQuality`, `FixDTG`, `ROT`, `NavStatus`, `Source`, `TimeOfFix`, `Latitude`, `Longitude`, `SOG`, `Heading`, `RxStnID`, `COG` FROM $ais_database.$vessels_table WHERE (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $ais_database.$vessels_table GROUP BY MMSI)) VESSELS";
                //TODO:TESTING FASTER QUERY below
                $fromSources = "$ais_database.$vessels_table VESSELS";
+               if (!empty($_GET["mssisonly"])) {
+                  $fromSources = "$ais_database.$vessels_table VESSELS WHERE RxStnID not like ('%ORBCOMM%') AND RxStnID not like ('%EXACT%')";
+               }
+               else if (!empty($_GET["sataisonly"])) {
+                  $fromSources = "$ais_database.$vessels_table VESSELS WHERE (RxStnID like ('%ORBCOMM%') OR RxStnID like ('%EXACT%'))";
+               }
             }
             else {
                //With risk query:
                $fromSources = "(SELECT `MMSI`, `CommsID`, `IMONumber`, `CallSign`, `Name`, `VesType`, `Cargo`, `AISClass`, `Length`, `Beam`, `Draft`, `AntOffsetBow`, `AntOffsetPort`, `Destination`, `ETADest`, `PosSource`, `PosQuality`, `FixDTG`, `ROT`, `NavStatus`, `Source`, `TimeOfFix`, `Latitude`, `Longitude`, `SOG`, `Heading`, `RxStnID`, `COG` FROM $ais_database.$vessels_table WHERE (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $ais_database.$vessels_table GROUP BY MMSI)) VESSELS LEFT OUTER JOIN `risk`.user_ship_risk ON VESSELS.mmsi = `risk`.user_ship_risk.mmsi";
+               if (!empty($_GET["mssisonly"])) {
+                  $fromSources = "(SELECT `MMSI`, `CommsID`, `IMONumber`, `CallSign`, `Name`, `VesType`, `Cargo`, `AISClass`, `Length`, `Beam`, `Draft`, `AntOffsetBow`, `AntOffsetPort`, `Destination`, `ETADest`, `PosSource`, `PosQuality`, `FixDTG`, `ROT`, `NavStatus`, `Source`, `TimeOfFix`, `Latitude`, `Longitude`, `SOG`, `Heading`, `RxStnID`, `COG` FROM $ais_database.$vessels_table WHERE RxStnID not like ('%ORBCOMM%') AND RxStnID not like ('%EXACT%') AND (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $ais_database.$vessels_table GROUP BY MMSI)) VESSELS LEFT OUTER JOIN `risk`.user_ship_risk ON VESSELS.mmsi = `risk`.user_ship_risk.mmsi";
+               }
+               else if (!empty($_GET["sataisonly"])) {
+                  $fromSources = "(SELECT `MMSI`, `CommsID`, `IMONumber`, `CallSign`, `Name`, `VesType`, `Cargo`, `AISClass`, `Length`, `Beam`, `Draft`, `AntOffsetBow`, `AntOffsetPort`, `Destination`, `ETADest`, `PosSource`, `PosQuality`, `FixDTG`, `ROT`, `NavStatus`, `Source`, `TimeOfFix`, `Latitude`, `Longitude`, `SOG`, `Heading`, `RxStnID`, `COG` FROM $ais_database.$vessels_table WHERE (RxStnID like ('%ORBCOMM%') OR RxStnID like ('%EXACT%')) AND (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $ais_database.$vessels_table GROUP BY MMSI)) VESSELS LEFT OUTER JOIN `risk`.user_ship_risk ON VESSELS.mmsi = `risk`.user_ship_risk.mmsi";
+               }
             }
       }
    }
@@ -104,7 +116,7 @@ if(count($_GET) > 0) {
           }
 
           //Check if a 'WHERE' has already been inserted into the query, append 'AND' if so.
-          if ($timemachine || strpos($query, "where") !== FALSE ) {
+          if ($timemachine || strpos(strtolower($query), "where") !== FALSE ) {
              $query = $query . " AND";
           }
           else {  //Append 'WHERE' since there is no previous WHERE
@@ -183,6 +195,7 @@ else {
     $limit = 10;
     $query = $query . " limit " . $limit;
 }
+
 
 //Execute the query
 $result = @odbc_exec($connection, $query) or die('Query error: '.htmlspecialchars(odbc_errormsg()).' // '.$query);;

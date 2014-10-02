@@ -45,6 +45,12 @@ if (!empty($_GET["mobile"])) {
 
 $iMinClusterSize = 10;
 $latestpositionsfrommemorytable = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local')";
+if (!empty($_GET["mssisonly"])) {
+   $latestpositionsfrommemorytable = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID not like ('%ORBCOMM%') AND RxStnID not like ('%EXACT%'))";
+}
+else if (!empty($_GET["sataisonly"])) {
+   $latestpositionsfrommemorytable = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID like ('%ORBCOMM%') OR RxStnID like ('%EXACT%'))";
+}
 
 //Add timestamp constraint
 if (!empty($_GET["vessel_age"])) {
