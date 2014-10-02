@@ -386,8 +386,12 @@
                  8x - Tankers<br>
                  <hr>
 
-                 <input class="checkbox" id="mssisonly" type="checkbox" onclick="refreshMaps(true);"> Terrestrial AIS Only<br>
-                 <input class="checkbox" id="sataisonly" type="checkbox" onclick="refreshMaps(true);"> Satellite AIS Only<br>
+                 <center><b>AIS Sources</b><br></center>
+                 <form>
+                    <input type="radio" id="allaissources" name="aissources" checked="checked" onclick="refreshMaps(true);"> All AIS Sources</input><br>
+                    <input type="radio" id="mssisonly" name="aissources" onclick="refreshMaps(true);"> Terrestrial AIS Only</input><br>
+                    <input type="radio" id="sataisonly" name="aissources" onclick="refreshMaps(true);"> Satellite AIS Only</input><br>
+                 </form>
 
                  <hr>
                  <center><b>Risk Level</b><br>(vessel outline)</center>

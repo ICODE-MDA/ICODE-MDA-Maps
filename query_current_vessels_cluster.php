@@ -42,21 +42,45 @@ if (!empty($_GET["mobile"])) {
    }
 }
 
+//Flag to keep track of whether a filter/criteria string has been started
+$criteriaListStarted = 0;
 
 $iMinClusterSize = 10;
-$latestpositionsfrommemorytable = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local')";
+
+
+$latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local')";
 if (!empty($_GET["mssisonly"])) {
-   $latestpositionsfrommemorytable = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID not like ('%ORBCOMM%') AND RxStnID not like ('%EXACT%'))";
+   $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID not like ('%ORBCOMM%') AND RxStnID not like ('%EXACT%'))";
+   $criteriaListStarted = 1;
 }
 else if (!empty($_GET["sataisonly"])) {
-   $latestpositionsfrommemorytable = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID like ('%ORBCOMM%') OR RxStnID like ('%EXACT%'))";
+   $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID like ('%ORBCOMM%') OR RxStnID like ('%EXACT%'))";
+   $criteriaListStarted = 1;
+}
+
+//Add vessel type filters here
+if (!empty($_GET["vthide"])) {
+   $vthideArray = $_GET["vthide"];
+
+   for ($i=0; $i < sizeof($vthideArray) ; $i++) {
+      if ($criteriaListStarted) {
+         $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . ' AND ';
+      }
+      else {
+         $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local') AND ";
+         $criteriaListStarted = 1;
+      }
+
+      $nottype = $vthideArray[$i];
+      $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . "VesType not like ('$nottype%')";
+   }
 }
 
 //Add timestamp constraint
 if (!empty($_GET["vessel_age"])) {
    $vessel_age = $_GET["vessel_age"];
    $timeconstraint = " AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
-   $latestpositionsfrommemorytable .= $timeconstraint;
+   $latestpositionsfrommemorytableStr .= $timeconstraint;
 }
 
 //Count the number of arguments
@@ -113,7 +137,7 @@ SELECT
    count(*) AS clustersum
 FROM
    (SELECT * FROM
-      ($latestpositionsfrommemorytable) AS tmp1
+      ($latestpositionsfrommemorytableStr) AS tmp1
    GROUP BY mmsi) AS tmp2
 WHERE ($geobounds) 
 GROUP BY FLOOR($iGridRows * (Latitude - $minlat) / $dlat) * 1000000 + FLOOR($iGridCols * (IF(Longitude > $minlon, Longitude, Longitude + 360.0) - $minlon) / $dlon);";

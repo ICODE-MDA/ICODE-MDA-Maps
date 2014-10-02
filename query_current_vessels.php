@@ -32,47 +32,75 @@ if (!$connection) {
     exit("Connection Failed: " . $conn);
 }
 
+//Flag to keep track of whether a filter/criteria string has been started
+$criteriaListStarted = 0;
+
+
+//------------------------ Build the initial base query --------------------------
 if(count($_GET) > 0) { 
    if (!empty($_GET["source"])) { 
       $source = (string)$_GET["source"];
 
       switch ($source) {
          case "LAISIC_AIS_TRACK":
-            $fromSources = "(SELECT trkguid, trknum, updateguid, srcguid, datetime, lat as Latitude, lon as Longitude, cog, sog, stage, semimajor, semiminor, orientation, holdtime, hitscount, quality, source, inttype, callsign, mmsi, vesselname, imo FROM $laisic_database.trackdata_mem_track_heads) VESSELS";
+            $sourceStr = "(SELECT trkguid, trknum, updateguid, srcguid, datetime, lat as Latitude, lon as Longitude, cog, sog, stage, semimajor, semiminor, orientation, holdtime, hitscount, quality, source, inttype, callsign, mmsi, vesselname, imo FROM $laisic_database.trackdata_mem_track_heads) VESSELS";
             break;
          case "LAISIC_RADAR":
-            $fromSources = "(SELECT mmsi, sog, lon as Longitude, lat as Latitude, cog, datetime, streamid, target_status, target_acq, trknum, sourceid FROM $laisic_database.radar_laisic_output_mem_track_heads) VESSELS";
+            $sourceStr = "(SELECT mmsi, sog, lon as Longitude, lat as Latitude, cog, datetime, streamid, target_status, target_acq, trknum, sourceid FROM $laisic_database.radar_laisic_output_mem_track_heads) VESSELS";
             break;
          case "LAISIC_AIS_OBS":
-            $fromSources = "(SELECT obsguid, lat as Latitude, lon as Longitude, semimajor, semiminor, orientation, cog, sog, datetime, callsign, mmsi, vesselname, imo, streamid FROM $laisic_database.aisobservation_mem_track_heads) VESSELS";
+            $sourceStr = "(SELECT obsguid, lat as Latitude, lon as Longitude, semimajor, semiminor, orientation, cog, sog, datetime, callsign, mmsi, vesselname, imo, streamid FROM $laisic_database.aisobservation_mem_track_heads) VESSELS";
             break;
          case "RADAR":
-            $fromSources = "(SELECT * FROM icodemda.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM icodemda.pvol_pdm_memory GROUP BY `CommsID` )) VESSELS";
+            $sourceStr = "(SELECT * FROM icodemda.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM icodemda.pvol_pdm_memory GROUP BY `CommsID` )) VESSELS";
             break;
          case "LIVE_LAISIC":
-            $fromSources = "(SELECT mmsi, sog, lon as Longitude, lat as Latitude, cog, datetime, streamid, target_status, target_acq, trknum, sourceid FROM $laisic_live_database.radar_laisic_output_mem_track_heads WHERE mmsi != 0) VESSELS";
+            $sourceStr = "(SELECT mmsi, sog, lon as Longitude, lat as Latitude, cog, datetime, streamid, target_status, target_acq, trknum, sourceid FROM $laisic_live_database.radar_laisic_output_mem_track_heads WHERE mmsi != 0) VESSELS";
             break;
          default: //AIS
             if (empty($_GET["risk"])) {
                //No risk query:
-               //$fromSources = "(SELECT `MMSI`, `CommsID`, `IMONumber`, `CallSign`, `Name`, `VesType`, `Cargo`, `AISClass`, `Length`, `Beam`, `Draft`, `AntOffsetBow`, `AntOffsetPort`, `Destination`, `ETADest`, `PosSource`, `PosQuality`, `FixDTG`, `ROT`, `NavStatus`, `Source`, `TimeOfFix`, `Latitude`, `Longitude`, `SOG`, `Heading`, `RxStnID`, `COG` FROM $ais_database.$vessels_table WHERE (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $ais_database.$vessels_table GROUP BY MMSI)) VESSELS";
-               //TODO:TESTING FASTER QUERY below
-               $fromSources = "$ais_database.$vessels_table VESSELS";
+
+               //Version of the AIS source string that includes only the latest vessel contact from all sources
+               //$sourceStr = "(SELECT `MMSI`, `CommsID`, `IMONumber`, `CallSign`, `Name`, `VesType`, `Cargo`, `AISClass`, `Length`, `Beam`, `Draft`, `AntOffsetBow`, `AntOffsetPort`, `Destination`, `ETADest`, `PosSource`, `PosQuality`, `FixDTG`, `ROT`, `NavStatus`, `Source`, `TimeOfFix`, `Latitude`, `Longitude`, `SOG`, `Heading`, `RxStnID`, `COG` FROM $ais_database.$vessels_table WHERE (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $ais_database.$vessels_table GROUP BY MMSI)) VESSELS";
+
+               //TODO: Faster query below that could display the same vessel multiple times if it exists with different RxStnID
+               $sourceStr = "$ais_database.$vessels_table VESSELS";
                if (!empty($_GET["mssisonly"])) {
-                  $fromSources = "$ais_database.$vessels_table VESSELS WHERE RxStnID not like ('%ORBCOMM%') AND RxStnID not like ('%EXACT%')";
+                  $sourceStr = "$ais_database.$vessels_table VESSELS WHERE RxStnID not like ('%ORBCOMM%') AND RxStnID not like ('%EXACT%')";
+                  $criteriaListStarted = 1;
                }
                else if (!empty($_GET["sataisonly"])) {
-                  $fromSources = "$ais_database.$vessels_table VESSELS WHERE (RxStnID like ('%ORBCOMM%') OR RxStnID like ('%EXACT%'))";
+                  $sourceStr = "$ais_database.$vessels_table VESSELS WHERE (RxStnID like ('%ORBCOMM%') OR RxStnID like ('%EXACT%'))";
+                  $criteriaListStarted = 1;
+               }
+
+               //Add vessel type filters here
+               if (!empty($_GET["vthide"])) {
+                  $vthideArray = $_GET["vthide"];
+
+                  for ($i=0; $i < sizeof($vthideArray) ; $i++) {
+                     if ($criteriaListStarted) {
+                        $sourceStr = $sourceStr . ' AND ';
+                     }
+                     else {
+                        $sourceStr = $sourceStr . ' WHERE ';
+                        $criteriaListStarted = 1;
+                     }
+
+                     $nottype = $vthideArray[$i];
+                     $sourceStr = $sourceStr . "VesType not like ('$nottype%')";
+                  }
                }
             }
             else {
                //With risk query:
-               $fromSources = "(SELECT `MMSI`, `CommsID`, `IMONumber`, `CallSign`, `Name`, `VesType`, `Cargo`, `AISClass`, `Length`, `Beam`, `Draft`, `AntOffsetBow`, `AntOffsetPort`, `Destination`, `ETADest`, `PosSource`, `PosQuality`, `FixDTG`, `ROT`, `NavStatus`, `Source`, `TimeOfFix`, `Latitude`, `Longitude`, `SOG`, `Heading`, `RxStnID`, `COG` FROM $ais_database.$vessels_table WHERE (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $ais_database.$vessels_table GROUP BY MMSI)) VESSELS LEFT OUTER JOIN `risk`.user_ship_risk ON VESSELS.mmsi = `risk`.user_ship_risk.mmsi";
+               $sourceStr = "(SELECT `MMSI`, `CommsID`, `IMONumber`, `CallSign`, `Name`, `VesType`, `Cargo`, `AISClass`, `Length`, `Beam`, `Draft`, `AntOffsetBow`, `AntOffsetPort`, `Destination`, `ETADest`, `PosSource`, `PosQuality`, `FixDTG`, `ROT`, `NavStatus`, `Source`, `TimeOfFix`, `Latitude`, `Longitude`, `SOG`, `Heading`, `RxStnID`, `COG` FROM $ais_database.$vessels_table WHERE (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $ais_database.$vessels_table GROUP BY MMSI)) VESSELS LEFT OUTER JOIN `risk`.user_ship_risk ON VESSELS.mmsi = `risk`.user_ship_risk.mmsi";
                if (!empty($_GET["mssisonly"])) {
-                  $fromSources = "(SELECT `MMSI`, `CommsID`, `IMONumber`, `CallSign`, `Name`, `VesType`, `Cargo`, `AISClass`, `Length`, `Beam`, `Draft`, `AntOffsetBow`, `AntOffsetPort`, `Destination`, `ETADest`, `PosSource`, `PosQuality`, `FixDTG`, `ROT`, `NavStatus`, `Source`, `TimeOfFix`, `Latitude`, `Longitude`, `SOG`, `Heading`, `RxStnID`, `COG` FROM $ais_database.$vessels_table WHERE RxStnID not like ('%ORBCOMM%') AND RxStnID not like ('%EXACT%') AND (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $ais_database.$vessels_table GROUP BY MMSI)) VESSELS LEFT OUTER JOIN `risk`.user_ship_risk ON VESSELS.mmsi = `risk`.user_ship_risk.mmsi";
+                  $sourceStr = "(SELECT `MMSI`, `CommsID`, `IMONumber`, `CallSign`, `Name`, `VesType`, `Cargo`, `AISClass`, `Length`, `Beam`, `Draft`, `AntOffsetBow`, `AntOffsetPort`, `Destination`, `ETADest`, `PosSource`, `PosQuality`, `FixDTG`, `ROT`, `NavStatus`, `Source`, `TimeOfFix`, `Latitude`, `Longitude`, `SOG`, `Heading`, `RxStnID`, `COG` FROM $ais_database.$vessels_table WHERE RxStnID not like ('%ORBCOMM%') AND RxStnID not like ('%EXACT%') AND (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $ais_database.$vessels_table GROUP BY MMSI)) VESSELS LEFT OUTER JOIN `risk`.user_ship_risk ON VESSELS.mmsi = `risk`.user_ship_risk.mmsi";
                }
                else if (!empty($_GET["sataisonly"])) {
-                  $fromSources = "(SELECT `MMSI`, `CommsID`, `IMONumber`, `CallSign`, `Name`, `VesType`, `Cargo`, `AISClass`, `Length`, `Beam`, `Draft`, `AntOffsetBow`, `AntOffsetPort`, `Destination`, `ETADest`, `PosSource`, `PosQuality`, `FixDTG`, `ROT`, `NavStatus`, `Source`, `TimeOfFix`, `Latitude`, `Longitude`, `SOG`, `Heading`, `RxStnID`, `COG` FROM $ais_database.$vessels_table WHERE (RxStnID like ('%ORBCOMM%') OR RxStnID like ('%EXACT%')) AND (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $ais_database.$vessels_table GROUP BY MMSI)) VESSELS LEFT OUTER JOIN `risk`.user_ship_risk ON VESSELS.mmsi = `risk`.user_ship_risk.mmsi";
+                  $sourceStr = "(SELECT `MMSI`, `CommsID`, `IMONumber`, `CallSign`, `Name`, `VesType`, `Cargo`, `AISClass`, `Length`, `Beam`, `Draft`, `AntOffsetBow`, `AntOffsetPort`, `Destination`, `ETADest`, `PosSource`, `PosQuality`, `FixDTG`, `ROT`, `NavStatus`, `Source`, `TimeOfFix`, `Latitude`, `Longitude`, `SOG`, `Heading`, `RxStnID`, `COG` FROM $ais_database.$vessels_table WHERE (RxStnID like ('%ORBCOMM%') OR RxStnID like ('%EXACT%')) AND (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $ais_database.$vessels_table GROUP BY MMSI)) VESSELS LEFT OUTER JOIN `risk`.user_ship_risk ON VESSELS.mmsi = `risk`.user_ship_risk.mmsi";
                }
             }
       }
@@ -80,20 +108,20 @@ if(count($_GET) > 0) {
 }
 
 //Query statement - default statement unless user inputs custom statement
-$query = "SELECT * FROM " . $fromSources;
+$query = "SELECT * FROM " . $sourceStr;
 
 
 //Count the number of arguments
 if(count($_GET) > 0) {
     //custom query, erase everything else and use this query
     if (!empty($_GET["query"])) {
-       //TODO: add security checks, e.g. against "DROP TABLE *" commands
+       //TODO: add security checks against SQL injections
        $query = $_GET["query"];
     }
 
     $basequery = $query;
 
-    //Add geo bounding box constraint
+    //-------------------- Add geo bounding box constraint --------------------------
     if (strpos($query, "WHERE Latitude") !== FALSE || !empty($_GET["noappend"])) {
        //don't add anything to query
     }
@@ -115,8 +143,8 @@ if(count($_GET) > 0) {
              $timemachine = 1;
           }
 
-          //Check if a 'WHERE' has already been inserted into the query, append 'AND' if so.
-          if ($timemachine || strpos(strtolower($query), "where") !== FALSE ) {
+          //Check if the filter/criteria list has been started 
+          if ($timemachine || $criteriaListStarted) {
              $query = $query . " AND";
           }
           else {  //Append 'WHERE' since there is no previous WHERE

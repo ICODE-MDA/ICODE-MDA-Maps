@@ -25,6 +25,9 @@ var latestPHPcall;            //last phpWithArgs call
 var mainQuery;                //main query called
 var prevZoom = null;          //store the last zoom level
 
+//Vessel type filter
+var vesseltypeFilterPHPStr = '';
+
 //Cluster boxes for zoomed out view of vessel count instead of showing markers
 var clusterBoxes = [];        
 var clusterBoxesLabels= [];
@@ -66,7 +69,7 @@ var queryBounds;              //map bounds of query
 var expandFactor = 300;       //factor to expand bounds by outside of viewable area
 var boundRectangle = null;    //rectangle map object to draw query bounds
 
-var queryid;
+var queryid;                  //ID of query based on timestamp to keep track of map clearing on simultaneous query layers
 
 //Marker timing objects
 //var markerMouseoutTimeout;
@@ -687,7 +690,7 @@ function initialize() {
 
 /* -------------------------------------------------------------------------------- */
 /** 
- * Handles refreshing map of all markers
+ * Handles refreshing map of all markers/clusters/ports layers/day-night layer/etc.
  */
 function refreshMaps(forceRedraw) {
    //alert("caller is " + arguments.callee.caller.toString()); //Find out who called this function
@@ -704,21 +707,26 @@ function refreshMaps(forceRedraw) {
    if (forceRedraw) {
       lastRefresh = new Date();
    }
+   
+   //------------------------ Update AIS/RADAR/LAISIC ---------------------------
 
    //Check if URL has query
    var queryArgument = Request.QueryString("query").toString();
    //console.log(queryArgument);
 
    if (enableTimeMachine) {
+      // -- Time Machine mode --
       console.log('Performing Time Machine query');
       getTargetsFromDB(map.getBounds(), queryTimeMachine, 'AIS', true); 
    }
    else if (enableCustomQuery) {
+      // -- Custom query mode --
       console.log('Performing custom query: ' + queryCustomQuery);
       getTargetsFromDB(map.getBounds(), queryCustomQuery, 'AIS', true); 
    }
    //Check if URL has query parameter, and use if it is defined
    else if (queryArgument != null) {
+      // -- URL Query mode --
       console.log('Performing URL query');
       mainQuery = queryArgument;
 
@@ -728,6 +736,8 @@ function refreshMaps(forceRedraw) {
    else {
       //Update vessels displayed
       if (document.getElementById("LAISIC_TARGETS").checked) {
+         // -- LAISIC mode --
+
          //Uncheck auto refresh
          $('input[name=autoRefresh]').attr('checked', false);
          toggleAutoRefresh();
@@ -743,7 +753,10 @@ function refreshMaps(forceRedraw) {
          getTargetsFromDB(map.getBounds(), null, "LAISIC_AIS_OBS", redrew);
       }
       else if (!enableCluster || map.getZoom() > 9) {
+         // -- Live view mode --
+
          //Create a unique query id to keep track of when to clear map
+         //  The first layer to return will clear the map and set a new queryid so the other calls don't clear the map again
          queryid = new Date().getTime();
 
          //Most queries will default here
@@ -759,9 +772,14 @@ function refreshMaps(forceRedraw) {
          }
       }
       else {
+         // -- Clusters mode --
+
+         //Only get AIS (no PVOL/radar or LAISIC) for clusters
          getClustersFromDB(map.getBounds(), null);
       }
    }
+
+   //------------------------ Update other layers ---------------------------
 
    //Update ports displayed
    if (Ports) {
@@ -796,8 +814,6 @@ function refreshTracks() {
 /* -------------------------------------------------------------------------------- */
 /** 
  * Get AIS data from JSON, which is from database, with bounds.
- *
- * Optional callback argument (4th argument)
  */
 function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisqueryid) {
    //Set buffer around map bounds to expand queried area slightly outside viewable area
@@ -902,30 +918,37 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
    var phpWithArg;
 
    //Read sourceType (AIS, LAISIC stuff, etc) from global variable, set previous right before this calling this function.  This one used to notify PHP script which table to query from.
-   var source = "source=" + sourceType;
+   var sourceStr = "source=" + sourceType;
    var boundStr = "&minlat=" + Math.round(minLat*1000)/1000 + "&maxlat=" + Math.round(maxLat*1000)/1000 + "&minlon=" + Math.round(minLon*1000)/1000 + "&maxlon=" + Math.round(maxLon*1000)/1000;
 
    //Check if a query has been previously made, and use it to preserve previous query but just change the bounds to current view now
    if (!customQuery && customQuery !== '') {     //No custom query
-      phpWithArg = "query_current_vessels.php?" + source;
+      phpWithArg = "query_current_vessels.php?" + sourceStr;
 
       if (enableRisk) {
          phpWithArg += "&risk=1";
       }
 
-      if ($('#mssisonly:checked').length != 0) {
-         phpWithArg += "&mssisonly=1";
-      }
-      if ($('#sataisonly:checked').length != 0) {
-         phpWithArg += "&sataisonly=1";
-      }
+      //Check for AIS's source (terrestrial vs SatAIS)
+      if (sourceType == 'AIS') {
+         if ($('#mssisonly:checked').length != 0) {
+            phpWithArg += "&mssisonly=1";
+         }
+         if ($('#sataisonly:checked').length != 0) {
+            phpWithArg += "&sataisonly=1";
+         }
 
-      phpWithArg += boundStr;
+         if (vesseltypeFilterPHPStr != '') {
+            phpWithArg += vesseltypeFilterPHPStr;
+         }
+      }
 
       //if vessel age limit was chosen, then add option
       if (vessel_age != -1) {
          phpWithArg += "&vessel_age=" + vessel_age;
       }
+
+      phpWithArg += boundStr;
 
       enableCustomQuery = false;
    }
@@ -933,7 +956,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
       //TODO: need a more robust condition for keyword search
       if (customQuery.length < 20) {
          //customQuery is really a keyword search
-         phpWithArg = "query_current_vessels.php?" + source + boundStr + "&keyword=" + customQuery;
+         phpWithArg = "query_current_vessels.php?" + sourceStr + boundStr + "&keyword=" + customQuery;
       }
       //TODO for handling case when trying to display specific vessels or LAISIC outputs
       /*
@@ -1473,6 +1496,9 @@ function getClustersFromDB(bounds, customQuery) {
       phpWithArg += "&sataisonly=1";
    }
 
+   if (vesseltypeFilterPHPStr != '') {
+      phpWithArg += vesseltypeFilterPHPStr;
+   }
 
    //Debug query output
    console.log('getClustersFromDB(): ' + phpWithArg);
@@ -2778,8 +2804,38 @@ function enteredQuery() {
 }
 
 /* -------------------------------------------------------------------------------- */
+function selectVessel(mmsi) {
+   for (var i=0; i < markersDisplayed.length; i++) {
+      if (markersDisplayed[i].mmsi == mmsi) {
+         new google.maps.event.trigger(markerArray[i], 'click');
+      }
+   }
+}
+
+/* -------------------------------------------------------------------------------- */
+function hideHighlightMMSI() {
+   selectionCircle.setMap(null);
+}
+
+/* -------------------------------------------------------------------------------- */
 function typeSelectUpdated() {
    console.log('Types select updated');
+
+   //Build the global PHP request filter argument string
+   //clear the string of old filter
+   vesseltypeFilterPHPStr = '';
+
+   //Build new string
+   var types = getTypesNotSelected();     //get array of vesseltype integers which are NOT selected
+
+   for (var i=0; i < types.length; i++) {
+      vesseltypeFilterPHPStr += '&vthide[]=' + types[i];
+   }
+
+   //getTargetsFromDB() will check vesseltypeFilterPHPStr for filtering
+   refreshMaps(true);
+
+   /*
    var types = getTypesSelected();
 
    //var entered_query = document.getElementById("query").value;
@@ -2802,33 +2858,7 @@ function typeSelectUpdated() {
    else {
       refreshMaps(true);
    }
-}
-
-/* -------------------------------------------------------------------------------- */
-function selectVessel(mmsi) {
-   for (var i=0; i < markersDisplayed.length; i++) {
-      if (markersDisplayed[i].mmsi == mmsi) {
-         new google.maps.event.trigger(markerArray[i], 'click');
-      }
-   }
-}
-
-/* -------------------------------------------------------------------------------- */
-function hideHighlightMMSI() {
-   selectionCircle.setMap(null);
-}
-
-/* -------------------------------------------------------------------------------- */
-// Given the LatLng of a northwest corner, and the number of meters to
-// measure east and south, return the LatLngBounds for that rectangle
-function makeBounds(nw, metersEast, metersSouth) {
-    var ne = google.maps.geometry.spherical.computeOffset(
-        nw, metersEast, 90
-    );
-    var sw = google.maps.geometry.spherical.computeOffset(
-        nw, metersSouth, 180
-    );
-    return new google.maps.LatLngBounds( sw, ne );
+   */
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -2838,6 +2868,9 @@ function typeSelectedAllShips() {
 }
 
 /* -------------------------------------------------------------------------------- */
+/**
+ * Forces all vessel type checkboxes to be checked, used when All Ships is checked
+ **/
 function setAllTypesChecked() {
    if ( document.getElementById("All Ships").checked ) {
       console.log('setting all check boxes true');
@@ -2859,11 +2892,15 @@ function setAllTypesChecked() {
 }
 
 /* -------------------------------------------------------------------------------- */
-function getTypesSelected() {
+/**
+ * Returns an array of integers that matches the vessel types that are checked
+ **/
+function getTypesNotSelected() {
 	var types = [];
 
    //Check if any of the specific types are unchecked
-   var checkboxtype = document.getElementsByClassName("checkboxtype");
+   var checkboxtype = $('.checkboxtype');//document.getElementsByClassName("checkboxtype");
+
    for (var i=0; i < checkboxtype.length; i++) {
       //If there are any unchecked types, then uncheck the "All Ships" checkbox as well
       if (checkboxtype[i].checked == false) {
@@ -2872,41 +2909,43 @@ function getTypesSelected() {
       }
    }
 
-   //Now, check which boxes are still checked
-   if(document.getElementById("0-Unspecified Ships").checked) {
+   //Check which boxes are still checked
+   if(!document.getElementById("0-Unspecified Ships").checked) {
       types.push(0);
    }
-   if(document.getElementById("30-Fishing").checked) {
+   if(!document.getElementById("30-Fishing").checked) {
       types.push(30);
    }
-   if(document.getElementById("31-Towing").checked) {
+   if(!document.getElementById("31-Towing").checked) {
       types.push(31);
    }
-   if(document.getElementById("32-Big Tow").checked) {
+   if(!document.getElementById("32-Big Tow").checked) {
       types.push(32);
    }
-   if(document.getElementById("33-Dredge").checked) {
+   if(!document.getElementById("33-Dredge").checked) {
       types.push(33);
    }
-   if(document.getElementById("35-Military").checked) {
+   if(!document.getElementById("35-Military").checked) {
       types.push(35);
    }
-   if(document.getElementById("37-Pleasure Craft").checked) {
+   if(!document.getElementById("37-Pleasure Craft").checked) {
       types.push(37);
    }
-   if(document.getElementById("50-Pilot").checked) {
+   if(!document.getElementById("50-Pilot").checked) {
       types.push(50);
    }
-   if(document.getElementById("51-Search and Rescue").checked) {
+   if(!document.getElementById("51-Search and Rescue").checked) {
       types.push(51);
    }
-   if(document.getElementById("52-Tug").checked) {
+   if(!document.getElementById("52-Tug").checked) {
       types.push(52);
    }
-   if(document.getElementById("55-Law Enforcement").checked) {
+   if(!document.getElementById("55-Law Enforcement").checked) {
       types.push(55);
    }
-   if(document.getElementById("6x-Passenger Vessels").checked) {
+   if(!document.getElementById("6x-Passenger Vessels").checked) {
+      types.push(6);   //covers 60-69
+      /*
       types.push(60);   //covers 60-69
       types.push(61);
       types.push(62);
@@ -2917,8 +2956,11 @@ function getTypesSelected() {
       types.push(67);
       types.push(68);
       types.push(69);
+      */
    }
-   if(document.getElementById("7x-Cargo Vessels").checked) {
+   if(!document.getElementById("7x-Cargo Vessels").checked) {
+      types.push(7);   //covers 70-79
+      /*
       types.push(70);   //covers 70-79
       types.push(71);
       types.push(72);
@@ -2929,8 +2971,11 @@ function getTypesSelected() {
       types.push(77);
       types.push(78);
       types.push(79);
+      */
    }
-   if(document.getElementById("8x-Tankers").checked) {
+   if(!document.getElementById("8x-Tankers").checked) {
+      types.push(8);   //covers 80-89
+      /*
       types.push(80);   //covers 80-89
       types.push(81);
       types.push(82);
@@ -2941,14 +2986,17 @@ function getTypesSelected() {
       types.push(87);
       types.push(88);
       types.push(89);
+      */
    }
 
+   /*
    //Default to all ships if no types selected
    if (types.length == 0 || document.getElementById("All Ships").checked) {
       types.push(999);
       document.getElementById("All Ships").checked = true;
       setAllTypesChecked();
    }
+   */
 
    return types;
 }
