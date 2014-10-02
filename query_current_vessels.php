@@ -11,6 +11,35 @@ function startsWith($haystack, $needle)
     return $needle === "" || strpos($haystack, $needle) === 0;
 }
 
+/* Types not included in legend
+1-Reserved
+2-WIG
+20-WIG
+21-Pusher
+22-Push+Brg
+23-LightBt
+24-MODU
+25-OSV
+26-Process
+27-Training
+28-Gov
+29-Auto
+34-Diving
+36-Sailing
+38-Reserved
+39-Reserved
+4-HSC
+53-Tender
+54-AntiPol
+56-Spare
+57-Spare
+58-Medical
+59-Resol-18
+9-Other
+ */
+$typesNotIncluded = [1, 2, 34, 36, 38, 39, 4, 53, 54, 56, 57, 58, 59, 9];
+
+
 //-----------------------------------------------------------------------------
 //Database execution
 //Keep database connection information secure
@@ -80,16 +109,31 @@ if(count($_GET) > 0) {
                   $vthideArray = $_GET["vthide"];
 
                   for ($i=0; $i < sizeof($vthideArray) ; $i++) {
-                     if ($criteriaListStarted) {
-                        $sourceStr = $sourceStr . ' AND ';
+                     $type = $vthideArray[$i];
+                     
+                     if ($type === "-1") {
+                        for ($j=0; $j < sizeof($typesNotIncluded); $j++) {
+                           if ($criteriaListStarted) {
+                              $sourceStr = $sourceStr . ' AND ';
+                           }
+                           else {
+                              $sourceStr = $sourceStr . ' WHERE ';
+                              $criteriaListStarted = 1;
+                           }
+                           $type = $typesNotIncluded[$j];
+                           $sourceStr = $sourceStr . "VesType not like ('$type%')";
+                        }
                      }
                      else {
-                        $sourceStr = $sourceStr . ' WHERE ';
-                        $criteriaListStarted = 1;
+                        if ($criteriaListStarted) {
+                           $sourceStr = $sourceStr . ' AND ';
+                        }
+                        else {
+                           $sourceStr = $sourceStr . ' WHERE ';
+                           $criteriaListStarted = 1;
+                        }                        
+                        $sourceStr = $sourceStr . "VesType not like ('$type%')";
                      }
-
-                     $nottype = $vthideArray[$i];
-                     $sourceStr = $sourceStr . "VesType not like ('$nottype%')";
                   }
                }
             }

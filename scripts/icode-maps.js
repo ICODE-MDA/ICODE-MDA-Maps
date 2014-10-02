@@ -2893,7 +2893,7 @@ function setAllTypesChecked() {
 
 /* -------------------------------------------------------------------------------- */
 /**
- * Returns an array of integers that matches the vessel types that are checked
+ * Returns an array of integers that matches the vessel types that are NOT checked
  **/
 function getTypesNotSelected() {
 	var types = [];
@@ -2910,6 +2910,10 @@ function getTypesNotSelected() {
    }
 
    //Check which boxes are still checked
+   if(!document.getElementById("All Ships").checked) {
+      //Push all types not equal to the ones below; Use the '-1' flag to indicate
+      types.push(-1);
+   }
    if(!document.getElementById("0-Unspecified Ships").checked) {
       types.push(0);
    }
@@ -2945,48 +2949,12 @@ function getTypesNotSelected() {
    }
    if(!document.getElementById("6x-Passenger Vessels").checked) {
       types.push(6);   //covers 60-69
-      /*
-      types.push(60);   //covers 60-69
-      types.push(61);
-      types.push(62);
-      types.push(63);
-      types.push(64);
-      types.push(65);
-      types.push(66);
-      types.push(67);
-      types.push(68);
-      types.push(69);
-      */
    }
    if(!document.getElementById("7x-Cargo Vessels").checked) {
       types.push(7);   //covers 70-79
-      /*
-      types.push(70);   //covers 70-79
-      types.push(71);
-      types.push(72);
-      types.push(73);
-      types.push(74);
-      types.push(75);
-      types.push(76);
-      types.push(77);
-      types.push(78);
-      types.push(79);
-      */
    }
    if(!document.getElementById("8x-Tankers").checked) {
       types.push(8);   //covers 80-89
-      /*
-      types.push(80);   //covers 80-89
-      types.push(81);
-      types.push(82);
-      types.push(83);
-      types.push(84);
-      types.push(85);
-      types.push(86);
-      types.push(87);
-      types.push(88);
-      types.push(89);
-      */
    }
 
    /*
