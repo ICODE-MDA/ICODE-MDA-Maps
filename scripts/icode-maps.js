@@ -325,6 +325,7 @@ function initialize() {
    //Clear marker array
    markerArray = [];
    vesselArray = [];
+   markersDisplayed = [];
 
    //var infoWindow = new google.maps.InfoWindow();
    /*
@@ -3048,6 +3049,12 @@ function clearVesselMarkerArray() {
       emptyArray(markerArray);
       vesselArray.length = 0;
       emptyArray(vesselArray);
+
+      for (i in markersDisplayed) {
+         markersDisplayed[i].vesselnameLabel.setMap(null);
+      }
+      markersDisplayed.length = 0;
+      emptyArray(markersDisplayed);
 	}
 }
 
