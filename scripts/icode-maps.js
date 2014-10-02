@@ -3045,15 +3045,12 @@ function clearVesselMarkerArray() {
          markerArray[i] = null;
          vesselArray[i] = null;
 		}
-		markerArray.length = 0;
       emptyArray(markerArray);
-      vesselArray.length = 0;
       emptyArray(vesselArray);
 
       for (i in markersDisplayed) {
          markersDisplayed[i].vesselnameLabel.setMap(null);
       }
-      markersDisplayed.length = 0;
       emptyArray(markersDisplayed);
 	}
 }
@@ -3066,7 +3063,6 @@ function clearOutBoundMarkers() {
 			markerArray[i].setMap(null);
          markerArray[i] = null;
 		}
-		markerArray.length = 0;
       emptyArray(markerArray);
 	}
 }
@@ -4843,4 +4839,5 @@ function emptyArray(arr) {
          arr.pop();
       }
    }
+   arr.length = 0;
 }
