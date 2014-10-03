@@ -31,60 +31,242 @@
         });           
     });
     </script>
+	
 </head>
 
-<body>
+<body onload="initialize();">
 <div class="outerContainer">
 	<div class="title"><center>Query Builder</center></div>
 	<div class="leftPanel">
 		<div class="subtitle">Query Options</div>
 		<div id="accordion" class="accordion">
-			
+			<h3>Tables</h3>
+			<div id="tables">
+				Select from:<br />
+				<select id="tableName">
+					<option value="1" selected="selected">Vessels Memory</option>
+					<option value="2">RADAR/LAISIC</option>
+					<option value="3">PVOL-PDM</option>
+				</select>
+			</div>
 			<h3>Geographic Coordinates</h3>
-			<div id="">
+			<div id="latLon">
 				<b>Latitude:</b><br />
-				Between <input id="minLat" name="minLat" type="text" value="1.1" style="width: 50px">
-				to <input id="maxLat" name="maxLat" type="text" value="1.2" style="width: 50px"><br /><br />
+				Between <input id="minLat" name="minLat" type="text" value="-33.213" style="width: 50px">
+				to <input id="maxLat" name="maxLat" type="text" value="-32.786" style="width: 50px"><br /><br />
 				<b>Longitude:</b><br />
-				Between <input id="minLon" name="minLon" type="text" value="1.1" style="width: 50px">
-				to <input id="maxLon" name="maxLon" type="text" value="1.2" style="width: 50px"><br /><br />				
+				Between <input id="minLon" name="minLon" type="text" value="-71.988" style="width: 50px">
+				to <input id="maxLon" name="maxLon" type="text" value="-71.212" style="width: 50px"><br /><br />				
 			</div>
-			<h3>Order by</h3>
-			<div id="orderBy">
-				<input id="mmsi" name="mmsi" checked="checked" type="checkbox" onclick="uncheckRest();">
+			<h3>Date-Time</h3>			
+			<div id="datetime">
+				<b>Starting Date-Time</b><br />
+				<input id="minMonth" type="text" placeholder="Month" style="width: 50px">
+				<b>/</b><input id="minDay" type="text" placeholder="Day" style="width: 50px">
+				<b>/</b><input id="minYear" type="text" placeholder="Year" style="width: 50px"><br /><br />
+				<input id="minHour" type="text" placeholder="Hour" style="width: 50px">
+				<b>:</b><input id="minMinute" type="text" placeholder="Minute" style="width: 50px">
+				<b>:</b><input id="minSecond" type="text" placeholder="Second" style="width: 50px">
+				<br /><br />	
+				<b>Ending Date-Time</b><br />
+				<input id="maxMonth" type="text" placeholder="Month" style="width: 50px">
+				<b>/</b><input id="maxDay" type="text" placeholder="Day" style="width: 50px">
+				<b>/</b><input id="maxYear" type="text" placeholder="Year" style="width: 50px"><br /><br />
+				<input id="maxHour" type="text" placeholder="Hour" style="width: 50px">
+				<b>:</b><input id="maxMinute" type="text" placeholder="Minute" style="width: 50px">
+				<b>:</b><input id="maxSecond" type="text" placeholder="Second" style="width: 50px">
+				<br /><br />
+				Date-time format: <br />MM/DD/YYYY HH:MM:SS<br /><br />
+				Note: Time is calculated locally.
+			</div>	
+			<!--
+			<h3>Vessels Memory:</h3>
+			<div id="vesselsMemory">
+				<input id="vmMmsi" type="checkbox">
 				MMSI<br />
-				<input id="sog" name="sog" type="checkbox" onclick="uncheckRest();">
-				SOG<br />
-				<input id="lon" name="lon" type="checkbox" onclick="uncheckRest();">
-				Longitude<br />
-				<input id="lat" name="lat" type="checkbox" onclick="uncheckRest();">
+				<input id="vmCommsID" type="checkbox">
+				Communications ID<br />
+				<input id="vmIMONumber" type="checkbox">
+				IMO Number<br />
+				<input id="vmCallSign" type="checkbox">
+				Call Sign<br />
+				<input id="vmName" type="checkbox">
+				Vessel Name<br />
+				<input id="vmVesType" type="checkbox">
+				Vessel Type<br />
+				<input id="vmCargo" type="checkbox">
+				Cargo<br />
+				<input id="vmAISClass" type="checkbox">
+				AIS Class<br />
+				<input id="vmLength" type="checkbox">
+				Length<br />
+				<input id="vmBeam" type="checkbox">
+				Beam<br />
+				<input id="vmDraft" type="checkbox">
+				Draft<br />
+				<input id="vmAntOffsetBow" type="checkbox">
+				Antenna Offset Bow<br />
+				<input id="vmAntOffsetPort" type="checkbox">
+				Antenna Offset Port<br />
+				<input id="vmDestination" type="checkbox">
+				Destination<br />
+				<input id="vmETADest" type="checkbox">
+				ETA Destination<br />
+				<input id="vmPosSource" type="checkbox">
+				Position Source<br />
+				<input id="vmPosQuality" type="checkbox">
+				Position Quality<br />
+				<input id="vmFixDTG" type="checkbox">
+				Fix Date-Time Group<br />
+				<input id="vmROT" type="checkbox">
+				ROT<br />
+				<input id="vmNavStatus" type="checkbox">
+				Navigation Status<br />
+				<input id="vmSource" type="checkbox">
+				Source<br />
+				<input id="vmTimeOfFix" type="checkbox">
+				Time Of Fix<br />
+				<input id="vmLat" type="checkbox">
 				Latitude<br />
-				<input id="cog" name="cog" type="checkbox" onclick="uncheckRest();">
-				COG<br />
-				<input id="dateTime" name="dateTime" type="checkbox" onclick="uncheckRest();">
-				Date Time<br />
-				<input id="streamId" name="streamId" type="checkbox" onclick="uncheckRest();">
-				Stream ID<br />
-				<input id="targetStatus" name="targetStatus" type="checkbox" onclick="uncheckRest();">
-				Target Status<br />
-				<input id="targetAcq" name="targetAcq" type="checkbox" onclick="uncheckRest();">
-				Target Acquired<br />
-				<input id="trackNo" name="trackNo" type="checkbox" onclick="uncheckRest();">
-				Track Number<br />
-				<input id="sourceId" name="sourceId" type="checkbox" onclick="uncheckRest();">
-				Source ID<br />
+				<input id="vmLon" type="checkbox">
+				Longitude<br />
+				<input id="vmSOG" type="checkbox">
+				SOG<br />
+				<input id="vmHeading" type="checkbox">
+				Heading<br />
+				<input id="vmRxStnID" type="checkbox">
+				Rx Station Id<br />
+				<input id="vmCOG" type="checkbox">
+				COG<br /><br />
+				<button id="selectAll" onClick='selectAll("vesselsMemory");'>Select All</button>&nbsp;&nbsp;
+				<button id="clearAll" onClick='clearAll("vesselsMemory");'>Clear All</button>
+				<br /><br />
 			</div>
-			<h3>Category 3</h3>
-			<div id="">
-				<input id="" name="" checked="checked" type="checkbox" onclick="">
-				Field<br />
-			</div>		
+			RADAR/LAISIC:</h3>
+			<div id="radarLaisic">
+				<input id="rlKeyColumn" type="checkbox">
+				Key Column<br />
+				<input id="rlMsgType" type="checkbox">
+				Message Type<br />
+				<input id="rlMmsi" type="checkbox">
+				MMSI<br />
+				<input id="rlNavStatus" type="checkbox">
+				Navigation Status<br />
+				<input id="rlROT" type="checkbox">
+				ROT<br />
+				<input id="rlSOG" type="checkbox">
+				SOG<br />
+				<input id="rlLon" type="checkbox">
+				Longitude<br />
+				<input id="rlLat" type="checkbox">
+				Latitude<br />
+				<input id="rlCOG" type="checkbox">
+				COG<br />
+				<input id="rlTrueHeading" type="checkbox">
+				True Heading<br />
+				<input id="rlDatetime" type="checkbox">
+				Date-Time<br />
+				<input id="rlIMO" type="checkbox">
+				IMO Number<br />
+				<input id="rlVesName" type="checkbox">
+				Vessel Name<br />
+				<input id="rlVesType" type="checkbox">
+				Vessel Type<br />
+				<input id="rlLength" type="checkbox">
+				Length<br />
+				<input id="rlShipWidth" type="checkbox">
+				Ship Width<br />
+				<input id="rlBow" type="checkbox">
+				Bow<br />
+				<input id="rlStern" type="checkbox">
+				Stern<br />
+				<input id="rlPort" type="checkbox">
+				Port<br />
+				<input id="rlStarboard" type="checkbox">
+				Starboard<br />
+				<input id="rlDraught" type="checkbox">
+				Draught<br />
+				<input id="rlDestination" type="checkbox">
+				Destination<br />
+				<input id="rlCallSign" type="checkbox">
+				Call Sign<br />
+				<input id="rlPosAcc" type="checkbox">
+				Position Accuracy<br />
+				<input id="rlETA" type="checkbox">
+				Estimated Time of Arrival<br />
+				<input id="rlPosFixType" type="checkbox">
+				Position Fix Type<br />
+				<input id="rlStreamId" type="checkbox">
+				Stream ID<br />
+				<input id="rlTargetStatus" type="checkbox">
+				Target Status<br />
+				<input id="rlTargetAcq" type="checkbox">
+				Target Acquisition<br />
+				<input id="rlTrkNum" type="checkbox">
+				Track Number<br />
+				<input id="rlSourceId" type="checkbox">
+				Source ID<br />
+				<input id="rlAISTime" type="checkbox">
+				AIS Time<br />
+				<input id="rlAISTrkNum" type="checkbox">
+				AIS Track Number<br /><br />
+				<button id="selectAll" onClick='selectAll("radarLaisic");'>Select All</button>&nbsp;&nbsp;
+				<button id="clearAll" onClick='clearAll("radarLaisic");'>Clear All</button>
+				<br /><br />
+			</div>	
+			<h3>PVOL-PDM</h3>
+			<div id="pvol">
+				<input id="pvolMMSI" type="checkbox">
+				MMSI<br />
+				<input id="pvolCommsID" type="checkbox">
+				Communications ID<br />
+				<input id="pvolName" type="checkbox">
+				Name<br />
+				<input id="pvolPosSource" type="checkbox">
+				Position Source<br />
+				<input id="pvolSource" type="checkbox">
+				Source<br />
+				<input id="pvolTimeOfFix" type="checkbox">
+				Time Of Fix<br />
+				<input id="pvolLat" type="checkbox">
+				Latitude<br />
+				<input id="pvolLon" type="checkbox">
+				Longitude<br />
+				<input id="pvolSOG" type="checkbox">
+				SOG<br />
+				<input id="pvolHeading" type="checkbox">
+				Heading<br />
+				<input id="pvolRxStnID" type="checkbox">
+				Rx Station ID<br />
+				<input id="pvolCOG" type="checkbox">
+				COG<br />
+				<input id="pvolOpt1Tag" type="checkbox">
+				Option 1 Tag<br />
+				<input id="pvolOpt1Val" type="checkbox">
+				Option 1 Value<br />
+				<input id="pvolOpt2Tag" type="checkbox">
+				Option 2 Tag<br />
+				<input id="pvolOpt2Val" type="checkbox">
+				Option 2 Value<br />
+				<input id="pvolOpt3Tag" type="checkbox">
+				Option 3 Tag<br />
+				<input id="pvolOpt3Val" type="checkbox">
+				Option 3 Value<br />
+				<input id="pvolOpt4Tag" type="checkbox">
+				Option 4 Tag<br />
+				<input id="pvolOpt4Val" type="checkbox">
+				Option 4 Value<br /><br />
+				<button id="selectAll" onClick='selectAll("pvol");'>Select All</button>&nbsp;&nbsp;
+				<button id="clearAll" onClick='clearAll("pvol");'>Clear All</button>
+				<br /><br />
+			</div>
+			-->
 		</div>
 	</div>
 	<div class="rightPanel">
 		<!-- search panel for searching specific info in database -->
 		<div class="search">
-			<input type="text" id="searchguiQuery" placeholder=" Type search term here (e.g. MMSI, Ship Name, etc.)"></input>
+			<input type="text" id="searchguiQuery" placeholder=" Type search term here (e.g. MMSI, ship name, etc.)"></input>
 			<span><button onClick="searchguiResults();">Search</button>
 		</div>
 		<div class="mainPanel">

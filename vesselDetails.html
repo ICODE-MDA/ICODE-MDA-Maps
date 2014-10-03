@@ -19,113 +19,20 @@
 	<script type="text/javascript" src="scripts/jquery-ui-1.10.3.custom.js"></script>
     <link rel="stylesheet" href="css/custom-theme/jquery-ui-1.10.3.custom.css">
     
-	<!-- slideshow UI library -->
+	<!-- slideshow UI library 
 	<link rel="stylesheet" type="text/css" href="css/lightSlider.css">
 	<script type="text/javascript" src="scripts/jquery.lightSlider.js"></script>
-	
+	-->
 	<!-- vesselDetails.js -->
 	<script type="text/javascript" src="scripts/vesselDetails.js"></script>
 	
-	<!-- testing: fake database info -->
+	<!-- initialize the widget -->
 	<script>
 		function init() {
-		$("#name").html("ID COPENHAGEN");
-		$("#shipName").html("ID COPENHAGEN");
-		$("#imo").html("9624328");
-		$("#callSign").html("3EUN3");
-		$("#mmsi").html("373843000");
-		$("#flag").html("Panama");
-		$("#operator").html("Bidsted & Co A/S");
-		$("#shiptype").html("Bulk Carrier");
-		$("#gross").html("17,027");
-		$("#deadweight").html("28,206");
-		$("#yearOfBuild").html("2012");
-		$("#status").html("In Service/Commission");
-		$("#shipbuilder").html("I-S Shipyard Co Ltd");
-		
-		$("#portOfRegistry").html("Panama");
-		$("#officialNumber").html("4426312");
-		$("#satComAnsBack").html("");
-		$("#regFlag").html("Panama");
-		$("#satComId").html("");
-		$("#fishingNumber").html("");
-		$("#regPniClubDate").html("2010-02-20");
-		$("#regPniClub").html("Unknown");
-		
-		$("#ownershipGroupOwner").html("Unknown");
-		$("#ownershipShipManager").html("Bidsted & Co A/S");
-		$("#ownershipOperator").html("Bidsted & Co A/S");
-		$("#ownershipDocCompany").html("First Steamship SA");
-		$("#ownershipRegisteredOwner").html("Ship Bulker Steamship SA");
-		$("#ownershipTechnicalManager").html("First Steamship SA");
-		$("#ownershipBareboatOwner").html("");
-		$("#location1").html("");
-		$("#location2").html("Denmark");
-		$("#location3").html("Denmark");
-		$("#location4").html("Chinese Taipei");
-		$("#location5").html("Denmark");
-		$("#location6").html("Chinese Taipei");
-		$("#location7").html("");
-		$("#imoCompanyNo").html("1581022");
-		$("#imoRegisteredOwnerNo").html("5688396");
-
-		$("#commDate").html("2012-08");
-		$("#commName").html("ID COPENHAGEN");
-		$("#commFlag").html("Panama");
-		$("#commGroupOwner").html("Unknown");
-		$("#commOperator").html("Bidsted & Co A/S");
-		$("#commManager").html("Bidsted & Co A/S");
-		$("#commRegisteredOwner").html("Ship Bulker Steamship SA");
-		$("#commDoc").html("First Steamship SA");
-		$("#commPrice").html("");
-		
-		$("#clas").html("Nippon Kaiji Kyokai");
-		$("#clasId").html("124655");
-		$("#clasNk").html("Special");
-		$("#clasSurveyDate").html("2012-08-28");
-		$("#clasNotation").html("NS*(BC-A, BC-XII, GRAB, PSPC-WBT)(ESP)/MNS* Strengthened for heavy cargo loading where hold nos. 2 & 4 may be empty");
-		$("#clasDate").html("2011-00-00");
-		$("#clas2").html("Nippon Kaiji Kyokai");
-		$("#clasStatus").html("(Contemplated)");
-		
-		$("#conShipType").html("Bulk Carrier");
-		$("#conBuilt").html("2012");
-		$("#conGt").html("17,027");
-		$("#conDeadweight").html("28,206");
-		$("#conDate1").html("2012-08-28");
-		$("#conDate2").html("2012-07-09");
-		$("#conDate3").html("2010-11-08");
-		$("#conDate4").html("2010-01-01");
-		$("#conStatus1").html("In Service/Commision");
-		$("#conStatus2").html("Launched");
-		$("#conStatus3").html("Keel Laid");
-		$("#conStatus4").html("On Order/Not Commenced");
-		$("#conConstructionDetail").html("Statcode5:A21A2BC; Standard design:Imabari 28; Ship Type Group:Bulk Carrier - Large Handy; Hull Material:Steel; Strengthened for heavy cargoes; Hull Connections:Welded; Decks:1 dk; Bulbous bow");
-		$("#conServiceConstraints").html("Trading, Commercial; Sea, Unspecified");
-		$("#conAlterations").html("");
-		$("#conLengthOverall").html("169.370");
-		$("#conLengthReg").html("161.210");
-		$("#conBreadthExtreme").html("0.000");
-		$("#conDraught").html("9.8200");
-		$("#conHeight").html("0.000");
-		$("#conDisplacement").html("0");
-		$("#conLengthBp").html("160.400");
-		$("#conBulbousBow").html("Yes");
-		$("#conBreadthMoulded").html("27.200");
-		$("#conDepth").html("13.600");
-		$("#conTcm").html("39.7");
-		$("#conTonnageType").html("One tonnage, unspecified");
-		$("#conEffectiveDate").html("2012-08");
-		$("#conGrossTonnage").html("17,027");
-		$("#conDeadweight").html("28,206");
-		$("#conFormulaDeadweight").html("26,196");
-		$("#conTonnageSystem").html("New System (International 1969)");
-		$("#conNetTonnage").html("10,108");
-		$("#conCompensatedGrossTonnage").html("0");
-		$("#conLightDisplacementTonnage").html("0");
-		
-		$("#con").html("");
-	}
+			var launchData = false;
+			
+			initialize(launchData,"","");
+		}
 	</script>
 	
 	<!-- call accordion -->
@@ -141,7 +48,7 @@
     });
     </script>
 	
-	<!-- call lightSlider -->
+	<!-- call lightSlider 
 	<script>
 	$(document).ready(function() {
 		$("#lightSlider").lightSlider({
@@ -152,7 +59,7 @@
 		}); 
 	});
 	</script>
-		
+	-->	
 </head>
 
 <body onload="init();">
@@ -185,7 +92,8 @@
 			<h3>Construction</h3>
 			<div id="construction">
 				<button class="leftPanelButton" onClick="triggerConOverview();">Overview</button><br />
-				<button class="leftPanelButton" onClick="triggerConShipbuilderStatus();">Shipbuilder Status</button><br />
+				<button class="leftPanelButton" onClick="triggerConShipbuilder();">Shipbuilder Status</button><br />
+				<button class="leftPanelButton" onClick="triggerConStatus();">Status</button><br />
 				<button class="leftPanelButton" onClick="triggerConConstructionDetail();">Construction Detail</button><br />
 				<button class="leftPanelButton" onClick="triggerConServiceConstraints();">Service Constraints</button><br />
 				<button class="leftPanelButton" onClick="triggerConAlterations();">Alterations</button><br />
@@ -198,43 +106,42 @@
 			</div>
 			<h3>Cargo & Gear</h3>
 			<div id="cargoAndGear">
-				Overview<br />
-				Compartments<br />
-				Tanks<br />
-				Hatches<br />
-				Capacities<br />
-				Specialist<br />
-				Cargo Gear<br />
-				Ro-ro<br />
-				Towage<br />
-				Miscellaneous<br />
+				<button class="leftPanelButton" onClick="triggerCngOverview();">Overview</button><br />
+				<button class="leftPanelButton" onClick="triggerCngCompartments();">Compartments</button><br />
+				<button class="leftPanelButton" onClick="triggerCngTanks();">Tanks</button><br />
+				<button class="leftPanelButton" onClick="triggerCngHatches();">Hatches</button><br />
+				<button class="leftPanelButton" onClick="triggerCngCapacities();">Capacities</button><br />
+				<button class="leftPanelButton" onClick="triggerCngSpecialist();">Specialist</button><br />
+				<button class="leftPanelButton" onClick="triggerCngCargoGear();">Cargo Gear</button><br />
+				<button class="leftPanelButton" onClick="triggerCngRoro();">Ro-ro</button><br />
+				<button class="leftPanelButton" onClick="triggerCngTowage();">Towage</button><br />
+				<button class="leftPanelButton" onClick="triggerCngMiscellaneous();">Miscellaneous</button><br />
+				<button class="leftPanelButton" onClick="triggerCngViewAll();">View All</button>
 			</div>
 			<h3>Machinery</h3>
 			<div id="machinery">
-				Overview<br />
-				Prime Mover<br />
-				Auxiliary Engines<br />
-				Boilers<br />
-				Auxiliary Generators<br />
-				Bunkers<br />
-				Thrusters<br />
+				<button class="leftPanelButton" onClick="triggerMacOverview();">Overview</button><br />
+				<button class="leftPanelButton" onClick="triggerMacPrimeMover();">Prime Mover</button><br />
+				<button class="leftPanelButton" onClick="triggerMacAuxEngines();">Auxiliary Engines</button><br />
+				<button class="leftPanelButton" onClick="triggerMacBoilers();">Boilers</button><br />
+				<button class="leftPanelButton" onClick="triggerMacAuxGenerators();">Auxiliary Generators</button><br />
+				<button class="leftPanelButton" onClick="triggerMacBunkers();">Bunkers</button><br />
+				<button class="leftPanelButton" onClick="triggerMacThrusters();">Thrusters</button><br />
+				<button class="leftPanelButton" onClick="triggerMacViewAll();">View All</button>
 			</div>
 			<h3>Classified</h3>
 			<div id="classified">
-				Inspections<br />
-				Ship Certificates<br />
-				Safety Management<br />
-				Event Summary<br />
-				Casualties<br />
-				Crew List<br />
+				<button class="leftPanelButton" onClick="triggerClaOverview();">Overview</button><br />
+				<button class="leftPanelButton" onClick="triggerClaInspections();">Inspections</button><br />
+				<button class="leftPanelButton" onClick="triggerClaCertificates();">Ship Certificates</button><br />
+				<button class="leftPanelButton" onClick="triggerClaSafety();">Safety Management</button><br />
+				<button class="leftPanelButton" onClick="triggerClaCasualties();">Casualties</button><br />
+				<button class="leftPanelButton" onClick="triggerClaCrew();">Crew List</button><br />
+				<button class="leftPanelButton" onClick="triggerClaViewAll();">View All</button>
 			</div>
 			<h3>Event Timeline</h3>
 			<div id="eventTimeline">
 				Event Timeline<br />
-			</div>
-			<h3>Photographs</h3>
-			<div id="photographs">
-				Photographs<br />
 			</div>
 			<h3>Movements</h3>
 			<div id="movements">
@@ -257,7 +164,12 @@
 	<div class="rightPanel">
 		<!-- search panel for searching specific info in database -->
 		<div class="search">
-			<input type="text" id="searchQuery" placeholder=" Type search here."></input>
+			<select id="searchType">
+				<option value="selectMmsi" selected="selected">MMSI</option>
+				<option value="selectImo" selected="selected">IMO Number</option>
+				<option value="selectShipName">Ship Name</option>
+			</select>
+			<span><input type="text" id="searchTerm" value="9624328" placeholder=" Type search terms here (e.g. MMSI, vessel name, vessel type, etc.)"></input></span>
 			<span><button onClick="searchResults();">Search</button>
 		</div>
 		
@@ -265,7 +177,7 @@
 		<div class="topPanel">
 			<div class="title">Ship Detail</div>
 			<div id="shipDetails" class="shipDetailsContainer">
-				<div class="shipDetailsCols">
+				<div class="shipDetailsColsInner">
 					<div class="shipDetailsLabel">Ship Name</div>
 					<div class="shipDetailsLabel">LR/IMO No.</div>
 					<div class="shipDetailsLabel">Call Sign</div>
@@ -273,29 +185,29 @@
 					<div class="shipDetailsLabel">Flag</div>
 					<div class="shipDetailsLabel">Operator</div>
 				</div>
-				<div class="shipDetailsCols">
-					<div id="shipName"></div>
-					<div id="imo"></div>
-					<div id="callSign"></div>
-					<div id="mmsi"></div>
-					<div id="flag"></div>
-					<div id="operator"></div>
+				<div class="shipDetailsColsOuter">
+					<div id="detailShipName"></div>
+					<div id="detailImo"></div>
+					<div id="detailCallSign"></div>
+					<div id="detailMmsi"></div>
+					<div id="detailFlag"></div>
+					<div id="detailOperator"></div>
 				</div>
-				<div class="shipDetailsCols">
+				<div class="shipDetailsColsInner">
 					<div class="shipDetailsLabel">Shiptype</div>
-					<div class="shipDetailsLabel">Gross</div>
+					<div class="shipDetailsLabel">Gross Tonnage</div>
 					<div class="shipDetailsLabel">Deadweight</div>
-					<div class="shipDetailsLabel">Year of Build</div>
+					<div class="shipDetailsLabel">Date of Build</div>
 					<div class="shipDetailsLabel">Status</div>
 					<div class="shipDetailsLabel">Shipbuilder</div>
 				</div>
-				<div class="shipDetailsCols">
-					<div id="shiptype"></div>
-					<div id="gross"></div>
-					<div id="deadweight"></div>
-					<div id="yearOfBuild"></div>
-					<div id="status"></div>
-					<div id="shipbuilder"></div>
+				<div class="shipDetailsColsOuter">
+					<div id="detailShiptype"></div>
+					<div id="detailGross"></div>
+					<div id="detailDeadweight"></div>
+					<div id="detailDateOfBuild"></div>
+					<div id="detailShipStatus"></div>
+					<div id="detailShipbuilder"></div>
 				</div>
 				<div class="shipDetailsCols">
 					<img src="img/1411693.simg" width="200" height="120" style="margin: 20px;" />

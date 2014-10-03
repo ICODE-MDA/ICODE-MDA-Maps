@@ -35,22 +35,16 @@ body {
 }
 .mainPanel {
 	margin-top: 5px;
-	height: 300px;
+	height: 500px;
 	overflow-x: hidden;
 	overflow-y: auto;
 }
-
-.fourColsContainer {
-	overflow: hidden;
-	clear: both;
-}
-.fourCols { 
-	float: left;
-	width: 25%;
-	font-weight: bold;
-}
-.fourColsLabel {
-	color: rgb(96,96,96);
+#latLon input, #datetime input {
+	border-radius: 7px;
+	border: 1px solid rgb(120,160,224);
+	padding: 3px;
+	background-color: rgba(0,0,0,0.2);
+	text-align: right;
 }
 
 .title {
