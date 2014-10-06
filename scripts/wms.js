@@ -141,6 +141,7 @@ function loadWMS(map, baseURL, customParams){
 
     map.overlayMapTypes.insertAt(0, overlayWMS);
 
+    /*
     map.setOptions({
         mapTypeControlOptions: {
             mapTypeIds: [
@@ -152,4 +153,5 @@ function loadWMS(map, baseURL, customParams){
             style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
         }
     });
+    */
 }
