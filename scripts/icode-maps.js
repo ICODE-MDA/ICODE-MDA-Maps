@@ -913,7 +913,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
    console.log("Refreshing target points...");
    document.getElementById("query").value = "QUERY RUNNING...";
    document.getElementById('stats').innerHTML = '';
-   document.getElementById('busy_indicator').style.visibility = 'visible';
+   $('#busy_indicator').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#fff', speed: 2.0}); //show spinner
    NProgress.start();   //JS library top progress bar
 
    var phpWithArg;
@@ -1404,7 +1404,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
 
          //Update activity status spinner and results
          console.log('getTargetsFromDB(): ' + "Total number of markers = " + markerArray.length);
-         document.getElementById('busy_indicator').style.visibility = 'hidden';
+         $('#busy_indicator').activity(false); //hide spinner
          document.getElementById('stats').innerHTML = 
             //response.resultcount + " results<br>" + 
             markersDisplayed.length + " results<br>" + //Use markersDisplayed array length to include RADAR and LAISIC markers
@@ -1421,7 +1421,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
             console.log('getTargetsFromDB(): ' +  'No response from track query; error in php?'); 
             document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
          }
-         document.getElementById('busy_indicator').style.visibility = 'hidden';
+         $('#busy_indicator').activity(false); //hide spinner
          NProgress.done();   //JS library top progress bar
          return false; 
       }); //END .fail()
@@ -1436,7 +1436,7 @@ function getClustersFromDB(bounds, customQuery) {
    console.log("Refreshing target points...");
    document.getElementById("query").value = "QUERY RUNNING...";
    document.getElementById('stats').innerHTML = '';
-   document.getElementById('busy_indicator').style.visibility = 'visible';
+   $('#busy_indicator').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#fff', speed: 2.0}); //show spinner
    NProgress.start();   //JS library top progress bar
 
    //Set buffer around map bounds to expand queried area slightly outside viewable area
@@ -1632,7 +1632,7 @@ function getClustersFromDB(bounds, customQuery) {
          console.log('getClustersFromDB(): ' + "Total number of vessels = " + totalsum);
 
 
-         document.getElementById('busy_indicator').style.visibility = 'hidden';
+         $('#busy_indicator').activity(false); //hide spinner
          document.getElementById('stats').innerHTML = 
             totalsum + " results<br>" + 
             Math.round(response.exectime*1000)/1000 + " secs";
@@ -1648,7 +1648,7 @@ function getClustersFromDB(bounds, customQuery) {
             console.log('getClustersFromDB(): ' +  'No response from track query; error in php?'); 
             document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
          }
-         document.getElementById('busy_indicator').style.visibility = 'hidden';
+         $('#busy_indicator').activity(false); //hide spinner
          NProgress.done();   //JS library top progress bar
          return; 
       }); //end .fail()
@@ -2226,7 +2226,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
        $.inArray(trknum, tracksDisplayedID) == -1) {
       document.getElementById("query").value = "QUERY RUNNING FOR TRACK...";
       document.getElementById('stats').innerHTML = '';
-      document.getElementById('busy_indicator').style.visibility = 'visible';
+      $('#busy_indicator').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#fff', speed: 2.0}); //show spinner
       NProgress.start();   //JS library top progress bar
 
       var phpWithArg = "query_track.php?source=" + source;
@@ -2651,14 +2651,14 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
                      });
                   }
 
-                  document.getElementById('busy_indicator').style.visibility = 'hidden';
+                  $('#busy_indicator').activity(false); //hide spinner
                   document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
                   NProgress.done();   //JS library top progress bar
                }) //end .done()
             .fail(function() { 
                console.log('GETTRACK(): ' +  'No response from track query; error in php?'); 
                document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
-               document.getElementById('busy_indicator').style.visibility = 'hidden';
+               $('#busy_indicator').activity(false); //hide spinner
                NProgress.done();   //JS library top progress bar
                return; 
             }); //end .fail()
@@ -3164,7 +3164,7 @@ function togglePortLayer() {
 function showPorts() {
    document.getElementById("query").value = "QUERY RUNNING FOR PORTS...";
    document.getElementById('stats').innerHTML = '';
-   document.getElementById('busy_indicator').style.visibility = 'visible';
+   $('#busy_indicator').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#fff', speed: 2.0}); //show spinner
    NProgress.start();   //JS library top progress bar
 
    var bounds = map.getBounds();
@@ -3234,14 +3234,14 @@ function showPorts() {
          });
       });
 
-      document.getElementById('busy_indicator').style.visibility = 'hidden';
+      $('#busy_indicator').activity(false); //hide spinner
       document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
       console.log('SHOWPORTS(): ' +  'No response from port query; error in php?'); 
       document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
-      document.getElementById('busy_indicator').style.visibility = 'hidden';
+      $('#busy_indicator').activity(false); //hide spinner
       NProgress.done();   //JS library top progress bar
       return; 
    }); //end .fail()
@@ -3305,14 +3305,14 @@ function showPorts() {
          });
       });
 
-      document.getElementById('busy_indicator').style.visibility = 'hidden';
+      $('#busy_indicator').activity(false); //hide spinner
       document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
       console.log('SHOWPORTS() part 2: ' +  'No response from port query; error in php?'); 
       document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
-      document.getElementById('busy_indicator').style.visibility = 'hidden';
+      $('#busy_indicator').activity(false); //hide spinner
       NProgress.done();   //JS library top progress bar
       return; 
    }); //end .fail()
@@ -3410,14 +3410,14 @@ function showPorts() {
       }
 
 
-      document.getElementById('busy_indicator').style.visibility = 'hidden';
+      $('#busy_indicator').activity(false); //hide spinner
       document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
       console.log('SHOWPORTS() part 3: ' +  'No response from port query; error in php?'); 
       document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
-      document.getElementById('busy_indicator').style.visibility = 'hidden';
+      $('#busy_indicator').activity(false); //hide spinner
       NProgress.done();   //JS library top progress bar
       return; 
    }); //end .fail()   

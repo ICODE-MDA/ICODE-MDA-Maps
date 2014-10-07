@@ -32,19 +32,19 @@
 
 /* Remove these to get rid of the spinner */
 #nprogress .spinner {
-  display: block;
-  position: fixed;
+  display: inline-block;
+  position: absolute;
   z-index: 1031;
   top: 15px;
-  right: 15px;
+  right: 200px;
 }
 
 #nprogress .spinner-icon {
-  width: 18px;
-  height: 18px;
+  width: 34px;
+  height: 34px;
   box-sizing: border-box;
 
-  border: solid 2px transparent;
+  border: solid 5px transparent;
   border-top-color: #29d;
   border-left-color: #29d;
   border-radius: 50%;
