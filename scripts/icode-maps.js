@@ -1652,6 +1652,227 @@ function getClustersFromDB(bounds, customQuery) {
          NProgress.done();   //JS library top progress bar
          return; 
       }); //end .fail()
+
+
+
+   //----------------------------------------------------------------------------------------
+   //Draw individual vessels where cluster boxes contain less than 10 vessels
+
+   var vw = vesseliconwidth; //4; //vessel width
+   var vl = vesseliconlength; //10; //vessel length
+   var markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
+
+   phpWithArg = "query_current_vessels_individual.php?" + boundStr;
+
+   //if vessel age limit was chosen, then add option
+   if (vessel_age != -1) {
+      phpWithArg += "&vessel_age=" + vessel_age;
+   }
+
+   if (detectMobileBrowser()) {
+      phpWithArg += "&mobile=1";
+   }
+
+   if ($('#mssisonly:checked').length != 0) {
+      phpWithArg += "&mssisonly=1";
+   }
+   if ($('#sataisonly:checked').length != 0) {
+      phpWithArg += "&sataisonly=1";
+   }
+
+   if (vesseltypeFilterPHPStr != '') {
+      phpWithArg += vesseltypeFilterPHPStr;
+   }
+
+   //Debug query output
+   console.log('getClustersFromDB(): ' + phpWithArg);
+
+
+   //Keep track of newest PHP request, current one may not be the newest one by the time data is received
+   latestPHPcall = phpWithArg;
+
+
+   //Call PHP and get results as markers
+   $.getJSON(
+         phpWithArg, // The server URL 
+         { }
+      ) //end .getJSON()
+      .done(function (response) {
+         console.log('getClustersFromDB(): ' + response.query);
+         //Show the query and put it in the form
+         document.getElementById("query").value = response.query;
+
+
+         //Prepare to grab PHP results as JSON objects
+         $.each(response.vessels, function(key,vessel) {
+               var point = new google.maps.LatLng(
+                     parseFloat(vessel.lat),
+                     parseFloat(vessel.lon));
+
+               var iconColor = getIconColor(vessel.vesseltypeint, vessel.streamid);
+
+               //Slightly different style for vessels with valid risk score
+               if (enableRisk && (vessel.risk_score_safety != null || vessel.risk_score_security != null)) {
+                  var riskColorSafety = getRiskColor(vessel.vesseltypeint, vessel.streamid, vessel.safety_rating);
+                  var riskColorSecurity = getRiskColor(vessel.vesseltypeint, vessel.streamid, vessel.security_rating);
+                  var marker = new google.maps.Marker({
+                     position: point,
+                     icon: {
+                        path:         markerpath, //'M 0,8 4,8 4,-3 0,-8 -4,-3 -4,8 z', //middle rear
+                        strokeColor:  riskColorSafety,
+                        strokeWeight: vw*3/4,
+                        fillColor:    iconColor,
+                        fillOpacity:  0.6,
+                        optimized:    false,
+                        rotation:     parseInt(vessel.heading)
+                     }
+                  });
+               }
+               else {   //regular style for AIS vessels with no risk info
+                  var marker = new google.maps.Marker({
+                     position: point,
+                     icon: {
+                        path:         markerpath, //'M 0,8 4,8 4,-3 0,-8 -4,-3 -4,8 z', //middle rear
+                        strokeColor:  shadeColor(iconColor,-50),
+                        strokeWeight: vw/4,
+                        fillColor:    iconColor,
+                        fillOpacity:  0.8,
+                        rotation:     parseInt(vessel.heading),
+                        optimized:    false,
+                     }
+                  });
+               }               
+
+               //Listener for click on marker to display infoBubble
+               google.maps.event.addListener(marker, 'click', function () {
+                  //Associate the infoBubble to the marker
+                  clearInterval(vesselLastUpdated);
+
+                  //Draw the selection square
+                  selectionSquare.setPosition(point);
+                  selectionSquare.setMap(map);
+
+                  //Setup the infoBubble and show it
+                  markerInfoBubble(marker, vessel, infoBubble);
+
+                  //Close the infoBubble if user clicks outside of infoBubble area
+                  google.maps.event.addListenerOnce(map, 'click', function() {
+                     if (enableIHSTabs) {
+                        for (var i=0; i < NUM_INFO_BUBBLE; i++) {
+                           console.log('Removing tab ' + i);
+                           infoBubble.removeTab(0);
+                        }
+                     }
+                     clearInterval(vesselLastUpdated);
+                     selectionSquare.setMap(null);
+                     infoBubble.setMap(null);
+                     infoBubble.close(); 
+                  });
+               });
+
+               //Listener for mouseover marker to display tracks
+               google.maps.event.addListener(marker, 'mouseover', function() {
+                  //Hover display name
+                  if (vessel.vesselname != null && vessel.vesselname.length != 0) {
+                     marker.setTitle(vessel.vesselname.trim());
+                  }
+                  else {
+                     marker.setTitle(vessel.mmsi);
+                  }
+
+                  google.maps.event.addListenerOnce(marker, 'mouseout', function() {
+                     //window.clearTimeout(trackMouseoverTimeout);
+                     document.getElementById('shipdetails').style.visibility = 'hidden';
+                  });
+               });
+
+               //Prepare data for creating marker infoWindows/infoBubbles later
+               markerArray.push(marker);
+               vesselArray.push(vessel);
+
+               var vessellabel = vessel.mmsi;
+
+               //add vesselnameLabel to markersDisplayed array
+               //Trying InfoBox to display many labels with no problems
+               vesselnameLabel = new InfoBox({
+                    content: vessellabel,
+                    boxStyle: {
+                      border: "0px dashed black",
+                      textAlign: "center",
+                      //fontSize: "10pt",  //Define text styling properties in CSS file
+                      width: "120px"
+                    },
+                    disableAutoPan: true,
+                    pixelOffset: new google.maps.Size(-60, 10),
+                    position: new google.maps.LatLng(vessel.lat, vessel.lon),
+                    closeBoxURL: "",
+                    isHidden: false,
+                    pane: "mapPane",
+                    enableEventPropagation: true
+               });
+
+               vesselnameLabel.open(map);
+               
+               //Check if labels should be displayed or not
+               if (document.getElementById("showvesselnames") == null || 
+                   !document.getElementById("showvesselnames").checked) {
+                  vesselnameLabel.setMap(null);
+               }
+
+               markersDisplayed.push({
+                  mmsi: vessel.mmsi, 
+                  trknum: vessel.commsid, 
+                  vessellabel: vessel.vesselname,
+                  vesseltypeint: vessel.vesseltypeint,
+                  //source: sourceType,
+                  streamid: vessel.streamid,
+                  datetime: vessel.datetime,
+                  lat: vessel.lat,
+                  lon: vessel.lon,
+                  vesselnameLabel: vesselnameLabel 
+               });
+         });
+
+         //Display the appropriate layer according to the sidebar checkboxes
+         if (document.getElementById("HeatmapLayer") && document.getElementById("HeatmapLayer").checked) {
+            addHeatmap();
+         }
+         else {
+            showOverlays();   //Display the markers individually
+         }
+
+         //Check if user wants to display all tracks (from URL request)
+         // Need to be careful if user has "queryTracks=all" in the URL request, 
+         // then starts clicking around on LAISIC outputs, etc.  All tracks will be queried unintentionally.
+         var trackDisplayArgument = Request.QueryString("queryTracks").toString();
+         if (trackDisplayArgument == 'all') {
+            queryAllTracks();
+            document.getElementById("queryalltracks").checked = true;
+         }
+
+         //Update activity status spinner and results
+         console.log('getClustersFromDB(): ' + "Total number of markers = " + markerArray.length);
+         document.getElementById('busy_indicator').style.visibility = 'hidden';
+         document.getElementById('stats').innerHTML = 
+            //response.resultcount + " results<br>" + 
+            markersDisplayed.length + " results<br>" + //Use markersDisplayed array length to include RADAR and LAISIC markers
+            Math.round(response.exectime*1000)/1000 + " secs";
+         NProgress.done();   //JS library top progress bar
+      }) //END .done()
+      .fail(function(d, textStatus, error) { 
+         if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+            console.log('getClustersFromDB(): ' +  'Database is down'); 
+            document.getElementById("query").value = "DATABASE IS DOWN.";
+         }
+         else {
+            //Update activity status spinner and results
+            console.log('getClustersFromDB(): ' +  'No response from track query; error in php?'); 
+            document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
+         }
+         document.getElementById('busy_indicator').style.visibility = 'hidden';
+         NProgress.done();   //JS library top progress bar
+         return false; 
+      }); //END .fail()
 }
 
 /* -------------------------------------------------------------------------------- */

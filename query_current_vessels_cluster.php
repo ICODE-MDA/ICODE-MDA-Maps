@@ -189,9 +189,8 @@ FROM
       ($latestpositionsfrommemorytableStr) AS tmp1
    GROUP BY mmsi) AS tmp2
 WHERE ($geobounds) 
-GROUP BY FLOOR($iGridRows * (Latitude - $minlat) / $dlat) * 1000000 + FLOOR($iGridCols * (IF(Longitude > $minlon, Longitude, Longitude + 360.0) - $minlon) / $dlon);";
-//HAVING clustersum >= $iMinClusterSize;";
-//
+GROUP BY FLOOR($iGridRows * (Latitude - $minlat) / $dlat) * 1000000 + FLOOR($iGridCols * (IF(Longitude > $minlon, Longitude, Longitude + 360.0) - $minlon) / $dlon) 
+HAVING clustersum >= $iMinClusterSize;";
 
       //Remove special characters
       $query = trim(preg_replace('/\s+/', ' ', $query));
