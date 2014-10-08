@@ -1534,7 +1534,6 @@ function getClustersFromDB(bounds, customQuery) {
 
          mainQuery = response.basequery;
 
-         console.log('Clearing previous markers and tracks');
          clearVesselMarkerArray();
          clearOutBoundMarkers();
          clearAllTracks();
@@ -1698,8 +1697,9 @@ function checkImageExistOrReplace(url) {
 //function markerInfoBubble(marker, infoBubble, html, mmsi, vesselname, vesseltypeint, streamid, datetime) {
 function markerInfoBubble(marker, vessel, infoBubble) {
    //Prepare vessel image from Marine Traffic
-   if (vessel.imo != null) {
-      imgURL = 'http://photos2.marinetraffic.com/ais/showphoto.aspx?mmsi=' + vessel.mmsi + '&imo=' + vessel.imo;
+   if (passIMOChecksum(vessel.imo)) {
+      //imgURL = 'http://photos2.marinetraffic.com/ais/showphoto.aspx?mmsi=' + vessel.mmsi + '&imo=' + vessel.imo;
+      imgURL = 'fetch_photo.php?imo=' + vessel.imo;
    }
    else {
       imgURL = 'http://photos2.marinetraffic.com/ais/showphoto.aspx?mmsi=' + vessel.mmsi;
