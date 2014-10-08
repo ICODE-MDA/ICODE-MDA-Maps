@@ -796,7 +796,7 @@ function drawTable(sourceType, historytrailindex) {
          clearLAISICAISTRACKTable();
          clearLAISICRADARTable();
          clearLAISICAISOBSTable();
-         clearHistoryTrailTable();
+         //clearHistoryTrailTable();
 
          clearLAISICAISTRACKdata();
          clearLAISICRADARdata();
