@@ -456,9 +456,9 @@
               <div>
                  <input class="checkbox" id="LAISIC_TARGETS" name="LAISIC_TARGETS" type="checkbox" onclick="refreshMaps(true);"> Display LAISIC targets<br><br>
                  <center>
-                    <button class="button" onClick="window.open('icode-table.html');">Open Vessels Tables (new window)</button>
+                    <button id="vesselstableherebutton" class="button" onClick="if ($('#vessels-modal').dialog('isOpen')){$('#vessels-modal').dialog('close'); $('#vesselstableherebutton').text('Open Vessels Tables here');} else {$('#vessels-modal').dialog('open'); $('#vesselstableherebutton').text('Close Vessels Tables');}">Open Vessels Tables here</button>
                     <br>
-                    <button class="button" onClick="if ($('#vessels-modal').dialog('isOpen')){$('#vessels-modal').dialog('close');} else {$('#vessels-modal').dialog('open');}">Open Vessels Tables in dialog</button>
+                    <button id="vesselstablenewwindowbutton" class="button" onClick="window.open('icode-table.html');">Open Vessels Tables (new window)</button>
                  </center>
                  <br>
                  <input class="checkbox" id="error ellipses" name="error ellipses" type="checkbox" checked="checked" onclick=";"> Draw error ellipses on trackicons<br><br>
