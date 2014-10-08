@@ -801,7 +801,7 @@ function drawTable(sourceType, historytrailindex) {
          clearLAISICAISTRACKdata();
          clearLAISICRADARdata();
          clearLAISICAISOBSdata();
-         clearHistoryTraildata();
+         //clearHistoryTraildata();
 
          console.log("Cluster query, nothing to show in tables.");
          break;
