@@ -896,7 +896,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
             fillOpacity: 0,
             map: map,
             bounds: queryBounds,
-          clickable: false,
+            clickable: false,
          });
       }
    }
@@ -3798,6 +3798,11 @@ function WMSOpenLayersGetTileUrl(tile, zoom) {
 
 /* -------------------------------------------------------------------------------- */
 function testWMSLayers() {
+   //Use loadWMS function from wms.js
+
+   //TODO: check if GeoServer is alive
+
+   console.log('GeoServer is alive, get tiles');
    //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:states&", null);
    //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:world_shorelines_Project_with_SD_BA&", null);
    loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:alert_properties&", null);

@@ -3,6 +3,8 @@
     Created on : Feb 16, 2011, 3:25:27 PM
     Author     : "Gavin Jackson <Gavin.Jackson@csiro.au>"
 
+    Source: http://www.gavinj.net/2011/02/overlaying-wms-data-using-google-maps.html
+    Source2: http://blog.canberraphotography.com.au/googlewms/wms.js
     Refactored code from http://lyceum.massgis.state.ma.us/wiki/doku.php?id=googlemapsv3:home
 */
 
@@ -139,18 +141,17 @@ function loadWMS(map, baseURL, customParams){
 
     overlayWMS = new google.maps.ImageMapType(overlayOptions);
 
-    map.overlayMapTypes.insertAt(0, overlayWMS);
+    //map.overlayMapTypes.insertAt(0, overlayWMS);
+    map.overlayMapTypes.push(overlayWMS);
 
     /*
+    //Set the map type legend selector
+    var mapTypeIds = map.mapTypeControlOptions.mapTypeIds;
+    mapTypeIds.push(GoogleEarth.MAP_TYPE_ID);
+
     map.setOptions({
         mapTypeControlOptions: {
-            mapTypeIds: [
-            google.maps.MapTypeId.ROADMAP,
-            google.maps.MapTypeId.TERRAIN,
-            google.maps.MapTypeId.SATELLITE,
-            google.maps.MapTypeId.HYBRID
-            ],
-            style: google.maps.MapTypeControlStyle.DROPDOWN_MENU
+            mapTypeIds: mapTypeIds,
         }
     });
     */

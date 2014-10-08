@@ -161,6 +161,24 @@
 
      <script>
         $(document).ready(function() {
+           var vesselsModal = $('#vessels-modal')
+           .dialog({
+              autoOpen: false,
+              title: 'Vessels Table',
+              width: 700,
+              height: $('#panel').height(),
+              modal: false,
+              position: [$('#panel').position().left - 700 - 14,$('#panel').position().top],
+              open: function (event, ui) {
+                 $('#vessels-modal').css('overflow', 'hidden');
+                 $('#vessels-modal').css('padding', '0');
+              }
+           });
+        });
+     </script>
+
+     <script>
+        $(document).ready(function() {
            NProgress.configure({ 
               ease: 'ease', 
               trickleRate: 0.02,
@@ -434,10 +452,14 @@
                  </p>
               </div>
 
-              <h3>LAISIC Tables</h3>
+              <h3>Vessels Tables</h3>
               <div>
                  <input class="checkbox" id="LAISIC_TARGETS" name="LAISIC_TARGETS" type="checkbox" onclick="refreshMaps(true);"> Display LAISIC targets<br><br>
-                 <center><a href="laisictables.html" target="_blank">Click here to open <br>LAISIC Tables in a new window</a></center>
+                 <center>
+                    <button class="button" onClick="window.open('icode-table.html');">Open Vessels Tables (new window)</button>
+                    <br>
+                    <button class="button" onClick="if ($('#vessels-modal').dialog('isOpen')){$('#vessels-modal').dialog('close');} else {$('#vessels-modal').dialog('open');}">Open Vessels Tables in dialog</button>
+                 </center>
                  <br>
                  <input class="checkbox" id="error ellipses" name="error ellipses" type="checkbox" checked="checked" onclick=";"> Draw error ellipses on trackicons<br><br>
               </div>
@@ -633,6 +655,11 @@
 
      <div id="setup-alert-modal">
         <!-- Content here defined in separate alerts/setup-alerts.html file -->
+     </div>
+
+     <div id="vessels-modal">
+        <iframe src="icode-table.html" height="100%" width="100%" style="margin-top:-65px">
+        </iframe>
      </div>
 
 
