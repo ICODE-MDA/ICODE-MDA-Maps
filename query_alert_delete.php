@@ -36,6 +36,8 @@ if (count($_GET) > 0) {
    }
 }
 
+//-----------------------------------------------------------------------------
+//Delete alert_properties that mach alert_id
 //Build the query
 if (isset($id)) {
    $query = "DELETE FROM $alert_database.alert_properties WHERE alert_id=$id LIMIT 1";
@@ -45,6 +47,19 @@ else {
    exit();
 }
 
+//Execute the query
+$result = @odbc_exec($connection, $query) or die('Query error: '.htmlspecialchars(odbc_errormsg()).' // '.$query);
+
+//-----------------------------------------------------------------------------
+//TODO: delete all criteria matching alert_id
+//Build the query
+if (isset($id)) {
+   $query = "DELETE FROM $alert_database.criteria WHERE alert_id=$id";
+}
+else {
+   echo json_encode(array(response => 'failure'), JSON_PRETTY_PRINT);
+   exit();
+}
 
 //Execute the query
 $result = @odbc_exec($connection, $query) or die('Query error: '.htmlspecialchars(odbc_errormsg()).' // '.$query);
