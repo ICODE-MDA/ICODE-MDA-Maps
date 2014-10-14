@@ -239,11 +239,10 @@
 			OWF.Eventing.subscribe("otherOptions_toggleDayNightOverlay", this.updateOtherOptions_toggleDayNightOverlay);
 			OWF.Eventing.subscribe("setupAlerts_setupAlertInitialize", this.updateSetupAlerts_setupAlertInitialize);
 			*/
-			OWF.Eventing.subscribe("queryBuilder", this.updateQuery);
+			OWF.Eventing.subscribe("queryBuilderToMap", this.updateQuery);
 		}
-
+		
 		var updateQuery = function(sender, msg) {
-			console.log("QUERY BUILDER:"+msg);
 			$('#query').val(msg);
 			
 			// simulate "enter" keypress
@@ -252,6 +251,7 @@
 			e.keyCode = 13;
 			$('#query').trigger(e);
 		}
+		
 		/*
 		// Event handlers for each Legend Channel
 		var updateLegend_radarvessels = function(sender, msg) {
@@ -734,7 +734,7 @@
            <div id="stats">
               <!-- result count and query time to be shown here -->
            </div>
-           <div id="busy_indicator"><div style="width: 32px; height: 32px;"></div></div>
+           <div id="busy_indicator" style="width: 32px; height: 32px;"></div>
         </div>
         <div id="alerts_nav" onclick="toggleAlertsPanel()" onmouseenter="$('#alertStatusConnection').show()" onmouseleave="$('#alertStatusConnection').hide()">
            <div id="alertsContainer">

@@ -211,9 +211,9 @@ function initialize() {
    //Set up map properties
    //var centerCoord = new google.maps.LatLng(0,0);
    //var centerCoord = new google.maps.LatLng(32.72,-117.2319);   //Point Loma
-   var centerCoord = new google.maps.LatLng(6.0,1.30);   //Lome, Togo
+   //var centerCoord = new google.maps.LatLng(6.0,1.30);   //Lome, Togo
    //var centerCoord = new google.maps.LatLng(2.0,1.30);     //GoG
-   //var centerCoord = new google.maps.LatLng(-33.0, -71.6);   //Valparaiso, Chile
+   var centerCoord = new google.maps.LatLng(-33.0, -71.6);   //Valparaiso, Chile
    //var centerCoord = new google.maps.LatLng(17.978677, -16.078958);   //Nouakchott, Mauritania
    //var centerCoord = new google.maps.LatLng(13.273461807246479, -13.465625000000037);   //Zoomed out world view
    
@@ -1720,7 +1720,17 @@ function markerInfoBubble(marker, vessel, infoBubble) {
  * Function to generate the HTML for infoBubble/infoWindow
  * for a AIS or LAISIC vessel marker.
  */
+ var owfLaunchStatus = false;
 function generateInfoHTML(vessel, vesseltype, title) {
+	if(OWF.Util.isRunningInOWF()) {
+		if(!owfLaunchStatus) {
+			owfLaunchStatus = true;
+			launchOwfVesselDetails(vessel.imo);
+		} else {
+			sendOwfLaunchConfigToWidget(vessel.imo);
+		}
+	}
+	
    var htmlTitle = 
       '<div id="content">'+
       '<span style="vertical-align: middle;display:inline-block;height: 30px;"><img title="' + MIDtoCountry(vessel.mmsi) + '" height=26px align="top" src=flags/' + vessel.mmsi.toString().substr(0,3) + '.png>&nbsp;&nbsp;<span id="firstHeading" class="firstHeading">' + title + '</span></span>' +
@@ -4831,4 +4841,21 @@ function initializeBrowserFocus() {
       window.onfocus = onFocus;
       window.onblur = onBlur;
    }
+}
+
+function launchOwfVesselDetails(msg) {
+	msg = "false " + msg;
+	OWF.Launcher.launch({
+		universealName: '51a8fc83-c801-ee68-1b9f-facf8c3f7f0e',
+		guid: '51a8fc83-c801-ee68-1b9f-facf8c3f7f0e',
+		title: 'ICODE-MDA Vessel Details',
+		launchOnlyIfClosed: true,
+		data: msg // string: launched (true or false), imo number
+	}, callback);
+}
+function callback(){
+}
+function sendOwfLaunchConfigToWidget(msg) {
+	msg = "true " + msg;
+	OWF.Eventing.publish("mapsToVesselDetails", msg);
 }

@@ -21,13 +21,6 @@
  
  // Show search results
 function searchResults() {
-	/*
-	$(".mainPanel").html(
-		'<div class="title">Search Results</div>' +
-		'<div>Returned the following search results...</div>'
-	);
-	*/
-	
 	var searchType = $('#searchType').find(":selected").val();
 	var searchTerm = $('#searchTerm').val();
 	
@@ -61,6 +54,9 @@ function searchResults() {
 }
 
 // Get information from database and show Initial info in main panel
+// parameters: (1) bool; launched by widget or manually,
+// (2) string; search by? imo, mmsi, or vessel name
+// (3) string; search for?
  function initialize(launchData,searchType,searchTerm) {
 
 	// check how widget was launched
@@ -96,20 +92,23 @@ function searchResults() {
 		).done(function (response) {
 			console.log('Vessels Detail: ' + response.query);
 		
-			if (response.resultcount > 0) {
+			if (response.resultcount == 1) {
+				// exactly one vessel retrieved; display that vessel
 				for(var i=0; i<response.vesseldata.length; i++) {
-					var shipName = response.vesseldata[i].shipName;
-					var dimo = response.vesseldata[i].imo;
-					var callSign = response.vesseldata[i].callSign;
-					var mmsi = response.vesseldata[i].mmsi;
-					var flag = response.vesseldata[i].flag;
-					var operator = response.vesseldata[i].operator;
-					var shipType = response.vesseldata[i].shipType;
-					var gross = response.vesseldata[i].gross;
-					var deadweight = response.vesseldata[i].deadweight;
-					var dateOfBuild = response.vesseldata[i].dateOfBuild;
-					var shipStatus = response.vesseldata[i].shipStatus;
-					var shipBuilder = response.vesseldata[i].shipBuilder;
+					var shipName = response.vesseldata[0].shipName;
+					var dimo = response.vesseldata[0].imo;
+					var callSign = response.vesseldata[0].callSign;
+					var mmsi = response.vesseldata[0].mmsi;
+					var flag = response.vesseldata[0].flag;
+					var operator = response.vesseldata[0].operator;
+					var shipType = response.vesseldata[0].shipType;
+					var shipSubtype = response.vesseldata[0].shipSubtype;
+					var gross = response.vesseldata[0].gross;
+					var deadweight = response.vesseldata[0].deadweight;
+					var dateOfBuild = ((response.vesseldata[0].dateOfBuild).split(" "))[0];
+					var shipStatus = response.vesseldata[0].shipStatus;
+					var shipSubstatus = response.vesseldata[0].shipSubstatus;
+					var shipBuilder = response.vesseldata[0].shipBuilder;
 				}
 				imo = dimo;
 				$(".mainPanel").html('');
@@ -119,13 +118,48 @@ function searchResults() {
 				$("#detailMmsi").html(mmsi);
 				$("#detailFlag").html(flag);
 				$("#detailOperator").html(operator);
-				$("#detailShiptype").html(shipType);
+				$("#detailShiptype").html(shipType + ": " + shipSubtype);
 				$("#detailGross").html(gross);
 				$("#detailDeadweight").html(deadweight);
 				$("#detailDateOfBuild").html(dateOfBuild);
-				$("#detailShipStatus").html(shipStatus);
+				$("#detailShipStatus").html(shipSubstatus);
 				$("#detailShipbuilder").html(shipBuilder);
+				
+			} else if(response.resultcount > 1) {
+				// more than one vessel retrieved; display list with links
+				$(".mainPanel").html(
+					'<div class="title">Search Results</div>' +
+					'<div style="color:red;font-weight:bold;">Found ' +
+					response.resultcount + 
+					' results.</div><div>&nbsp;</div>'
+				);
+				for(var i=0; i<response.vesseldata.length; i++) {
+					var shipName = response.vesseldata[i].shipName;
+					var dimo = response.vesseldata[i].imo;
+					var callSign = response.vesseldata[i].callSign;
+					var mmsi = response.vesseldata[i].mmsi;
+					var flag = response.vesseldata[i].flag;
+					var operator = response.vesseldata[i].operator;
+					var shipType = response.vesseldata[i].shipType;
+					var shipSubtype = response.vesseldata[i].shipSubtype;
+					var gross = response.vesseldata[i].gross;
+					var deadweight = response.vesseldata[i].deadweight;
+					var dateOfBuild = ((response.vesseldata[i].dateOfBuild).split(" "))[0];
+					var shipStatus = response.vesseldata[i].shipStatus;
+					var shipSubstatus = response.vesseldata[i].shipSubstatus;
+					var shipBuilder = response.vesseldata[i].shipBuilder;
+					var num = i+1;
+					var str = "'selectImo'";
+					$(".mainPanel").append(
+					'<div class="fourColsContainer">' +
+						'<button style="border: 0;" onclick="initialize(true,' + str + ',' + dimo + ');">' + 
+							num + ' |  Name: ' + shipName + ' | IMO No: ' + dimo + ' | MMSI: ' + mmsi + ' | Call Sign: ' + callSign + ' | Flag: ' + flag + 
+						'</button>' +
+					'</div>'
+					);
+				}
 			} else {
+				// no vessel retrieved
 				$(".mainPanel").html(
 					'<div class="title">Notice</div>' +
 					'<div style="color:red;font-weight:bold;">Unable to find vessel in database.</div>'
@@ -242,60 +276,41 @@ function triggerRegistration() {
 }
 
 // Get information from database and show Ownership info in main panel
-function triggerOwnership() {
-	if(checkImo()){
-		return;
-	};
+function createOwnTitle() {
+	$(".mainPanel").html(
+		'<div class="title">Ownership</div>'
+	);
+}
+function triggerOwnCurrent() {
+	createOwnTitle();
+	triggerOwnCurrent2();
+}
+function triggerOwnCurrent2() {
+	if(checkImo()){return;};
 	
 	// build HTML code
-	$(".mainPanel").html(
-		'<div class="title">Ownership</div>' +
-		'<div class="subtitle">Ownership</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
+	$(".mainPanel").append(
+		'<div class="subtitle">Current Ownership</div>' +
+		'<div class="twoColsContainer">' +
+			'<div class="twoColsInner">' +
 				'<div class="fourColsLabel">Group Owner</div>' +
 				'<div class="fourColsLabel">Ship Manager</div>' +
 				'<div class="fourColsLabel">Operator</div>' +
-				'<div class="fourColsLabel">DOC Company</div>' +
 				'<div class="fourColsLabel">Registered Owner</div>' +
 				'<div class="fourColsLabel">Technical Manager</div>' +
-				'<div class="fourColsLabel">IMO Company No (DOC)</div>' +
-				'<div class="fourColsLabel">IMO Registered Owner No</div>' +
 			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id="ownershipGroupOwner"></div>' +
-				'<div id="ownershipShipManager"></div>' +
-				'<div id="ownershipOperator"></div>' +
-				'<div id="ownershipDocCompany"></div>' +
-				'<div id="ownershipRegisteredOwner"></div>' +
-				'<div id="ownershipTechnicalManager"></div>' +
-				'<div id="ownershipImoCompanyNo"></div>' +
-				'<div id="ownershipImoRegisteredOwnerNo"></div>' +
+			'<div class="twoColsOuter">' +
+				'<div id="ownGroupOwner"></div>' +
+				'<div id="ownShipManager"></div>' +
+				'<div id="ownOperator"></div>' +
+				'<div id="ownRegisteredOwner"></div>' +
+				'<div id="ownTechnicalManager"></div>' +
 			'</div>' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel">Location</div>' +
-				'<div class="fourColsLabel">Location</div>' +
-				'<div class="fourColsLabel">Location</div>' +
-				'<div class="fourColsLabel">Location</div>' +
-				'<div class="fourColsLabel">Location</div>' +
-				'<div class="fourColsLabel">Location</div>' +
-				'<div class="fourColsLabel"></div>' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id="ownershipGroupOwnerLocation"></div>' +
-				'<div id="ownershipShipManagerLocation"></div>' +
-				'<div id="ownershipOperatorLocation"></div>' +
-				'<div id="ownershipDocCompanyLocation"></div>' +
-				'<div id="ownershipRegisteredOwnerLocation"></div>' +
-				'<div id="ownershipTechnicalManagerLocation"></div>' +
-				'<div id=""></div>' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
+		'</div>' +
+		'<div>&nbsp;</div>'
 	);
 	
-	var phpWithArg = "query_vessel_details.php?source=ownership&imo=" + imo;
+	var phpWithArg = "query_vessel_details.php?source=ownCurrent&imo=" + imo;
 	console.log('phpWithArg: ' + phpWithArg);
 	
 	// retrieve info from database using query request parameters
@@ -309,81 +324,205 @@ function triggerOwnership() {
 		if (response.resultcount > 0) {
 			// format data; remove NULL strings
 			if(!response.vesseldata[0].ownOwner){
-				response.vesseldata[0].ownOwner
+				response.vesseldata[0].ownOwner = "N/A";
+				response.vesseldata[0].ownOwnerId = "N/A";
+				response.vesseldata[0].ownOwnerCod = "N/A";
 			}
 			if(!response.vesseldata[0].ownManager){
-				response.vesseldata[0].ownManager
+				response.vesseldata[0].ownManager = "N/A";
+				response.vesseldata[0].ownManagerId = "N/A";
+				response.vesseldata[0].ownManagerCod = "N/A";
 			}
 			if(!response.vesseldata[0].ownOperator){
-				response.vesseldata[0].ownOperator
-			}
-			if(!response.vesseldata[0].ownDoc){
-				response.vesseldata[0].ownDoc
+				response.vesseldata[0].ownOperator = "N/A";
+				response.vesseldata[0].ownOperatorId = "N/A";
+				response.vesseldata[0].ownOperatorCod = "N/A";
 			}
 			if(!response.vesseldata[0].ownRegisteredOwner){
-				response.vesseldata[0].ownRegisteredOwner
+				response.vesseldata[0].ownRegisteredOwner = "N/A";
+				response.vesseldata[0].ownRegisteredOwnerId = "N/A";
+				response.vesseldata[0].ownRegisteredOwnerCod = "N/A";
 			}
 			if(!response.vesseldata[0].ownTechnicalManager){
-				response.vesseldata[0].ownTechnicalManager
-			}
-			if(!response.vesseldata[0].ownDocId){
-				response.vesseldata[0].ownDocId
-			}
-			if(!response.vesseldata[0].ownRegisteredOwnerId){
-				response.vesseldata[0].ownRegisteredOwnerId
+				response.vesseldata[0].ownTechnicalManager = "N/A";
+				response.vesseldata[0].ownTechnicalManagerCod = "N/A";
 			}
 			
 			// display data
-			$("#ownershipGroupOwner").html(response.vesseldata[0].ownOwner);
-			$("#ownershipShipManager").html(response.vesseldata[0].ownManager);
-			$("#ownershipOperator").html(response.vesseldata[0].ownOperator);
-			$("#ownershipDocCompany").html(response.vesseldata[0].ownDoc);
-			$("#ownershipRegisteredOwner").html(response.vesseldata[0].ownRegisteredOwner);
-			$("#ownershipTechnicalManager").html(response.vesseldata[0].ownTechnicalManager);
-			$("#ownershipImoCompanyNo").html(response.vesseldata[0].ownDocId);
-			$("#ownershipImoRegisteredOwnerNo").html(response.vesseldata[0].ownRegisteredOwnerId);
+			$("#ownGroupOwner").html(
+				"ID: " + 
+				response.vesseldata[0].ownOwnerId + ", " +
+				response.vesseldata[0].ownOwner + ", " + 
+				response.vesseldata[0].ownOwnerCod
+			);
+			$("#ownShipManager").html(
+				"ID: " +
+				response.vesseldata[0].ownManagerId + ", " +
+				response.vesseldata[0].ownManager + ", " +				
+				response.vesseldata[0].ownManagerCod
+			);
+			$("#ownOperator").html(
+				"ID: " +
+				response.vesseldata[0].ownOperatorId + ", " +
+				response.vesseldata[0].ownOperator + ", " +				
+				response.vesseldata[0].ownOperatorCod
+			);
+			$("#ownRegisteredOwner").html(
+				"ID: " +
+				response.vesseldata[0].ownRegisteredOwnerId + ", " +
+				response.vesseldata[0].ownRegisteredOwner + ", " +				
+				response.vesseldata[0].ownRegisteredOwnerCod
+			);
+			$("#ownTechnicalManager").html(
+				response.vesseldata[0].ownTechnicalManager + ", " +				
+				response.vesseldata[0].ownTechnicalManagerCod
+			);
 		}	
 	}).fail(function() {
 		console.log('Vessels Detail: No response from database; error in php?');
 		return;
 	});
 }
+function triggerOwnOriginal() {
+	createOwnTitle();
+	triggerOwnOriginal2();
+}
+function triggerOwnOriginal2() {
+	if(checkImo()){return;};
+	
+	// build HTML code
+	$(".mainPanel").append(
+		'<div class="subtitle">Original Ownership</div>' +
+		'<div class="twoColsContainer">' +
+			'<div class="twoColsInner">' +
+				'<div class="fourColsLabel">Original Vessel Name</div>' +
+				'<div class="fourColsLabel">Original Flag</div>' +
+				'<div class="fourColsLabel">Original Owner</div>' +
+				'<div class="fourColsLabel">Original Manager</div>' +
+				'<div class="fourColsLabel">Original Operator</div>' +				
+			'</div>' +
+			'<div class="twoColsOuter">' +
+				'<div id="ownOrigVesselName"></div>' +
+				'<div id="ownOrigFlag"></div>' +
+				'<div id="ownOrigOwner"></div>' +
+				'<div id="ownOrigManager"></div>' +
+				'<div id="ownOrigOperator"></div>' +			
+			'</div>' +
+		'</div>' +
+		'<div>&nbsp;</div>'
+	);
+	
+	var phpWithArg = "query_vessel_details.php?source=ownOriginal&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			if(!response.vesseldata[0].ownOrigOwner){
+				response.vesseldata[0].ownOrigOwner = "N/A";
+				response.vesseldata[0].ownOrigOwnerCod = "N/A";
+			}
+			if(!response.vesseldata[0].ownOrigManager){
+				response.vesseldata[0].ownOrigManager = "N/A";
+				response.vesseldata[0].ownOrigManagerCod = "N/A";
+			}
+			if(!response.vesseldata[0].ownOrigOperator){
+				response.vesseldata[0].ownOrigOperator = "N/A";
+				response.vesseldata[0].ownOrigOperatorCod = "N/A";
+			}
+			if(!response.vesseldata[0].ownOrigVesselName){
+				response.vesseldata[0].ownOrigVesselName = "N/A";
+			}
+			if(!response.vesseldata[0].ownOrigFlag){
+				response.vesseldata[0].ownOrigFlag = "N/A";
+			}
+			
+			// display data
+			$("#ownOrigOwner").html(
+				response.vesseldata[0].ownOrigOwner + ", " + 
+				response.vesseldata[0].ownOrigOwnerCod
+			);
+			$("#ownOrigManager").html(
+				response.vesseldata[0].ownOrigManager + ", " +				
+				response.vesseldata[0].ownOrigManagerCod
+			);
+			$("#ownOrigOperator").html(
+				response.vesseldata[0].ownOrigOperator + ", " +				
+				response.vesseldata[0].ownOrigOperatorCod
+			);
+			$("#ownOrigVesselName").html(response.vesseldata[0].ownOrigVesselName);
+			$("#ownOrigFlag").html(response.vesseldata[0].ownOrigFlag);
+		}	
+		
+console.log(response.vesseldata);
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
+}
+function triggerOwnViewAll() {
+	createOwnTitle();
+	triggerOwnCurrent2();
+	triggerOwnOriginal2();
+}
 
 // Get information from database and show Commercial History info in main panel
 function triggerCommercialHistory() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	// build HTML code
 	$(".mainPanel").html(
 		'<div class="title">Commercial History</div>' +
 		'<div class="subtitle">Commercial History</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel">Date</div>' +
-				'<div class="fourColsLabel">Name</div>' +
-				'<div class="fourColsLabel">Flag</div>' +
-				'<div class="fourColsLabel">Group Owner</div>' +
-				'<div class="fourColsLabel">Operator</div>' +
-				'<div class="fourColsLabel">Manager</div>' +
-				'<div class="fourColsLabel">Registered Owner</div>' +
-				'<div class="fourColsLabel">DOC</div>' +
-				'<div class="fourColsLabel">Price</div>' +
+		'<div class="twoColsContainer">' +
+			'<div class="twoColsInner">' +
+				'<div class="fourColsLabel">PCNT</div>' +
+				'<div class="fourColsLabel">SCNT</div>' +
 			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id="commDate"></div>' +
-				'<div id="commName"></div>' +
-				'<div id="commFlag"></div>' +
-				'<div id="commGroupOwner"></div>' +
-				'<div id="commOperator"></div>' +
-				'<div id="commManager"></div>' +
-				'<div id="commRegisteredOwner"></div>' +
-				'<div id="commDoc"></div>' +
-				'<div id="commPrice"></div>	' +			
+			'<div class="twoColsOuter">' +
+				'<div id="comPcnt"></div>' +
+				'<div id="comScnt"></div>' +		
 			'</div>' +
 		'</div>'
 	);	
+	
+	// create phpWithArgs
+	var phpWithArg = "query_vessel_details.php?source=commercialHistory&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			if(!response.vesseldata[0].comPcnt){
+				response.vesseldata[0].comPcnt = "N/A";
+			}
+			if(!response.vesseldata[0].comScnt){
+				response.vesseldata[0].comScnt = "N/A";
+			}
+		
+			// display data
+			$("#comRoute").html(response.vesseldata[0].comRoute);
+			$("#comPcnt").html(response.vesseldata[0].comPcnt);
+			$("#comScnt").html(response.vesseldata[0].comScnt);
+		}
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
 }
 
 // Get information from database and show Class info in main panel
@@ -400,42 +539,56 @@ function triggerClass() {
 			'<div class="fourColsInner">' +
 				'<div class="fourColsLabel">Class</div>' +
 				'<div class="fourColsLabel">Class ID</div>' +
-				'<div class="fourColsLabel">NK</div>' +
-				'<div class="fourColsLabel">Survey Date</div>' +
-				'<div class="fourColsLabel">Class Notation</div>' +
+				'<div class="fourColsLabel">Class Date</div>' +
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id="clas"></div>' +
-				'<div id="clasId"></div>' +
-				'<div id="clasNk"></div>' +
-				'<div id="clasSurveyDate"></div>' +
-				'<div id="clasNotation"></div>' +
+				'<div id="claClass"></div>' +
+				'<div id="claId"></div>' +
+				'<div id="claDate"></div>' +
 			'</div>' + 
-		'</div>' +
-		
-		'<div>&nbsp;</div>' +
-		
-		'<div class="subtitle">Class History</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel">Date</div>' +
-				'<div class="fourColsLabel">Class</div>' +
-				'<div class="fourColsLabel">Status</div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id="clasDate"></div>' +
-				'<div id="clas2"></div>' +
-				'<div id="clasStatus"></div>' +
-			'</div>' +
 		'</div>'
 	);
+	
+	var phpWithArg = "query_vessel_details.php?source=class&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			if(!response.vesseldata[0].claClass){
+				response.vesseldata[0].claClass = "N/A";
+			}
+			if(response.vesseldata[0].claClass2){
+				response.vesseldata[0].claClass2 = ", " + response.vesseldata[0].claClass2;
+			}
+			if(!response.vesseldata[0].claDate){
+				response.vesseldata[0].claDate = "N/A";
+			}
+			if(!response.vesseldata[0].claId){
+				response.vesseldata[0].claId = "N/A";
+			}
+			
+			// display data
+			$("#claClass").html(response.vesseldata[0].claClass + response.vesseldata[0].claClass2);
+			$("#claId").html(response.vesseldata[0].claId);
+			$("#claDate").html(((response.vesseldata[0].claDate).split(" "))[0]);
+		}	
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
 }
 
 // Get information from database and show Survey info in main panel
 function triggerSurveys() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	//build HTML code
 	$(".mainPanel").html(
@@ -443,24 +596,80 @@ function triggerSurveys() {
 		'<div class="subtitle">Surveys</div>' +
 		'<div class="fourColsContainer">' +
 			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
+				'<div class="fourColsLabel">Special Survey</div>' +
+				'<div class="fourColsLabel">Special Survey Lakes</div>' +
+				'<div class="fourColsLabel">Continuous Hull Survey</div>' +
+				'<div class="fourColsLabel">Continuous Machinery Survey</div>' +
+				'<div class="fourColsLabel">Tail Shaft Survey</div>' +
+				'<div class="fourColsLabel">Docking Survey</div>' +
+				'<div class="fourColsLabel">Annual Survey</div>' +
+				'<div class="fourColsLabel">Class Society</div>' +
 			'</div>' +
 			'<div class="fourColsOuter">' +
+				'<div id="surSpecial"></div>' +
+				'<div id="surLakes"></div>' +
+				'<div id="surHull"></div>' +
+				'<div id="surMachinery"></div>' +
+				'<div id="surTailShaft"></div>' +
+				'<div id="surDocking"></div>' +
+				'<div id="surAnnual"></div>' +
+				'<div id="surClassSociety"></div>' +
 			'</div>' + 
-		'</div>' +
-		
-		'<div>&nbsp;</div>' +
-		
-		'<div class="subtitle">Surveys</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel">Date</div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id="clasDate"></div>' +
-			'</div>' +
 		'</div>'
 	);
+	
+	var phpWithArg = "query_vessel_details.php?source=surveys&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			if(!response.vesseldata[0].surSpecial){
+				response.vesseldata[0].surSpecial = "N/A";
+			}
+			if(!response.vesseldata[0].surLakes){
+				response.vesseldata[0].surLakes = "N/A";
+			}
+			if(!response.vesseldata[0].surHull){
+				response.vesseldata[0].surHull = "N/A";
+			}
+			if(!response.vesseldata[0].surMachinery){
+				response.vesseldata[0].surMachinery = "N/A";
+			}
+			if(!response.vesseldata[0].surTailShaft){
+				response.vesseldata[0].surTailShaft = "N/A";
+			}
+			if(!response.vesseldata[0].surDocking){
+				response.vesseldata[0].surDocking = "N/A";
+			}
+			if(!response.vesseldata[0].surAnnual){
+				response.vesseldata[0].surAnnual = "N/A";
+			}
+			if(!response.vesseldata[0].surClassSociety){
+				response.vesseldata[0].surClassSociety = "N/A";
+			}
+			
+			// display data
+			$("#surSpecial").html(((response.vesseldata[0].surSpecial).split(" "))[0]);
+			$("#surLakes").html(((response.vesseldata[0].surLakes).split(" "))[0]);
+			$("#surHull").html(((response.vesseldata[0].surHull).split(" "))[0]);
+			$("#surMachinery").html(((response.vesseldata[0].surMachinery).split(" "))[0]);
+			$("#surTailShaft").html(((response.vesseldata[0].surTailShaft).split(" "))[0]);
+			$("#surDocking").html(((response.vesseldata[0].surDocking).split(" "))[0]);
+			$("#surAnnual").html(((response.vesseldata[0].surAnnual).split(" "))[0]);
+			$("#surClassSociety").html(((response.vesseldata[0].surClassSociety).split(" "))[0]);
+		}	
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
 }
 
 // Get information from database and show Construction info in main panel
@@ -488,18 +697,47 @@ function triggerConOverview2() {
 				'<div class="fourColsLabel">Deadweight</div>' +
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id="conShipType"></div>' +
-				'<div id="conBuilt"></div>' +
-				'<div id="conGt"></div>' +
-				'<div id="conDeadweight"></div>' +
+				'<div id="conOverviewShiptype"></div>' +
+				'<div id="conOverviewLaunched"></div>' +
+				'<div id="conOverviewGT"></div>' +
+				'<div id="conOverviewDWT"></div>' +
 			'</div>' +
-		'</div>'
+		'</div>' +
+		'<div>&nbsp;</div>'
 	);
+	
+	// create phpWithArgs
+	var phpWithArg = "query_vessel_details.php?source=conOverview&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			response.vesseldata[0].conOverviewShiptype = checkNullField(response.vesseldata[0].conOverviewShiptype);
+			response.vesseldata[0].conOverviewLaunched = checkNullField(response.vesseldata[0].conOverviewLaunched);
+			response.vesseldata[0].conOverviewGT = checkNullField(response.vesseldata[0].conOverviewGT);
+			response.vesseldata[0].conOverviewDWT = checkNullField(response.vesseldata[0].conOverviewDWT);
+		
+			// display data
+			$("#conOverviewShiptype").html(response.vesseldata[0].conOverviewShiptype);
+			$("#conOverviewLaunched").html(((response.vesseldata[0].conOverviewLaunched).split(" "))[0]);
+			$("#conOverviewGT").html(response.vesseldata[0].conOverviewGT);
+			$("#conOverviewDWT").html(response.vesseldata[0].conOverviewDWT);
+		}
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
 }
 function triggerConShipbuilder() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createConstructionTitle();
 	triggerConShipbuilder2();
@@ -509,22 +747,149 @@ function triggerConShipbuilder2() {
 		'<div class="subtitle">Shipbuilder</div>' +
 		'<div class="fourColsContainer">' +
 			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel">Build Date</div>' +
-				'<div class="fourColsLabel">Build Company</div>' +
 				'<div class="fourColsLabel">Hull Number</div>' +
+				'<div class="fourColsLabel">Hull Type</div>' +
+				'<div class="fourColsLabel">Shipyard</div>' +
+				'<div class="fourColsLabel">Shipyard Hull Number</div>' +
+				'<div class="fourColsLabel">Shipyard Location</div>' +
+				'<div class="fourColsLabel">Builder</div>' +
+				'<div class="fourColsLabel">Builder ID</div>' +
+				'<div class="fourColsLabel">Builder Location</div>' +
+				'<div class="fourColsLabel">Main HC</div>' +
+				
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id="conBuildDate"></div>' +
-				'<div id="conBuildCompany"></div>' +
-				'<div id="conHullNumber"></div>' +
+				'<div id="conHullNo"></div>' +
+				'<div id="conHullType"></div>' +
+				'<div id="conShipyard"></div>' +
+				'<div id="conShipyardHullNo"></div>' +
+				'<div id="conShipyardCountry"></div>' +
+				'<div id="conBuilder"></div>' +
+				'<div id="conBuilderId"></div>' +	
+				'<div id="conBuilderCod"></div>' +
+				'<div id="conMainHc"></div>' +
 			'</div>' +
-		'</div>'
+			'<div class="fourColsInner">' +
+				'<div class="fourColsLabel">Main HC Location</div>' +
+				'<div class="fourColsLabel">Main HC ID</div>' +
+				'<div class="fourColsLabel">Main HC Hull Number</div>' +
+				'<div class="fourColsLabel">Main NBC</div>' +
+				'<div class="fourColsLabel">Main NBC Location</div>' +
+				'<div class="fourColsLabel">Main NBC ID</div>' +
+				'<div class="fourColsLabel">Main NBC Hull Number</div>' +
+				'<div class="fourColsLabel">Newbuild Price</div>' +
+				'<div class="fourColsLabel">Newbuild Price (USD)</div>' +
+			'</div>' +
+			'<div class="fourColsOuter">' +
+				'<div id="conMainHcCod"></div>' +
+				'<div id="conMainHcId"></div>' +
+				'<div id="conMainHcHullNo"></div>' +
+				'<div id="conMainNbc"></div>' +
+				'<div id="conMainNbcCod"></div>' +
+				'<div id="conMainNbcId"></div>' +
+				'<div id="conMainNbcHullNo"></div>' +
+				'<div id="conNbcPrice"></div>' +
+				'<div id="conNbcPriceUsd"></div>' +
+			'</div>' +
+		'</div>' +
+		'<div>&nbsp;</div>'
 	);	
+	
+	// create phpWithArgs
+	var phpWithArg = "query_vessel_details.php?source=conShipbuilder&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);	
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			if(!response.vesseldata[0].conHullNo){
+				response.vesseldata[0].conHullNo = "N/A";
+			}
+			if(!response.vesseldata[0].conHullType){
+				response.vesseldata[0].conHullType = "N/A";
+			}
+			if(!response.vesseldata[0].conMainHcCod){
+				response.vesseldata[0].conMainHcCod = "N/A";
+			}
+			if(!response.vesseldata[0].conMainHcHullNo){
+				response.vesseldata[0].conMainHcHullNo = "N/A";
+			}
+			if(!response.vesseldata[0].conShipyardHullNo){
+				response.vesseldata[0].conShipyardHullNo = "N/A";
+			}
+			if(!response.vesseldata[0].conBuilderId){
+				response.vesseldata[0].conBuilderId = "N/A";
+			}
+			if(!response.vesseldata[0].conMainHcId){
+				response.vesseldata[0].conMainHcId = "N/A";
+			}
+			if(!response.vesseldata[0].conMainNbcId){
+				response.vesseldata[0].conMainNbcId = "N/A";
+			}
+			if(!response.vesseldata[0].conMainNbcCod){
+				response.vesseldata[0].conMainNbcCod = "N/A";
+			}
+			if(!response.vesseldata[0].conMainNbcHullNo){
+				response.vesseldata[0].conMainNbcHullNo = "N/A";
+			}
+			if(!response.vesseldata[0].conNbcPrice){
+				response.vesseldata[0].conNbcPrice = "N/A";
+			}
+			if(!response.vesseldata[0].conNbcPriceUsd){
+				response.vesseldata[0].conNbcPriceUsd = "N/A";
+			}
+			if(!response.vesseldata[0].conBuilderCod){
+				response.vesseldata[0].conBuilderCod = "N/A";
+			}
+			if(!response.vesseldata[0].conBuilder){
+				response.vesseldata[0].conBuilder = "N/A";
+			}
+			if(!response.vesseldata[0].conMainHc){
+				response.vesseldata[0].conMainHc = "N/A";
+			}
+			if(!response.vesseldata[0].conMainNbc){
+				response.vesseldata[0].conMainNbc = "N/A";
+			}
+			if(!response.vesseldata[0].conShipyard){
+				response.vesseldata[0].conShipyard = "N/A";
+			}
+			if(!response.vesseldata[0].conShipyardCountry){
+				response.vesseldata[0].conShipyardCountry = "N/A";
+			}
+			
+			// display data
+			$("#conHullNo").html(response.vesseldata[0].conHullNo);
+			$("#conHullType").html(response.vesseldata[0].conHullType);
+			$("#conMainHcCod").html(response.vesseldata[0].conMainHcCod);
+			$("#conMainHcHullNo").html(response.vesseldata[0].conMainHcHullNo);
+			$("#conShipyardHullNo").html(response.vesseldata[0].conShipyardHullNo);
+			$("#conBuilderId").html(response.vesseldata[0].conBuilderId);
+			$("#conMainHcId").html(response.vesseldata[0].conMainHcId);
+			$("#conMainNbcId").html(response.vesseldata[0].conMainNbcId);
+			$("#conMainNbcCod").html(response.vesseldata[0].conMainNbcCod);
+			$("#conMainNbcHullNo").html(response.vesseldata[0].conMainNbcHullNo);
+			$("#conNbcPrice").html(response.vesseldata[0].conNbcPrice);
+			$("#conNbcPriceUsd").html(response.vesseldata[0].conNbcPriceUsd);
+			$("#conBuilderCod").html(response.vesseldata[0].conBuilderCod);
+			$("#conBuilder").html(response.vesseldata[0].conBuilder);
+			$("#conMainHc").html(response.vesseldata[0].conMainHc);
+			$("#conMainNbc").html(response.vesseldata[0].conMainNbc);
+			$("#conShipyard").html(response.vesseldata[0].conShipyard);
+			$("#conShipyardCountry").html(response.vesseldata[0].conShipyardCountry);
+		}
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
 }
 function triggerConStatus() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createConstructionTitle();
 	triggerConStatus2();
@@ -539,13 +904,38 @@ function triggerConStatus2() {
 			'<div class="fourColsOuter">' +
 				'<div id="conStatus"></div>' +
 			'</div>' +
-		'</div>'
+		'</div>' +
+		'<div>&nbsp;</div>'
 	);	
+	
+	// create phpWithArgs
+	var phpWithArg = "query_vessel_details.php?source=conStatus&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			if(!response.vesseldata[0].conStatus){
+				response.vesseldata[0].conStatus = "N/A";
+			}
+		
+			// display data
+			$("#conStatus").html(response.vesseldata[0].conStatus);
+		}
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
 }	
 function triggerConConstructionDetail() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createConstructionTitle();
 	triggerConConstructionDetail2();
@@ -556,75 +946,70 @@ function triggerConConstructionDetail2() {
 		'<div class="fourColsContainer">' +
 			'<div class="fourColsInner">' +
 				'<div class="fourColsLabel">Statcode5</div>' +
-				'<div class="fourColsLabel">Standard Design</div>' +
 				'<div class="fourColsLabel">Ship Type Group</div>' +
-				'<div class="fourColsLabel">Hull Material</div>' +
+				'<div class="fourColsLabel">Construction Detail</div>' +
 				'<div class="fourColsLabel">Strengthed for Heavy Cargo</div>' +
-				'<div class="fourColsLabel">Hull Connections</div>' +
-				'<div class="fourColsLabel">Deck</div>' +
-				'<div class="fourColsLabel">Bulbous Bow</div>' +
+				'<div class="fourColsLabel">Segregated Ballast Tanks</div>' +
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id="conStatcode5"></div>' +
-				'<div id="conStandardDesign"></div>' +
-				'<div id="conShipTypeGroup"></div>' +
-				'<div id="conHullMaterial"></div>' +
-				'<div id="conHeavyCargoStrengthed"></div>' +
-				'<div id="conHullConnections"></div>' +
-				'<div id="conDeck"></div>' +
-				'<div id="conBulbousBow"></div>' +
+				'<div id="conDetStatcode5"></div>' +
+				'<div id="conDetShiptype"></div>' +
+				'<div id="conDetDetail"></div>' +
+				'<div id="conDetHeavyCargo"></div>' +
+				'<div id="conDetBallastTanks"></div>' +
 			'</div>' +
-		'</div>'
+		'</div>' +
+		'<div>&nbsp;</div>'
 	);
-}	
-function triggerConServiceConstraints() {
-	if(checkImo()){
-		return;
-	};
 	
-	createConstructionTitle();
-	triggerConServiceConstraints2();
-}
-function triggerConServiceConstraints2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Service Constraints</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
-}	
-function triggerConAlterations() {
-	if(checkImo()){
-		return;
-	};
+	// create phpWithArgs
+	var phpWithArg = "query_vessel_details.php?source=conDetail&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
 	
-	createConstructionTitle();
-	triggerConAlterations2();
-}
-function triggerConAlterations2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Alterations</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			if(!response.vesseldata[0].conDetStatcode5){
+				response.vesseldata[0].conDetStatcode5 = "N/A";
+			}
+			if(!response.vesseldata[0].conDetShiptype){
+				response.vesseldata[0].conDetShiptype = "N/A";
+			}
+			if(!response.vesseldata[0].conDetDetail){
+				response.vesseldata[0].conDetDetail = "N/A";
+			}
+			if(response.vesseldata[0].conDetHeavyCargo){
+				var conDetailHeavyCargo = "no";
+			} else {
+				var conDetailHeavyCargo = "yes";
+			}
+			if(response.vesseldata[0].conDetBallastTanks){
+				var conDetailSegBallast = "no";
+			} else {
+				var conDetailSegBallast = "yes";
+			}			
+		
+			// display data
+			$("#conDetStatcode5").html(response.vesseldata[0].conDetStatcode5);
+			$("#conDetShiptype").html(response.vesseldata[0].conDetShiptype);
+			$("#conDetDetail").html(response.vesseldata[0].conDetDetail);
+			$("#conDetHeavyCargo").html(conDetailHeavyCargo);
+			$("#conDetBallastTanks").html(conDetailSegBallast);
+		}
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
 }	
 function triggerConDimensions() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createConstructionTitle();
 	triggerConDimensions2();
@@ -634,44 +1019,91 @@ function triggerConDimensions2() {
 		'<div class="subtitle">Dimensions</div>' +
 		'<div class="fourColsContainer">' +
 			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel">Length Overall</div>' +
-				'<div class="fourColsLabel">Length (Reg)</div>' +
-				'<div class="fourColsLabel">Breadth Extreme</div>' +
-				'<div class="fourColsLabel">Draught</div>' +
-				'<div class="fourColsLabel">Height</div>' +
-				'<div class="fourColsLabel">Displacement</div>' +
+				'<div class="fourColsLabel">Design</div>' +
+				'<div class="fourColsLabel">LOA (metres)</div>' +
+				'<div class="fourColsLabel">Depth (metres)</div>' +
+				'<div class="fourColsLabel">Draft (metres)</div>' +						
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id="conLengthOverall"></div>' +
-				'<div id="conLengthReg"></div>' +
-				'<div id="conBreadthExtreme"></div>' +
-				'<div id="conDraught"></div>' +
-				'<div id="conHeight"></div>' +
-				'<div id="conDisplacement"></div>' +
+				'<div id="conDesign"></div>' +
+				'<div id="conLength"></div>' +
+				'<div id="conDepth"></div>' +
+				'<div id="conDraft"></div>' +	
 			'</div>' +
 			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel">Length (BP)</div>' +
-				'<div class="fourColsLabel">Bulbous Bow</div>' +
-				'<div class="fourColsLabel">Breadth Moulded</div>' +
-				'<div class="fourColsLabel">Depth</div>' +
-				'<div class="fourColsLabel">&nbsp;</div>' +
-				'<div class="fourColsLabel">T/CM</div>' +
+				'<div class="fourColsLabel">Beam (metres)</div>' +
+				'<div class="fourColsLabel">LBP (metres)</div>' +
+				'<div class="fourColsLabel">BCM (metres)</div>' +
+				'<div class="fourColsLabel">KTMH (metres)</div>' +
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id="conLengthBp"></div>' +
-				'<div id="conBulbousBow"></div>' +
-				'<div id="conBreadthMoulded"></div>' +
-				'<div id="conDepth"></div>' +
-				'<div>&nbsp;</div>' +
-				'<div id="conTcm"></div>' +
+				'<div id="conLBP"></div>' +
+				'<div id="conBCM"></div>' +
+				'<div id="conKTMH"></div>' +
+				'<div id="conBeam"></div>' +
 			'</div>' +
-		'</div>'
+		'</div>' +
+		'<div>&nbsp;</div>' +
+		'<div style="font-size:x-small;">LOA = Length overall, LBP = Length between perpendiculars, BCM = Bow to center manifold, KTMH = Keel to masthead</div>' +
+		'<div>&nbsp;</div>'
 	);
+	
+	// create phpWithArgs
+	var phpWithArg = "query_vessel_details.php?source=conDimensions&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			if(!response.vesseldata[0].conDesign){
+				response.vesseldata[0].conDesign = "N/A";
+			}	
+			if(!response.vesseldata[0].conLength){
+				response.vesseldata[0].conLength = "N/A";
+			}
+			if(!response.vesseldata[0].conDepth){
+				response.vesseldata[0].conDepth = "N/A";
+			}
+			if(!response.vesseldata[0].conDraft){
+				response.vesseldata[0].conDraft = "N/A";
+			}
+			if(!response.vesseldata[0].conLBP){
+				response.vesseldata[0].conLBP = "N/A";
+			}
+			if(!response.vesseldata[0].conBCM){
+				response.vesseldata[0].conBCM = "N/A";
+			}
+			if(!response.vesseldata[0].conKTMH){
+				response.vesseldata[0].conKTMH = "N/A";
+			}
+			if(!response.vesseldata[0].conBeam){
+				response.vesseldata[0].conBeam = "N/A";
+			}
+		
+			// display data
+			$("#conDesign").html(response.vesseldata[0].conDesign);
+			$("#conLength").html(response.vesseldata[0].conLength);
+			$("#conDepth").html(response.vesseldata[0].conDepth);
+			$("#conDraft").html(response.vesseldata[0].conDraft);
+			$("#conLBP").html(response.vesseldata[0].conLBP);
+			$("#conBCM").html(response.vesseldata[0].conBCM);
+			$("#conKTMH").html(response.vesseldata[0].conKTMH);
+			$("#conBeam").html(response.vesseldata[0].conBeam);
+		}
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
 }
 function triggerConTonnages() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createConstructionTitle();
 	triggerConTonnages2();	
@@ -681,38 +1113,87 @@ function triggerConTonnages2() {
 		'<div class="subtitle">Tonnages</div>' +
 		'<div class="fourColsContainer">' +
 			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel">Tonnage Type</div>' +
-				'<div class="fourColsLabel">Effective Date</div>' +
-				'<div class="fourColsLabel">Gross Tonnage (GT)</div>' +
-				'<div class="fourColsLabel">Deadweight (DWT)</div>' +
-				'<div class="fourColsLabel">Formula Deadweight</div>' +
+				'<div class="fourColsLabel">GT</div>' +
+				'<div class="fourColsLabel">DWT</div>' +
+				'<div class="fourColsLabel">NRT</div>' +
+				'<div class="fourColsLabel">CGT</div>' +
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id="conTonnageType"></div>' +
-				'<div id="conEffectiveDate"></div>' +
-				'<div id="conGrossTonnage"></div>' +
-				'<div id="conDeadweight""></div>' +
-				'<div id="conFormulaDeadweight"></div>' +
+				'<div id="conTonGt"></div>' +
+				'<div id="conTonDwt"></div>' +
+				'<div id="conTonNrt"></div>' +
+				'<div id="conTonCgt"></div>' +
 			'</div>' +
 			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel">Tonnage System</div>' +
-				'<div class="fourColsLabel">Net Tonnage (NT)</div>' +
-				'<div class="fourColsLabel">Compensated Gross Tonnage (CGT)</div>' +
-				'<div class="fourColsLabel">Light Displacement Tonnage (LDT)</div>' +
+				'<div class="fourColsLabel">LDT</div>' +
+				'<div class="fourColsLabel">TPC</div>' +
+				'<div class="fourColsLabel">TPI</div>' +
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id="conTonnageSystem"></div>' +
-				'<div id="conNetTonnage"></div>' +
-				'<div id="conCompensatedGrossTonnage"></div>' +
-				'<div id="conLightDisplacementTonnage"></div>' +
+				'<div id="conTonLdt"></div>' +
+				'<div id="conTonTpc"></div>' +
+				'<div id="conTonTpi"></div>' +
 			'</div>' +
-		'</div>'
+		'</div>' +
+		'<div>&nbsp;</div>' +
+		'<div style="font-size:x-small;">'+
+		'GT = Gross Tonnage, DWT = Deadweight Tonnage, NRT = Net Tonnage, CGT = Compensated Gross Tonnage, LDT = Light Displacement Tonnage, TPC = Tons Per Centimeter, TPI = Tons Per Inch' +
+		'</div>' +
+		'<div>&nbsp;</div>'
 	);
+	
+	// create phpWithArgs
+	var phpWithArg = "query_vessel_details.php?source=conTonnages&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			if(!response.vesseldata[0].conTonGt){
+				response.vesseldata[0].conTonGt = "N/A";
+			}	
+			if(!response.vesseldata[0].conTonDwt){
+				response.vesseldata[0].conTonDwt = "N/A";
+			}
+			if(!response.vesseldata[0].conTonNrt){
+				response.vesseldata[0].conTonNrt = "N/A";
+			}
+			if(!response.vesseldata[0].conTonCgt){
+				response.vesseldata[0].conTonCgt = "N/A";
+			}
+			if(!response.vesseldata[0].conTonLdt){
+				response.vesseldata[0].conTonLdt = "N/A";
+			}
+			if(!response.vesseldata[0].conTonTpc){
+				response.vesseldata[0].conTonTpc = "N/A";
+			}
+			if(!response.vesseldata[0].conTonTpi){
+				response.vesseldata[0].conTonTpi = "N/A";
+			}
+		
+			// display data
+			$("#conTonGt").html(response.vesseldata[0].conTonGt);
+			$("#conTonDwt").html(response.vesseldata[0].conTonDwt);
+			$("#conTonNrt").html(response.vesseldata[0].conTonNrt);
+			$("#conTonCgt").html(response.vesseldata[0].conTonCgt);
+			$("#conTonLdt").html(response.vesseldata[0].conTonLdt);
+			$("#conTonTpc").html(response.vesseldata[0].conTonTpc);
+			$("#conTonTpi").html(response.vesseldata[0].conTonTpi);
+		}
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
 }
 function triggerConArrangement() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createConstructionTitle();
 	triggerConArrangement2();	
@@ -722,73 +1203,200 @@ function triggerConArrangement2() {
 		'<div class="subtitle">Arrangement</div>' +
 		'<div class="fourColsContainer">' +
 			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
+				'<div class="fourColsLabel">Decks</div>' +
+				'<div class="fourColsLabel">Tween Decks</div>' +
+				'<div class="fourColsLabel">Fixed Decks</div>' +
+				'<div class="fourColsLabel">FHMD (meters)</div>' +
+				'<div class="fourColsLabel">Berths</div>' +
+				'<div class="fourColsLabel">Holds</div>' +
+				'<div class="fourColsLabel">Work Hold Dimensions</div>' +
+				'<div class="fourColsLabel">Hatches</div>' +
+				'<div class="fourColsLabel">Hatch Size</div>' +
+				'<div class="fourColsLabel">Closed Loading</div>' +
+				'<div class="fourColsLabel">Bow Loading</div>' +
+				'<div class="fourColsLabel">Stern Loading Discharge</div>' +
+				'<div class="fourColsLabel">Tanks (Deck)</div>' +
+				'<div class="fourColsLabel">Tanks (Center)</div>' +
+				'<div class="fourColsLabel">Tanks (Wing)</div>' +
+				'<div class="fourColsLabel">Tanks (Slop)</div>' +
+				'<div class="fourColsLabel">Tanks (Permanent Ballast)</div>' +
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
+				'<div id="conArrDecks"></div>' +
+				'<div id="conArrTweenDecks"></div>' +
+				'<div id="conArrFixedDecks"></div>' +
+				'<div id="conArrFhmd"></div>' +
+				'<div id="conArrBerths"></div>' +
+				'<div id="conArrHolds"></div>' +
+				'<div id="conArrWhd"></div>' +
+				'<div id="conArrHatches"></div>' +
+				'<div id="conArrHatchSize"></div>' +
+				'<div id="conArrClosedLoading"></div>' +
+				'<div id="conArrBowLoading"></div>' +
+				'<div id="conArrSternLoading"></div>' +
+				'<div id="conArrTanksDeck"></div>' +
+				'<div id="conArrTanksCenter"></div>' +
+				'<div id="conArrTanksWing"></div>' +
+				'<div id="conArrTanksSlop"></div>' +
+				'<div id="conArrTanksPerm"></div>' +
 			'</div>' +
-		'</div>'
+			'<div class="fourColsInner">' +
+				'<div class="fourColsLabel">Cabins</div>' +
+				'<div class="fourColsLabel">Number of Ramps</div>' +
+				'<div class="fourColsLabel">Ramp 1 Length</div>' +
+				'<div class="fourColsLabel">Ramp 1 Width</div>' +
+				'<div class="fourColsLabel">Ramp 1 SWL</div>' +
+				'<div class="fourColsLabel">Ramp 1 Clear Openings</div>' +
+				'<div class="fourColsLabel">Ramp 1 Description</div>' +
+				'<div class="fourColsLabel">Ramp 2 Length</div>' +
+				'<div class="fourColsLabel">Ramp 2 Width</div>' +
+				'<div class="fourColsLabel">Ramp 2 SWL</div>' +
+				'<div class="fourColsLabel">Ramp 2 Clear Openings</div>' +
+				'<div class="fourColsLabel">Ramp 2 Description</div>' +
+				'<div class="fourColsLabel">Ramp 3 Length</div>' +
+				'<div class="fourColsLabel">Ramp 3 Width</div>' +
+				'<div class="fourColsLabel">Ramp 3 SWL</div>' +
+				'<div class="fourColsLabel">Ramp 3 Clear Openings</div>' +
+				'<div class="fourColsLabel">Ramp 3 Description</div>' +
+			'</div>' +
+			'<div class="fourColsOuter">' +
+				'<div id="conArrCabins"></div>' +
+				'<div id="conArrRamps"></div>' +
+				'<div id="conArrRamp1L"></div>' +
+				'<div id="conArrRamp1W"></div>' +
+				'<div id="conArrRamp1Swl"></div>' +
+				'<div id="conArrRamp1Co"></div>' +
+				'<div id="conArrRamp1D"></div>' +
+				'<div id="conArrRamp2L"></div>' +
+				'<div id="conArrRamp2W"></div>' +
+				'<div id="conArrRamp2Swl"></div>' +
+				'<div id="conArrRamp2Co"></div>' +
+				'<div id="conArrRamp2D"></div>' +
+				'<div id="conArrRamp3L"></div>' +
+				'<div id="conArrRamp3W"></div>' +
+				'<div id="conArrRamp3Swl"></div>' +
+				'<div id="conArrRamp3Co"></div>' +
+				'<div id="conArrRamp3D"></div>' +
+			'</div>' +
+		'</div>' +
+		'<div>&nbsp;</div>' +
+		'<div style="font-size:x-small;">FHMD = Free height main deck, SWL = Safe working load</div>' +
+		'<div>&nbsp;</div>'
 	);
-}
-function triggerConSisterShips() {
-	if(checkImo()){
-		return;
-	};
 	
-	createConstructionTitle();
-	triggerConSisterShips2();
-}	
-function triggerConSisterShips2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Sister Ships</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourCols">' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourCols">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
-}
-function triggerConSupplementaryFeatures() {
-	if(checkImo()){
-		return;
-	};
+	// create phpWithArgs
+	var phpWithArg = "query_vessel_details.php?source=conArrangement&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
 	
-	createConstructionTitle();
-	triggerConSupplementaryFeatures2();
-}	
-function triggerConSupplementaryFeatures2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Supplementary Features</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourCols">' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourCols">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			var tween = 'no';
+			var closed = 'no';
+			var bow = 'no';
+			var stern = 'no';
+			response.vesseldata[0].conArrTanksDeck = checkNullField(response.vesseldata[0].conArrTanksDeck);
+			if (!(response.vesseldata[0].conArrTweenDecks)) {
+				tween = 'yes';
+			}
+			if (!(response.vesseldata[0].conArrClosedLoading == '0')) {
+				closed = 'yes';
+			}
+			if (!(response.vesseldata[0].conArrBowLoading == '0')) {
+				bow = 'yes';
+			}
+			if (!(response.vesseldata[0].conArrSternLoading == '0')) {
+				stern = 'yes';
+			}
+			response.vesseldata[0].conArrFhmd = checkNullField(response.vesseldata[0].conArrFhmd);
+			response.vesseldata[0].conArrHatchSize = checkNullField(response.vesseldata[0].conArrHatchSize);
+			response.vesseldata[0].conArrHatches = checkNullField(response.vesseldata[0].conArrHatches);
+			response.vesseldata[0].conArrDecks = checkNullField(response.vesseldata[0].conArrDecks);
+			response.vesseldata[0].conArrRamps = checkNullField(response.vesseldata[0].conArrRamps);
+			response.vesseldata[0].conArrRamp1D = checkNullField(response.vesseldata[0].conArrRamp1D);
+			response.vesseldata[0].conArrRamp2D = checkNullField(response.vesseldata[0].conArrRamp2D);
+			response.vesseldata[0].conArrRamp3D = checkNullField(response.vesseldata[0].conArrRamp3D);
+			response.vesseldata[0].conArrRamp1L = checkNullField(response.vesseldata[0].conArrRamp1L);
+			response.vesseldata[0].conArrRamp2L = checkNullField(response.vesseldata[0].conArrRamp2L);
+			response.vesseldata[0].conArrRamp3L = checkNullField(response.vesseldata[0].conArrRamp3L);
+			response.vesseldata[0].conArrRamp1W = checkNullField(response.vesseldata[0].conArrRamp1W);
+			response.vesseldata[0].conArrRamp2W = checkNullField(response.vesseldata[0].conArrRamp2W);
+			response.vesseldata[0].conArrRamp3W = checkNullField(response.vesseldata[0].conArrRamp3W);
+			response.vesseldata[0].conArrRamp1Swl = checkNullField(response.vesseldata[0].conArrRamp1Swl);
+			response.vesseldata[0].conArrRamp2Swl = checkNullField(response.vesseldata[0].conArrRamp2Swl);
+			response.vesseldata[0].conArrRamp3Swl = checkNullField(response.vesseldata[0].conArrRamp3Swl);
+			response.vesseldata[0].conArrRamp1Co = checkNullField(response.vesseldata[0].conArrRamp1Co);
+			response.vesseldata[0].conArrRamp2Co = checkNullField(response.vesseldata[0].conArrRamp2Co);
+			response.vesseldata[0].conArrRamp3Co = checkNullField(response.vesseldata[0].conArrRamp3Co);
+			response.vesseldata[0].conArrFixedDecks = checkNullField(response.vesseldata[0].conArrFixedDecks);
+			response.vesseldata[0].conArrTanksCenter = checkNullField(response.vesseldata[0].conArrTanksCenter);
+			response.vesseldata[0].conArrTanksWing = checkNullField(response.vesseldata[0].conArrTanksWing);
+			response.vesseldata[0].conArrTanksSlop = checkNullField(response.vesseldata[0].conArrTanksSlop);
+			response.vesseldata[0].conArrTanksPerm = checkNullField(response.vesseldata[0].conArrTanksPerm);
+			response.vesseldata[0].conArrBerths = checkNullField(response.vesseldata[0].conArrBerths);
+			response.vesseldata[0].conArrCabins = checkNullField(response.vesseldata[0].conArrCabins);
+			response.vesseldata[0].conArrWhd = checkNullField(response.vesseldata[0].conArrWhd);
+			response.vesseldata[0].conArrHolds = checkNullField(response.vesseldata[0].conArrHolds);
+			
+			// display data
+			$("#conArrFhmd").html(response.vesseldata[0].conArrFhmd);
+			$("#conArrHatchSize").html(response.vesseldata[0].conArrHatchSize);
+			$("#conArrHatches").html(response.vesseldata[0].conArrHatches);
+			$("#conArrDecks").html(response.vesseldata[0].conArrDecks);
+			$("#conArrRamps").html(response.vesseldata[0].conArrRamps);
+			$("#conArrRamp1D").html(response.vesseldata[0].conArrRamp1D);
+			$("#conArrRamp2D").html(response.vesseldata[0].conArrRamp2D);
+			$("#conArrRamp3D").html(response.vesseldata[0].conArrRamp3D);
+			$("#conArrRamp1L").html(response.vesseldata[0].conArrRamp1L);
+			$("#conArrRamp2L").html(response.vesseldata[0].conArrRamp2L);
+			$("#conArrRamp3L").html(response.vesseldata[0].conArrRamp3L);
+			$("#conArrRamp1W").html(response.vesseldata[0].conArrRamp1W);
+			$("#conArrRamp2W").html(response.vesseldata[0].conArrRamp2W);
+			$("#conArrRamp3W").html(response.vesseldata[0].conArrRamp3W);
+			$("#conArrRamp1Swl").html(response.vesseldata[0].conArrRamp1Swl);
+			$("#conArrRamp2Swl").html(response.vesseldata[0].conArrRamp2Swl);
+			$("#conArrRamp3Swl").html(response.vesseldata[0].conArrRamp3Swl);
+			$("#conArrRamp1Co").html(response.vesseldata[0].conArrRamp1Co);
+			$("#conArrRamp2Co").html(response.vesseldata[0].conArrRamp2Co);
+			$("#conArrRamp3Co").html(response.vesseldata[0].conArrRamp3Co);
+			$("#conArrFixedDecks").html(response.vesseldata[0].conArrFixedDecks);
+			$("#conArrTanksCenter").html(response.vesseldata[0].conArrTanksCenter);
+			$("#conArrTanksWing").html(response.vesseldata[0].conArrTanksWing);
+			$("#conArrTanksSlop").html(response.vesseldata[0].conArrTanksSlop);
+			$("#conArrTanksPerm").html(response.vesseldata[0].conArrTanksPerm);
+			$("#conArrBerths").html(response.vesseldata[0].conArrBerths);
+			$("#conArrTweenDecks").html(tween);
+			$("#conArrCabins").html(response.vesseldata[0].conArrCabins);
+			$("#conArrWhd").html(response.vesseldata[0].conArrWhd);
+			$("#conArrHolds").html(response.vesseldata[0].conArrHolds);
+			$("#conArrClosedLoading").html(closed);
+			$("#conArrBowLoading").html(bow);
+			$("#conArrSternLoading").html(stern);
+			$("#conArrTanksDeck").html(response.vesseldata[0].conArrTanksDeck);
+		}
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
 }
 function triggerConViewAll() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createConstructionTitle();
 	triggerConOverview2();
 	triggerConShipbuilder2();
 	triggerConStatus2();
 	triggerConConstructionDetail2();
-	triggerConServiceConstraints2();
-	triggerConAlterations2();
 	triggerConDimensions2();
 	triggerConTonnages2();
 	triggerConArrangement2();
-	triggerConSisterShips2();
-	triggerConSupplementaryFeatures2();	
 }	
 
 // Get information from database and show Cargo and Gear info in main panel
@@ -798,9 +1406,7 @@ function createCargoAndGearTitle() {
 	);
 }
 function triggerCngOverview() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createCargoAndGearTitle();
 	triggerCngOverview2();
@@ -810,225 +1416,272 @@ function triggerCngOverview2() {
 		'<div class="subtitle">Overview</div>' +
 		'<div class="fourColsContainer">' +
 			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel">Grain</div>' +
-				'<div class="fourColsLabel">Bale</div>' +
-				'<div class="fourColsLabel">TEU</div>' +
+				'<div class="fourColsLabel">Container Arrangement</div>' +
+				'<div class="fourColsLabel">Grain (cubic meters)</div>' +
+				'<div class="fourColsLabel">Bale (cubic meters)</div>' +
+				'<div class="fourColsLabel">TEU (cubic meters)</div>' +
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id="cngOverviewGrain"></div>' +
-				'<div id="cngOverviewBale"></div>' +
-				'<div id="cngOverviewTeu"></div>' +
+				'<div id="cngArrangement"></div>' +
+				'<div id="cngGrain"></div>' +
+				'<div id="cngBale"></div>' +
+				'<div id="cngTeu"></div>' +
 			'</div>' +
-		'</div>'
+		'</div>' +
+		'<div>&nbsp;</div>'
 	);
-}
-function triggerCngCompartments() {
-	if(checkImo()){
+	
+	// create phpWithArgs
+	var phpWithArg = "query_vessel_details.php?source=cngOverview&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			response.vesseldata[0].cngArrangement = checkNullField(response.vesseldata[0].cngArrangement);
+			response.vesseldata[0].cngGrain = checkNullField(response.vesseldata[0].cngGrain);
+			response.vesseldata[0].cngBale = checkNullField(response.vesseldata[0].cngBale);
+			response.vesseldata[0].cngTeu = checkNullField(response.vesseldata[0].cngTeu);
+		
+			// display data
+			$("#cngArrangement").html(response.vesseldata[0].cngArrangement);
+			$("#cngGrain").html(response.vesseldata[0].cngGrain);
+			$("#cngBale").html(response.vesseldata[0].cngBale);
+			$("#cngTeu").html(response.vesseldata[0].cngTeu);
+		}
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
 		return;
-	};
+	});
+}
+function triggerCngCargo() {
+	if(checkImo()){return;};
 	
 	createCargoAndGearTitle();
-	triggerCngCompartments2();
+	triggerCngCargo2();
 }
-function triggerCngCompartments2() {
+function triggerCngCargo2() {
 	$(".mainPanel").append(
-		'<div class="subtitle">Compartments</div>' +
+		'<div class="subtitle">Cargo</div>' +
 		'<div class="fourColsContainer">' +
 			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
+				'<div class="fourColsLabel">Grades</div>' +
+				'<div class="fourColsLabel">Tanks</div>' +
+				'<div class="fourColsLabel">Holds</div>' +
+				'<div class="fourColsLabel">Lash</div>' +
+				'<div class="fourColsLabel">Ore</div>' +
+				'<div class="fourColsLabel">Liquid</div>' +
+				'<div class="fourColsLabel">Reefer Capacity</div>' +
+				'<div class="fourColsLabel">Reefer TEU</div>' +
+				'<div class="fourColsLabel">Passengers</div>' +
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
+				'<div id="cngCargoGrades"></div>' +
+				'<div id="cngCargoTanks"></div>' +
+				'<div id="cngCargoHolds"></div>' +
+				'<div id="cngCargoLash"></div>' +
+				'<div id="cngCargoLiquid"></div>' +
+				'<div id="cngCargoOre"></div>' +
+				'<div id="cngCargoReeferCap"></div>' +
+				'<div id="cngCargoReeferTeu"></div>' +
+				'<div id="cngCargoPassengers"></div>' +
 			'</div>' +
-		'</div>'
+			'<div class="fourColsInner">' +
+				'<div class="fourColsLabel">Cars</div>' +
+				'<div class="fourColsLabel">Rail Cars</div>' +
+				'<div class="fourColsLabel">Cars and Trucks</div>' +
+				'<div class="fourColsLabel">Trailers</div>' +
+				'<div class="fourColsLabel">Car Lane Meters</div>' +
+				'<div class="fourColsLabel">Total Lane Meters</div>' +
+				'<div class="fourColsLabel">Track Lane Meters</div>' +
+				'<div class="fourColsLabel">Trailer Lane Meters</div>' +
+			'</div>' +
+			'<div class="fourColsOuter">' +
+				'<div id="cngCargoCars"></div>' +
+				'<div id="cngCargoRailCars"></div>' +
+				'<div id="cngCargoCarsAndTrucks"></div>' +
+				'<div id="cngCargoTrailers"></div>' +
+				'<div id="cngCargoCarLM"></div>' +
+				'<div id="cngCargoTotalLM"></div>' +
+				'<div id="cngCargoTrackLM"></div>' +
+				'<div id="cngCargoTrailerLM"></div>' +
+			'</div>' +
+		'</div>' +
+		'<div>&nbsp;</div>'
 	);
-}
-function triggerCngTanks() {
-	if(checkImo()){
+	
+	// create phpWithArgs
+	var phpWithArg = "query_vessel_details.php?source=cngCargo&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			response.vesseldata[0].cngCargoGrades = checkNullField(response.vesseldata[0].cngCargoGrades);
+			response.vesseldata[0].cngCargoTanks = checkNullField(response.vesseldata[0].cngCargoTanks);
+			response.vesseldata[0].cngCargoHolds = checkNullField(response.vesseldata[0].cngCargoHolds);
+			response.vesseldata[0].cngCargoLash = checkNullField(response.vesseldata[0].cngCargoLash);
+			response.vesseldata[0].cngCargoLiquid = checkNullField(response.vesseldata[0].cngCargoLiquid);
+			response.vesseldata[0].cngCargoOre = checkNullField(response.vesseldata[0].cngCargoOre);
+			response.vesseldata[0].cngCargoReeferCap = checkNullField(response.vesseldata[0].cngCargoReeferCap);
+			response.vesseldata[0].cngCargoReeferTeu = checkNullField(response.vesseldata[0].cngCargoReeferTeu);
+			response.vesseldata[0].cngCargoPassengers = checkNullField(response.vesseldata[0].cngCargoPassengers);
+			response.vesseldata[0].cngCargoCars = checkNullField(response.vesseldata[0].cngCargoCars);
+			response.vesseldata[0].cngCargoRailCars = checkNullField(response.vesseldata[0].cngCargoRailCars);
+			response.vesseldata[0].cngCargoCarsAndTrucks = checkNullField(response.vesseldata[0].cngCargoCarsAndTrucks);
+			response.vesseldata[0].cngCargoTrailers = checkNullField(response.vesseldata[0].cngCargoTrailers);
+			response.vesseldata[0].cngCargoCarLM = checkNullField(response.vesseldata[0].cngCargoCarLM);
+			response.vesseldata[0].cngCargoTotalLM = checkNullField(response.vesseldata[0].cngCargoTotalLM);
+			response.vesseldata[0].cngCargoTrackLM = checkNullField(response.vesseldata[0].cngCargoTrackLM);
+			response.vesseldata[0].cngCargoTrailerLM = checkNullField(response.vesseldata[0].cngCargoTrailerLM);
+		
+			// display data
+			$("#cngCargoGrades").html(response.vesseldata[0].cngCargoGrades);
+			$("#cngCargoTanks").html(response.vesseldata[0].cngCargoTanks);
+			$("#cngCargoHolds").html(response.vesseldata[0].cngCargoHolds);
+			$("#cngCargoLash").html(response.vesseldata[0].cngCargoLash);
+			$("#cngCargoLiquid").html(response.vesseldata[0].cngCargoLiquid);
+			$("#cngCargoOre").html(response.vesseldata[0].cngCargoOre);
+			$("#cngCargoReeferCap").html(response.vesseldata[0].cngCargoReeferCap);
+			$("#cngCargoReeferTeu").html(response.vesseldata[0].cngCargoReeferTeu);
+			$("#cngCargoPassengers").html(response.vesseldata[0].cngCargoPassengers);
+			$("#cngCargoCars").html(response.vesseldata[0].cngCargoCars);
+			$("#cngCargoRailCars").html(response.vesseldata[0].cngCargoRailCars);
+			$("#cngCargoCarsAndTrucks").html(response.vesseldata[0].cngCargoCarsAndTrucks);
+			$("#cngCargoTrailers").html(response.vesseldata[0].cngCargoTrailers);
+			$("#cngCargoCarLM").html(response.vesseldata[0].cngCargoCarLM);
+			$("#cngCargoTotalLM").html(response.vesseldata[0].cngCargoTotalLM);
+			$("#cngCargoTrackLM").html(response.vesseldata[0].cngCargoTrackLM);
+			$("#cngCargoTrailerLM").html(response.vesseldata[0].cngCargoTrailerLM);
+		}
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
 		return;
-	};
+	});
+}
+function triggerCngGears() {
+	if(checkImo()){return;};
 	
 	createCargoAndGearTitle();
-	triggerCngTanks2();
+	triggerCngGears2();
 }
-function triggerCngTanks2() {
+function triggerCngGears2() {
 	$(".mainPanel").append(
-		'<div class="subtitle">Tanks</div>' +
+		'<div class="subtitle">Gears</div>' +
 		'<div class="fourColsContainer">' +
 			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
+				'<div class="fourColsLabel">Gear Type</div>' +
+				'<div class="fourColsLabel">Gear Description</div>' +
+				'<div class="fourColsLabel">Gear SWL</div>' +
+				'<div class="fourColsLabel">Pummp Type</div>' +
+				'<div class="fourColsLabel">Pump Description</div>' +
+				'<div class="fourColsLabel">Pump Rating</div>' +
+				'<div class="fourColsLabel">Rump Total Capacity</div>' +
+				'<div class="fourColsLabel">Pump Stripping</div>' +
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
+				'<div id="cngGearType"></div>' +
+				'<div id="cngGearDesc"></div>' +
+				'<div id="cngGearSWL"></div>' +
+				'<div id="cngPumpType"></div>' +
+				'<div id="cngPumpDesc"></div>' +
+				'<div id="cngPumpRating"></div>' +
+				'<div id="cngPumpsTotalCap"></div>' +
+				'<div id="cngPumpsStripping"></div>' +
 			'</div>' +
-		'</div>'
+			'<div class="fourColsInner">' +
+				'<div class="fourColsLabel">Pump 1</div>' +
+				'<div class="fourColsLabel">Pump 1 Capacity</div>' +
+				'<div class="fourColsLabel">Pump 2</div>' +
+				'<div class="fourColsLabel">Pump 2 Capacity</div>' +
+				'<div class="fourColsLabel">Pump 3</div>' +
+				'<div class="fourColsLabel">Pump 3 Capacity</div>' +
+			'</div>' +
+			'<div class="fourColsOuter">' +
+				'<div id="cngCargoPumps1"></div>' +
+				'<div id="cngCargoPumps1Cap"></div>' +
+				'<div id="cngCargoPumps2"></div>' +
+				'<div id="cngCargoPumps2Cap"></div>' +
+				'<div id="cngCargoPumps3"></div>' +
+				'<div id="cngCargoPumps3Cap"></div>' +
+			'</div>' +
+		'</div>' +
+		'<div>&nbsp;</div>' + 
+		'<div style="font-size:x-small;">SWL = Safe working load</div>' + 
+		'<div>&nbsp;</div>'
 	);
-}
-function triggerCngHatches() {
-	if(checkImo()){
-		return;
-	};
 	
-	createCargoAndGearTitle();
-	triggerCngHatches2();
-}
-function triggerCngHatches2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Hatches</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
-}
-function triggerCngCapacities() {
-	if(checkImo()){
-		return;
-	};
+	// create phpWithArgs
+	var phpWithArg = "query_vessel_details.php?source=cngGears&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
 	
-	createCargoAndGearTitle();
-	triggerCngCapacities2();
-}
-function triggerCngCapacities2() {
-	$(".mainPanel").append(
-		'<div class="subtitle"Capacities></div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel">Grain</div>' +
-				'<div class="fourColsLabel">Bale</div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id="cngCapacitiesGrain"></div>' +
-				'<div id="cngCapacitiesBale"></div>' +
-			'</div>' +
-		'</div>'
-	);
-}
-function triggerCngSpecialist() {
-	if(checkImo()){
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			response.vesseldata[0].cngGearType = checkNullField(response.vesseldata[0].cngGearType);
+			response.vesseldata[0].cngGearDesc = checkNullField(response.vesseldata[0].cngGearDesc);
+			response.vesseldata[0].cngGearSWL = checkNullField(response.vesseldata[0].cngGearSWL);
+			response.vesseldata[0].cngPumpType = checkNullField(response.vesseldata[0].cngPumpType);
+			response.vesseldata[0].cngPumpDesc = checkNullField(response.vesseldata[0].cngPumpDesc);
+			response.vesseldata[0].cngPumpRating = checkNullField(response.vesseldata[0].cngPumpRating);
+			response.vesseldata[0].cngPumpsTotalCap = checkNullField(response.vesseldata[0].cngPumpsTotalCap);
+			response.vesseldata[0].cngPumpsStripping = checkNullField(response.vesseldata[0].cngPumpsStripping);
+			response.vesseldata[0].cngCargoPumps1 = checkNullField(response.vesseldata[0].cngCargoPumps1);
+			response.vesseldata[0].cngCargoPumps1Cap = checkNullField(response.vesseldata[0].cngCargoPumps1Cap);
+			response.vesseldata[0].cngCargoPumps2 = checkNullField(response.vesseldata[0].cngCargoPumps2);
+			response.vesseldata[0].cngCargoPumps2Cap = checkNullField(response.vesseldata[0].cngCargoPumps2Cap);
+			response.vesseldata[0].cngCargoPumps3 = checkNullField(response.vesseldata[0].cngCargoPumps3);
+			response.vesseldata[0].cngCargoPumps3Cap = checkNullField(response.vesseldata[0].cngCargoPumps3Cap);
+		
+			// display data
+			$("#cngGearType").html(response.vesseldata[0].cngGearType);
+			$("#cngGearDesc").html(response.vesseldata[0].cngGearDesc);
+			$("#cngGearSWL").html(response.vesseldata[0].cngGearSWL);
+			$("#cngPumpType").html(response.vesseldata[0].cngPumpType);
+			$("#cngPumpDesc").html(response.vesseldata[0].cngPumpDesc);
+			$("#cngPumpRating").html(response.vesseldata[0].cngPumpRating);
+			$("#cngPumpsTotalCap").html(response.vesseldata[0].cngPumpsTotalCap);
+			$("#cngPumpsStripping").html(response.vesseldata[0].cngPumpsStripping);
+			$("#cngCargoPumps1").html(response.vesseldata[0].cngCargoPumps1);
+			$("#cngCargoPumps1Cap").html(response.vesseldata[0].cngCargoPumps1Cap);
+			$("#cngCargoPumps2").html(response.vesseldata[0].cngCargoPumps2);
+			$("#cngCargoPumps2Cap").html(response.vesseldata[0].cngCargoPumps2Cap);
+			$("#cngCargoPumps3").html(response.vesseldata[0].cngCargoPumps3);
+			$("#cngCargoPumps3Cap").html(response.vesseldata[0].cngCargoPumps3Cap);
+		}
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
 		return;
-	};
-	
-	createCargoAndGearTitle();
-	triggerCngSpecialist2();
-}
-function triggerCngSpecialist2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Specialist</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
-}
-function triggerCngCargoGear() {
-	if(checkImo()){
-		return;
-	};
-	
-	createCargoAndGearTitle();
-	triggerCngCargoGear2();
-}
-function triggerCngCargoGear2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Cargo Gear</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
-}
-function triggerCngRoro() {
-	if(checkImo()){
-		return;
-	};
-	
-	createCargoAndGearTitle();
-	triggerCngRoro2();
-}
-function triggerCngRoro2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Ro-ro (Lanes,Ramps, and Doors)</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
-}
-function triggerCngTowage() {
-	if(checkImo()){
-		return;
-	};
-	
-	createCargoAndGearTitle();
-	triggerCngTowage2();
-}
-function triggerCngTowage2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Towage</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
-}
-function triggerCngMiscellaneous() {
-	if(checkImo()){
-		return;
-	};
-	
-	createCargoAndGearTitle();
-	triggerCngMiscellaneous2();
-}
-function triggerCngMiscellaneous2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Miscellaneous</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
+	});
 }
 function triggerCngViewAll() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createCargoAndGearTitle();
 	triggerCngOverview2();
-	triggerCngCompartments2();
-	triggerCngTanks2();
-	triggerCngHatches2();
-	triggerCngCapacities2();
-	triggerCngSpecialist2();
-	triggerCngCargoGear2();
-	triggerCngRoro2();
-	triggerCngTowage2();
-	triggerCngMiscellaneous2();
+	triggerCngCargo2();
+	triggerCngGears2();
 }
 	
 // Get information from database and show Machinery info in main panel	
@@ -1037,36 +1690,8 @@ function createMachineryTitle() {
 		'<div class="title">Machinery</div>'	
 	);
 }
-function triggerMacOverview() {
-	if(checkImo()){
-		return;
-	};
-	
-	createMachineryTitle();
-	triggerMacOverview2();
-}
-function triggerMacOverview2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Overview</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
-				'<div class="fourColsLabel"></div>' +
-				'<div class="fourColsLabel"></div>' +
-				'<div class="fourColsLabel">Speed</div>' +
-				'<div class="fourColsLabel"></div>' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
-}
 function triggerMacPrimeMover() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createMachineryTitle();
 	triggerMacPrimeMover2();
@@ -1081,8 +1706,9 @@ function triggerMacPrimeMover2() {
 				'<div class="fourColsLabel">Engine Make</div>' +
 				'<div class="fourColsLabel">Engine Model</div>' +
 				'<div class="fourColsLabel">Engine Type</div>' +
-				
 				'<div class="fourColsLabel">Engine Layout</div>' +
+				'<div class="fourColsLabel">Number of Engines</div>' +
+				'<div class="fourColsLabel">Speed</div>' +
 			'</div>' +
 			'<div class="fourColsOuter">' +
 				'<div id="macEngineBuilder"></div>' +
@@ -1091,25 +1717,31 @@ function triggerMacPrimeMover2() {
 				'<div id="macEngineModel"></div>' +
 				'<div id="macEngineType"></div>' +
 				'<div id="macEngineLayout"></div>' +
+				'<div id="macEngineNumber"></div>' +
+				'<div id="macEngineSpeed"></div>' +
 			'</div>' +
 			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel">Number of Engines</div>' +
 				'<div class="fourColsLabel">RPM</div>' +
-				'<div class="fourColsLabel">Speed</div>' +
 				'<div class="fourColsLabel">Stroke</div>' +
 				'<div class="fourColsLabel">Total HP</div>' +
 				'<div class="fourColsLabel">Total KW</div>' +	
-				
+				'<div class="fourColsLabel">Propulsion Type</div>' +	
+				'<div class="fourColsLabel">Propulsion Units</div>' +	
+				'<div class="fourColsLabel">Cylinder Bore</div>' +	
+				'<div class="fourColsLabel">Cylinder Stroke</div>' +	
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id="macEngineNumber"></div>' +
 				'<div id="macEngineRPM"></div>' +
-				'<div id="macEngineSpeed"></div>' +
 				'<div id="macEngineStroke"></div>' +
 				'<div id="macEngineHP"></div>' +
 				'<div id="macEngineKW"></div>' +
+				'<div id="macPropulsionType"></div>' +
+				'<div id="macPropulsionUnits"></div>' +
+				'<div id="macCylinderBore"></div>' +
+				'<div id="macCylinderStroke"></div>' +
 			'</div>' +
-		'</div>'
+		'</div>' +
+		'<div>&nbsp;</div>'
 	);
 	
 	var searchType = $('#searchType').find(":selected").val();
@@ -1127,42 +1759,22 @@ function triggerMacPrimeMover2() {
 		
 		if (response.resultcount > 0) {
 			// format data; remove NULL strings
-			if(!response.vesseldata[0].macEngineBuilder){
-				response.vesseldata[0].macEngineBuilder ="N/A";
-			}
-			if(!response.vesseldata[0].macEngineDetails){
-				response.vesseldata[0].macEngineDetails ="N/A";
-			}
-			if(!response.vesseldata[0].macEngineLayout){
-				response.vesseldata[0].macEngineLayout ="N/A";
-			}
-			if(!response.vesseldata[0].macEngineMake){
-				response.vesseldata[0].macEngineMake ="N/A";
-			}
-			if(!response.vesseldata[0].macEngineModel){
-				response.vesseldata[0].macEngineModel ="N/A";
-			}
-			if(!response.vesseldata[0].macEngineNumber){
-				response.vesseldata[0].macEngineNumber ="N/A";
-			}
-			if(!response.vesseldata[0].macEngineRPM){
-				response.vesseldata[0].macEngineRPM ="N/A";
-			}
-			if(!response.vesseldata[0].macEngineSpeed){
-				response.vesseldata[0].macEngineSpeed ="N/A";
-			}
-			if(!response.vesseldata[0].macEngineStroke){
-				response.vesseldata[0].macEngineStroke ="N/A";
-			}
-			if(!response.vesseldata[0].macEngineHP){
-				response.vesseldata[0].macEngineHP ="N/A";
-			}
-			if(!response.vesseldata[0].macEngineKW){
-				response.vesseldata[0].macEngineKW ="N/A";
-			}
-			if(!response.vesseldata[0].macEngineType){
-				response.vesseldata[0].macEngineType ="N/A";
-			}
+			response.vesseldata[0].macEngineBuilder = checkNullField(response.vesseldata[0].macEngineBuilder);
+			response.vesseldata[0].macEngineDetails = checkNullField(response.vesseldata[0].macEngineDetails);
+			response.vesseldata[0].macEngineLayout = checkNullField(response.vesseldata[0].macEngineLayout);
+			response.vesseldata[0].macEngineMake = checkNullField(response.vesseldata[0].macEngineMake);
+			response.vesseldata[0].macEngineModel = checkNullField(response.vesseldata[0].macEngineModel);
+			response.vesseldata[0].macEngineNumber = checkNullField(response.vesseldata[0].macEngineNumber);
+			response.vesseldata[0].macEngineRPM = checkNullField(response.vesseldata[0].macEngineRPM);
+			response.vesseldata[0].macEngineSpeed = checkNullField(response.vesseldata[0].macEngineSpeed);
+			response.vesseldata[0].macEngineStroke = checkNullField(response.vesseldata[0].macEngineStroke);
+			response.vesseldata[0].macEngineHP = checkNullField(response.vesseldata[0].macEngineHP);
+			response.vesseldata[0].macEngineKW = checkNullField(response.vesseldata[0].macEngineKW);
+			response.vesseldata[0].macEngineType = checkNullField(response.vesseldata[0].macEngineType);
+			response.vesseldata[0].macPropulsionType = checkNullField(response.vesseldata[0].macPropulsionType);
+			response.vesseldata[0].macPropulsionUnits = checkNullField(response.vesseldata[0].macPropulsionUnits);
+			response.vesseldata[0].macCylinderBore = checkNullField(response.vesseldata[0].macCylinderBore);
+			response.vesseldata[0].macCylinderStroke = checkNullField(response.vesseldata[0].macCylinderStroke);
 			
 			//display data
 			$("#macEngineBuilder").html(response.vesseldata[0].macEngineBuilder);
@@ -1177,100 +1789,18 @@ function triggerMacPrimeMover2() {
 			$("#macEngineHP").html(response.vesseldata[0].macEngineHP);
 			$("#macEngineKW").html(response.vesseldata[0].macEngineKW);
 			$("#macEngineType").html(response.vesseldata[0].macEngineType);
+			$("#macPropulsionType").html(response.vesseldata[0].macPropulsionType);
+			$("#macPropulsionUnits").html(response.vesseldata[0].macPropulsionUnits);
+			$("#macCylinderBore").html(response.vesseldata[0].macCylinderBore);
+			$("#macCylinderStroke").html(response.vesseldata[0].macCylinderStroke);
 		}		
 	}).fail(function() {
 		console.log('Vessels Detail: No response from database; error in php?');
 		return;
 	});
 }
-function triggerMacAuxEngines() {
-	if(checkImo()){
-		return;
-	};
-	
-	createMachineryTitle();
-	triggerMacAuxEngines2();
-}
-function triggerMacAuxEngines2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Auxiliary Engines</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
-}
-function triggerMacBoilers() {
-	if(checkImo()){
-		return;
-	};
-	
-	createMachineryTitle();
-	triggerMacBoilers2();
-}
-function triggerMacBoilers2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Boilers</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
-}
-function triggerMacAuxGenerators() {
-	if(checkImo()){
-		return;
-	};
-	
-	createMachineryTitle();
-	triggerMacAuxGenerators2();
-}
-function triggerMacAuxGenerators2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Auxiliary Generators</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
-}
-function triggerMacBunkers() {
-	if(checkImo()){
-		return;
-	};
-	
-	createMachineryTitle();
-	triggerMacBunkers2();
-}
-function triggerMacBunkers2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Bunkers</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
-}
 function triggerMacThrusters() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createMachineryTitle();
 	triggerMacThrusters2();
@@ -1280,26 +1810,44 @@ function triggerMacThrusters2() {
 		'<div class="subtitle">Thrusters</div>' +
 		'<div class="fourColsContainer">' +
 			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
+				'<div class="fourColsLabel">Thrusters</div>' +
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
+				'<div id="macThrusters"></div>' +
 			'</div>' +
-		'</div>'
+		'</div>' +
+		'<div>&nbsp;</div>'
 	);
+	
+	// create phpWithArgs
+	var phpWithArg = "query_vessel_details.php?source=macThrusters&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			response.vesseldata[0].macThrusters = checkNullField(response.vesseldata[0].macThrusters);
+		
+			// display data
+			$("#macThrusters").html(response.vesseldata[0].macThrusters);
+		}
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
 }
 function triggerMacViewAll() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createMachineryTitle();
-	triggerMacOverview2();
 	triggerMacPrimeMover2();
-	triggerMacAuxEngines2();
-	triggerMacBoilers2();
-	triggerMacAuxGenerators2();
-	triggerMacBunkers2();
 	triggerMacThrusters2();
 }
 	
@@ -1309,31 +1857,8 @@ function createClassifiedTitle() {
 		'<div class="title">Classified</div>'	
 	);
 }
-function triggerClaOverview() {
-	if(checkImo()){
-		return;
-	};
-	
-	createClassifiedTitle();
-	triggerClaOverview2();
-}
-function triggerClaOverview2() {
-	$(".mainPanel").append(
-		'<div class="subtitle">Overview</div>' +
-		'<div class="fourColsContainer">' +
-			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
-			'</div>' +
-			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
-			'</div>' +
-		'</div>'
-	);
-}
 function triggerClaInspections() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createClassifiedTitle();
 	triggerClaInspections2();
@@ -1461,9 +1986,7 @@ function triggerClaInspections2() {
 	});
 }
 function triggerClaCertificates() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createClassifiedTitle();
 	triggerClaCertificates2();
@@ -1482,9 +2005,7 @@ function triggerClaCertificates2() {
 	);
 }
 function triggerClaSafety() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createClassifiedTitle();
 	triggerClaSafety2();
@@ -1494,18 +2015,80 @@ function triggerClaSafety2() {
 		'<div class="subtitle">Safety Management</div>' +
 		'<div class="fourColsContainer">' +
 			'<div class="fourColsInner">' +
-				'<div class="fourColsLabel"></div>' +
+				'<div class="fourColsLabel">Chemical Class</div>' +
+				'<div class="fourColsLabel">Inert Gas System</div>' +
+				'<div class="fourColsLabel">Crude Oil Washing</div>' +
+				'<div class="fourColsLabel">Vapour Recovery System</div>' +
+				'<div class="fourColsLabel">Internal Watertight Doors</div>' +							
 			'</div>' +
 			'<div class="fourColsOuter">' +
-				'<div id=""></div>' +
+				'<div id="claSafetyChemical"></div>' +
+				'<div id="claSafetyInertGas"></div>' +
+				'<div id="claSafetyOilWashing"></div>' +
+				'<div id="claSafetyVapourRecovery"></div>' +
+				'<div id="claSafetyWatertightDoors"></div>' +
+			'</div>' +
+			'<div class="fourColsInner">' +
+				'<div class="fourColsLabel">Heating Coils</div>' +
+				'<div class="fourColsLabel">Heating Type</div>' +
+				'<div class="fourColsLabel">Max Temp (&#176; Celcius)</div>' +
+				'<div class="fourColsLabel">Min Temp (&#176; Celcius)</div>' +
+				'<div class="fourColsLabel">Coats</div>' +
+			'</div>' +
+			'<div class="fourColsOuter">' +
+				'<div id="claSafetyCoils"></div>' +
+				'<div id="claSafetyHeatingType"></div>' +
+				'<div id="claSafetyMaxTemp"></div>' +
+				'<div id="claSafetyMinTemp"></div>' +
+				'<div id="claSafetyCoats"></div>' +
 			'</div>' +
 		'</div>'
 	);
+	
+	// create phpWithArgs
+	var phpWithArg = "query_vessel_details.php?source=claSafety&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			response.vesseldata[0].claSafetyChemical = checkNullField(response.vesseldata[0].claSafetyChemical);
+			response.vesseldata[0].claSafetyInertGas = checkNullField(response.vesseldata[0].claSafetyInertGas);
+			response.vesseldata[0].claSafetyOilWashing = checkNullField(response.vesseldata[0].claSafetyOilWashing);
+			response.vesseldata[0].claSafetyVapourRecovery = checkNullField(response.vesseldata[0].claSafetyVapourRecovery);
+			response.vesseldata[0].claSafetyWatertightDoors = checkNullField(response.vesseldata[0].claSafetyWatertightDoors);
+			response.vesseldata[0].claSafetyCoils = checkNullField(response.vesseldata[0].claSafetyCoils);
+			response.vesseldata[0].claSafetyHeatingType = checkNullField(response.vesseldata[0].claSafetyHeatingType);
+			response.vesseldata[0].claSafetyMaxTemp = checkNullField(response.vesseldata[0].claSafetyMaxTemp);
+			response.vesseldata[0].claSafetyMinTemp = checkNullField(response.vesseldata[0].claSafetyMinTemp);
+			response.vesseldata[0].claSafetyCoats = checkNullField(response.vesseldata[0].claSafetyCoats);
+		
+			// display data
+			$("#claSafetyChemical").html(response.vesseldata[0].claSafetyChemical);
+			$("#claSafetyInertGas").html(response.vesseldata[0].claSafetyInertGas > 0 ? 'yes':'no');
+			$("#claSafetyOilWashing").html(response.vesseldata[0].claSafetyOilWashing > 0 ? 'yes':'no');
+			$("#claSafetyVapourRecovery").html(response.vesseldata[0].claSafetyVapourRecovery > 0 ? 'yes':'no');
+			$("#claSafetyWatertightDoors").html(response.vesseldata[0].claSafetyWatertightDoors > 0 ? 'yes':'no');
+			$("#claSafetyCoils").html(response.vesseldata[0].claSafetyCoils > 0 ? 'yes':'no');
+			$("#claSafetyHeatingType").html(response.vesseldata[0].claSafetyHeatingType);
+			$("#claSafetyMaxTemp").html(response.vesseldata[0].claSafetyMaxTemp);
+			$("#claSafetyMinTemp").html(response.vesseldata[0].claSafetyMinTemp);
+			$("#claSafetyCoats").html(response.vesseldata[0].claSafetyCoats);
+		}
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
 }
 function triggerClaCasualties() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createClassifiedTitle();
 	triggerClaCasualties2();
@@ -1524,9 +2107,7 @@ function triggerClaCasualties2() {
 	);
 }
 function triggerClaCrew() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createClassifiedTitle();
 	triggerClaCrew2();
@@ -1608,12 +2189,9 @@ function triggerClaCrew2() {
 	});
 }
 function triggerClaViewAll() {
-	if(checkImo()){
-		return;
-	};
+	if(checkImo()){return;};
 	
 	createClassifiedTitle();
-	triggerClaOverview2();
 	triggerClaInspections2();
 	triggerClaCertificates2();
 	triggerClaSafety2();
@@ -1621,6 +2199,246 @@ function triggerClaViewAll() {
 	triggerClaCrew2();
 }
 
+// Get information from database and show Event Timeline info in main panel
+function triggerEventTimeline() {
+	if(checkImo()){ return; };
+	
+	// retrieve info from database
+	var phpWithArg = "query_vessel_details.php?source=eventTimeline&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+
+		if (response.resultcount > 0) {
+			var timDateArr = new Array(8+response.vesseldata.length);	
+			var timDescArr = new Array(8+response.vesseldata.length);	
+			var timHtmlArr = new Array(8+response.vesseldata.length);	
+			timDateArr[0] = ((response.vesseldata[0].dateLastUpdate).split(" "))[0];
+			timDateArr[1] = ((response.vesseldata[0].dateContract).split(" "))[0];
+			timDateArr[2] = ((response.vesseldata[0].dateKeelLaid).split(" "))[0];
+			timDateArr[3] = ((response.vesseldata[0].dateDueOrDelivered).split(" "))[0];
+			timDateArr[4] = ((response.vesseldata[0].dateAcquired).split(" "))[0];
+			timDateArr[5] = ((response.vesseldata[0].dateLaunched).split(" "))[0];
+			timDateArr[6] = ((response.vesseldata[0].dateConversion).split(" "))[0];
+			timDateArr[7] = ((response.vesseldata[0].dateScrapOrLoss).split(" "))[0];
+			timDateArr[8] = ((response.vesseldata[0].dateRecommissioned).split(" "))[0];
+			timDescArr[0] = "Last Updated";
+			timDescArr[1] = "Contracted";
+			timDescArr[2] = "Keel Laid"; 
+			timDescArr[3] = "Due or Delivered"; 
+			timDescArr[4] = "Acquired"; 
+			timDescArr[5] = "Launched"; 
+			timDescArr[6] = "Conversion"; 
+			timDescArr[7] = "Scrap or Loss"; 
+			timDescArr[8] = "Recommissioned"; 
+			timHtmlArr[0] = 'timLastUpdated';
+			timHtmlArr[1] = 'timContracted';
+			timHtmlArr[2] = 'timKeelLaid';
+			timHtmlArr[3] = 'timDueOrDelivered';
+			timHtmlArr[4] = 'timAcquired';
+			timHtmlArr[5] = 'timLaunched';
+			timHtmlArr[6] = 'timConversion';
+			timHtmlArr[7] = 'timScrapOrLoss';
+			timHtmlArr[8] = 'timRecommissioned';
+
+			// check for at least one inspection record
+			if (response.resultcount > 1) { 
+		
+				// holds all inspection records
+				var inspDateArr = new Array(response.vesseldata.length-1); 
+				var inspDescArr = new Array(response.vesseldata.length-1); 
+				var inspHtmlArr = new Array(response.vesseldata.length-1); 
+				
+				// create an array to store all inspection records
+				for (var i=1;i<response.vesseldata.length;i++) {
+					inspDateArr[i-1] = ((response.vesseldata[i].dateLastUpdate).split(" "))[0];
+					inspDescArr[i-1] = "";
+					inspHtmlArr[i-1] = "";
+					
+					if (response.vesseldata[i].dateContract) {
+						inspDescArr[i-1] += "ID " + response.vesseldata[i].dateContract;
+					}
+					if (response.vesseldata[i].dateKeelLaid) {
+						inspDescArr[i-1] += ": Inspected by " + response.vesseldata[i].dateKeelLaid;
+					}
+					if (response.vesseldata[i].dateDueOrDelivered) {
+						inspDescArr[i-1] += " in " + response.vesseldata[i].dateDueOrDelivered;
+					}
+					if (response.vesseldata[i].dateAcquired) {
+						inspDescArr[i-1] += ", " + response.vesseldata[i].dateAcquired;				
+					}
+					if (response.vesseldata[i].dateLaunched !=0) {
+						inspDescArr[i-1] += ", " + response.vesseldata[i].dateLaunched + " defects found";
+					}
+					if (response.vesseldata[i].dateConversion != 0) {
+						inspDescArr[i-1] += ", vessel detained"
+					}
+					
+					inspHtmlArr[i-1] += 'timInspection' + [i];
+				}		
+
+				for (var i=0;i<inspDateArr.length;i++) {
+					timDateArr[8+i] = inspDateArr[i];
+					timDescArr[8+i] = inspDescArr[i];
+					timHtmlArr[8+i] = inspHtmlArr[i];
+				}
+			}	
+
+			// contains all timeline events
+			var timArr = new Array(timDateArr.length);
+			for (var i=0;i<timDateArr.length;i++) {
+				timArr[i] = new Array(3);
+			}
+			for (var i=0;i<timDateArr.length;i++) {
+				timArr[i][0] = timDateArr[i];
+				timArr[i][1] = timDescArr[i];
+				timArr[i][2] = timHtmlArr[i];
+			}
+
+			// sort dates
+			// order dates in ascending order
+			timArr.sort(
+				(function(index) {
+					return function(a,b) {
+						// convert null values to blank strings
+						var va = (a[index] === null) ? "" : "" + a,
+						    vb = (b[index] === null) ? "" : "" + b;
+						// return string comparison result
+						return (va === vb ? 0 : (va < vb ? -1 : 1));
+					};
+				})(0) // sort by index 0
+			);
+			
+			// order dates in descending order
+			timArr.reverse();
+			
+			// build HTML code
+			$(".mainPanel").html(
+			'<div class="title">Event Timeline</div>'	+
+			'<div class="timelineColsContainer">' +
+				'<div class="timelineColLeft">' +
+					'<div class="subtitle">Date</div>' +
+				'</div>' +
+				'<div class="timelineColRight">' +
+					'<div class="subtitle">Significant Event</div>' +
+				'</div>' +
+			'</div>' 
+			);
+
+			for (var i=0;i<timArr.length;i++) {
+				if (timArr[i][0]) {
+					$(".mainPanel").append(
+					'<div class="timelineColsContainer">' +
+						'<div class="timelineColLeft">' +
+							'<div>' + timArr[i][0] + '</div>' +
+						'</div>' +
+						'<div class="timelineColRight" style="font-weight:normal;">' +
+							'<div id="' + timArr[i][2] + '"></div>' +
+						'</div>' +
+					'</div>'	
+					);
+				}
+			}
+			
+			// display data
+			for (var i=0;i<timArr.length;i++){
+				$("#"+timArr[i][2]).html(timArr[i][1]);
+			}
+		
+		} else {
+			$(".mainPanel").html(
+				'Search result returned nothing for Event Timeline.'
+			);
+		}
+		
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
+}
+
+// Get information from database and show Ship Performance info in main panel
+function triggerPerformance() {
+	if(checkImo()){return;};
+	
+	// build HTML code
+	$(".mainPanel").html(
+		'<div class="title">Ship Performance</div>' +
+		'<div class="subtitle">Ship Performance</div>' +
+		'<div class="fourColsContainer">' +
+			'<div class="fourColsInner">' +
+				'<div class="fourColsLabel">Bollard Pull</div>' +
+				'<div class="fourColsLabel">Consumption Speed (tonnes)</div>' +
+				'<div class="fourColsLabel">MDO (tonnes)</div>' +
+				'<div class="fourColsLabel">HFO (tonnes)</div>' +
+			'</div>' +
+			'<div class="fourColsOuter">' +
+				'<div id="perBollard"></div>' +
+				'<div id="perMdo"></div>' +
+				'<div id="perHfo"></div>' +
+				'<div id="perSpeed"></div>' +
+			'</div>' + 
+		'</div>' +
+		'<div>&nbsp;</div>' +
+		'<div style="font-size:x-small;">MDO = medium diesel oil consumed, HFO = Heavy fuel oil consumed</div>'
+	);
+	
+	var phpWithArg = "query_vessel_details.php?source=performance&imo=" + imo;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			response.vesseldata[0].perBollard = checkNullField(response.vesseldata[0].perBollard);
+			response.vesseldata[0].perMdo = checkNullField(response.vesseldata[0].perMdo);
+			response.vesseldata[0].perHfo = checkNullField(response.vesseldata[0].perHfo);
+			response.vesseldata[0].perSpeed = checkNullField(response.vesseldata[0].perSpeed);
+			
+			// display data
+			$("#perBollard").html(response.vesseldata[0].perBollard);
+			console.log(response.vesseldata[0].perBollard);
+			$("#perMdo").html(response.vesseldata[0].perMdo);
+			$("#perHfo").html(response.vesseldata[0].perHfo);
+			$("#perSpeed").html(response.vesseldata[0].perSpeed);
+		}	
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
+}
+
+// Checks for null fields and replaces it with a placeholder
+function checkNullField(field) {
+	if(!field) {
+		return "N/A";
+	}
+	return field;
+}
+
+// Launch Maps Widget
+function launchOwfMaps() {
+	OWF.Launcher.launch({
+		universealName: 'e23da61e-3a4f-3237-360b-af328ffc1d4e',
+		guid: 'e23da61e-3a4f-3237-360b-af328ffc1d4e',
+		title: 'ICODE-MDA Maps',
+		launchOnlyIfClosed: true
+	}, callback);
+}
+function callback(){
+}
 
 // PROTOTYPES	
 function fxnName() {
@@ -1655,3 +2473,29 @@ function subSection() {
 		'</div>'
 	);
 }	
+
+
+
+/*
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			// format data; remove NULL strings
+			if(!response.vesseldata[0].){
+				response.vesseldata[0]. = "N/A";
+			}
+		
+			// display data
+			$("#").html(response.vesseldata[0].);
+		}
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
+*/

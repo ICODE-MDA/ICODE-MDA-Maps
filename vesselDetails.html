@@ -28,11 +28,41 @@
 	
 	<!-- initialize the widget -->
 	<script>
-		function init() {
-			var launchData = false;
-			
-			initialize(launchData,"","");
+	function init() {
+		var launchData = OWF.Launcher.getLaunchData(); //Maps widget launch status and data
+		var launchDataStatus = "";
+		var launchDataMsg = "";
+		if (launchData) {
+			var parseMsg = launchData.split(" ");
+			launchDataStatus = parseMsg[0];
+			launchDataMsg = parseMsg[1];
 		}
+		
+		if (!launchData) {
+			// not launched by Maps Widget
+			initialize(false,"",""); 												//display generic info
+			launchOwfMaps();														//launch Maps widget
+			owfLaunchStatus = true;													//change status of Maps widget to launched
+			OWF.Eventing.subscribe("mapsToVesselDetails",this.updateVesselDetails); //subscribe to channel
+		} else {
+			// launched by Maps Widget
+			if(launchDataStatus == 'false') {
+				// first time launching Vessel Details widget; subscribe to channel
+				OWF.Eventing.subscribe("mapsToVesselDetails",this.updateVesselDetails);
+				initialize(true,'selectImo',launchDataMsg);
+			}
+		}
+	}
+	
+	var updateVesselDetails = function(sender,msg) {
+		// listen to channel; get imo number
+		initialize(true,'selectImo',(msg.split(" "))[1]);
+	};
+
+	// add OWF Eventing API on page load
+	owfdojo.addOnLoad(function() { 
+		OWF.ready(init); 
+	}); 
 	</script>
 	
 	<!-- call accordion -->
@@ -62,10 +92,9 @@
 	-->	
 </head>
 
-<body onload="init();">
+<body>
 
 <div class="outerContainer">
-
 	<!-- left panel contains menu for navigating catalog of ship info -->
 	<div class="leftPanel">
 		<div id="accordion" class="accordion">
@@ -75,7 +104,9 @@
 			</div>
 			<h3>Ownership</h3>
 			<div id="ownership">
-				<button class="leftPanelButton" onClick="triggerOwnership();">Ownership</button>
+				<button class="leftPanelButton" onClick="triggerOwnCurrent();">Current Ownership</button>
+				<button class="leftPanelButton" onClick="triggerOwnOriginal();">Original Ownership</button>
+				<button class="leftPanelButton" onClick="triggerOwnViewAll();">View All</button>
 			</div>
 			<h3>Commercial History</h3>
 			<div id="commercialHistory">
@@ -95,43 +126,26 @@
 				<button class="leftPanelButton" onClick="triggerConShipbuilder();">Shipbuilder Status</button><br />
 				<button class="leftPanelButton" onClick="triggerConStatus();">Status</button><br />
 				<button class="leftPanelButton" onClick="triggerConConstructionDetail();">Construction Detail</button><br />
-				<button class="leftPanelButton" onClick="triggerConServiceConstraints();">Service Constraints</button><br />
-				<button class="leftPanelButton" onClick="triggerConAlterations();">Alterations</button><br />
 				<button class="leftPanelButton" onClick="triggerConDimensions();">Dimensions</button><br />
 				<button class="leftPanelButton" onClick="triggerConTonnages();">Tonnages</button><br />
 				<button class="leftPanelButton" onClick="triggerConArrangement();">Arrangement</button><br />
-				<button class="leftPanelButton" onClick="triggerConSisterShips();">Sister Ships</button><br />
-				<button class="leftPanelButton" onClick="triggerConSupplementaryFeatures();">Supplementary Features</button><br />
 				<button class="leftPanelButton" onClick="triggerConViewAll();">View All</button>
 			</div>
 			<h3>Cargo & Gear</h3>
 			<div id="cargoAndGear">
 				<button class="leftPanelButton" onClick="triggerCngOverview();">Overview</button><br />
-				<button class="leftPanelButton" onClick="triggerCngCompartments();">Compartments</button><br />
-				<button class="leftPanelButton" onClick="triggerCngTanks();">Tanks</button><br />
-				<button class="leftPanelButton" onClick="triggerCngHatches();">Hatches</button><br />
-				<button class="leftPanelButton" onClick="triggerCngCapacities();">Capacities</button><br />
-				<button class="leftPanelButton" onClick="triggerCngSpecialist();">Specialist</button><br />
-				<button class="leftPanelButton" onClick="triggerCngCargoGear();">Cargo Gear</button><br />
-				<button class="leftPanelButton" onClick="triggerCngRoro();">Ro-ro</button><br />
-				<button class="leftPanelButton" onClick="triggerCngTowage();">Towage</button><br />
-				<button class="leftPanelButton" onClick="triggerCngMiscellaneous();">Miscellaneous</button><br />
+				<button class="leftPanelButton" onClick="triggerCngCargo();">Cargo</button><br />
+				<button class="leftPanelButton" onClick="triggerCngGear();">Gears</button><br />
 				<button class="leftPanelButton" onClick="triggerCngViewAll();">View All</button>
 			</div>
 			<h3>Machinery</h3>
 			<div id="machinery">
-				<button class="leftPanelButton" onClick="triggerMacOverview();">Overview</button><br />
 				<button class="leftPanelButton" onClick="triggerMacPrimeMover();">Prime Mover</button><br />
-				<button class="leftPanelButton" onClick="triggerMacAuxEngines();">Auxiliary Engines</button><br />
-				<button class="leftPanelButton" onClick="triggerMacBoilers();">Boilers</button><br />
-				<button class="leftPanelButton" onClick="triggerMacAuxGenerators();">Auxiliary Generators</button><br />
-				<button class="leftPanelButton" onClick="triggerMacBunkers();">Bunkers</button><br />
 				<button class="leftPanelButton" onClick="triggerMacThrusters();">Thrusters</button><br />
 				<button class="leftPanelButton" onClick="triggerMacViewAll();">View All</button>
 			</div>
 			<h3>Classified</h3>
 			<div id="classified">
-				<button class="leftPanelButton" onClick="triggerClaOverview();">Overview</button><br />
 				<button class="leftPanelButton" onClick="triggerClaInspections();">Inspections</button><br />
 				<button class="leftPanelButton" onClick="triggerClaCertificates();">Ship Certificates</button><br />
 				<button class="leftPanelButton" onClick="triggerClaSafety();">Safety Management</button><br />
@@ -141,7 +155,7 @@
 			</div>
 			<h3>Event Timeline</h3>
 			<div id="eventTimeline">
-				Event Timeline<br />
+				<button class="leftPanelButton" onClick="triggerEventTimeline();">Event Timeline</button><br />
 			</div>
 			<h3>Movements</h3>
 			<div id="movements">
@@ -150,13 +164,16 @@
 				Movements<br />
 				Trading Areas<br />
 			</div>
-			<h3>Fixtures</h3>
-			<div id="fixtures">
-				Fixtures<br />
-			</div>
 			<h3>Ship Performance</h3>
 			<div id="shipPerformance">
-				Ship Performance<br />
+				<button class="leftPanelButton" onClick="triggerPerformance();">Ship Performance</button><br />
+			</div>
+			<h3>Help</h3>
+			<div id="help">
+				<button class="leftPanelButton" onClick="">Glossary</button><br />
+				<button class="leftPanelButton" onClick="">Tutorial</button><br />
+				<button class="leftPanelButton" onClick="">FAQ</button><br />
+				<button class="leftPanelButton" onClick="">Contact</button><br />
 			</div>
 		</div>
 	</div>
@@ -170,7 +187,8 @@
 				<option value="selectShipName">Ship Name</option>
 			</select>
 			<span><input type="text" id="searchTerm" value="9624328" placeholder=" Type search terms here (e.g. MMSI, vessel name, vessel type, etc.)"></input></span>
-			<span><button onClick="searchResults();">Search</button>
+<!--			<span><input type="text" id="searchTerm" placeholder=" Type search terms here (e.g. MMSI, vessel name, vessel type, etc.)"></input></span>
+-->			<span><button onClick="searchResults();">Search</button>
 		</div>
 		
 		<!-- top panel contains general ship info -->
@@ -209,9 +227,11 @@
 					<div id="detailShipStatus"></div>
 					<div id="detailShipbuilder"></div>
 				</div>
+				<!--
 				<div class="shipDetailsCols">
 					<img src="img/1411693.simg" width="200" height="120" style="margin: 20px;" />
 				</div>
+				-->
 			</div> 
 		</div>
 		

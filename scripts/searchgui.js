@@ -226,6 +226,20 @@ function searchguiResults() {
 	formatDatetime("maxMinute", maxMinute);
 	formatDatetime("maxSecond", maxSecond);
 	
+	// ensure user did not specify Apr, Jun, Sep, Nov date with more than 30 days
+	if ((minMonth=="04")||(minMonth=="06")||(minMonth=="09")||(minMonth=="11")){
+		if (minMonth>30) {
+			$('#queryString').html('<span class="errorLog">Error: Ending Date-Time must be greater than or equal to Starting Date-Time</span>');
+		return;
+		}
+	// ensure user did not specify Feb date with more than 28 days
+	} else if (minMonth=="02") {
+		if (minMonth>28) {
+			$('#queryString').html('<span class="errorLog">Error: Ending Date-Time must be greater than or equal to Starting Date-Time</span>');
+			return;
+		}
+	}
+	
 	////////////////////////////////////
 	// build search query from string //
 	////////////////////////////////////
