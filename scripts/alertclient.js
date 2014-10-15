@@ -9,7 +9,7 @@
 
 /* -------------------------------------------------------------------------------- */
 /**
- * Main alert client function
+ * Main alert client function (starts on page load)
  **/
 $(function start() {
    "use strict";

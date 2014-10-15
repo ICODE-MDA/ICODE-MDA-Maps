@@ -2285,7 +2285,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
                         var sog = vessel.sog;
                         var cog = vessel.cog;
                         //var streamid = vessel.streamid;
-                        var heading = vessel.heading;
+                        var heading = parseFloat(vessel.heading);
 
                         if (vessel.target_status != null) {
                            prev_target_status = target_status;
