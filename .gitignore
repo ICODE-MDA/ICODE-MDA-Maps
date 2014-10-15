@@ -1,0 +1,5 @@
+*.swp
+*Thumbs.db
+.\phpsql_dbinfo.php
+# Ignore any new directories in the kml directory (where uploads are placed)
+kml/*/

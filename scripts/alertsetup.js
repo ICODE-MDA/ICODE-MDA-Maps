@@ -240,7 +240,7 @@ function saveAlert(){
    */
 
    //check if polygon is defined
-   if (typeof alertPolygonString === 'undefined') {
+   if (typeof alertPolygonString === 'undefined' || alertPolygonString == '') {
       alert('Please define polygon');
       return;
    }
@@ -248,6 +248,7 @@ function saveAlert(){
    var phpWithArg = 'query_alert_setup.php?userid=' + userid;
 
    phpWithArg += '&alertPolygon=' + alertPolygonString;
+   alertPolygonString = '';   //clear the polygon string for the next alert
 
    var entering = $('#alertenteringarea');
    var exiting = $('#alertexitingarea');
@@ -270,7 +271,35 @@ function saveAlert(){
    }
    phpWithArg += '&email="' + emailStr + '"';
 
-   console.log(phpWithArg);
+
+   //TODO: Add criteria arguments
+   //Parse criteria
+   if ($('#alertfield1 option:selected').text() === 'ALL VESSELS') {
+      //no criteria needs to be added
+      console.log('saveAlert(): No criteria to be added');
+   }
+   else {
+      var field, operation, value;
+
+      //iterate through all criteria that the user defined
+      for (var i=1; i < $('.criterialabel').length+1; i++) {
+         //Build SQL strings from criteria
+         field = $('#alertfield'+i+' option:selected').text();
+         operation = $('#alertoperation'+i+' option:selected').text();
+         value = $('#alertvalue'+i).val();
+         console.log(i, field);
+         console.log(i, operation);
+         console.log(i, value);
+
+         //Add criteria arguments to phpWithArg
+         phpWithArg += '&field[]=' + field;
+         phpWithArg += '&operation[]=' + operation;
+         phpWithArg += '&value[]=' + value;
+      }
+   }
+
+   //Final resulting PHP call with all arguments
+   console.log('saveAlert():', phpWithArg);
 
    //Call the PHP script to insert new alert row to alert database
    console.log('Calling PHP script to push new alert_properties element...');
@@ -284,9 +313,6 @@ function saveAlert(){
       //console.log('saveAlert(): ' + response.query);
 
       console.log('saveAlert(): Added new alert id ' + response.alert_id);
-
-      //TODO: Add criteria to database here
-
       
       //Notify server about newly added alert so that it can be added for monitoring
       var connection = new WebSocket('ws://128.49.78.214:2411');
@@ -308,62 +334,10 @@ function saveAlert(){
    .fail(function() {
       console.log('saveAlert(): ' +  'No response from alert database; error in php?'); 
 
-      //alert('Alert not saved.  Please try again');
+      alert('Alert not saved.  Please try again later.');
 
       return;
    }); //END .fail()
-
-/*
-   //TODO: move to above, after successful response from adding alert_properties
-   //======================== ADD CRITERIA FOR ALERT ================================
-   phpWithArg = 'query_setup_alert_criteria.php?';
-
-   //Obtain user's criteria
-   //User has specific vessel criteria defined, loop through each of them
-   var fields = $('[id^=alertfield]');    //Find all ids that begin with 'alertfield'
-   var operations = $('[id^=alertoperation]');
-   var value = $('[id^=alertvalue]');
-
-   if (fields[0].value === 'all') {
-      console.log('Skipping operation and value');
-
-   }
-
-   //phpWithArg += '&field=' + $('#alertfield1').val();
-   //phpWithArg += '&operation=' + $('#alertoperation1').val();
-   //phpWithArg += '&value=' + $('#alertvalue1').val();
-
-   //TODO: add pre-built SQL query statement field
-   var prebuiltquery = '';
-
-   phpWithArg += '&query="' + prebuiltquery + '"';
-
-
-
-   console.log(phpWithArg);
-
-   //Call the PHP script to insert new alert row to alert database
-   $.getJSON(
-         phpWithArg, 
-         function (){ 
-            console.log('success');
-         }
-      )
-   .done(function (response) {
-      console.log('saveAlert(): ' + response.query);
-
-
-      //Exit the "setup alert" mode
-      setAlertEnd();
-   }) // END .done()
-   .fail(function() {
-      console.log('saveAlert(): ' +  'No response from alert database; error in php?'); 
-
-      //alert('Alert not saved.  Please try again');
-
-      return;
-   }); //END .fail()
-*/
 }
 
 /**
@@ -488,7 +462,7 @@ function addCriterionRow() {
 
    //New alert field
    var newalertfield = $('<select>').attr({
-      class: 'label',
+      class: 'criterialabel',
       id: 'alertfield' + countCriterion,
       width: '300px',
       onchange: 'setAlertOptions(' + countCriterion + ')'

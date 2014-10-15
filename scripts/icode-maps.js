@@ -25,6 +25,9 @@ var latestPHPcall;            //last phpWithArgs call
 var mainQuery;                //main query called
 var prevZoom = null;          //store the last zoom level
 
+//Vessel type filter
+var vesseltypeFilterPHPStr = '';
+
 //Cluster boxes for zoomed out view of vessel count instead of showing markers
 var clusterBoxes = [];        
 var clusterBoxesLabels= [];
@@ -66,7 +69,7 @@ var queryBounds;              //map bounds of query
 var expandFactor = 300;       //factor to expand bounds by outside of viewable area
 var boundRectangle = null;    //rectangle map object to draw query bounds
 
-var queryid;
+var queryid;                  //ID of query based on timestamp to keep track of map clearing on simultaneous query layers
 
 //Marker timing objects
 //var markerMouseoutTimeout;
@@ -196,6 +199,7 @@ var geocoder;
 
 //Port labels
 var portLabel;
+var portPolygons = [];
 
 //Traffic layer
 var trafficLayer;
@@ -215,7 +219,7 @@ function initialize() {
    //var centerCoord = new google.maps.LatLng(2.0,1.30);     //GoG
    var centerCoord = new google.maps.LatLng(-33.0, -71.6);   //Valparaiso, Chile
    //var centerCoord = new google.maps.LatLng(17.978677, -16.078958);   //Nouakchott, Mauritania
-   //var centerCoord = new google.maps.LatLng(13.273461807246479, -13.465625000000037);   //Zoomed out world view
+   var centerCoord = new google.maps.LatLng(13.273461807246479, -13.465625000000037);   //Zoomed out world view
    
    /* Uses browser location to fill in more precise user location in the geocode box
     * currently disabled to prevent annoying browser warning messages
@@ -231,9 +235,9 @@ function initialize() {
    }
    else {
       controlStyle = google.maps.MapTypeControlStyle.HORIZONTAL_BAR;
-      defaultZoom = 11;
+      //defaultZoom = 11;
       //defaultZoom = 7;
-      //defaultZoom = 2;
+      defaultZoom = 2;
    }
       
    var mapOptions = {
@@ -289,6 +293,7 @@ function initialize() {
    //Clear marker array
    markerArray = [];
    vesselArray = [];
+   markersDisplayed = [];
 
    //var infoWindow = new google.maps.InfoWindow();
    /*
@@ -354,6 +359,9 @@ function initialize() {
       //Check for TMACS layer toggle on load
       toggleTMACSHeadWMSLayer();
       toggleTMACSHistoryWMSLayer();
+
+      //TEST
+      testWMSLayers();
 
       //TEMP: disable TMACS layer for now since the layer is not currently available
       document.getElementById("tmacslayer").style.opacity = '0.5';      
@@ -651,7 +659,7 @@ function initialize() {
 
 /* -------------------------------------------------------------------------------- */
 /** 
- * Handles refreshing map of all markers
+ * Handles refreshing map of all markers/clusters/ports layers/day-night layer/etc.
  */
 function refreshMaps(forceRedraw) {
    //alert("caller is " + arguments.callee.caller.toString()); //Find out who called this function
@@ -668,21 +676,26 @@ function refreshMaps(forceRedraw) {
    if (forceRedraw) {
       lastRefresh = new Date();
    }
+   
+   //------------------------ Update AIS/RADAR/LAISIC ---------------------------
 
    //Check if URL has query
    var queryArgument = Request.QueryString("query").toString();
    //console.log(queryArgument);
 
    if (enableTimeMachine) {
+      // -- Time Machine mode --
       console.log('Performing Time Machine query');
       getTargetsFromDB(map.getBounds(), queryTimeMachine, 'AIS', true); 
    }
    else if (enableCustomQuery) {
+      // -- Custom query mode --
       console.log('Performing custom query: ' + queryCustomQuery);
       getTargetsFromDB(map.getBounds(), queryCustomQuery, 'AIS', true); 
    }
    //Check if URL has query parameter, and use if it is defined
    else if (queryArgument != null) {
+      // -- URL Query mode --
       console.log('Performing URL query');
       mainQuery = queryArgument;
 
@@ -692,6 +705,8 @@ function refreshMaps(forceRedraw) {
    else {
       //Update vessels displayed
       if (document.getElementById("LAISIC_TARGETS").checked) {
+         // -- LAISIC mode --
+
          //Uncheck auto refresh
          $('input[name=autoRefresh]').attr('checked', false);
          toggleAutoRefresh();
@@ -707,7 +722,10 @@ function refreshMaps(forceRedraw) {
          getTargetsFromDB(map.getBounds(), null, "LAISIC_AIS_OBS", redrew);
       }
       else if (!enableCluster || map.getZoom() > 9) {
+         // -- Live view mode --
+
          //Create a unique query id to keep track of when to clear map
+         //  The first layer to return will clear the map and set a new queryid so the other calls don't clear the map again
          queryid = new Date().getTime();
 
          //Most queries will default here
@@ -723,9 +741,14 @@ function refreshMaps(forceRedraw) {
          }
       }
       else {
+         // -- Clusters mode --
+
+         //Only get AIS (no PVOL/radar or LAISIC) for clusters
          getClustersFromDB(map.getBounds(), null);
       }
    }
+
+   //------------------------ Update other layers ---------------------------
 
    //Update ports displayed
    if (Ports) {
@@ -760,8 +783,6 @@ function refreshTracks() {
 /* -------------------------------------------------------------------------------- */
 /** 
  * Get AIS data from JSON, which is from database, with bounds.
- *
- * Optional callback argument (4th argument)
  */
 function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisqueryid) {
    //Set buffer around map bounds to expand queried area slightly outside viewable area
@@ -843,7 +864,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
             fillOpacity: 0,
             map: map,
             bounds: queryBounds,
-          clickable: false,
+            clickable: false,
          });
       }
    }
@@ -860,29 +881,43 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
    console.log("Refreshing target points...");
    document.getElementById("query").value = "QUERY RUNNING...";
    document.getElementById('stats').innerHTML = '';
-   document.getElementById('busy_indicator').style.visibility = 'visible';
+   $('#busy_indicator').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#fff', speed: 2.0}); //show spinner
    NProgress.start();   //JS library top progress bar
 
    var phpWithArg;
 
    //Read sourceType (AIS, LAISIC stuff, etc) from global variable, set previous right before this calling this function.  This one used to notify PHP script which table to query from.
-   var source = "source=" + sourceType;
+   var sourceStr = "source=" + sourceType;
    var boundStr = "&minlat=" + Math.round(minLat*1000)/1000 + "&maxlat=" + Math.round(maxLat*1000)/1000 + "&minlon=" + Math.round(minLon*1000)/1000 + "&maxlon=" + Math.round(maxLon*1000)/1000;
 
    //Check if a query has been previously made, and use it to preserve previous query but just change the bounds to current view now
    if (!customQuery && customQuery !== '') {     //No custom query
-      phpWithArg = "query_current_vessels.php?" + source;
+      phpWithArg = "query_current_vessels.php?" + sourceStr;
 
       if (enableRisk) {
          phpWithArg += "&risk=1";
       }
 
-      phpWithArg += boundStr;
+      //Check for AIS's source (terrestrial vs SatAIS)
+      if (sourceType == 'AIS') {
+         if ($('#mssisonly:checked').length != 0) {
+            phpWithArg += "&mssisonly=1";
+         }
+         if ($('#sataisonly:checked').length != 0) {
+            phpWithArg += "&sataisonly=1";
+         }
+
+         if (vesseltypeFilterPHPStr != '') {
+            phpWithArg += vesseltypeFilterPHPStr;
+         }
+      }
 
       //if vessel age limit was chosen, then add option
       if (vessel_age != -1) {
          phpWithArg += "&vessel_age=" + vessel_age;
       }
+
+      phpWithArg += boundStr;
 
       enableCustomQuery = false;
    }
@@ -890,7 +925,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
       //TODO: need a more robust condition for keyword search
       if (customQuery.length < 20) {
          //customQuery is really a keyword search
-         phpWithArg = "query_current_vessels.php?" + source + boundStr + "&keyword=" + customQuery;
+         phpWithArg = "query_current_vessels.php?" + sourceStr + boundStr + "&keyword=" + customQuery;
       }
       //TODO for handling case when trying to display specific vessels or LAISIC outputs
       /*
@@ -954,7 +989,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
          for (var i=0; i < markersDisplayed.length; i++) {
             markersDisplayed[i].vesselnameLabel.setMap(null);
          }
-         markersDisplayed = [];
+         emptyArray(markersDisplayed);
       }
    }
 
@@ -1001,7 +1036,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                for (var i=0; i < markersDisplayed.length; i++) {
                   markersDisplayed[i].vesselnameLabel.setMap(null);
                }
-               markersDisplayed = [];
+               emptyArray(markersDisplayed);
             }
 
             //Set new queryid so other concurrent PHP returns don't clear the new markers
@@ -1014,7 +1049,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
             for (var i=0; i < markersDisplayed.length; i++) {
                markersDisplayed[i].vesselnameLabel.setMap(null);
             }
-            markersDisplayed = [];
+            emptyArray(markersDisplayed);
          }
 
          localStorage.setItem('query-timestamp', Math.floor((new Date()).getTime()/1000));
@@ -1337,7 +1372,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
 
          //Update activity status spinner and results
          console.log('getTargetsFromDB(): ' + "Total number of markers = " + markerArray.length);
-         document.getElementById('busy_indicator').style.visibility = 'hidden';
+         $('#busy_indicator').activity(false); //hide spinner
          document.getElementById('stats').innerHTML = 
             //response.resultcount + " results<br>" + 
             markersDisplayed.length + " results<br>" + //Use markersDisplayed array length to include RADAR and LAISIC markers
@@ -1354,7 +1389,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
             console.log('getTargetsFromDB(): ' +  'No response from track query; error in php?'); 
             document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
          }
-         document.getElementById('busy_indicator').style.visibility = 'hidden';
+         $('#busy_indicator').activity(false); //hide spinner
          NProgress.done();   //JS library top progress bar
          return false; 
       }); //END .fail()
@@ -1369,7 +1404,7 @@ function getClustersFromDB(bounds, customQuery) {
    console.log("Refreshing target points...");
    document.getElementById("query").value = "QUERY RUNNING...";
    document.getElementById('stats').innerHTML = '';
-   document.getElementById('busy_indicator').style.visibility = 'visible';
+   $('#busy_indicator').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#fff', speed: 2.0}); //show spinner
    NProgress.start();   //JS library top progress bar
 
    //Set buffer around map bounds to expand queried area slightly outside viewable area
@@ -1423,6 +1458,16 @@ function getClustersFromDB(bounds, customQuery) {
       phpWithArg += "&mobile=1";
    }
 
+   if ($('#mssisonly:checked').length != 0) {
+      phpWithArg += "&mssisonly=1";
+   }
+   if ($('#sataisonly:checked').length != 0) {
+      phpWithArg += "&sataisonly=1";
+   }
+
+   if (vesseltypeFilterPHPStr != '') {
+      phpWithArg += vesseltypeFilterPHPStr;
+   }
 
    //Debug query output
    console.log('getClustersFromDB(): ' + phpWithArg);
@@ -1457,7 +1502,6 @@ function getClustersFromDB(bounds, customQuery) {
 
          mainQuery = response.basequery;
 
-         console.log('Clearing previous markers and tracks');
          clearVesselMarkerArray();
          clearOutBoundMarkers();
          clearAllTracks();
@@ -1466,8 +1510,7 @@ function getClustersFromDB(bounds, customQuery) {
          for (var i=0; i < markersDisplayed.length; i++) {
             markersDisplayed[i].vesselnameLabel.setMap(null);
          }
-         markersDisplayed = [];
-         markersQueried = [];
+         emptyArray(markersDisplayed);
 
          var totalsum = 0;
 
@@ -1556,7 +1599,7 @@ function getClustersFromDB(bounds, customQuery) {
          console.log('getClustersFromDB(): ' + "Total number of vessels = " + totalsum);
 
 
-         document.getElementById('busy_indicator').style.visibility = 'hidden';
+         $('#busy_indicator').activity(false); //hide spinner
          document.getElementById('stats').innerHTML = 
             totalsum + " results<br>" + 
             Math.round(response.exectime*1000)/1000 + " secs";
@@ -1572,7 +1615,7 @@ function getClustersFromDB(bounds, customQuery) {
             console.log('getClustersFromDB(): ' +  'No response from track query; error in php?'); 
             document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
          }
-         document.getElementById('busy_indicator').style.visibility = 'hidden';
+         $('#busy_indicator').activity(false); //hide spinner
          NProgress.done();   //JS library top progress bar
          return; 
       }); //end .fail()
@@ -1591,8 +1634,8 @@ function clearMarkerAndClusters() {
       clusterBoxes[i].setMap(null);
       clusterBoxesLabels[i].setMap(null);
    }
-   clusterBoxes = [];
-   clusterBoxesLabels = [];
+   emptyArray(clusterBoxes);
+   emptyArray(clusterBoxesLabels);
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -1622,8 +1665,9 @@ function checkImageExistOrReplace(url) {
 //function markerInfoBubble(marker, infoBubble, html, mmsi, vesselname, vesseltypeint, streamid, datetime) {
 function markerInfoBubble(marker, vessel, infoBubble) {
    //Prepare vessel image from Marine Traffic
-   if (vessel.imo != null) {
-      imgURL = 'http://photos2.marinetraffic.com/ais/showphoto.aspx?mmsi=' + vessel.mmsi + '&imo=' + vessel.imo;
+   if (passIMOChecksum(vessel.imo)) {
+      //imgURL = 'http://photos2.marinetraffic.com/ais/showphoto.aspx?mmsi=' + vessel.mmsi + '&imo=' + vessel.imo;
+      imgURL = 'fetch_photo.php?imo=' + vessel.imo;
    }
    else {
       imgURL = 'http://photos2.marinetraffic.com/ais/showphoto.aspx?mmsi=' + vessel.mmsi;
@@ -2160,7 +2204,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
        $.inArray(trknum, tracksDisplayedID) == -1) {
       document.getElementById("query").value = "QUERY RUNNING FOR TRACK...";
       document.getElementById('stats').innerHTML = '';
-      document.getElementById('busy_indicator').style.visibility = 'visible';
+      $('#busy_indicator').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#fff', speed: 2.0}); //show spinner
       NProgress.start();   //JS library top progress bar
 
       var phpWithArg = "query_track.php?source=" + source;
@@ -2219,7 +2263,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
                         var sog = vessel.sog;
                         var cog = vessel.cog;
                         //var streamid = vessel.streamid;
-                        var heading = vessel.heading;
+                        var heading = parseFloat(vessel.heading);
 
                         if (vessel.target_status != null) {
                            prev_target_status = target_status;
@@ -2585,14 +2629,14 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
                      });
                   }
 
-                  document.getElementById('busy_indicator').style.visibility = 'hidden';
+                  $('#busy_indicator').activity(false); //hide spinner
                   document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
                   NProgress.done();   //JS library top progress bar
                }) //end .done()
             .fail(function() { 
                console.log('GETTRACK(): ' +  'No response from track query; error in php?'); 
                document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
-               document.getElementById('busy_indicator').style.visibility = 'hidden';
+               $('#busy_indicator').activity(false); //hide spinner
                NProgress.done();   //JS library top progress bar
                return; 
             }); //end .fail()
@@ -2739,33 +2783,6 @@ function enteredQuery() {
 }
 
 /* -------------------------------------------------------------------------------- */
-function typeSelectUpdated() {
-   console.log('Types select updated');
-   var types = getTypesSelected();
-
-   //var entered_query = document.getElementById("query").value;
-   var entered_query;
-
-   if ($.inArray(999, types) == -1) {
-      //Massage mainQuery to add VesType filtering based on checkboxes selected
-      entered_query = "SELECT * from (" + mainQuery.substring(0,mainQuery.indexOf(' VESSELS')) + " WHERE VesType IN (";
-   
-      for (var i=0; i < types.length; i++) {
-         entered_query = entered_query + types[i];
-         if (i != types.length-1) {
-            entered_query = entered_query + ",";
-         }
-      }
-      entered_query += ")) VESSELS";
-      //Set entered query to default to AIS data
-      getTargetsFromDB(map.getBounds(), entered_query, "AIS", true);
-   }
-   else {
-      refreshMaps(true);
-   }
-}
-
-/* -------------------------------------------------------------------------------- */
 function selectVessel(mmsi) {
    for (var i=0; i < markersDisplayed.length; i++) {
       if (markersDisplayed[i].mmsi == mmsi) {
@@ -2780,135 +2797,77 @@ function hideHighlightMMSI() {
 }
 
 /* -------------------------------------------------------------------------------- */
-// Given the LatLng of a northwest corner, and the number of meters to
-// measure east and south, return the LatLngBounds for that rectangle
-function makeBounds(nw, metersEast, metersSouth) {
-    var ne = google.maps.geometry.spherical.computeOffset(
-        nw, metersEast, 90
-    );
-    var sw = google.maps.geometry.spherical.computeOffset(
-        nw, metersSouth, 180
-    );
-    return new google.maps.LatLngBounds( sw, ne );
-}
+function typeSelectUpdated() {
+   console.log('Types select updated');
 
-/* -------------------------------------------------------------------------------- */
-function typeSelectedAllShips() {
-   setAllTypesChecked();
-   typeSelectUpdated();
-}
+   //Build the global PHP request filter argument string
+   //clear the string of old filter
+   vesseltypeFilterPHPStr = '';
 
-/* -------------------------------------------------------------------------------- */
-function setAllTypesChecked() {
-   if ( document.getElementById("All Ships").checked ) {
-      console.log('setting all check boxes true');
-      document.getElementById("0-Unspecified Ships").checked = true;
-      document.getElementById("30-Fishing").checked = true;
-      document.getElementById("31-Towing").checked = true;
-      document.getElementById("32-Big Tow").checked = true;
-      document.getElementById("33-Dredge").checked = true;
-      document.getElementById("35-Military").checked = true;
-      document.getElementById("37-Pleasure Craft").checked = true;
-      document.getElementById("50-Pilot").checked = true;
-      document.getElementById("51-Search and Rescue").checked = true;
-      document.getElementById("52-Tug").checked = true;
-      document.getElementById("55-Law Enforcement").checked = true;
-      document.getElementById("6x-Passenger Vessels").checked = true;
-      document.getElementById("7x-Cargo Vessels").checked = true;
-      document.getElementById("8x-Tankers").checked = true;
+   //Build new string
+   var types = getTypesNotSelected();     //get array of vesseltype integers which are NOT selected
+
+   for (var i=0; i < types.length; i++) {
+      vesseltypeFilterPHPStr += '&vthide[]=' + types[i];
    }
+
+   //getTargetsFromDB() will check vesseltypeFilterPHPStr for filtering
+   refreshMaps(true);
 }
 
 /* -------------------------------------------------------------------------------- */
-function getTypesSelected() {
+/**
+ * Returns an array of integers that matches the vessel types that are NOT checked
+ **/
+function getTypesNotSelected() {
 	var types = [];
 
-   //Check if any of the specific types are unchecked
-   var checkboxtype = document.getElementsByClassName("checkboxtype");
-   for (var i=0; i < checkboxtype.length; i++) {
-      //If there are any unchecked types, then uncheck the "All Ships" checkbox as well
-      if (checkboxtype[i].checked == false) {
-         document.getElementById("All Ships").checked = false;
-         document.getElementById("All Ships").removeAttribute('checked');
-      }
+   //Check which boxes are still checked
+   if(!document.getElementById("All Other Vessels").checked) {
+      //Push all types not equal to the ones below; Use the '-1' flag to indicate
+      types.push(-1);
    }
-
-   //Now, check which boxes are still checked
-   if(document.getElementById("0-Unspecified Ships").checked) {
+   if(!document.getElementById("0-Unspecified Ships").checked) {
       types.push(0);
    }
-   if(document.getElementById("30-Fishing").checked) {
+   if(!document.getElementById("30-Fishing").checked) {
       types.push(30);
    }
-   if(document.getElementById("31-Towing").checked) {
+   if(!document.getElementById("31-Towing").checked) {
       types.push(31);
    }
-   if(document.getElementById("32-Big Tow").checked) {
+   if(!document.getElementById("32-Big Tow").checked) {
       types.push(32);
    }
-   if(document.getElementById("33-Dredge").checked) {
+   if(!document.getElementById("33-Dredge").checked) {
       types.push(33);
    }
-   if(document.getElementById("35-Military").checked) {
+   if(!document.getElementById("35-Military").checked) {
       types.push(35);
    }
-   if(document.getElementById("37-Pleasure Craft").checked) {
+   if(!document.getElementById("37-Pleasure Craft").checked) {
       types.push(37);
    }
-   if(document.getElementById("50-Pilot").checked) {
+   if(!document.getElementById("50-Pilot").checked) {
       types.push(50);
    }
-   if(document.getElementById("51-Search and Rescue").checked) {
+   if(!document.getElementById("51-Search and Rescue").checked) {
       types.push(51);
    }
-   if(document.getElementById("52-Tug").checked) {
+   if(!document.getElementById("52-Tug").checked) {
       types.push(52);
    }
-   if(document.getElementById("55-Law Enforcement").checked) {
+   if(!document.getElementById("55-Law Enforcement").checked) {
       types.push(55);
    }
-   if(document.getElementById("6x-Passenger Vessels").checked) {
-      types.push(60);   //covers 60-69
-      types.push(61);
-      types.push(62);
-      types.push(63);
-      types.push(64);
-      types.push(65);
-      types.push(66);
-      types.push(67);
-      types.push(68);
-      types.push(69);
+   if(!document.getElementById("6x-Passenger Vessels").checked) {
+      types.push(6);   //covers 60-69
    }
-   if(document.getElementById("7x-Cargo Vessels").checked) {
-      types.push(70);   //covers 70-79
-      types.push(71);
-      types.push(72);
-      types.push(73);
-      types.push(74);
-      types.push(75);
-      types.push(76);
-      types.push(77);
-      types.push(78);
-      types.push(79);
+   if(!document.getElementById("7x-Cargo Vessels").checked) {
+      types.push(7);   //covers 70-79
    }
-   if(document.getElementById("8x-Tankers").checked) {
-      types.push(80);   //covers 80-89
-      types.push(81);
-      types.push(82);
-      types.push(83);
-      types.push(84);
-      types.push(85);
-      types.push(86);
-      types.push(87);
-      types.push(88);
-      types.push(89);
-   }
-
-   //Default to all ships if no types selected
-   if (types.length == 0 || document.getElementById("All Ships").checked) {
-      types.push(999);
-      document.getElementById("All Ships").checked = true;
-      setAllTypesChecked();
+   if(!document.getElementById("8x-Tankers").checked) {
+      types.push(8);   //covers 80-89
    }
 
    return types;
@@ -3064,10 +3023,13 @@ function clearVesselMarkerArray() {
          markerArray[i] = null;
          vesselArray[i] = null;
 		}
-		markerArray.length = 0;
-      markerArray = [];
-      vesselArray.length = 0;
-      vesselArray = [];
+      emptyArray(markerArray);
+      emptyArray(vesselArray);
+
+      for (i in markersDisplayed) {
+         markersDisplayed[i].vesselnameLabel.setMap(null);
+      }
+      emptyArray(markersDisplayed);
 	}
 }
 
@@ -3079,8 +3041,7 @@ function clearOutBoundMarkers() {
 			markerArray[i].setMap(null);
          markerArray[i] = null;
 		}
-		markerArray.length = 0;
-         markerArray = [];
+      emptyArray(markerArray);
 	}
 }
 
@@ -3099,7 +3060,7 @@ function toggleKMLLayer() {
          for (var i in kmlparser.docs[0].markers) {
             kmlparser.docs[0].markers[i].setMap(null);
          }
-         kmlparser.docs[0].markers = [];
+         emptyArray(kmlparser.docs[0].markers);
          kmlparser.docs[0].overlays[0].setMap(null);
          kmlparser.docs[0].overlays[0] = null;
          kmlparser.docs[0] = null
@@ -3136,7 +3097,7 @@ function deleteKMLLayer(index) {
          for (var i in tempkmlparser.docs[0].markers) {
             tempkmlparser.docs[0].markers[i].setMap(null);
          }
-         tempkmlparser.docs[0].markers = [];
+         emptyArray(tempkmlparser.docs[0].markers);
          tempkmlparser.docs[0].overlays[0].setMap(null);
          tempkmlparser.docs[0].overlays[0] = null;
          tempkmlparser.docs[0] = null
@@ -3181,7 +3142,7 @@ function togglePortLayer() {
 function showPorts() {
    document.getElementById("query").value = "QUERY RUNNING FOR PORTS...";
    document.getElementById('stats').innerHTML = '';
-   document.getElementById('busy_indicator').style.visibility = 'visible';
+   $('#busy_indicator').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#fff', speed: 2.0}); //show spinner
    NProgress.start();   //JS library top progress bar
 
    var bounds = map.getBounds();
@@ -3251,14 +3212,14 @@ function showPorts() {
          });
       });
 
-      document.getElementById('busy_indicator').style.visibility = 'hidden';
+      $('#busy_indicator').activity(false); //hide spinner
       document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
       console.log('SHOWPORTS(): ' +  'No response from port query; error in php?'); 
       document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
-      document.getElementById('busy_indicator').style.visibility = 'hidden';
+      $('#busy_indicator').activity(false); //hide spinner
       NProgress.done();   //JS library top progress bar
       return; 
    }); //end .fail()
@@ -3322,14 +3283,14 @@ function showPorts() {
          });
       });
 
-      document.getElementById('busy_indicator').style.visibility = 'hidden';
+      $('#busy_indicator').activity(false); //hide spinner
       document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
       console.log('SHOWPORTS() part 2: ' +  'No response from port query; error in php?'); 
       document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
-      document.getElementById('busy_indicator').style.visibility = 'hidden';
+      $('#busy_indicator').activity(false); //hide spinner
       NProgress.done();   //JS library top progress bar
       return; 
    }); //end .fail()
@@ -3369,7 +3330,7 @@ function showPorts() {
          //Start of all ports
          if (prevPortName == null) {
             portPolygon = null;
-            portCoords = [];
+            emptyArray(portCoords);
             //Set to new name
             prevPortName = port_name;
          }
@@ -3399,7 +3360,7 @@ function showPorts() {
             portPolygons.push(portPolygon);
 
             portPolygon = null;
-            portCoords = [];
+            emptyArray(portCoords);
 
             portCoords.push(new google.maps.LatLng(lat, lon));
             prevPortName = port_name;
@@ -3427,20 +3388,18 @@ function showPorts() {
       }
 
 
-      document.getElementById('busy_indicator').style.visibility = 'hidden';
+      $('#busy_indicator').activity(false); //hide spinner
       document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
       console.log('SHOWPORTS() part 3: ' +  'No response from port query; error in php?'); 
       document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
-      document.getElementById('busy_indicator').style.visibility = 'hidden';
+      $('#busy_indicator').activity(false); //hide spinner
       NProgress.done();   //JS library top progress bar
       return; 
    }); //end .fail()   
 }
-
-var portPolygons = [];
 
 /* -------------------------------------------------------------------------------- */
 function hidePorts() {
@@ -3452,8 +3411,8 @@ function hidePorts() {
       portCircle = portCircles[i];
       portCircle.setMap(null);
    }
-   portIcons = [];
-   portCircles = [];
+   emptyArray(portIcons);
+   emptyArray(portCircles);
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -3813,6 +3772,20 @@ function WMSOpenLayersGetTileUrl(tile, zoom) {
    //Establish the baseURL.  Several elements, including &EXCEPTIONS=INIMAGE and &Service are unique to openLayers addresses.
    var url = baseURL + "Layers=" + layers + "&version=" + version + "&EXCEPTIONS=INIMAGE" + "&Service=" + service + "&request=" + request + "&Styles=" + styles + "&format=" + format + "&CRS=" + crs + "&BBOX=" + bbox + "&width=" + width + "&height=" + height;
    return url;
+}
+
+/* -------------------------------------------------------------------------------- */
+function testWMSLayers() {
+   //Use loadWMS function from wms.js
+
+   //TODO: check if GeoServer is alive
+
+   console.log('GeoServer is alive, get tiles');
+   //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:states&", null);
+   //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:world_shorelines_Project_with_SD_BA&", null);
+   loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:alert_properties&", null);
+   //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:pointlatlon&", null);
+   //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/nurc/wms?layers=nurc:Img_Sample&", null);
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -4859,3 +4832,13 @@ function sendOwfLaunchConfigToWidget(msg) {
 	msg = "true " + msg;
 	OWF.Eventing.publish("mapsToVesselDetails", msg);
 }
+
+function emptyArray(arr) {
+   if (typeof array !== 'undefined') {
+      while(arr.length > 0) {
+         arr.pop();
+      }
+   }
+   arr.length = 0;
+}
+

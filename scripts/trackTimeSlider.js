@@ -161,7 +161,7 @@ function setClosestMarker(tracks, closest, closest_index, timediff) {
                strokeColor: '#404040',
                fillColor:   '#404040',
                fillOpacity: 0.7,
-               rotation:    track[closest_index[i]].true_heading
+               rotation:    parseInt(track[closest_index[i]].true_heading)
             });
          }
          else {
@@ -170,7 +170,7 @@ function setClosestMarker(tracks, closest, closest_index, timediff) {
                strokeColor: '#a0a0a0',
                fillColor:   '#a0a0a0',
                fillOpacity: 0.6,
-               rotation:    track[closest_index[i]].true_heading
+               rotation:    parseInt(track[closest_index[i]].true_heading)
             });
          }
 

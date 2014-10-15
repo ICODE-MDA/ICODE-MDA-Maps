@@ -5,6 +5,33 @@ $mtime = explode(" ",$mtime);
 $mtime = $mtime[1] + $mtime[0]; 
 $starttime = $mtime; 
 
+/* Types not included in legend
+1-Reserved
+2-WIG
+20-WIG
+21-Pusher
+22-Push+Brg
+23-LightBt
+24-MODU
+25-OSV
+26-Process
+27-Training
+28-Gov
+29-Auto
+34-Diving
+36-Sailing
+38-Reserved
+39-Reserved
+4-HSC
+53-Tender
+54-AntiPol
+56-Spare
+57-Spare
+58-Medical
+59-Resol-18
+9-Other
+ */
+$typesNotIncluded = [null, 1, 2, 34, 36, 38, 39, 4, 53, 54, 56, 57, 58, 59, 9];
 
 //-----------------------------------------------------------------------------
 //Database execution
@@ -42,15 +69,67 @@ if (!empty($_GET["mobile"])) {
    }
 }
 
+//Flag to keep track of whether a filter/criteria string has been started
+$criteriaListStarted = 0;
 
 $iMinClusterSize = 10;
-$latestpositionsfrommemorytable = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local')";
+
+
+$latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local')";
+if (!empty($_GET["mssisonly"])) {
+   $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID not like ('%ORBCOMM%') AND RxStnID not like ('%EXACT%'))";
+   $criteriaListStarted = 1;
+}
+else if (!empty($_GET["sataisonly"])) {
+   $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID like ('%ORBCOMM%') OR RxStnID like ('%EXACT%'))";
+   $criteriaListStarted = 1;
+}
+
+//Add vessel type filters here
+if (!empty($_GET["vthide"])) {
+   $vthideArray = $_GET["vthide"];
+
+   for ($i=0; $i < sizeof($vthideArray) ; $i++) {
+      $type = $vthideArray[$i];
+
+      if ($type === "-1") {
+         for ($j=0; $j < sizeof($typesNotIncluded); $j++) {
+            if ($criteriaListStarted) {
+               $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . ' AND ';
+            }
+            else {
+         $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local') AND ";
+
+               $criteriaListStarted = 1;
+            }
+            $type = $typesNotIncluded[$j];
+            if ($type === null) {
+               $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . "VesType not like ('')";
+            }
+            else {
+               $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . "VesType not like ('$type%')";
+            }
+         }
+      }
+      else {
+         if ($criteriaListStarted) {
+            $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . ' AND ';
+         }
+         else {
+         $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local') AND ";
+
+            $criteriaListStarted = 1;
+         }                        
+         $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . "VesType not like ('$type%')";
+      }
+   }
+}
 
 //Add timestamp constraint
 if (!empty($_GET["vessel_age"])) {
    $vessel_age = $_GET["vessel_age"];
    $timeconstraint = " AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
-   $latestpositionsfrommemorytable .= $timeconstraint;
+   $latestpositionsfrommemorytableStr .= $timeconstraint;
 }
 
 //Count the number of arguments
@@ -107,7 +186,7 @@ SELECT
    count(*) AS clustersum
 FROM
    (SELECT * FROM
-      ($latestpositionsfrommemorytable) AS tmp1
+      ($latestpositionsfrommemorytableStr) AS tmp1
    GROUP BY mmsi) AS tmp2
 WHERE ($geobounds) 
 GROUP BY FLOOR($iGridRows * (Latitude - $minlat) / $dlat) * 1000000 + FLOOR($iGridCols * (IF(Longitude > $minlon, Longitude, Longitude + 360.0) - $minlon) / $dlon);";

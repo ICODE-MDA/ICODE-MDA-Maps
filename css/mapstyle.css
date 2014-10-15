@@ -211,7 +211,7 @@ table
 }
 #alertAccordion .ui-accordion-content 
 {
-    max-height: 500px;
+    max-height: 400px;
 }
 #login_nav
 {
@@ -555,7 +555,6 @@ input[type="text"]
 	background-color: black;
 	background-image: none;
 	opacity: 0.8;
-	z-index: 1040;
 }
 #drop-container
 {

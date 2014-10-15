@@ -796,12 +796,12 @@ function drawTable(sourceType, historytrailindex) {
          clearLAISICAISTRACKTable();
          clearLAISICRADARTable();
          clearLAISICAISOBSTable();
-         clearHistoryTrailTable();
+         //clearHistoryTrailTable();
 
          clearLAISICAISTRACKdata();
          clearLAISICRADARdata();
          clearLAISICAISOBSdata();
-         clearHistoryTraildata();
+         //clearHistoryTraildata();
 
          console.log("Cluster query, nothing to show in tables.");
          break;
