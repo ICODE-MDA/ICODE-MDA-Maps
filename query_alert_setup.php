@@ -53,11 +53,13 @@ function parseCriteria($field, $operation, $value) {
       $condstr .= "shiptype.toString().toLowerCase()";
       break;
    case "length":
-      $condstr .= "";
+      $condstr .= "length.toString()";
       break;
    case "width":
+      $condstr .= "width.toString()";
       break;
    case "draught":
+      $condstr .= "draught.toString()";
       break;
    default:
       exit('Error in parsing field');
