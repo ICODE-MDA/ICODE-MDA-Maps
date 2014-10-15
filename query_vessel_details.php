@@ -102,6 +102,12 @@ switch ($source) {
 	case "macThrusters":
 		$fromSources = "(SELECT Thrusters FROM wros.tblship WHERE IMO_No like ('$imo') GROUP BY IMO_No) VESSELS";
 		break;
+	case "claCertificates":
+		$fromSources = "(SELECT CERTIFICATE_ID,INSPECTION_ID,CERTIFICATE_TITLE_CODE,CERTIFICATE_TITLE,issuing_authority,issue_date,expiry_date FROM wros.tblcertificates WHERE LRNO like ('$imo')) VESSELS";
+		break;
+	case "claCasualties":
+		$fromSources ="(SELECT * FROM wros.tblcasualty WHERE LRNO like ('$imo')) VESSELS";
+		break;
 	case "claInspections":
 		$fromSources = "(SELECT inspectionid,Authorisation,Country,InspectionDate,InspectionPortDecode,Manager,Owner,NumberofDaysDetained,NumberofDefects,OtherInspectionType,ReleaseDate,shipDetained,Source FROM wros.tblinspections WHERE LRIMOShipNo like ('$imo')) VESSELS";
 		break;
@@ -392,6 +398,54 @@ while (odbc_fetch_row($result)){
 			claSafetyMinTemp=>htmlspecialchars(odbc_result($result,"Minimum_Temperature")),
 			claSafetyCoats=>htmlspecialchars(odbc_result($result,"Coats"))
 		);
+	} else if ($source === "claCasualties") {
+		$vessel = array(claCasName=>htmlspecialchars(odbc_result($result,"Name_At_Time")),			
+			claCasCallSign=>htmlspecialchars(odbc_result($result,"CALL_At_Time")),
+			claCasTypeA=>htmlspecialchars(odbc_result($result,"Vessel_Type_A")),
+			claCasTypeB=>htmlspecialchars(odbc_result($result,"Vessel_Type_B")),
+			claCasBuild=>htmlspecialchars(odbc_result($result,"YOB")),
+			claCasStatus=>htmlspecialchars(odbc_result($result,"Status_At_Time")),
+			claCasFlag=>htmlspecialchars(odbc_result($result,"Flag_At_Time")),
+			claCasOwner=>htmlspecialchars(odbc_result($result,"Owner_At_Time")),
+			claCasClass1=>htmlspecialchars(odbc_result($result,"Class_1_At_Time")),
+			claCasClass2=>htmlspecialchars(odbc_result($result,"Class_2_At_Time")),						
+			claCasGt=>htmlspecialchars(odbc_result($result,"GT_At_Time")),
+			claCasDwt=>htmlspecialchars(odbc_result($result,"DWT_At_Time")),
+			claCasPropulsion=>htmlspecialchars(odbc_result($result,"Prop_Type")),
+			claCasLocation=>htmlspecialchars(odbc_result($result,"Enviro_Loc")),
+			claCasPort1=>htmlspecialchars(odbc_result($result,"Start_Port")),
+			claCasPort2=>htmlspecialchars(odbc_result($result,"Port_Decode")),
+			claCasVoyStart=>htmlspecialchars(odbc_result($result,"Voy_From")),
+			claCasVoyEnd=>htmlspecialchars(odbc_result($result,"Voy_To")),
+			claCasLatDeg=>htmlspecialchars(odbc_result($result,"Lat_Deg")),
+			claCasLatMin=>htmlspecialchars(odbc_result($result,"Lat_Min")),
+			claCasLatSec=>htmlspecialchars(odbc_result($result,"Lat_Sec")),
+			claCasLatDir=>htmlspecialchars(odbc_result($result,"Lat_Dir")),
+			claCasLonDeg=>htmlspecialchars(odbc_result($result,"Lon_Deg")),
+			claCasLonMin=>htmlspecialchars(odbc_result($result,"Lon_Min")),
+			claCasLonSec=>htmlspecialchars(odbc_result($result,"Lon_Sec")),
+			claCasLonDir=>htmlspecialchars(odbc_result($result,"Lon_Dir")),
+			claCasDateStart=>htmlspecialchars(odbc_result($result,"Start_Date")),
+			claCasDateReported=>htmlspecialchars(odbc_result($result,"First_Reported")),
+			claCasSeverity=>htmlspecialchars(odbc_result($result,"Severity_Ind")),
+			claCasCasualty=>htmlspecialchars(odbc_result($result,"Casualty_Grouping")),
+			claCasMarsdenStart=>htmlspecialchars(odbc_result($result,"Marsden_Grid_St")),
+			claCasMarsdenEnd=>htmlspecialchars(odbc_result($result,"Marsden_Grid_End")),
+			claCasSisZone=>htmlspecialchars(odbc_result($result,"SIS_ZONE")),
+			claCasReport1=>htmlspecialchars(odbc_result($result,"Precis_Txt")),
+			claCasReport2=>htmlspecialchars(odbc_result($result,"Comp_Txt")),
+			claCasPollInd=>htmlspecialchars(odbc_result($result,"Pollution_Ind")),
+			claCasPollType=>htmlspecialchars(odbc_result($result,"Pollution_Type")),
+			claCasPollUnit=>htmlspecialchars(odbc_result($result,"Pollution_Units")),
+			claCasPollQty=>htmlspecialchars(odbc_result($result,"Pollution_QTY")),
+			claCasKillInd=>htmlspecialchars(odbc_result($result,"Killed_Ind")),
+			claCasKillNo=>htmlspecialchars(odbc_result($result,"Killed_No")),
+			claCasKillDate=>htmlspecialchars(odbc_result($result,"Death_Date")),
+			claCasMissingInd=>htmlspecialchars(odbc_result($result,"Missing_Ind")),
+			claCasMissingNo=>htmlspecialchars(odbc_result($result,"Missing_No")),
+			claCasCargoText=>htmlspecialchars(odbc_result($result,"Cargo_Txt")),
+			claCasCargoStatus=>htmlspecialchars(odbc_result($result,"Cargo_Status"))
+		);
 	} else if ($source === "claInspections") {
 		$vessel = array(claInspId=>htmlspecialchars(odbc_result($result,"inspectionid")),
 			claInspAuthorisation=>htmlspecialchars(odbc_result($result,"Authorisation")),
@@ -406,6 +460,15 @@ while (odbc_fetch_row($result)){
 			claInspReleaseDate=>htmlspecialchars(odbc_result($result,"ReleaseDate")),
 			claInspDetained=>htmlspecialchars(odbc_result($result,"shipDetained")),
 			claInspSource=>htmlspecialchars(odbc_result($result,"Source"))
+		);
+	} else if ($source === "claCertificates") {
+		$vessel = array(claCertId=>htmlspecialchars(odbc_result($result,"CERTIFICATE_ID")),
+			claCertInsp=>htmlspecialchars(odbc_result($result,"INSPECTION_ID")),
+			claCertCode=>htmlspecialchars(odbc_result($result,"CERTIFICATE_TITLE_CODE")),
+			claCertTitle=>htmlspecialchars(odbc_result($result,"CERTIFICATE_TITLE")),
+			claCertIssueAuthority=>htmlspecialchars(odbc_result($result,"issuing_authority")),
+			claCertIssueDate=>htmlspecialchars(odbc_result($result,"issue_date")),
+			claCertExpiryDate=>htmlspecialchars(odbc_result($result,"expiry_date"))
 		);
 	} else if ($source === "claCrew") {
 		$vessel = array(claCrewId=>htmlspecialchars(odbc_result($result,"id")),

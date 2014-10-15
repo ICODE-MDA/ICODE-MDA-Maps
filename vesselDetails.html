@@ -123,7 +123,7 @@
 			<h3>Construction</h3>
 			<div id="construction">
 				<button class="leftPanelButton" onClick="triggerConOverview();">Overview</button><br />
-				<button class="leftPanelButton" onClick="triggerConShipbuilder();">Shipbuilder Status</button><br />
+				<button class="leftPanelButton" onClick="triggerConShipbuilder();">Shipbuilder</button><br />
 				<button class="leftPanelButton" onClick="triggerConStatus();">Status</button><br />
 				<button class="leftPanelButton" onClick="triggerConConstructionDetail();">Construction Detail</button><br />
 				<button class="leftPanelButton" onClick="triggerConDimensions();">Dimensions</button><br />
@@ -147,8 +147,8 @@
 			<h3>Classified</h3>
 			<div id="classified">
 				<button class="leftPanelButton" onClick="triggerClaInspections();">Inspections</button><br />
-				<button class="leftPanelButton" onClick="triggerClaCertificates();">Ship Certificates</button><br />
-				<button class="leftPanelButton" onClick="triggerClaSafety();">Safety Management</button><br />
+				<button class="leftPanelButton" onClick="triggerClaCertificates();">Certificates</button><br />
+				<button class="leftPanelButton" onClick="triggerClaSafety();">Safety</button><br />
 				<button class="leftPanelButton" onClick="triggerClaCasualties();">Casualties</button><br />
 				<button class="leftPanelButton" onClick="triggerClaCrew();">Crew List</button><br />
 				<button class="leftPanelButton" onClick="triggerClaViewAll();">View All</button>
@@ -170,9 +170,10 @@
 			</div>
 			<h3>Help</h3>
 			<div id="help">
-				<button class="leftPanelButton" onClick="">Glossary</button><br />
 				<button class="leftPanelButton" onClick="">Tutorial</button><br />
 				<button class="leftPanelButton" onClick="">FAQ</button><br />
+				<button class="leftPanelButton" onClick="">Glossary</button><br />
+				<button class="leftPanelButton" onClick="">About</button><br />
 				<button class="leftPanelButton" onClick="">Contact</button><br />
 			</div>
 		</div>
@@ -186,9 +187,9 @@
 				<option value="selectImo" selected="selected">IMO Number</option>
 				<option value="selectShipName">Ship Name</option>
 			</select>
-			<span><input type="text" id="searchTerm" value="9624328" placeholder=" Type search terms here (e.g. MMSI, vessel name, vessel type, etc.)"></input></span>
-<!--			<span><input type="text" id="searchTerm" placeholder=" Type search terms here (e.g. MMSI, vessel name, vessel type, etc.)"></input></span>
--->			<span><button onClick="searchResults();">Search</button>
+<!--			<span><input type="text" id="searchTerm" value="9624328" placeholder=" Type search terms here (e.g. MMSI, vessel name, vessel type, etc.)"></input></span>
+-->			<span><input type="text" id="searchTerm" placeholder=" Type search terms here (e.g. MMSI, vessel name, vessel type, etc.)"></input></span>
+			<span><button onClick="searchResults();">Search</button>
 		</div>
 		
 		<!-- top panel contains general ship info -->
@@ -227,7 +228,7 @@
 					<div id="detailShipStatus"></div>
 					<div id="detailShipbuilder"></div>
 				</div>
-				<!--
+				<!-- ship image
 				<div class="shipDetailsCols">
 					<img src="img/1411693.simg" width="200" height="120" style="margin: 20px;" />
 				</div>
@@ -239,66 +240,6 @@
 		<div class="mainPanel"></div>	
 	</div>
 </div>
-
-<!--
-	<center><h1>Ship Details</h1></center>
-	
-	<div>&nbsp;</div>
-	
-	<div id="accordion" class="accordion">
-
-		<h3>Class</h3>
-		<div id="">
-		</div>
-		<h3>Surveys</h3>
-		<div id="">
-		</div> 	
-		<h3>Construction</h3>
-		<div id="">
-		</div> 
-		<h3>Cargo & Gear</h3>
-		<div id="">
-		</div>
-		<h3>Machinery</h3>
-		<div id="">
-		</div> 
-		<h3>Classified</h3>
-		<div id="">
-		</div> 
-		<h3>Event Timeline</h3>
-		<div id="">
-		</div>
-		<h3>Photographs</h3>
-		<div id="photographs">
-			<ul id="lightSlider">
-				<li data-thumb="img/1367473.simg">
-					<img src="img/1367473.simg" />
-				</li>
-				<li data-thumb="img/1411693.simg">
-					<img src="img/1411693.simg" />
-				</li>
-				<li data-thumb="img/1519290.simg">
-					<img src="img/1519290.simg" />
-				</li>
-				<li data-thumb="img/1519292.simg">
-					<img src="img/1519292.simg" />
-				</li>
-				<li data-thumb="img/1519294.simg">
-					<img src="img/1519294.simg" />
-				</li>
-				<li data-thumb="img/1519296.simg">
-					<img src="img/1519296.simg" />
-				</li>
-			</ul>
-		</div>
-		<h3>Movements</h3>
-		<div id="movements">
-		</div>  
-		<h3>Ship Performance</h3>
-		<div id="">
-		</div> 	
-	</div>
--->
 </body>
 </html>
 

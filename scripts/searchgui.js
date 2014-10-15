@@ -10,6 +10,8 @@
  *  Global Variables
  */
 var searchQuery = ""; 	// search query string
+var searchArr = new Array();
+var searchSize = 0;
 
 /*
 // 	OWF: broadcast query to maps widget
@@ -306,10 +308,10 @@ function searchguiResults() {
 
 	// display the search string in search results div in document
 	$('#queryString').html(searchQuery);
-	
+	$('#queryString').append(' <button onclick="saveSearch();">Save</button>');
+
 	// parse searchQuery string and build query sentence for MySQL database
-	doQuerySearch(); 
-	
+	doQuerySearch(); 	
 	
 	// get selected checkboxes from div
 	//var selected = [];
@@ -319,6 +321,76 @@ function searchguiResults() {
 	
 }
 
+/*
+//	save search to History tab
+ */
+ function saveSearch() {
+	var idx = searchSize;
+	searchSize++;
+	
+	if (idx < 1){
+		// start at index=0
+		searchArr[idx] = searchQuery;
+	} else {
+		// continue from last index
+		searchArr[idx] = searchQuery;
+	}
+	
+	$('#searchHistory').append(
+		'<p>Saved Search ' + searchSize + '<br />' +
+		'<button onclick="triggerSavedSearch(' + idx + ');">Select</button> ' +
+		'<button onclick="triggerRemoveSavedSearch(' + idx + ');">Remove</button>' +
+		'</p>'
+	);
+}
+ 
+ /*
+//	retrieve saved search and input into query builder
+ */
+ function triggerSavedSearch(idx) {
+	// retrieve search query from array using index
+	searchQuery = searchArr[idx];
+	
+	// show new search string in document
+	$('#queryString').html(searchQuery);
+	
+	// build query search and execute
+	doQuerySearch();
+ }
+ 
+  /*
+//	retrieve saved search and input into query builder
+ */
+ function triggerRemoveSavedSearch(idx) {
+	// decrease size
+	searchSize -= 1;
+	
+	// remove element and reshape array if needed
+	if (idx != searchSize) {
+		for(var i=idx;i<searchSize;i++){
+			searchArr[i] = searchArr[i+1];
+		}
+	}
+	
+	// remove last element from array
+	searchArr[searchSize] = null;
+	
+	// refresh saved searches displayed on document
+	refreshSearchHistory();
+ }
+ 
+ function refreshSearchHistory() {
+	$('#searchHistory').html('');
+	for(var i=0; i < searchSize; i++) {
+		$('#searchHistory').append(
+			'<p>Saved Search ' + (i+1) + '<br />' +
+			'<button onclick="triggerSavedSearch(' + i + ');">Select</button> ' +
+			'<button onclick="triggerRemoveSavedSearch(' + i + ');">Remove</button>' +
+			'</p>'
+		);
+	}
+ }
+ 
 /*
 //	parse searchQuery string and build query sentence for MySQL database
  */
