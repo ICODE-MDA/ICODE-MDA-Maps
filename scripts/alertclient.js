@@ -39,7 +39,7 @@ $(function start() {
    var processedCountLabel = $('.processedCountLabel');
    var user = userid;
    var receivedAlertRules = false;
-   var alertArray = [];
+   var alertRulesArray = [];
    var alertPolygon = new google.maps.Polygon({
             strokeWeight: 2,
             strokeColor: '#5555FF',
@@ -130,7 +130,7 @@ $(function start() {
          $('.alertPanel').remove();  //Remove all accordion alert titles
          $('[id^=alert_id]').remove(); //Remove all accordion alert panels
 
-         alertArray = [];
+         alertRulesArray = [];
       }
       //---------------------- Alert Rules received -------------------------------
       else if (json.type === 'alertRule') {
@@ -138,14 +138,14 @@ $(function start() {
          receivedAlertRules = true;
 
          //Create a new menu panel content for the alert accordion panel
-         var singleAlert = json.data;
-         console.log('Received alert:', singleAlert.alert_id);
+         var singleAlertRule = json.data;
+         console.log('Received alert:', singleAlertRule.alert_id);
 
          //store alert rule to array
-         alertArray.push(singleAlert);
+         alertRulesArray.push(singleAlertRule);
 
          //Create the accordion panel with new received rule
-         createAccordionElement(singleAlert);
+         createAccordionElement(singleAlertRule);
       }
       //---------------------- Alert received -------------------------------------
       else if (json.type === 'alertNotification') {
@@ -155,10 +155,10 @@ $(function start() {
          console.log('Alert server sent alert');
 
          //Display the data in the specific alert accordion panel
-         var singleAlert = json.alertRule;
+         var matchingAlertRule = json.alertRule;   //alertRule that matched notification
 
          //Add notification to appropriate places
-         newAlertReceived(singleAlert, decodedAIS, timestamp);
+         newAlertReceived(matchingAlertRule, decodedAIS, timestamp);
       }
       //---------------------- Alert History --------------------------------------
       else if (json.type === 'alertHistory') {
@@ -182,14 +182,14 @@ $(function start() {
    /**
     * Creates a new panel in the alert accordion with a new alert rule received
     **/
-   function createAccordionElement(singleAlert) {
-      var id = singleAlert.alert_id;
+   function createAccordionElement(singleAlertRule) {
+      var id = singleAlertRule.alert_id;
 
       //Create the accordion panel title
       var accordionElement = document.createElement('h3');
       accordionElement.className = 'alertPanel';
       accordionElement.id = 'alert_heading_id' + id;
-      accordionElement.innerHTML = 'Alert ' + id + ' for ' + singleAlert.user_id + ' (<span id="alertCount-' + id + '">0</span>)';
+      accordionElement.innerHTML = 'Alert ' + id + ' for ' + singleAlertRule.user_id + ' (<span id="alertCount-' + id + '">0</span>)';
       //Create the accordion panel content
       var alertDiv = document.createElement('div');
       alertDiv.id = 'alert_id' + id;
@@ -216,7 +216,7 @@ $(function start() {
       //Pretty print the alert rules/properties
       var panelContent = document.getElementById('alert_id' + id);
 
-      panelContent.appendChild(document.createElement('fieldset')).innerHTML = '<legend><b>Alert Rules</b></legend><pre><div id="alertRule-'+id+'">' + JSON.stringify(singleAlert, undefined, 1) + '</div></pre>'; 
+      panelContent.appendChild(document.createElement('fieldset')).innerHTML = '<legend><b>Alert Rules</b></legend><pre><div id="alertRule-'+id+'">' + JSON.stringify(singleAlertRule, undefined, 1) + '</div></pre>'; 
 
 
       //Pretty print latest matching AIS message
@@ -264,9 +264,9 @@ $(function start() {
    /**
     * Perform appropriate actions after receiving an alert with a matching alertRule
     **/
-   function newAlertReceived(singleAlert, decodedAIS, timestamp) {
-      //var panelContent = document.getElementById('alert_id' + singleAlert.alert_id);
-      var divNewMessages = document.getElementById('alertNewMessages-' + singleAlert.alert_id);
+   function newAlertReceived(matchingAlertRule, decodedAIS, timestamp) {
+      //var panelContent = document.getElementById('alert_id' + matchingAlertRule.alert_id);
+      var divNewMessages = document.getElementById('alertNewMessages-' + singlmatchingAlertRuleeAlert.alert_id);
 
       if (typeof divNewMessages === 'undefined') {
          console.log('newAlertReceived(): ERROR - accordion element for received alert does not exist');
@@ -280,18 +280,25 @@ $(function start() {
       divNewMessages.innerHTML = toHumanTime(timestamp) + '<br>' + JSON.stringify(decodedAIS, undefined, 1);
 
       //increment count on alert panel title
-      var alertCountSpan = document.getElementById('alertCount-' + singleAlert.alert_id);
+      var alertCountSpan = document.getElementById('alertCount-' + matchingAlertRule.alert_id);
       alertCountSpan.innerHTML = parseInt(alertCountSpan.innerHTML) + 1;
 
       //display Growl notification
       //toastr.success(decodedAIS.mmsi + ' detected in ROI!');
       //console.log(decodedAIS);
 
-      alertCountLabel.text(alertArray.length);
-      if (alertArray.length > 100) {
+      //Sum up the counts in the accordion heading spans
+      var alertCountSpans = $("[id^='alertCount-']");
+      var alertSum = 0;
+      alertCountSpans.each(function(index) {
+         alertSum += parseInt(this.innerHTML);
+      });
+
+      alertCountLabel.text(alertSum);
+      if (alertSum > 100) {
          alertCountNavbar.text('+99');
       }
-      setCountBubbleColor();
+      setCountBubbleColor(alertSum);
 
       //Draw an indicator on the map where the alert vessel originated from
       var alertVesselCircle = new google.maps.Circle({
@@ -312,10 +319,10 @@ $(function start() {
 
       //Handle click
       //TODO: Need to remove click listener if the message is overwritten!
-      $('#alertNewMessages-' + singleAlert.alert_id).unbind( "click" );
+      $('#alertNewMessages-' + matchingAlertRule.alert_id).unbind( "click" );
 
-      $('#alertNewMessages-' + singleAlert.alert_id).unbind( "mouseenter" );      
-      $('#alertNewMessages-' + singleAlert.alert_id).unbind( "mouseleave" );      
+      $('#alertNewMessages-' + matchingAlertRule.alert_id).unbind( "mouseenter" );      
+      $('#alertNewMessages-' + matchingAlertRule.alert_id).unbind( "mouseleave" );      
 
       var alertVesselTempCircle = new google.maps.Circle({
           center:         new google.maps.LatLng(decodedAIS.lat,decodedAIS.lon),
@@ -327,7 +334,7 @@ $(function start() {
           fillOpacity:    0.7,
       });
 
-      $('#alertNewMessages-' + singleAlert.alert_id).css('cursor', 'pointer')
+      $('#alertNewMessages-' + matchingAlertRule.alert_id).css('cursor', 'pointer')
       //Handle hover action
       .mouseenter(function () {
          alertVesselTempCircle.setMap(map);
@@ -369,7 +376,7 @@ $(function start() {
       //Parse polygon
       //find the right polygon
 
-      var polygonVertices = parsePolyStrings(alertArray[alertArrayIndexByID(id)].polygon);
+      var polygonVertices = parsePolyStrings(alertRulesArray[alertArrayIndexByID(id)].polygon);
 
       //Draw the polygon on the map
       if (polygonVertices.length) {
@@ -480,8 +487,8 @@ $(function start() {
    }
   
    /* -------------------------------------------------------------------------------- */
-   function setCountBubbleColor() {
-      if (alertArray.length> 0) {
+   function setCountBubbleColor(alertSum) {
+      if (alertSum > 0) {
          $('#alertsCountBubble').css('background-color', 'red');
       }
       else {
@@ -541,8 +548,8 @@ $(function start() {
    * Returns the element index number given an alert ID
    **/
    function alertArrayIndexByID(id) {
-      for (var i=0; i < alertArray.length; i++) {
-         if (alertArray[i].alert_id == id) {
+      for (var i=0; i < alertRulesArray.length; i++) {
+         if (alertRulesArray[i].alert_id == id) {
             return i;
          }
       };
