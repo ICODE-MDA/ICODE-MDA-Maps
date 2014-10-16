@@ -203,14 +203,17 @@ $(function start() {
 
       $('#alert_id' + id).append($('<br />'));
 
-      //Add zoom to polygon link
-      $('<input />', {type: 'button', id: 'show_polygon_id'+id, value: 'Zoom to Polygon' }).appendTo($('#alert_id' + id));
-
+      //Mark as read button
+      $('<input />', {type: 'button', id: 'markasread_id'+id, value: 'Mark as Read' }).appendTo($('#alert_id' + id));
       $('#alert_id' + id).append('<br>');
 
-      //Edit alert
+      //Zoom to polygon button
+      $('<input />', {type: 'button', id: 'show_polygon_id'+id, value: 'Zoom to Polygon' }).appendTo($('#alert_id' + id));
+      $('#alert_id' + id).append('<br>');
+
+      //Edit alert button
       $('<input />', {type: 'button', id: 'edit_alert_button'+id, value: 'Edit Alert' }).appendTo($('#alert_id' + id));
-      //Delete alert
+      //Delete alert button
       $('<input />', {type: 'button', id: 'delete_alert_button'+id, value: 'Delete Alert' }).appendTo($('#alert_id' + id));
 
       //Pretty print the alert rules/properties
@@ -232,6 +235,10 @@ $(function start() {
          else {
             hidePolygon();
          }
+      });
+
+      $('#markasread_id' + id).click(function () {
+         markAsRead(id);
       });
 
       $('#show_polygon_id' + id).click(function () {
@@ -258,6 +265,9 @@ $(function start() {
          console.log('Zooming into polygon ' + id);
          zoomToPolygon(id);
       });
+
+      //Fetch missed alerts from archive and populate rule
+      fetchAlertsArchive(id);
    }
 
    /* -------------------------------------------------------------------------------- */
@@ -266,7 +276,7 @@ $(function start() {
     **/
    function newAlertReceived(matchingAlertRule, decodedAIS, timestamp) {
       //var panelContent = document.getElementById('alert_id' + matchingAlertRule.alert_id);
-      var divNewMessages = document.getElementById('alertNewMessages-' + singlmatchingAlertRuleeAlert.alert_id);
+      var divNewMessages = document.getElementById('alertNewMessages-' + matchingAlertRule.alert_id);
 
       if (typeof divNewMessages === 'undefined') {
          console.log('newAlertReceived(): ERROR - accordion element for received alert does not exist');
@@ -287,19 +297,9 @@ $(function start() {
       //toastr.success(decodedAIS.mmsi + ' detected in ROI!');
       //console.log(decodedAIS);
 
-      //Sum up the counts in the accordion heading spans
-      var alertCountSpans = $("[id^='alertCount-']");
-      var alertSum = 0;
-      alertCountSpans.each(function(index) {
-         alertSum += parseInt(this.innerHTML);
-      });
+      updateTotalAlertCount();
 
-      alertCountLabel.text(alertSum);
-      if (alertSum > 100) {
-         alertCountNavbar.text('+99');
-      }
-      setCountBubbleColor(alertSum);
-
+      /*
       //Draw an indicator on the map where the alert vessel originated from
       var alertVesselCircle = new google.maps.Circle({
          center:         new google.maps.LatLng(decodedAIS.lat,decodedAIS.lon),
@@ -364,6 +364,7 @@ $(function start() {
             selectVessel(decodedAIS.mmsi);
          }, 1000);
       });
+      */
    }
 
    /* -------------------------------------------------------------------------------- */
@@ -544,6 +545,39 @@ $(function start() {
    }
 
    /* -------------------------------------------------------------------------------- */
+   function markAsRead(id) {
+      var phpWithArg = 'query_alert_archive_mark_read.php?alertid=' + id;
+
+      console.log(phpWithArg);      
+
+      //Call the PHP script to insert new alert row to alert database
+      console.log('Calling PHP script to mark archived messages as read...');
+      $.getJSON(
+            phpWithArg, 
+            function (){ 
+               console.log('markAsRead(): Success on marking as read');
+            }
+            )
+         .done(function (response) {
+            //console.log('saveAlert(): ' + response.query);
+            console.log('markAsRead(): Alert id ' + response.alert_id + ' marked as read.');
+
+            //TODO: reset GUI alert count
+            var countSpan = $('#alertCount-'+id);
+            countSpan.text('0');
+
+            updateTotalAlertCount();
+         }) // END .done()
+      .fail(function() {
+         console.log('markAsRead(): ' +  'No response from alert database; error in php?'); 
+
+         //alert('Alert not saved.  Please try again');
+
+         return;
+      }); //END .fail()
+   }
+
+   /* -------------------------------------------------------------------------------- */
    /**
    * Returns the element index number given an alert ID
    **/
@@ -553,6 +587,60 @@ $(function start() {
             return i;
          }
       };
+   }
+
+   /* -------------------------------------------------------------------------------- */
+   /**
+   * Fetches missed alerts and sets them to read (only on click TODO)
+   **/
+   function fetchAlertsArchive(id) {
+      var phpWithArg = 'query_alert_archive.php?alertid=' + id;
+
+      console.log(phpWithArg);      
+
+      //Call the PHP script to insert new alert row to alert database
+      console.log('Calling PHP script to fetch alert archive...');
+      $.getJSON(
+            phpWithArg, 
+            function (){ 
+               console.log('fetchAlertsArchive(): Success on fetching archive for alert');
+            }
+            )
+         .done(function (response) {
+            console.log(response);
+
+            $.each(response.alert_array, function(key, alertRow) {
+               newAlertReceived(alertRulesArray[alertArrayIndexByID(id)], alertRow.aisdata, alertRow.timestamp);
+            });
+
+            console.log('fetchAlertsArchive(): Fetched archive for alert id ' + response.alert_id);
+         }) // END .done()
+      .fail(function() {
+         console.log('fetchAlertsArchive(): ' +  'No response from alert database; error in php?'); 
+
+         //alert('Alert not saved.  Please try again');
+
+         return;
+      }); //END .fail()
+   }
+
+   /* -------------------------------------------------------------------------------- */
+   /**
+   * Updates the total count sum displayed
+   **/
+   function updateTotalAlertCount() {
+      //Sum up the counts in the accordion heading spans
+      var alertCountSpans = $("[id^='alertCount-']");
+      var alertSum = 0;
+      alertCountSpans.each(function(index) {
+         alertSum += parseInt(this.innerHTML);
+      });
+
+      alertCountLabel.text(alertSum);
+      if (alertSum > 100) {
+         alertCountNavbar.text('+99');
+      }
+      setCountBubbleColor(alertSum);
    }
 });
 

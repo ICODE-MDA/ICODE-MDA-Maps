@@ -40,35 +40,7 @@ if (count($_GET) > 0) {
 //Delete alert_properties that mach alert_id
 //Build the query
 if (isset($id)) {
-   $query = "DELETE FROM $alert_database.alert_properties WHERE alert_id=$id LIMIT 1";
-}
-else {
-   echo json_encode(array(response => 'failure'), JSON_PRETTY_PRINT);
-   exit();
-}
-
-//Execute the query
-$result = @odbc_exec($connection, $query) or die('Query error: '.htmlspecialchars(odbc_errormsg()).' // '.$query);
-
-//-----------------------------------------------------------------------------
-//Delete all criteria matching alert_id
-//Build the query
-if (isset($id)) {
-   $query = "DELETE FROM $alert_database.criteria WHERE alert_id=$id";
-}
-else {
-   echo json_encode(array(response => 'failure'), JSON_PRETTY_PRINT);
-   exit();
-}
-
-//Execute the query
-$result = @odbc_exec($connection, $query) or die('Query error: '.htmlspecialchars(odbc_errormsg()).' // '.$query);
-
-//-----------------------------------------------------------------------------
-//Delete all alert archives matching alert_id
-//Build the query
-if (isset($id)) {
-   $query = "DELETE FROM $alert_database.archive WHERE alert_id=$id";
+   $query = "SELECT * FROM $alert_database.archive WHERE alert_id=$id AND dismissed=0 AND vessel is not null";
 }
 else {
    echo json_encode(array(response => 'failure'), JSON_PRETTY_PRINT);
@@ -95,13 +67,24 @@ header('Expires: Mon, 01 Jan 1996 00:00:00 GMT');
 // The JSON standard MIME header.
 header('Content-type: application/json');
 
+$count_results = 0;
+$alertarray = array();
+while (odbc_fetch_row($result)){
+   $count_results = $count_results + 1;
+
+   $alert = array(timestamp=>odbc_result($result,"timestamp"),
+      aisdata=>odbc_result($result,"aisdata"),
+      vesseldata=>odbc_result($result,"vessel"),
+      dismissed=>(intval(odbc_result($result,"dismissed")) == 0) ? false : true
+   );
+
+   array_push($alertarray, $alert);
+}
+
 $memused = memory_get_usage(false);
 
 //Returned data (includes queries used for debugging/development -> UNSAFE!)
-$data = array(query => $query, exectime => $totaltime, memused => $memused, alert_id => $id);
-
-//Returned data, SAFE  
-//$data = array(exectime => $totaltime, memused => $memused, alert_id => $id);
+$data = array(query => $query, exectime => $totaltime, memused => $memused, alert_id => $id, alert_array => $alertarray);
 
 echo json_encode($data, JSON_PRETTY_PRINT);
 ?>

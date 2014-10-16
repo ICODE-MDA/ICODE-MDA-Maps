@@ -40,35 +40,7 @@ if (count($_GET) > 0) {
 //Delete alert_properties that mach alert_id
 //Build the query
 if (isset($id)) {
-   $query = "DELETE FROM $alert_database.alert_properties WHERE alert_id=$id LIMIT 1";
-}
-else {
-   echo json_encode(array(response => 'failure'), JSON_PRETTY_PRINT);
-   exit();
-}
-
-//Execute the query
-$result = @odbc_exec($connection, $query) or die('Query error: '.htmlspecialchars(odbc_errormsg()).' // '.$query);
-
-//-----------------------------------------------------------------------------
-//Delete all criteria matching alert_id
-//Build the query
-if (isset($id)) {
-   $query = "DELETE FROM $alert_database.criteria WHERE alert_id=$id";
-}
-else {
-   echo json_encode(array(response => 'failure'), JSON_PRETTY_PRINT);
-   exit();
-}
-
-//Execute the query
-$result = @odbc_exec($connection, $query) or die('Query error: '.htmlspecialchars(odbc_errormsg()).' // '.$query);
-
-//-----------------------------------------------------------------------------
-//Delete all alert archives matching alert_id
-//Build the query
-if (isset($id)) {
-   $query = "DELETE FROM $alert_database.archive WHERE alert_id=$id";
+   $query = "UPDATE $alert_database.archive SET dismissed=1 WHERE alert_id=$id";
 }
 else {
    echo json_encode(array(response => 'failure'), JSON_PRETTY_PRINT);
@@ -99,9 +71,6 @@ $memused = memory_get_usage(false);
 
 //Returned data (includes queries used for debugging/development -> UNSAFE!)
 $data = array(query => $query, exectime => $totaltime, memused => $memused, alert_id => $id);
-
-//Returned data, SAFE  
-//$data = array(exectime => $totaltime, memused => $memused, alert_id => $id);
 
 echo json_encode($data, JSON_PRETTY_PRINT);
 ?>
