@@ -47,6 +47,7 @@ $(function start() {
             fillColor: '#5555FF',
             fillOpacity: 0.2,
             geodesic: true,
+            clickable: false,
             map: null
          });
 
@@ -150,6 +151,7 @@ $(function start() {
       //---------------------- Alert received -------------------------------------
       else if (json.type === 'alertNotification') {
          var decodedAIS = JSON.parse(json.data);
+         var vessel = JSON.parse(json.vessel);
          var timestamp = parseInt(json.timestamp);
 
          console.log('Alert server sent alert');
@@ -158,7 +160,7 @@ $(function start() {
          var matchingAlertRule = json.alertRule;   //alertRule that matched notification
 
          //Add notification to appropriate places
-         newAlertReceived(matchingAlertRule, decodedAIS, timestamp);
+         newAlertReceived(matchingAlertRule, decodedAIS, vessel, timestamp);
       }
       //---------------------- Alert History --------------------------------------
       else if (json.type === 'alertHistory') {
@@ -204,7 +206,7 @@ $(function start() {
       $('#alert_id' + id).append($('<br />'));
 
       //Mark as read button
-      $('<input />', {type: 'button', id: 'markasread_id'+id, value: 'Mark as Read' }).appendTo($('#alert_id' + id));
+      $('<input />', {type: 'button', id: 'markasread_id'+id, value: 'Mark As Read' }).appendTo($('#alert_id' + id));
       $('#alert_id' + id).append('<br>');
 
       //Zoom to polygon button
@@ -274,7 +276,7 @@ $(function start() {
    /**
     * Perform appropriate actions after receiving an alert with a matching alertRule
     **/
-   function newAlertReceived(matchingAlertRule, decodedAIS, timestamp) {
+   function newAlertReceived(matchingAlertRule, decodedAIS, vessel, timestamp) {
       //var panelContent = document.getElementById('alert_id' + matchingAlertRule.alert_id);
       var divNewMessages = document.getElementById('alertNewMessages-' + matchingAlertRule.alert_id);
 
@@ -287,7 +289,7 @@ $(function start() {
 
       //panelContent.appendChild(document.createElement('pre')).innerHTML = toHumanTime(timestamp) + ' UTC';
       //panelContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(decodedAIS, undefined, 1);
-      divNewMessages.innerHTML = toHumanTime(timestamp) + '<br>' + JSON.stringify(decodedAIS, undefined, 1);
+      divNewMessages.innerHTML = toHumanTime(timestamp) + '<br>' + JSON.stringify(vessel, undefined, 1) + '<br>' + JSON.stringify(decodedAIS, undefined, 1);
 
       //increment count on alert panel title
       var alertCountSpan = document.getElementById('alertCount-' + matchingAlertRule.alert_id);
@@ -299,7 +301,6 @@ $(function start() {
 
       updateTotalAlertCount();
 
-      /*
       //Draw an indicator on the map where the alert vessel originated from
       var alertVesselCircle = new google.maps.Circle({
          center:         new google.maps.LatLng(decodedAIS.lat,decodedAIS.lon),
@@ -364,7 +365,6 @@ $(function start() {
             selectVessel(decodedAIS.mmsi);
          }, 1000);
       });
-      */
    }
 
    /* -------------------------------------------------------------------------------- */
@@ -610,7 +610,7 @@ $(function start() {
             console.log(response);
 
             $.each(response.alert_array, function(key, alertRow) {
-               newAlertReceived(alertRulesArray[alertArrayIndexByID(id)], alertRow.aisdata, alertRow.timestamp);
+               newAlertReceived(alertRulesArray[alertArrayIndexByID(id)], JSON.parse(alertRow.aisdata), JSON.parse(alertRow.vesseldata), alertRow.timestamp);
             });
 
             console.log('fetchAlertsArchive(): Fetched archive for alert id ' + response.alert_id);
