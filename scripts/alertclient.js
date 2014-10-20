@@ -9,9 +9,19 @@
 
 /* -------------------------------------------------------------------------------- */
 /**
- * Main alert client function (starts on page load)
+ * Starts on page load using jQuery $() operator
  **/
-$(function start() {
+$(function startAlertClient() {
+   setTimeout(function delayedStart() {
+      console.log('Starting alert client now');
+      alertClient();
+   }, 1000);   //adjust this value for delayed amount
+});
+
+/**
+ * Main alert client function
+ **/
+function alertClient() {
    "use strict";
 
    /*
@@ -269,7 +279,8 @@ $(function start() {
       });
 
       //Fetch missed alerts from archive and populate rule
-      fetchAlertsArchive(id);
+      //fetchAlertsArchive(id);
+      fetchAlertsArchiveCount(id);
    }
 
    /* -------------------------------------------------------------------------------- */
@@ -365,6 +376,24 @@ $(function start() {
             selectVessel(decodedAIS.mmsi);
          }, 1000);
       });
+   }
+
+/* -------------------------------------------------------------------------------- */
+   /**
+    * Perform appropriate actions after receiving an alert with a matching alertRule
+    **/
+   function alertCountReceived(id, count) {
+      //increment count on alert panel title
+      var alertCountSpan = document.getElementById('alertCount-' + id);
+
+      if (typeof alertCountSpan === 'undefined') {
+         console.log('newAlertReceived(): ERROR - accordion element for received alert id ' + id + ' does not exist');
+         return;
+      }
+
+      alertCountSpan.innerHTML = parseInt(alertCountSpan.innerHTML) + count;
+
+      updateTotalAlertCount();
    }
 
    /* -------------------------------------------------------------------------------- */
@@ -626,6 +655,44 @@ $(function start() {
 
    /* -------------------------------------------------------------------------------- */
    /**
+   * Fetches ONLY COUNT of missed alerts for quick status retrieval
+   **/
+   function fetchAlertsArchiveCount(id) {
+      //Get count only, so add a flag to indicate it
+      var phpWithArg = 'query_alert_archive.php?alertid=' + id + '&countOnly=1';
+
+      console.log(phpWithArg);      
+
+      //Call the PHP script to insert new alert row to alert database
+      console.log('Calling PHP script to fetch alert archive count...');
+      $.getJSON(
+            phpWithArg, 
+            function (){ 
+               console.log('fetchAlertsArchiveCount(): Success on fetching archive count for alert');
+            }
+            )
+         .done(function (response) {
+            console.log(response);
+
+            var count = JSON.parse(response.count);
+
+            alertCountReceived(id, count);
+
+            console.log('fetchAlertsArchiveCount(): Fetched archive count for alert id ' + response.alert_id);
+
+            return count;
+         }) // END .done()
+      .fail(function() {
+         console.log('fetchAlertsArchiveCount(): ' +  'No response from alert database; error in php?'); 
+
+         //alert('Alert not saved.  Please try again');
+
+         return null;
+      }); //END .fail()
+   }
+
+   /* -------------------------------------------------------------------------------- */
+   /**
    * Updates the total count sum displayed
    **/
    function updateTotalAlertCount() {
@@ -642,7 +709,7 @@ $(function start() {
       }
       setCountBubbleColor(alertSum);
    }
-});
+}
 
 /* -------------------------------------------------------------------------------- */
 function toggleAlertsPanel() {

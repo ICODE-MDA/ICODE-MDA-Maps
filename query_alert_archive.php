@@ -29,10 +29,17 @@ if (!$connection) {
     exit("Connection Failed: " . $conn);
 }
 
+$countOnly = false;
 
 if (count($_GET) > 0) { 
    if (!empty($_GET["alertid"])) { 
       $id = (string)$_GET["alertid"];
+   }
+
+   if (!empty($_GET["countOnly"])) { 
+      if ($_GET["countOnly"] == 1) {
+         $countOnly = true;
+      }
    }
 }
 
@@ -40,7 +47,12 @@ if (count($_GET) > 0) {
 //Delete alert_properties that mach alert_id
 //Build the query
 if (isset($id)) {
-   $query = "SELECT * FROM $alert_database.archive WHERE alert_id=$id AND dismissed=0 AND vessel is not null";
+   $fields = '*';    //grab all fields
+   if ($countOnly) { //grab only count of rows
+      $fields = 'count(*) as count';
+   }
+
+   $query = "SELECT $fields FROM $alert_database.archive WHERE alert_id=$id AND dismissed=0 AND vessel is not null";
 }
 else {
    echo json_encode(array(response => 'failure'), JSON_PRETTY_PRINT);
@@ -67,24 +79,34 @@ header('Expires: Mon, 01 Jan 1996 00:00:00 GMT');
 // The JSON standard MIME header.
 header('Content-type: application/json');
 
-$count_results = 0;
-$alertarray = array();
-while (odbc_fetch_row($result)){
-   $count_results = $count_results + 1;
+if ($countOnly) {
+   odbc_fetch_row($result);
+   $count = odbc_result($result,"count");
 
-   $alert = array(timestamp=>odbc_result($result,"timestamp"),
-      aisdata=>odbc_result($result,"aisdata"),
-      vesseldata=>odbc_result($result,"vessel"),
-      dismissed=>(intval(odbc_result($result,"dismissed")) == 0) ? false : true
-   );
+   $memused = memory_get_usage(false);
 
-   array_push($alertarray, $alert);
+   $data = array(query => $query, exectime => $totaltime, memused => $memused, alert_id => $id, count => $count);
 }
+else {
+   $count_results = 0;
+   $alertarray = array();
+   while (odbc_fetch_row($result)){
+      $count_results = $count_results + 1;
 
-$memused = memory_get_usage(false);
+      $alert = array(timestamp=>odbc_result($result,"timestamp"),
+         aisdata=>odbc_result($result,"aisdata"),
+         vesseldata=>odbc_result($result,"vessel"),
+         dismissed=>(intval(odbc_result($result,"dismissed")) == 0) ? false : true
+      );
 
-//Returned data (includes queries used for debugging/development -> UNSAFE!)
-$data = array(query => $query, exectime => $totaltime, memused => $memused, alert_id => $id, alert_array => $alertarray);
+      array_push($alertarray, $alert);
+   }
+
+   $memused = memory_get_usage(false);
+
+   //Returned data (includes queries used for debugging/development -> UNSAFE!)
+   $data = array(query => $query, exectime => $totaltime, memused => $memused, alert_id => $id, alert_array => $alertarray);
+}
 
 echo json_encode($data, JSON_PRETTY_PRINT);
 ?>
