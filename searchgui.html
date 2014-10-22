@@ -52,11 +52,11 @@
 			<h3>Geographic Coordinates</h3>
 			<div id="latLon">
 				<b>Latitude:</b><br />
-				Between <input id="minLat" name="minLat" type="text" value="-33.213" style="width: 50px">
-				to <input id="maxLat" name="maxLat" type="text" value="-32.786" style="width: 50px"><br /><br />
+				Between <input id="minLat" name="minLat" type="text" value="-85.05" style="width: 50px">
+				to <input id="maxLat" name="maxLat" type="text" value="85.05" style="width: 50px"><br /><br />
 				<b>Longitude:</b><br />
-				Between <input id="minLon" name="minLon" type="text" value="-71.988" style="width: 50px">
-				to <input id="maxLon" name="maxLon" type="text" value="-71.212" style="width: 50px"><br /><br />				
+				Between <input id="minLon" name="minLon" type="text" value="-85.05" style="width: 50px">
+				to <input id="maxLon" name="maxLon" type="text" value="85.05" style="width: 50px"><br /><br />				
 			</div>
 			<h3>Date-Time</h3>			
 			<div id="datetime">
@@ -87,7 +87,7 @@
 		<!-- search panel for searching specific info in database -->
 		<div class="search">
 			<input type="text" id="searchguiQuery" placeholder=" Type search term here (e.g. MMSI, ship name, etc.)"></input>
-			<span><button onClick="searchguiResults();">Search</button>
+			<span><button class="button1" onClick="searchguiResults();">Search</button>
 		</div>
 		<div class="mainPanel">
 			<div class="subtitle" style="margin-top: 10px;">Search Results</div>

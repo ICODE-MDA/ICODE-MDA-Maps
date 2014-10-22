@@ -5,10 +5,266 @@
  * Script to handle retrieval and display of detailed vessel information
  */
  
- // global variables
- var imo = "";
+// global variables
+var imo = "";
+var defsA = [];
+var defsB = [];
+var defsC = [];
+var defsD = [];
+var defsE = [];
+var defsF = [];
+var defsG = [];
+var defsH = [];
+var defsI = [];
+var defsJ = [];
+var defsK = [];
+var defsL = [];
+var defsM = [];
+var defsN = [];
+var defsO = [];
+var defsP = [];
+var defsQ = [];
+var defsR = [];
+var defsS = [];
+var defsT = [];
+var defsU = [];
+var defsV = [];
+var defsW = [];
+var defsX = [];
+var defsY = [];
+var defsZ = [];
+var defsMisc = [];
+var termsA = [
+	'Acquired Price'
+];
+var termsB = [
+	'Bale',
+	'Ballast Tank',
+	'BCM',
+	'Beam',
+	'Bearth',
+	'Bollard Pull',
+	'Bow',
+	'Bow Loading',
+	'Builder',
+	'Builder CoD',
+	'Builder ID'
+];
+var termsC = [
+	'Cabin',
+	'Call Sign',
+	'Car Lane Meters',
+	'Cars',
+	'Cars and Trucks',
+	'CGT',
+	'Chemical Class',
+	'Classed By',
+	'Class Date',
+	'Classification ID',
+	'Closed Loading',
+	'Coats',
+	'Coils',
+	'Construction Details',
+	'Container Arrangement',
+	'Contract Date',
+	'Consumption Speed',
+	'Conversion',
+	'Crude Oil Washing',
+	'Cylinder Bore',
+	'Cylinder Stroke'
+];
+var termsD = [
+	'Date Acquired',
+	'Date Conversion',
+	'Date Due or Delivered',
+	'Date Keel Laid',
+	'Date Launched',
+	'Date Recommissioned',
+	'Date Scrap or Loss',
+	'Decks',
+	'Demolition CoD',
+	'Demolition Price',
+	'Depth',
+	'Design',
+	'Displacement Tonnage',
+	'Draft',
+	'DWT'
+];
+var termsE = [
+	'Engine Builder',
+	'Engine Details',
+	'Engine HP Total',
+	'Engine KW Total',
+	'Engine Layout',
+	'Engine Make',
+	'Engine Model',
+	'Engine RPM',
+	'Engine Speed',
+	'Engine Stroke',
+	'Engine Type'
+];
+var termsF = [
+	'FDWT',
+	'FHMD',
+	'Fishing Number',
+	'Fixed Decks',
+	'Flag'
+];
+var termsG = [
+	'Gear Description',
+	'Gear SWL',
+	'Gear Type',
+	'Grades',
+	'Grain',
+	'GT'
+];
+var termsH = [
+	'Hatches',
+	'Hatch Sizes',
+	'Hatch Type',
+	'HC',
+	'Heating Type',
+	'Heavy Cargo Strengthened',
+	'HFO',
+	'Holds',
+	'Hull Number'
+];
+var termsI = [
+	'IMO Number',
+	'Inert Gas System',
+	'Internal Watertight Doors'
+];
+var termsJ = [
+];
+var termsK = [
+	'Keel',
+	'KTMH',
+];
+var termsL = [
+	'Lash',
+	'LBP',
+	'LDT',
+	'Liquid',
+	'LOA',
+	'Loaded Displacement'
+];
+var termsM = [
+	'Main HC Country',
+	'Main HC Hull Number',
+	'Main HC',
+	'Main HC ID',
+	'Main NBC',
+	'Main NBC ID',
+	'Main NBC Country',
+	'Main NBC Hull Number',
+	'Main Vessel Type',
+	'Manager',
+	'Manager CoD',
+	'Manager ID',
+	'Manifold',
+	'Maritime Mobile Service ID',
+	'MDO'
+];
+var termsN = [
+	'NBC',
+	'Newbuilding Price',
+	'Newbuilding Price (USD)',
+	'NRT'
+];
+var termsO = [
+	'Operator',
+	'Operator CoD',
+	'Operator ID',
+	'Ores',
+	'Original Flag',
+	'Original Manager',
+	'Original Manager CoD',
+	'Original Operator',
+	'Original Operator CoD',
+	'Original Owner',
+	'Original Owner CoD',
+	'Original Vessel Name',
+	'Owner',
+	'Owner CoD',
+	'Owner ID'
+];
+var termsP = [
+	'Passengers',
+	'PCNT',
+	'Permanent Ballast Capacity',
+	'P&I Club',
+	'P&I ID',
+	'Place of Scrap',
+	'Port of Registry',
+	'Propulsion Type',
+	'Propulsion Units',
+	'Pump Description',
+	'Pump Rating',
+	'Pump Type',
+	'Pumps, Total Capacity',
+	'Pumps, Stripping'
+];
+var termsQ = [];
+var termsR = [
+	'Rail Cars',
+	'Reefer Capacity',
+	'Reefer TEU',
+	'Registered Owner',
+	'Registered Owner CoD'
+];
+var termsS = [
+	'Sat Com',
+	'Sat Com Ans Back',
+	'SCNT',
+	'Segregated Ballast Capacity',
+	'Segregated Ballast Tanks',
+	'Ship Type Grouping',
+	'Shipyard',
+	'Shipyard Country',
+	'Shipyard Hull Number',
+	'Speed',
+	'Statcode5',
+	'Status',
+	'Stern Loading Discharge',
+	'SWL'
+];
+var termsT = [
+	'Tanks',
+	'Tanks, Center',
+	'Tanks, Deck',
+	'Tanks, Wing',
+	'Tanks, Slop',
+	'Tanks, Permanent Ballast',
+	'Technical Manager',
+	'Technical Manager CoD',
+	'Techinical Manager ID',
+	'Temperature, Maximum',
+	'Temperature, Minimum',
+	'TEU',
+	'TEU14',
+	'Thrusters',
+	'Tonnage',
+	'Total Lane Meters',
+	'TPC',
+	'TPI',
+	'Track Lane Meters',
+	'Trailer Lane Meters',
+	'Trailers',
+	'TVE Expiry',
+	'Tween Deck'
+];
+var termsU = [];
+var termsV = [
+	'Vapor Recovery System',
+	'Vessel Name'
+];
+var termsW = [];
+var termsX = [];
+var termsY = [];
+var termsZ = [];
+var termsMisc = [];
  
-// trigger click event to search when 'Enter' key pressed in search bar
+ // trigger click event to search when 'Enter' key pressed in search bar
 $(document).keypress(function(e) {
 	if (e.which == 13) {
 		// print what you are searching for in document
@@ -180,6 +436,7 @@ function searchResults() {
 					'</div>'
 					);
 				}
+				$(".mainPanel").append('<div>&nbsp;</div><div>&nbsp;</div>');
 			} else {
 				// no vessel retrieved
 				$(".mainPanel").html(
@@ -701,7 +958,7 @@ function triggerConOverview2() {
 						'<div class="fourColsLabel">Ship Type</div>' +
 						'<div class="fourColsLabel">Build Date</div>' +
 						'<div class="fourColsLabel">Gross Tonnage (GT)</div>' +
-						'<div class="fourColsLabel">Deadweight</div>' +
+						'<div class="fourColsLabel">Deadweight (DWT)</div>' +
 					'</div>' +
 					'<div class="fourColsOuter">' +
 						'<div id="conOverviewShiptype"></div>' +
@@ -1007,9 +1264,9 @@ function triggerConDimensions2() {
 				'<div class="fourColsContainer">' +
 					'<div class="fourColsInner">' +
 						'<div class="fourColsLabel">Design</div>' +
-						'<div class="fourColsLabel">LOA (metres)</div>' +
-						'<div class="fourColsLabel">Depth (metres)</div>' +
-						'<div class="fourColsLabel">Draft (metres)</div>' +						
+						'<div class="fourColsLabel">LOA (meters)</div>' +
+						'<div class="fourColsLabel">Depth (meters)</div>' +
+						'<div class="fourColsLabel">Draft (meters)</div>' +						
 					'</div>' +
 					'<div class="fourColsOuter">' +
 						'<div id="conDesign"></div>' +
@@ -1018,10 +1275,10 @@ function triggerConDimensions2() {
 						'<div id="conDraft"></div>' +	
 					'</div>' +
 					'<div class="fourColsInner">' +
-						'<div class="fourColsLabel">Beam (metres)</div>' +
-						'<div class="fourColsLabel">LBP (metres)</div>' +
-						'<div class="fourColsLabel">BCM (metres)</div>' +
-						'<div class="fourColsLabel">KTMH (metres)</div>' +
+						'<div class="fourColsLabel">Beam (meters)</div>' +
+						'<div class="fourColsLabel">LBP (meters)</div>' +
+						'<div class="fourColsLabel">BCM (meters)</div>' +
+						'<div class="fourColsLabel">KTMH (meters)</div>' +
 					'</div>' +
 					'<div class="fourColsOuter">' +
 						'<div id="conLBP"></div>' +
@@ -2833,9 +3090,7 @@ function triggerEventTimeline() {
 // Get information from database and show Ship Performance info in main panel
 function triggerPerformance() {
 	if(checkImo()){return;};
-	
-	
-	
+
 	var phpWithArg = "query_vessel_details.php?source=performance&imo=" + imo;
 	console.log('phpWithArg: ' + phpWithArg);
 	
@@ -2894,6 +3149,582 @@ function triggerPerformance() {
 	});
 }
 
+// Show a Tutorial Guide in main panel
+function triggerTutorial() {
+	$(".mainPanel").html(
+		'<div class="title">Tutorial</div>' +
+		'<div>There are two methods to access vessel data: (1) using the search box above or (2) clicking a vessel on the Maps Widget.</div>' +
+		'<div>&nbsp;</div>' +
+		'<div class="tutorialSubhead">Method 1: Vessel Details Widget</div>' +
+		'<div>' +
+			'Use the search panel located at the top of the widget. <br />' +
+			'<img width="600px" src="img/tutorial_method1.jpg"></center><br /><br />' +
+			'<b>Steps:</b> <br />' +
+			'1. Select the type of search term to be entered. <br />' +
+			'2. Type the search term in the text box. <br />' +
+			'3. Click on the <i>Search</i> button to retrieve vessel info. <br />' +
+		'</div>' +
+		'<div>&nbsp;</div>' +
+		'<div>' +
+			'<b>Results:</b> <br />' +
+			'<img height="300px" src="img/tutorial_method1_2.jpg"><br /><br />' +
+			'1. If more than one vessel matching the query is found, then a "Search Results" list will be shown, otherwise the ship detail will be retrieved. <br />' +
+			'2. Click on the desired vessel in the "Search Results" list to display info. <br />' +
+		'</div>' +
+		'<div>&nbsp;</div>' +
+		'<div class="tutorialSubhead">Method 2: Maps Widget</div>' +
+		'<div>' +
+			'Click on a vessel in the <i>Maps Widget</i> to display information for that vessel in the <i>Vessel Details Widget</i>.<br />' +
+			'<img height="300px" src="img/tutorial_method2.jpg"><br />' +
+		'</div>' +
+		'<div>&nbsp;</div>' +
+		'<div class="tutorialSubhead">Options</div>' +
+		'<div>' +
+			'For more vessel information click on the tabs on the left side panel. <br /><br />' +
+			'<img height="200px" src="img/tutorial_sidepanel.jpg"><br />' +
+		'</div>' +
+		'<div>&nbsp;</div>' +
+		'<div class="tutorialSubhead">Help</div>' +
+		'<div>For definitions of terms click on the "Glossary" tab on the left side panel.</div>' +
+		'<div>&nbsp;</div>'
+	);
+}
+
+// Get information from database and show Glossary terms in main panel
+function triggerGlossary() {
+	// get glossary info
+	var phpWithArg = "query_vessel_details.php?source=glossary";
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);
+		
+		if (response.resultcount > 0) {
+			var gloFieldName = new Array();
+			var gloDesc = new Array();
+			
+			for(var i=0;i<response.resultcount;i++) {
+				gloFieldName[i] = response.vesseldata[i].gloFieldName;
+				gloDesc[i] = response.vesseldata[i].gloDesc;
+			}
+console.log(gloFieldName);					
+			defsA = [gloDesc[178]];
+			defsB = [gloDesc[122],'A compartment within a ship that holds water.',gloDesc[211],gloDesc[120],gloDesc[117],gloDesc[121],'The forward part of the hull of a ship, the point that is usually most forward when the vessel is underway.',gloDesc[199],gloDesc[168],gloDesc[123],gloDesc[56]];
+			defsC = [gloDesc[124],gloDesc[125],gloDesc[126],gloDesc[127],gloDesc[128],gloDesc[129],gloDesc[18],gloDesc[132],gloDesc[130],gloDesc[133],gloDesc[198],gloDesc[134],gloDesc[135],'Details as to how the hull was constructed including material used and process implemented.',gloDesc[27],gloDesc[28],gloDesc[140],gloDesc[29],gloDesc[32],gloDesc[33],gloDesc[34]];
+			defsD = [gloDesc[35],gloDesc[30],gloDesc[41],gloDesc[23],gloDesc[26],'The date the vessel was recommissioned.',gloDesc[145],gloDesc[36],'The location the vessel was scrapped.',gloDesc[37],gloDesc[38],gloDesc[39],'The weight of water that a ship displaces when it is floating.',gloDesc[40],gloDesc[42]];
+			defsE = [gloDesc[43],gloDesc[62],gloDesc[180],gloDesc[176],gloDesc[44],gloDesc[45],gloDesc[46],gloDesc[48],gloDesc[49],gloDesc[50],gloDesc[51]];
+			defsF = ['FDWT',gloDesc[1],'Fishing Number',gloDesc[2],gloDesc[3]];
+			defsG = [gloDesc[4],gloDesc[5],gloDesc[6],gloDesc[7],gloDesc[8],gloDesc[9]];
+			defsH = [gloDesc[13],gloDesc[11],gloDesc[12],'Hull Contractor - ' + gloDesc[169],gloDesc[213],'Whether or not the vessel is strengthened to carry heavy cargo.',gloDesc[139],gloDesc[15],gloDesc[19]];
+			defsI = [gloDesc[19],gloDesc[20],gloDesc[181]];
+			defsJ = [];
+			defsK = ['A beam around which the hull of a ship is built.',gloDesc[221],];
+			defsL = [gloDesc[24],gloDesc[63],gloDesc[218],gloDesc[66],gloDesc[67],'Loaded Displacement'];
+			defsM = [gloDesc[53],gloDesc[54],gloDesc[169],gloDesc[57],gloDesc[170],gloDesc[58],gloDesc[68],gloDesc[69],gloDesc[70],gloDesc[173],gloDesc[71],'The representation ID of the current manager of the vessel.','Manifold','MMSI - The unique identifier for each ship station as assigned by the ITU for telecommunication purposes, AIS, and search and rescue. CAUTION: This number changes when the vessels flag is changed. For a unique unchanging vessel identifier use IMO Number.',gloDesc[138]];
+			defsN = ['Newbuild Contractor - ' + gloDesc[170],gloDesc[74],gloDesc[75],gloDesc[76]];
+			defsO = [gloDesc[171],gloDesc[78],'The representation ID of the current operator of the vessel.',gloDesc[79],gloDesc[80],gloDesc[81],gloDesc[82],gloDesc[83],gloDesc[84],gloDesc[85],gloDesc[86],gloDesc[87],gloDesc[172],gloDesc[119],'The presentation ID of the current owner of the vessel.'];
+			defsP = [gloDesc[88],gloDesc[216],gloDesc[222],"Protection and Indemnity Club - Provides liability coverage for the world's ocean-going tonnage. Coverage includes personal injury to crew, passengers and others on board, cargo loss and damage, oil pollution, wreck removal and dock damage.",gloDesc[174],gloDesc[89],gloDesc[90],gloDesc[91],gloDesc[92],gloDesc[93],gloDesc[94],gloDesc[95],gloDesc[205],gloDesc[195]];
+			defsQ = [];
+			defsR = [gloDesc[96],gloDesc[111],gloDesc[114],gloDesc[141],gloDesc[142]];
+			defsS = ['Sat Com','Sat Com Ans back',gloDesc[217],'The capacity in cubic meters of the segregated ballast tanks.',gloDesc[147],gloDesc[156],gloDesc[149],gloDesc[150],'Shipyard Hull No',gloDesc[153],'Industry-standard method of coding up and describing shiptypes which makes it easier to view the description of a ship, see a logical breakdown and allocation of ships between groups (such as cargo carrying, miscellaneous, non-seagoing, etc.), and facilitates extraction of shiptype statistics.',gloDesc[154],gloDesc[208],'Safe Working Load - recommended maximum weight load for a line, rope, crane or any other lifting device or component of a lifting device.'];
+			defsT = ['A large receptacle or storage chamber.',gloDesc[184],gloDesc[214],gloDesc[185],gloDesc[186],gloDesc[187],'The current technical manager of the vessel.','The country in which the technical manager of the vessel is located.','The representation ID of the current technical manager of the vessel.',gloDesc[158],gloDesc[159],gloDesc[160],'Twenty-foot equivalent unit (14 tons gross each).',gloDesc[183],'The size or carrying capacity of a ship measured in tons.',gloDesc[161],gloDesc[219],gloDesc[220],gloDesc[162],gloDesc[163],gloDesc[164],gloDesc[201],gloDesc[165]];
+			defsU = [];
+			defsV = [gloDesc[200],gloDesc[166]];
+			defsW = [];
+			defsX = [];
+			defsY = [];
+			defsZ = [];
+			defsMisc = [];
+	
+			//build HTML code
+			showGlossary();
+		} else {
+			$(".mainPanel").html(
+			'<div class="subtitle">Glossary</div>' +
+			'<div style="color:red;font-weight:bold;">No results found.</div>'
+			);
+		}	
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});	
+}
+function showGlossary() {
+	$(".mainPanel").html(
+		'<div class="title">Glossary</div>' +
+		'<div>[' + 
+		'<button class="glossary" onclick="showDef(' + 1 + ');">A</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 2 + ')">B</button>| ' + 
+		'<button class="glossary" onclick="showDef(' + 3 + ')">C</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 4 + ')">D</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 5 + ')">E</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 6 + ')">F</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 7 + ')">G</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 8 + ')">H</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 9 + ')">I</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 10 + ')">J</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 11 + ')">K</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 12 + ')">L</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 13 + ')">M</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 14 + ')">N</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 15 + ')">O</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 16 + ')">P</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 17 + ')">Q</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 18 + ')">R</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 19 + ')">S</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 20 + ')">T</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 21 + ')">U</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 22 + ')">V</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 23 + ')">W</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 24 + ')">X</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 25 + ')">Y</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 26 + ')">Z</button>| ' +
+		'<button class="glossary" onclick="showDef(' + 0 + ')">Misc</button>]' +
+		'</div><div>&nbsp;</div>' +
+		'<div id="glossaryLetter"></div>' +
+		'<div id="glossaryDef"></div>'+
+		'<div>&nbsp;</div>'
+	);
+}
+function showDef(val) {
+	switch(val) {
+		case 1:
+			$('#glossaryLetter').html('A');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsA.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsA[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsA[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 2:
+			$('#glossaryLetter').html('B');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsB.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsB[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsB[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 3:
+			$('#glossaryLetter').html('C');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsC.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsC[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsC[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 4:
+			$('#glossaryLetter').html('D');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsD.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsD[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsD[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 5:
+			$('#glossaryLetter').html('E');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsE.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsE[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsE[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 6:
+			$('#glossaryLetter').html('F');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsF.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsF[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsF[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 7:
+			$('#glossaryLetter').html('G');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsG.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsG[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsG[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 8:
+			$('#glossaryLetter').html('H');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsH.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsH[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsH[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 9:
+			$('#glossaryLetter').html('I');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsI.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsI[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsI[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 10:
+			$('#glossaryLetter').html('J');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsJ.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsJ[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsJ[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 11:
+			$('#glossaryLetter').html('K');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsK.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsK[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsK[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 12:
+			$('#glossaryLetter').html('L');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsL.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsL[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsL[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 13:
+			$('#glossaryLetter').html('M');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsM.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsM[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsM[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 14:
+			$('#glossaryLetter').html('N');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsN.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsN[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsN[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 15:
+			$('#glossaryLetter').html('O');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsO.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsO[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsO[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 16:
+			$('#glossaryLetter').html('P');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsP.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsP[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsP[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 17:
+			$('#glossaryLetter').html('Q');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsQ.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsQ[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsQ[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 18:
+			$('#glossaryLetter').html('R');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsR.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsR[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsR[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 19:
+			$('#glossaryLetter').html('S');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsS.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsS[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsS[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 20:
+			$('#glossaryLetter').html('T');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsT.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsT[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsT[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 21:
+			$('#glossaryLetter').html('U');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsU.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsU[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsU[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 22:
+			$('#glossaryLetter').html('V');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsV.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsV[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsV[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 23:
+			$('#glossaryLetter').html('W');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsW.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsW[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsW[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 24:
+			$('#glossaryLetter').html('X');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsX.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsX[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsX[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 25:
+			$('#glossaryLetter').html('Y');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsY.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsY[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsY[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 26:
+			$('#glossaryLetter').html('Z');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsZ.length;i++){
+				$('#glossaryDef').append(
+					'<div class="twoColsContainer">' +
+						'<div class="twoColsInner">' + termsZ[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsZ[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		case 0:
+			$('#glossaryLetter').html('Miscellaneous');
+			$('#glossaryDef').html('');
+			for (var i=0;i<termsMisc.length;i++){
+				var j = "twoColsContainer";
+				if(!(i%2)) {
+					j="twoColsContainer2";
+				}
+				$('#glossaryDef').append(
+					'<div class="' + j + '">' +
+						'<div class="twoColsInner">' + termsMisc[i] + '</div>' +
+						'<div class="twoColsOuter">' + defsMisc[i] + '</div>' +
+					'</div>'
+				);
+			}
+			break;
+		default:
+	}
+}
+
 // Checks for null fields and replaces it with a placeholder
 function checkNullField(field) {
 	if(!field) {
@@ -2916,7 +3747,7 @@ function callback(){
 
 
 // PROTOTYPES	
-function fxnName() {
+function fcnName() {
 	$(".mainPanel").html(
 		'<div class="title"></div>'	+
 		'<div class="subtitle"></div>' +

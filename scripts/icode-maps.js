@@ -1764,11 +1764,11 @@ function markerInfoBubble(marker, vessel, infoBubble) {
  * Function to generate the HTML for infoBubble/infoWindow
  * for a AIS or LAISIC vessel marker.
  */
- var owfLaunchStatus = false;
+var owfVDWLaunchStatus = false;
 function generateInfoHTML(vessel, vesseltype, title) {
 	if(OWF.Util.isRunningInOWF()) {
-		if(!owfLaunchStatus) {
-			owfLaunchStatus = true;
+		if(!owfVDWLaunchStatus) {
+			owfVDWLaunchStatus = true;
 			launchOwfVesselDetails(vessel.imo);
 		} else {
 			sendOwfLaunchConfigToWidget(vessel.imo);
@@ -4816,6 +4816,7 @@ function initializeBrowserFocus() {
    }
 }
 
+// OWF WIDGET LAUNCHER
 function launchOwfVesselDetails(msg) {
 	msg = "false " + msg;
 	OWF.Launcher.launch({
@@ -4829,6 +4830,7 @@ function launchOwfVesselDetails(msg) {
 function callback(){
 }
 function sendOwfLaunchConfigToWidget(msg) {
+	// widget already open so send msg to channel
 	msg = "true " + msg;
 	OWF.Eventing.publish("mapsToVesselDetails", msg);
 }

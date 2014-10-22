@@ -71,6 +71,11 @@ body {
 	overflow: hidden;
 	clear: both;
 }
+.twoColsContainer2 {
+	overflow: hidden;
+	clear: both;
+	background: rgb(192,192,192);
+}
 .twoColsInner { 
 	float: left;
 	width: 20%;
@@ -128,9 +133,24 @@ body {
 	background: rgb(192,192,192);
 	color: rgb(0,0,0);
 	padding-left: 5px;
-	font-size: 1.2em;
+	font-size: 1.4em;
 	font-weight: bold;
 }
 .leftPanelButton {
 	border: 0;
+}
+.glossary {
+	border: 0;
+	font-weight: bold;
+	font-style: narrower;
+}
+#glossaryLetter {
+	font-size: 2em;
+	font-weight: bold;
+	color: rgb(120,160,224);
+}
+.tutorialSubhead {
+	font-size: 1.5em;
+	font-weight: bold;
+	color: rgb(120,160,224);
 }

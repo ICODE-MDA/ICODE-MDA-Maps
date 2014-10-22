@@ -10,7 +10,8 @@
  *  Global Variables
  */
 var searchQuery = ""; 	// search query string
-var searchArr = new Array();
+var searchArrName = new Array();
+var searchArrString = new Array();
 var searchSize = 0;
 
 /*
@@ -308,7 +309,7 @@ function searchguiResults() {
 
 	// display the search string in search results div in document
 	$('#queryString').html(searchQuery);
-	$('#queryString').append(' <button onclick="saveSearch();">Save</button>');
+	$('#queryString').append(' <button class="button1" onclick="saveSearch();">Save</button>');
 
 	// parse searchQuery string and build query sentence for MySQL database
 	doQuerySearch(); 	
@@ -325,21 +326,23 @@ function searchguiResults() {
 //	save search to History tab
  */
  function saveSearch() {
+	var name = "";
 	var idx = searchSize;
 	searchSize++;
 	
-	if (idx < 1){
-		// start at index=0
-		searchArr[idx] = searchQuery;
-	} else {
-		// continue from last index
-		searchArr[idx] = searchQuery;
+	while(!name) {
+		name = prompt("Please enter name for saved query.");
 	}
 	
+	// add query name and string to arrays
+	searchArrName[idx] = name;
+	searchArrString[idx] = searchQuery;
+	
 	$('#searchHistory').append(
-		'<p>Saved Search ' + searchSize + '<br />' +
-		'<button onclick="triggerSavedSearch(' + idx + ');">Select</button> ' +
-		'<button onclick="triggerRemoveSavedSearch(' + idx + ');">Remove</button>' +
+		'<p class="savedSearchLabel">' + searchArrName[idx] + '<br />' +
+		'<button class="button1" onclick="triggerSavedSearch(' + idx + ');">Select</button> ' +
+		'<button class="button1" onclick="triggerRenameSavedSearch(' + idx + ');">Rename</button> ' +
+		'<button class="button1" onclick="triggerRemoveSavedSearch(' + idx + ');">Remove</button>' +
 		'</p>'
 	);
 }
@@ -349,7 +352,7 @@ function searchguiResults() {
  */
  function triggerSavedSearch(idx) {
 	// retrieve search query from array using index
-	searchQuery = searchArr[idx];
+	searchQuery = searchArrString[idx];
 	
 	// show new search string in document
 	$('#queryString').html(searchQuery);
@@ -368,12 +371,14 @@ function searchguiResults() {
 	// remove element and reshape array if needed
 	if (idx != searchSize) {
 		for(var i=idx;i<searchSize;i++){
-			searchArr[i] = searchArr[i+1];
+			searchArrName[i] = searchArrName[i+1];
+			searchArrString[i] = searchArrString[i+1];
 		}
 	}
 	
 	// remove last element from array
-	searchArr[searchSize] = null;
+	searchArrName[searchSize] = null;
+	searchArrString[searchSize] = null;
 	
 	// refresh saved searches displayed on document
 	refreshSearchHistory();
@@ -383,12 +388,27 @@ function searchguiResults() {
 	$('#searchHistory').html('');
 	for(var i=0; i < searchSize; i++) {
 		$('#searchHistory').append(
-			'<p>Saved Search ' + (i+1) + '<br />' +
-			'<button onclick="triggerSavedSearch(' + i + ');">Select</button> ' +
-			'<button onclick="triggerRemoveSavedSearch(' + i + ');">Remove</button>' +
+			'<p class="savedSearchLabel">' + searchArrName[i] + '<br />' +
+			'<button class="button1" onclick="triggerSavedSearch(' + i + ');">Select</button> ' +
+			'<button class="button1" onclick="triggerRenameSavedSearch(' + i + ');">Rename</button> ' +
+			'<button class="button1" onclick="triggerRemoveSavedSearch(' + i + ');">Remove</button>' +
 			'</p>'
 		);
 	}
+ }
+ 
+ function triggerRenameSavedSearch(idx) {
+	var name = "";
+	
+	// prompt user for new name
+	while(!name) {
+		name = prompt("Please enter name for saved query.");
+	}
+	// add new name to array
+	searchArrName[idx] = name;
+	
+	//refresh saved searches displayed on document
+	refreshSearchHistory();
  }
  
 /*
@@ -492,8 +512,6 @@ function launchMap() {
 	OWF.Launcher.launch({
 		universalName: 'e23da61e-3a4f-3237-360b-af328ffc1d4e',
 		guid: 'e23da61e-3a4f-3237-360b-af328ffc1d4e',
-		//universalName: '51a8fc83-c801-ee68-1b9f-facf8c3f7f0e',
-		//guid: '51a8fc83-c801-ee68-1b9f-facf8c3f7f0e',
 		title: 'ICODE-MDA Maps',
 		launchOnlyIfClosed: true
 	}, callback);

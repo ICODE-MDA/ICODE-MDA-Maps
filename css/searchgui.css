@@ -46,7 +46,19 @@ body {
 	background-color: rgba(0,0,0,0.2);
 	text-align: right;
 }
-
+.button1 {
+	border: 3px solid rgb(0,0,0);
+	border-radius: 7px;
+	color: rgb(0,0,0);
+	font-weight: bold;
+	padding: 2px;
+	background-color: rgb(192,192,192);
+	text-align: center;
+}
+.savedSearchLabel{
+	color: rgb(0,0,0);
+	font-weight: bold;
+}
 .title {
 	background: rgb(120,160,224);
 	color: rgb(255,255,255);

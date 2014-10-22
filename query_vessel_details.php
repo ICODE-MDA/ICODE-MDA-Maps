@@ -46,7 +46,7 @@ if ($source != 'initialize') {
 // Build query statement
 switch ($source) {
     case "initialize":
-        $fromSources = "(SELECT Vessel_Name,IMO_No,Call_Sign,Maritime_Mobile_Service_ID,Flag,Operator,Main_Vessel_Type,Sub_Type,Gt,Dwt,Launched,Sub_Status,Builder FROM wros.tblship WHERE $searchType like ('$searchTerm') GROUP BY IMO_No) VESSELS";
+        $fromSources = "(SELECT Vessel_Name,IMO_No,Call_Sign,Maritime_Mobile_Service_ID,Flag,Operator,Main_Vessel_Type,Sub_Type,Gt,Dwt,Launched,Sub_Status,Builder FROM wros.tblship WHERE $searchType like ('%$searchTerm%') GROUP BY IMO_No) VESSELS";
         break;		
     case "registration":
 		$fromSources = "(SELECT Port_Of_Registry,Official_Number,Sat_Com_Ansbk_Code,Flag,Sat_Com,Fishing_Number,P_and_I_ID,P_and_I_Club FROM wros.tblship WHERE IMO_No like ('$imo') GROUP BY IMO_No) VESSELS";
@@ -124,6 +124,9 @@ switch ($source) {
 		break;
 	case "performance":
 		$fromSources = "(SELECT Bollard_Pull,MDO_Consumption,HFO_Consumption,Consumption_Speed FROM wros.tblship WHERE IMO_No like ('$imo') GROUP BY IMO_No) VESSELS";
+		break;
+	case "glossary":
+		$fromSources = "(SELECT * FROM wros.tblship_definition) VESSELS";
 		break;
 	default: 
         break;
@@ -489,15 +492,17 @@ while (odbc_fetch_row($result)){
 			dateScrapOrLoss=>htmlspecialchars(odbc_result($result,"Scrap_or_Loss_Date")),
 			dateRecommissioned=>htmlspecialchars(odbc_result($result,"Recommissioned"))
 		 );
-	} else if ($source === "movements") {
-	} else if ($source === "fixtures") {
 	} else if ($source === "performance") {
 		$vessel = array(perBollard=>htmlspecialchars(odbc_result($result,"Bollard_Pull")),
 			perMdo=>htmlspecialchars(odbc_result($result,"MDO_Consumption")),
 			perHfo=>htmlspecialchars(odbc_result($result,"HFO_Consumption")),
 			perSpeed=>htmlspecialchars(odbc_result($result,"ConsumptionSpeed"))
 		);
-    } else {
+	} else if ($source === "glossary") {
+		$vessel = array(gloFieldName=>htmlspecialchars(odbc_result($result,"Field_Name")),
+			gloDesc=>htmlspecialchars(odbc_result($result,"Description"))
+		);
+  } else {
 	/*
 		} else if ($source === "performance") {
 		$vessel = array(=>htmlspecialchars(odbc_result($result,"")),
