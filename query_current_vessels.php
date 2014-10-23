@@ -210,26 +210,26 @@ if(count($_GET) > 0) {
                   " OR Longitude BETWEEN " . round($_GET["minlon"],3) . " AND 180 )";
           }
        }
-    }
 
     /*
-    if (!empty($_GET["risk"])) {
-       $query = $query . " AND `risk`.user_ship_risk.user_id = 'jstastny'";
-    }
-    */
+       if (!empty($_GET["risk"])) {
+          $query = $query . " AND `risk`.user_ship_risk.user_id = 'jstastny'";
+       }
+     */
 
-    //Add timestamp constraint, only for AIS tracks
-    if (!empty($_GET["vessel_age"]) && ($source === "AIS" || $source === "RADAR") && !$timemachine) {
-       $vessel_age = $_GET["vessel_age"];
-       $query = $query . " AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
-    }
-    else if (!empty($_GET["vessel_age"]) && ($source === "LIVE_LAISIC") && !$timemachine) {
-       $vessel_age = $_GET["vessel_age"];
-       $query = $query . " AND datetime > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
-    }
-    else if (!empty($_GET["vessel_age"]) && !startsWith($source,"LAISIC_") && !$timemachine) {
-       $vessel_age = $_GET["vessel_age"];
-       $query = $query . " AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
+       //Add timestamp constraint, only for AIS tracks
+       if (!empty($_GET["vessel_age"]) && ($source === "AIS" || $source === "RADAR") && !$timemachine) {
+          $vessel_age = $_GET["vessel_age"];
+          $query = $query . " AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
+       }
+       else if (!empty($_GET["vessel_age"]) && ($source === "LIVE_LAISIC") && !$timemachine) {
+          $vessel_age = $_GET["vessel_age"];
+          $query = $query . " AND datetime > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
+       }
+       else if (!empty($_GET["vessel_age"]) && !startsWith($source,"LAISIC_") && !$timemachine) {
+          $vessel_age = $_GET["vessel_age"];
+          $query = $query . " AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
+       }
     }
 
     //Add keyword search constraint
