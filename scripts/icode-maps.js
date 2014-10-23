@@ -1805,7 +1805,7 @@ function generateInfoHTML(vessel, vesseltype, title) {
    var htmlLeft = 
       '<div id="content-left">' +
       '<a href="https://marinetraffic.com/ais/shipdetails.aspx?MMSI=' + vessel.mmsi + '"  target="_blank"> '+
-      '<img id="marinetrafficimage" title="Click to open MarineTraffic page" width=180px src="' + imgURL + '">' + 
+      '<img id="marinetrafficimage" title="Click to open MarineTraffic page" width=180px src="' + imgURL + '" onError="this.onerror=null;this.src="icons/noimage.png";>' + 
       '</a><br>' + 
       '<a href="http://www.sea-web.com/lrupdate.aspx?param1=spatab833&param2=719766&script_name=authenticated/authenticated_handler.aspx&control=list&SearchString=MMSI+=+' + vessel.mmsi + '&ListType=Ships" target="_blank">Sea-Web link (broken)</a><br>' + 
       '<div id="content-sub" border=1>' +
@@ -1873,7 +1873,7 @@ function generateInfoHTMLmobile(vessel, vesseltype, title) {
    var htmlLeft = 
       '<div id="content-left">' +
       '<a href="https://marinetraffic.com/ais/shipdetails.aspx?MMSI=' + vessel.mmsi + '"  target="_blank"> '+
-      '<img id="marinetrafficimage" title="Click to open MarineTraffic page" width=180px src="' + imgURL + '">' + 
+      '<img id="marinetrafficimage" title="Click to open MarineTraffic page" width=180px src="' + imgURL + '" onError="this.onerror=null;this.src="icons/noimage.png";>' + 
       '</a><br>' + 
       '<div id="content-sub" border=1>' +
       '<b>MMSI</b>: ' + vessel.mmsi + '<br>' +
@@ -1973,7 +1973,7 @@ function generateLAISICInfoHTML(vessel, vesseltype, title) {
    var htmlLeft = 
       '<div id="content-left">' +
       '<a href="https://marinetraffic.com/ais/shipdetails.aspx?MMSI=' + vessel.mmsi + '"  target="_blank"> '+
-      '<img id="marinetrafficimage" title="Click to open MarineTraffic page" width=180px src="' + imgURL + '">' + 
+      '<img id="marinetrafficimage" title="Click to open MarineTraffic page" width=180px src="' + imgURL + '" onError="this.onerror=null;this.src="icons/noimage.png";>' + 
       '</a><br>' + 
       '<a href="http://www.sea-web.com/lrupdate.aspx?param1=%73%70%61%73%74%61%32%35%30&param2=%37%31%34%36%38%37&script_name=authenticated/authenticated_handler.aspx&control=list&SearchString=MMSI+=+' + vessel.mmsi + '&ListType=Ships" target="_blank">Sea-Web link</a><br>' + 
       '<div id="content-sub" border=1>' +
@@ -3805,7 +3805,7 @@ function testWMSLayers() {
    console.log('GeoServer is alive, get tiles');
    //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:states&", null);
    //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:world_shorelines_Project_with_SD_BA&", null);
-   loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:alert_properties&", null);
+   //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:alert_properties&", null);
    //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/topp/wms?layers=topp:pointlatlon&", null);
    //loadWMS(map, "http://spartan.sd.spawar.navy.mil:8080/geoserver/nurc/wms?layers=nurc:Img_Sample&", null);
 }
@@ -4838,6 +4838,10 @@ function initializeBrowserFocus() {
    }
 }
 
+/* -------------------------------------------------------------------------------- */
+/**
+ * Function to empty out an array and set length to zero
+ **/
 function emptyArray(arr) {
    if (typeof array !== 'undefined') {
       while(arr.length > 0) {
@@ -4845,4 +4849,17 @@ function emptyArray(arr) {
       }
    }
    arr.length = 0;
+}
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Function returns a vessel object from vesselArray that matches given MMSI
+ **/
+function fetchVesselArray(mmsiToSearch) {
+   for (var i=0; i < vesselArray.length; i++) {
+      if (vesselArray[i].mmsi == parseInt(mmsiToSearch)) {
+         return vesselArray[i];
+      }
+   }
+   return null;
 }

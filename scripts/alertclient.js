@@ -24,22 +24,7 @@ $(function startAlertClient() {
 function alertClient() {
    "use strict";
 
-   /*
-   toastr.options = {
-      "closeButton": false,
-      "debug": false,
-      "positionClass": "toast-bottom-left",
-      "onclick": null,
-      "showDuration": "300",
-      "hideDuration": "1000",
-      "timeOut": "5000",
-      "extendedTimeOut": "1000",
-      "showEasing": "swing",
-      "hideEasing": "linear",
-      "showMethod": "fadeIn",
-      "hideMethod": "fadeOut"
-   }
-   */
+   var DEBUG = false;
 
    // for better performance - to avoid searching in DOM
    var content = $('#content');
@@ -105,11 +90,13 @@ function alertClient() {
       $('[id^=alert_id]').remove(); //Remove all accordion alert panels
       receivedAlertRules = false;
 
+      //Set count to zero
+      updateTotalAlertCount();
 
       //try to reconnect every 3 seconds
       setTimeout(function() {
          console.log('Attempting to reconnect...');
-         start();
+         alertClient();
       }, 1000);
    };
 
@@ -120,9 +107,13 @@ function alertClient() {
       // the massage is not chunked or otherwise damaged.
       try {
          var json = JSON.parse(message.data);
-         console.log('Message from alertServer:', json);
+         if (DEBUG) {
+            console.log('Message from alertServer:', json);
+         }
       } catch (e) {
-         console.log('Alert server sent non-JSON formatted data: ', message.data);
+         if (DEBUG) {
+            console.log('Alert server sent non-JSON formatted data: ', message.data);
+         }
          return;
       }
 
@@ -143,7 +134,7 @@ function alertClient() {
 
          alertRulesArray = [];
       }
-      //---------------------- Alert Rules received -------------------------------
+      //---------------------- Alert Rule received -------------------------------
       else if (json.type === 'alertRule') {
          //Set received alertRules to true now that we are receiving the alerts
          receivedAlertRules = true;
@@ -164,7 +155,9 @@ function alertClient() {
          var vessel = JSON.parse(json.vessel);
          var timestamp = parseInt(json.timestamp);
 
-         console.log('Alert server sent alert');
+         if (DEBUG) {
+            console.log('Alert server sent alert');
+         }
 
          //Display the data in the specific alert accordion panel
          var matchingAlertRule = json.alertRule;   //alertRule that matched notification
@@ -178,15 +171,26 @@ function alertClient() {
       }
       //---------------------- Progress received ----------------------------------
       else if (json.type === 'totalDecoded') {
-         console.log('Alert server sent progress report');
+         if (DEBUG) {
+            console.log('Alert server sent progress report');
+         }
          //content.prepend(json.data + '<br>');
-         //toastr.info(json.data)
          processedCountLabel.html(json.data);
+      }
+      //---------------------- Alert History --------------------------------------
+      else if (json.type === 'readcountreset') {
+         //reset count on a certain id
+         var id = parseInt(json.data);
+
+         console.log('Alert count was reset on alert', id);
+
+         fetchAlertsArchiveCount(id);
       }
       //---------------------- Unknown message received ---------------------------
       else {
-         console.log('Alert server sent unrecognized data', json);
-         //toastr.error('Unrecognized data received: ', json);
+         if (DEBUG) {
+            console.log('Alert server sent unrecognized data', json);
+         }
       }
    };
 
@@ -307,7 +311,6 @@ function alertClient() {
       alertCountSpan.innerHTML = parseInt(alertCountSpan.innerHTML) + 1;
 
       //display Growl notification
-      //toastr.success(decodedAIS.mmsi + ' detected in ROI!');
       //console.log(decodedAIS);
 
       updateTotalAlertCount();
@@ -391,7 +394,8 @@ function alertClient() {
          return;
       }
 
-      alertCountSpan.innerHTML = parseInt(alertCountSpan.innerHTML) + count;
+      alertCountSpan.innerHTML = count;
+      //alertCountSpan.innerHTML = parseInt(alertCountSpan.innerHTML) + count;
 
       updateTotalAlertCount();
    }
@@ -585,6 +589,9 @@ function alertClient() {
             phpWithArg, 
             function (){ 
                console.log('markAsRead(): Success on marking as read');
+
+               //Notify all clients (via server's relay) that count was reset on this id
+               connection.send(JSON.stringify({type:'readcountreset', data: id }));
             }
             )
          .done(function (response) {
@@ -699,9 +706,12 @@ function alertClient() {
       //Sum up the counts in the accordion heading spans
       var alertCountSpans = $("[id^='alertCount-']");
       var alertSum = 0;
-      alertCountSpans.each(function(index) {
-         alertSum += parseInt(this.innerHTML);
-      });
+
+      if (typeof alertCountSpans != 'undefined') {
+         alertCountSpans.each(function(index) {
+            alertSum += parseInt(this.innerHTML);
+         });
+      }
 
       alertCountLabel.text(alertSum);
       if (alertSum > 100) {
