@@ -9,27 +9,22 @@
 
 /* -------------------------------------------------------------------------------- */
 /**
- * Main alert client function (starts on page load)
+ * Starts on page load using jQuery $() operator
  **/
-$(function start() {
+$(function startAlertClient() {
+   setTimeout(function delayedStart() {
+      console.log('Starting alert client now');
+      alertClient();
+   }, 1000);   //adjust this value for delayed amount
+});
+
+/**
+ * Main alert client function
+ **/
+function alertClient() {
    "use strict";
 
-   /*
-   toastr.options = {
-      "closeButton": false,
-      "debug": false,
-      "positionClass": "toast-bottom-left",
-      "onclick": null,
-      "showDuration": "300",
-      "hideDuration": "1000",
-      "timeOut": "5000",
-      "extendedTimeOut": "1000",
-      "showEasing": "swing",
-      "hideEasing": "linear",
-      "showMethod": "fadeIn",
-      "hideMethod": "fadeOut"
-   }
-   */
+   var DEBUG = false;
 
    // for better performance - to avoid searching in DOM
    var content = $('#content');
@@ -39,7 +34,7 @@ $(function start() {
    var processedCountLabel = $('.processedCountLabel');
    var user = userid;
    var receivedAlertRules = false;
-   var alertArray = [];
+   var alertRulesArray = [];
    var alertPolygon = new google.maps.Polygon({
             strokeWeight: 2,
             strokeColor: '#5555FF',
@@ -47,6 +42,7 @@ $(function start() {
             fillColor: '#5555FF',
             fillOpacity: 0.2,
             geodesic: true,
+            clickable: false,
             map: null
          });
 
@@ -94,11 +90,13 @@ $(function start() {
       $('[id^=alert_id]').remove(); //Remove all accordion alert panels
       receivedAlertRules = false;
 
+      //Set count to zero
+      updateTotalAlertCount();
 
       //try to reconnect every 3 seconds
       setTimeout(function() {
          console.log('Attempting to reconnect...');
-         start();
+         alertClient();
       }, 1000);
    };
 
@@ -109,9 +107,13 @@ $(function start() {
       // the massage is not chunked or otherwise damaged.
       try {
          var json = JSON.parse(message.data);
-         console.log('Message from alertServer:', json);
+         if (DEBUG) {
+            console.log('Message from alertServer:', json);
+         }
       } catch (e) {
-         console.log('Alert server sent non-JSON formatted data: ', message.data);
+         if (DEBUG) {
+            console.log('Alert server sent non-JSON formatted data: ', message.data);
+         }
          return;
       }
 
@@ -130,35 +132,38 @@ $(function start() {
          $('.alertPanel').remove();  //Remove all accordion alert titles
          $('[id^=alert_id]').remove(); //Remove all accordion alert panels
 
-         alertArray = [];
+         alertRulesArray = [];
       }
-      //---------------------- Alert Rules received -------------------------------
+      //---------------------- Alert Rule received -------------------------------
       else if (json.type === 'alertRule') {
          //Set received alertRules to true now that we are receiving the alerts
          receivedAlertRules = true;
 
          //Create a new menu panel content for the alert accordion panel
-         var singleAlert = json.data;
-         console.log('Received alert:', singleAlert.alert_id);
+         var singleAlertRule = json.data;
+         console.log('Received alert:', singleAlertRule.alert_id);
 
          //store alert rule to array
-         alertArray.push(singleAlert);
+         alertRulesArray.push(singleAlertRule);
 
          //Create the accordion panel with new received rule
-         createAccordionElement(singleAlert);
+         createAccordionElement(singleAlertRule);
       }
       //---------------------- Alert received -------------------------------------
       else if (json.type === 'alertNotification') {
          var decodedAIS = JSON.parse(json.data);
+         var vessel = JSON.parse(json.vessel);
          var timestamp = parseInt(json.timestamp);
 
-         console.log('Alert server sent alert');
+         if (DEBUG) {
+            console.log('Alert server sent alert');
+         }
 
          //Display the data in the specific alert accordion panel
-         var singleAlert = json.alertRule;
+         var matchingAlertRule = json.alertRule;   //alertRule that matched notification
 
          //Add notification to appropriate places
-         newAlertReceived(singleAlert, decodedAIS, timestamp);
+         newAlertReceived(matchingAlertRule, decodedAIS, vessel, timestamp);
       }
       //---------------------- Alert History --------------------------------------
       else if (json.type === 'alertHistory') {
@@ -166,15 +171,26 @@ $(function start() {
       }
       //---------------------- Progress received ----------------------------------
       else if (json.type === 'totalDecoded') {
-         console.log('Alert server sent progress report');
+         if (DEBUG) {
+            console.log('Alert server sent progress report');
+         }
          //content.prepend(json.data + '<br>');
-         //toastr.info(json.data)
          processedCountLabel.html(json.data);
+      }
+      //---------------------- Alert History --------------------------------------
+      else if (json.type === 'readcountreset') {
+         //reset count on a certain id
+         var id = parseInt(json.data);
+
+         console.log('Alert count was reset on alert', id);
+
+         fetchAlertsArchiveCount(id);
       }
       //---------------------- Unknown message received ---------------------------
       else {
-         console.log('Alert server sent unrecognized data', json);
-         //toastr.error('Unrecognized data received: ', json);
+         if (DEBUG) {
+            console.log('Alert server sent unrecognized data', json);
+         }
       }
    };
 
@@ -182,14 +198,14 @@ $(function start() {
    /**
     * Creates a new panel in the alert accordion with a new alert rule received
     **/
-   function createAccordionElement(singleAlert) {
-      var id = singleAlert.alert_id;
+   function createAccordionElement(singleAlertRule) {
+      var id = singleAlertRule.alert_id;
 
       //Create the accordion panel title
       var accordionElement = document.createElement('h3');
       accordionElement.className = 'alertPanel';
       accordionElement.id = 'alert_heading_id' + id;
-      accordionElement.innerHTML = 'Alert ' + id + ' for ' + singleAlert.user_id + ' (<span id="alertCount-' + id + '">0</span>)';
+      accordionElement.innerHTML = 'Alert ' + id + ' for ' + singleAlertRule.user_id + ' (<span id="alertCount-' + id + '">0</span>)';
       //Create the accordion panel content
       var alertDiv = document.createElement('div');
       alertDiv.id = 'alert_id' + id;
@@ -203,20 +219,23 @@ $(function start() {
 
       $('#alert_id' + id).append($('<br />'));
 
-      //Add zoom to polygon link
-      $('<input />', {type: 'button', id: 'show_polygon_id'+id, value: 'Zoom to Polygon' }).appendTo($('#alert_id' + id));
-
+      //Mark as read button
+      $('<input />', {type: 'button', id: 'markasread_id'+id, value: 'Mark As Read' }).appendTo($('#alert_id' + id));
       $('#alert_id' + id).append('<br>');
 
-      //Edit alert
+      //Zoom to polygon button
+      $('<input />', {type: 'button', id: 'show_polygon_id'+id, value: 'Zoom to Polygon' }).appendTo($('#alert_id' + id));
+      $('#alert_id' + id).append('<br>');
+
+      //Edit alert button
       $('<input />', {type: 'button', id: 'edit_alert_button'+id, value: 'Edit Alert' }).appendTo($('#alert_id' + id));
-      //Delete alert
+      //Delete alert button
       $('<input />', {type: 'button', id: 'delete_alert_button'+id, value: 'Delete Alert' }).appendTo($('#alert_id' + id));
 
       //Pretty print the alert rules/properties
       var panelContent = document.getElementById('alert_id' + id);
 
-      panelContent.appendChild(document.createElement('fieldset')).innerHTML = '<legend><b>Alert Rules</b></legend><pre><div id="alertRule-'+id+'">' + JSON.stringify(singleAlert, undefined, 1) + '</div></pre>'; 
+      panelContent.appendChild(document.createElement('fieldset')).innerHTML = '<legend><b>Alert Rules</b></legend><pre><div id="alertRule-'+id+'">' + JSON.stringify(singleAlertRule, undefined, 1) + '</div></pre>'; 
 
 
       //Pretty print latest matching AIS message
@@ -232,6 +251,10 @@ $(function start() {
          else {
             hidePolygon();
          }
+      });
+
+      $('#markasread_id' + id).click(function () {
+         markAsRead(id);
       });
 
       $('#show_polygon_id' + id).click(function () {
@@ -258,15 +281,19 @@ $(function start() {
          console.log('Zooming into polygon ' + id);
          zoomToPolygon(id);
       });
+
+      //Fetch missed alerts from archive and populate rule
+      //fetchAlertsArchive(id);
+      fetchAlertsArchiveCount(id);
    }
 
    /* -------------------------------------------------------------------------------- */
    /**
     * Perform appropriate actions after receiving an alert with a matching alertRule
     **/
-   function newAlertReceived(singleAlert, decodedAIS, timestamp) {
-      //var panelContent = document.getElementById('alert_id' + singleAlert.alert_id);
-      var divNewMessages = document.getElementById('alertNewMessages-' + singleAlert.alert_id);
+   function newAlertReceived(matchingAlertRule, decodedAIS, vessel, timestamp) {
+      //var panelContent = document.getElementById('alert_id' + matchingAlertRule.alert_id);
+      var divNewMessages = document.getElementById('alertNewMessages-' + matchingAlertRule.alert_id);
 
       if (typeof divNewMessages === 'undefined') {
          console.log('newAlertReceived(): ERROR - accordion element for received alert does not exist');
@@ -277,21 +304,16 @@ $(function start() {
 
       //panelContent.appendChild(document.createElement('pre')).innerHTML = toHumanTime(timestamp) + ' UTC';
       //panelContent.appendChild(document.createElement('pre')).innerHTML = JSON.stringify(decodedAIS, undefined, 1);
-      divNewMessages.innerHTML = toHumanTime(timestamp) + '<br>' + JSON.stringify(decodedAIS, undefined, 1);
+      divNewMessages.innerHTML = toHumanTime(timestamp) + '<br>' + JSON.stringify(vessel, undefined, 1) + '<br>' + JSON.stringify(decodedAIS, undefined, 1);
 
       //increment count on alert panel title
-      var alertCountSpan = document.getElementById('alertCount-' + singleAlert.alert_id);
+      var alertCountSpan = document.getElementById('alertCount-' + matchingAlertRule.alert_id);
       alertCountSpan.innerHTML = parseInt(alertCountSpan.innerHTML) + 1;
 
       //display Growl notification
-      //toastr.success(decodedAIS.mmsi + ' detected in ROI!');
       //console.log(decodedAIS);
 
-      alertCountLabel.text(alertArray.length);
-      if (alertArray.length > 100) {
-         alertCountNavbar.text('+99');
-      }
-      setCountBubbleColor();
+      updateTotalAlertCount();
 
       //Draw an indicator on the map where the alert vessel originated from
       var alertVesselCircle = new google.maps.Circle({
@@ -312,10 +334,10 @@ $(function start() {
 
       //Handle click
       //TODO: Need to remove click listener if the message is overwritten!
-      $('#alertNewMessages-' + singleAlert.alert_id).unbind( "click" );
+      $('#alertNewMessages-' + matchingAlertRule.alert_id).unbind( "click" );
 
-      $('#alertNewMessages-' + singleAlert.alert_id).unbind( "mouseenter" );      
-      $('#alertNewMessages-' + singleAlert.alert_id).unbind( "mouseleave" );      
+      $('#alertNewMessages-' + matchingAlertRule.alert_id).unbind( "mouseenter" );      
+      $('#alertNewMessages-' + matchingAlertRule.alert_id).unbind( "mouseleave" );      
 
       var alertVesselTempCircle = new google.maps.Circle({
           center:         new google.maps.LatLng(decodedAIS.lat,decodedAIS.lon),
@@ -327,7 +349,7 @@ $(function start() {
           fillOpacity:    0.7,
       });
 
-      $('#alertNewMessages-' + singleAlert.alert_id).css('cursor', 'pointer')
+      $('#alertNewMessages-' + matchingAlertRule.alert_id).css('cursor', 'pointer')
       //Handle hover action
       .mouseenter(function () {
          alertVesselTempCircle.setMap(map);
@@ -359,6 +381,25 @@ $(function start() {
       });
    }
 
+/* -------------------------------------------------------------------------------- */
+   /**
+    * Perform appropriate actions after receiving an alert with a matching alertRule
+    **/
+   function alertCountReceived(id, count) {
+      //increment count on alert panel title
+      var alertCountSpan = document.getElementById('alertCount-' + id);
+
+      if (typeof alertCountSpan === 'undefined') {
+         console.log('newAlertReceived(): ERROR - accordion element for received alert id ' + id + ' does not exist');
+         return;
+      }
+
+      alertCountSpan.innerHTML = count;
+      //alertCountSpan.innerHTML = parseInt(alertCountSpan.innerHTML) + count;
+
+      updateTotalAlertCount();
+   }
+
    /* -------------------------------------------------------------------------------- */
    /**
    * Display the alert polygon based on alert id
@@ -369,7 +410,7 @@ $(function start() {
       //Parse polygon
       //find the right polygon
 
-      var polygonVertices = parsePolyStrings(alertArray[alertArrayIndexByID(id)].polygon);
+      var polygonVertices = parsePolyStrings(alertRulesArray[alertArrayIndexByID(id)].polygon);
 
       //Draw the polygon on the map
       if (polygonVertices.length) {
@@ -480,8 +521,8 @@ $(function start() {
    }
   
    /* -------------------------------------------------------------------------------- */
-   function setCountBubbleColor() {
-      if (alertArray.length> 0) {
+   function setCountBubbleColor(alertSum) {
+      if (alertSum > 0) {
          $('#alertsCountBubble').css('background-color', 'red');
       }
       else {
@@ -537,17 +578,148 @@ $(function start() {
    }
 
    /* -------------------------------------------------------------------------------- */
+   function markAsRead(id) {
+      var phpWithArg = 'query_alert_archive_mark_read.php?alertid=' + id;
+
+      console.log(phpWithArg);      
+
+      //Call the PHP script to insert new alert row to alert database
+      console.log('Calling PHP script to mark archived messages as read...');
+      $.getJSON(
+            phpWithArg, 
+            function (){ 
+               console.log('markAsRead(): Success on marking as read');
+
+               //Notify all clients (via server's relay) that count was reset on this id
+               connection.send(JSON.stringify({type:'readcountreset', data: id }));
+            }
+            )
+         .done(function (response) {
+            //console.log('saveAlert(): ' + response.query);
+            console.log('markAsRead(): Alert id ' + response.alert_id + ' marked as read.');
+
+            //TODO: reset GUI alert count
+            var countSpan = $('#alertCount-'+id);
+            countSpan.text('0');
+
+            updateTotalAlertCount();
+         }) // END .done()
+      .fail(function() {
+         console.log('markAsRead(): ' +  'No response from alert database; error in php?'); 
+
+         //alert('Alert not saved.  Please try again');
+
+         return;
+      }); //END .fail()
+   }
+
+   /* -------------------------------------------------------------------------------- */
    /**
    * Returns the element index number given an alert ID
    **/
    function alertArrayIndexByID(id) {
-      for (var i=0; i < alertArray.length; i++) {
-         if (alertArray[i].alert_id == id) {
+      for (var i=0; i < alertRulesArray.length; i++) {
+         if (alertRulesArray[i].alert_id == id) {
             return i;
          }
       };
    }
-});
+
+   /* -------------------------------------------------------------------------------- */
+   /**
+   * Fetches missed alerts and sets them to read (only on click TODO)
+   **/
+   function fetchAlertsArchive(id) {
+      var phpWithArg = 'query_alert_archive.php?alertid=' + id;
+
+      console.log(phpWithArg);      
+
+      //Call the PHP script to insert new alert row to alert database
+      console.log('Calling PHP script to fetch alert archive...');
+      $.getJSON(
+            phpWithArg, 
+            function (){ 
+               console.log('fetchAlertsArchive(): Success on fetching archive for alert');
+            }
+            )
+         .done(function (response) {
+            console.log(response);
+
+            $.each(response.alert_array, function(key, alertRow) {
+               newAlertReceived(alertRulesArray[alertArrayIndexByID(id)], JSON.parse(alertRow.aisdata), JSON.parse(alertRow.vesseldata), alertRow.timestamp);
+            });
+
+            console.log('fetchAlertsArchive(): Fetched archive for alert id ' + response.alert_id);
+         }) // END .done()
+      .fail(function() {
+         console.log('fetchAlertsArchive(): ' +  'No response from alert database; error in php?'); 
+
+         //alert('Alert not saved.  Please try again');
+
+         return;
+      }); //END .fail()
+   }
+
+   /* -------------------------------------------------------------------------------- */
+   /**
+   * Fetches ONLY COUNT of missed alerts for quick status retrieval
+   **/
+   function fetchAlertsArchiveCount(id) {
+      //Get count only, so add a flag to indicate it
+      var phpWithArg = 'query_alert_archive.php?alertid=' + id + '&countOnly=1';
+
+      console.log(phpWithArg);      
+
+      //Call the PHP script to insert new alert row to alert database
+      console.log('Calling PHP script to fetch alert archive count...');
+      $.getJSON(
+            phpWithArg, 
+            function (){ 
+               console.log('fetchAlertsArchiveCount(): Success on fetching archive count for alert');
+            }
+            )
+         .done(function (response) {
+            console.log(response);
+
+            var count = JSON.parse(response.count);
+
+            alertCountReceived(id, count);
+
+            console.log('fetchAlertsArchiveCount(): Fetched archive count for alert id ' + response.alert_id);
+
+            return count;
+         }) // END .done()
+      .fail(function() {
+         console.log('fetchAlertsArchiveCount(): ' +  'No response from alert database; error in php?'); 
+
+         //alert('Alert not saved.  Please try again');
+
+         return null;
+      }); //END .fail()
+   }
+
+   /* -------------------------------------------------------------------------------- */
+   /**
+   * Updates the total count sum displayed
+   **/
+   function updateTotalAlertCount() {
+      //Sum up the counts in the accordion heading spans
+      var alertCountSpans = $("[id^='alertCount-']");
+      var alertSum = 0;
+
+      if (typeof alertCountSpans != 'undefined') {
+         alertCountSpans.each(function(index) {
+            alertSum += parseInt(this.innerHTML);
+         });
+      }
+
+      alertCountLabel.text(alertSum);
+      if (alertSum > 100) {
+         alertCountNavbar.text('+99');
+      }
+      setCountBubbleColor(alertSum);
+   }
+}
 
 /* -------------------------------------------------------------------------------- */
 function toggleAlertsPanel() {
