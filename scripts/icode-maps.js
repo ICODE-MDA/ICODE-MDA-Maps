@@ -4816,12 +4816,26 @@ function initializeBrowserFocus() {
    }
 }
 
-// OWF WIDGET LAUNCHER
+
+
+function emptyArray(arr) {
+   if (typeof array !== 'undefined') {
+      while(arr.length > 0) {
+         arr.pop();
+      }
+   }
+   arr.length = 0;
+}
+///////////////////////////////////////
+// OWF: Launch Vessel Details Widget //
+///////////////////////////////////////
 function launchOwfVesselDetails(msg) {
 	msg = "false " + msg;
 	OWF.Launcher.launch({
 		universealName: '51a8fc83-c801-ee68-1b9f-facf8c3f7f0e',
 		guid: '51a8fc83-c801-ee68-1b9f-facf8c3f7f0e',
+//		universealName: '44ab41db-c1cc-c727-3e0c-5aff9dc51f4d',
+//		guid: '44ab41db-c1cc-c727-3e0c-5aff9dc51f4d',
 		title: 'ICODE-MDA Vessel Details',
 		launchOnlyIfClosed: true,
 		data: msg // string: launched (true or false), imo number
@@ -4835,12 +4849,20 @@ function sendOwfLaunchConfigToWidget(msg) {
 	OWF.Eventing.publish("mapsToVesselDetails", msg);
 }
 
-function emptyArray(arr) {
-   if (typeof array !== 'undefined') {
-      while(arr.length > 0) {
-         arr.pop();
-      }
-   }
-   arr.length = 0;
+/////////////////////////////////////// 
+// OWF: Zoom map when running in OWF //
+///////////////////////////////////////
+function qbZoom() {	
+		var str = $("#query").val();
+		var parseStr = str.split('BETWEEN ');
+		var parseLat = parseStr[1].split(' AND ');
+		var parseLon = parseStr[2].split(' AND ');
+		var latMin = parseLat[0]; 
+		var latMax = parseLat[1];
+		var lonMin = parseLon[0];
+		var lonMax = parseLon[1];
+		var sw = new google.maps.LatLng(latMin,lonMin,true);
+		var ne = new google.maps.LatLng(latMax,latMax,true);
+		var latLngBounds = new google.maps.LatLngBounds(sw,ne);
+		map.fitBounds(latLngBounds);
 }
-

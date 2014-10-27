@@ -40,6 +40,10 @@
 	<div class="leftPanel">
 		<div class="subtitle">Query Options</div>
 		<div id="accordion" class="accordion">
+			<h3>Help</h3>
+			<div><button style="border:0;" onclick="triggerTutorial();">Tutorial</button></div>
+			<h3>Saved Searches</h3>
+			<div id="searchHistory"></div>
 			<h3>Tables</h3>
 			<div id="tables">
 				Select from:<br />
@@ -52,11 +56,11 @@
 			<h3>Geographic Coordinates</h3>
 			<div id="latLon">
 				<b>Latitude:</b><br />
-				Between <input id="minLat" name="minLat" type="text" value="-85.05" style="width: 50px">
-				to <input id="maxLat" name="maxLat" type="text" value="85.05" style="width: 50px"><br /><br />
+				Between <input id="minLat" name="minLat" type="text" value="-90" style="width: 50px">
+				to <input id="maxLat" name="maxLat" type="text" value="90" style="width: 50px"><br /><br />
 				<b>Longitude:</b><br />
-				Between <input id="minLon" name="minLon" type="text" value="-85.05" style="width: 50px">
-				to <input id="maxLon" name="maxLon" type="text" value="85.05" style="width: 50px"><br /><br />				
+				Between <input id="minLon" name="minLon" type="text" value="-180" style="width: 50px">
+				to <input id="maxLon" name="maxLon" type="text" value="180" style="width: 50px"><br /><br />				
 			</div>
 			<h3>Date-Time</h3>			
 			<div id="datetime">
@@ -76,21 +80,41 @@
 				<b>:</b><input id="maxMinute" type="text" placeholder="Minute" style="width: 50px">
 				<b>:</b><input id="maxSecond" type="text" placeholder="Second" style="width: 50px">
 				<br /><br />
-				Date-time format: <br />MM/DD/YYYY HH:MM:SS<br /><br />
+				Tip: Date-time format is <br />MM/DD/YYYY HH:MM:SS<br /><br />
 				Note: Time is calculated locally.
 			</div>	
-			<h3>Saved Searches</h3>
-			<div id="searchHistory"></div>
+			<h3>Limit</h3>
+			<div id="limitResults">
+				<input type="checkbox" id="searchguiLimitCheck" onclick="enableLimitInput();">  
+				Limit Results<br />
+				<p id="searchguiLimit" style="display:none"><input type="text" id="searchguiLimitText" value="100"> vessels</input></p>
+				<br />Tip: To see all results do not check "Limit Results" checkbox.
+			</div>
 		</div>
 	</div>
 	<div class="rightPanel">
 		<!-- search panel for searching specific info in database -->
 		<div class="search">
-			<input type="text" id="searchguiQuery" placeholder=" Type search term here (e.g. MMSI, ship name, etc.)"></input>
-			<span><button class="button1" onClick="searchguiResults();">Search</button>
+			<div>
+				<!-- trigger click event to search when 'Enter' key pressed in search bar -->
+				<input type="text" id="searchguiQuery" onkeypress="if(event.which==13){searchguiResults();}" placeholder=" Type search term here (e.g. MMSI, ship name, etc.)"></input>
+			</div>
+			<div class="searchContainer">
+				<div class="searchLeft">
+					<select id="searchguiConstraint">
+						<option value="1" selected="selected">contains</option>
+						<option value="2">exactly like</option>
+						<option value="3">begins with</option>
+						<option value="4">ends with</option>
+					</select>
+				</div>
+				<div class="searchRight">
+					<button onClick="searchguiResults();">Search</button>
+				</div>
+			</div>
 		</div>
 		<div class="mainPanel">
-			<div class="subtitle" style="margin-top: 10px;">Search Results</div>
+			<div class="subtitle" id="subtitle" style="margin-top: 10px;"></div>
 			<div id="queryString"></div>
 			<div id="results"></div>
 		</div>

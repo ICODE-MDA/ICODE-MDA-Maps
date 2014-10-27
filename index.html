@@ -305,7 +305,7 @@
 
         <div id="query_bar">
            <div>
-              <form name="query_form"><input id="query" type="text" name="query" onkeypress="if (event.which == 13) {enteredQuery();return false;}" value="QUERY RUNNING..."><input hidden="true" type="hidden"></form>
+              <form name="query_form"><input id="query" type="text" name="query" onkeypress="if (event.which == 13) {if(OWF.Util.isRunningInOWF()){qbZoom();} enteredQuery();return false;}" value="QUERY RUNNING..."><input hidden="true" type="hidden"></form>
            </div>
         </div>
         <div id="stats_nav">
