@@ -19,7 +19,7 @@ var savedString = new Array();	// saved searches: query value
 var searchSize = 0;				// saved searches: max size of saved searches array
 
 // Input Elements
-var tableType = 0;				// table type
+var tableType = 0;				// table type: 1=PVOL, 2=LAISIC, 3=Vessels Memory
 var tableName = '';				// table name
 var minLat = '';				// latitude: min value (degrees)
 var maxLat = '';				// latitude: max value (degrees)
@@ -39,7 +39,7 @@ var maxMinute = '';				// end time: minute (MM)
 var maxSecond = '';				// end time: second (SS)
 var minTime = '';				// start time: UNIX format
 var maxTime = '';				// end time: UNIX format
-var limit = '';					// limit (value greater than zero)
+var limit = '';					// limit (integer greater than zero)
 var searchConstraint = '';		// constraint for search term
 var searchTerm = '';			// search term string
 
@@ -849,7 +849,73 @@ function callback() {
 	// placeholder for launchMaps function
 }
 
-/*
+
+var latMinMsg;
+var lonMinMsg;
+var latMaxMsg;
+var lonMaxMsg;
+function launchTest() {
+	OWF.Launcher.launch({
+		universalName: '26bbdeca-0473-5735-ec5a-6cef1e62c17e',
+		guid: '26bbdeca-0473-5735-ec5a-6cef1e62c17e',
+		title: 'ICODE-MDA Maps',
+		launchOnlyIfClosed: true
+	}, callback);
+}
+
+function toggleButtons(){
+	$('#launchMaps').hide();
+	$('#addRectangle').show();
+	$('#acceptCoordinates').show();
+}
+// draw rectangle on Maps widget
+function addRectangle() {	
+	// notice to user
+	$('#rectUpdate').html('Specify region of interest by resizing or moving the rectangle.');
+	
+	// enable 'Accept' button
+	$('#acceptCoordinates').prop('disabled', false);
+	
+	// Add channel listener
+	OWF.Eventing.subscribe("mapToQueryBuilder", this.mapToQueryBuilder);
+	OWF.Eventing.publish("qbToMap", 'Add: ');
+}
+
+var mapToQueryBuilder = function(sender,msg){
+	var msgStr = msg.split(': ');
+	
+	if(msgStr[0] == 'Error'){
+		// notice to user
+		$('#rectUpdate').html('Rectangle already exists!');
+	} else if(msgStr[0] == 'LatLon') {
+		// parse string for Lat and Lon values
+		var str = msgStr[1].split(',');
+		latMinMsg = str[0];
+		lonMinMsg = str[1];
+		latMaxMsg = str[2];
+		lonMaxMsg = str[3];
+	} 
+}
+function acceptCoordinates(){
+console.log('Accept: (' + latMinMsg + ',' + lonMinMsg + '),(' + latMaxMsg + ',' + lonMaxMsg+')');	
+
+	// update input elements for Lat and Lon
+	$('#minLat').val(latMinMsg);
+	$('#minLon').val(lonMinMsg);
+	$('#maxLat').val(latMaxMsg);
+	$('#maxLon').val(lonMaxMsg);
+	
+	// notice to user
+	$('#rectUpdate').html('Updated latitude and longitude.');
+	$('#acceptCoordinates').prop('disabled', true);
+	
+	// tell maps to remove rectangle from map
+	OWF.Eventing.publish("qbToMap", 'Accept: ');	
+}
+
+/* 
+// issue: query launches before maps is done loading, thus query is seems to not be entered
+// to-do: fix load order; load maps first THEN load new query
 var launchMaps = function (){
 	var r = $.Deferred();
 	
@@ -938,9 +1004,13 @@ function triggerTutorial() {
 		'<div>' +
 			'Click on the Geographic Coordinates tab on the "Query Options" panel to the left.<br />' +
 			'<img width="50%" src="img/tutorial_search_step2_1.jpg"><br /><br />' +
-			'Specify the region of interest by typing in the latitude and longitude or using the draw tool on the <i>Maps Widget</i>.<br />' +
+			'Specify the region of interest (ROI) by typing in the latitude and longitude or using the draw tool on the <i>Maps Widget</i> by pressing the "Launch" button.<br />' +
 			'<img width="50%" src="img/tutorial_search_step2_2.jpg"><br />' +
-			'By default the latitude and longitude is set to capture the entire world map (Lat from -90 to 90 degrees and Lon -180 to 180 degrees).<br />' +
+			'By default the latitude and longitude is set to capture the entire world map (Lat from -90 to 90 degrees and Lon -180 to 180 degrees).<br /><br />' +
+			'After clicking the "Launch" button the <i>Maps Widget</i> will launch and two new options will appear: "Add" and "Accept".<br /><br />' +
+			'<img width="28%" src="img/tutorial_search_step2_3.jpg"><br />' +
+			'To start the draw tool click "Add". A red rectangle will be visible on the maps. This rectangle is draggable and resizeable. After the rectangle is over the ROI click "Accept". This will update the latitude and longitude coordinates on the <i>Query Builder Widget</i>.<br />' +
+			'<img width="80%" src="img/tutorial_search_step2_4.jpg"><br />' +
 		'</div>' +
 		'<div>&nbsp;</div>' +
 		'<div class="blueTitle">Step 3: Date-Time</div>' +

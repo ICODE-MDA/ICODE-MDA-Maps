@@ -26,18 +26,30 @@ body {
 .search {
 	margin-top: 10px;
 }
-.search input {
+.searchContainer {
+	padding: 5px;
+}
+.searchLeft {
+	float: left;
+	width: 320px;
+}
+.searchRight {
+	float: left;
+}
+#searchguiQuery {
 	border-radius: 10px;
 	border: 3px solid;
-	width: 330px;
+	width: 380px;
 	padding: 5px;
 	background-color: rgba(0,0,0,0.2);
 }
+
 .mainPanel {
 	margin-top: 5px;
 	height: 500px;
 	overflow-x: hidden;
 	overflow-y: auto;
+	clear: both;
 }
 #latLon input, #datetime input {
 	border-radius: 7px;
@@ -76,4 +88,34 @@ body {
 .errorLog {
 	color: rgb(255,0,0);
 	font-weight: bold;
+}
+.blueTitle {
+	font-size: 1.5em;
+	font-weight: bold;
+	color: rgb(120,160,224);
+}
+#queryString {
+	font-weight: bold;
+}
+#results {
+	font-size: 0.8em;
+}
+#results button {
+	height: 22px;
+	width: 50px;
+}
+.resultsContainer {
+	clear: both;
+	width: 450px;
+}
+.resultsLeft {
+	float: left;
+	width: 60px;
+}
+.resultsRight {
+	float: left;
+	width: 370px;
+}
+#addRectangle, #acceptCoordinates {
+	display: none;
 }

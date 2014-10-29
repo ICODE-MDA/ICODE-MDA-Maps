@@ -199,8 +199,9 @@
      <!-- Main JavaScript for controlling map -->
      <script type="text/javascript" src='scripts/icode-maps.js' ></script>
 	 
-	
+<!-- ----------------- -->	
 <!-- Begin OWF Section -->
+<!-- ----------------- -->
 	<script>
 	// Hide right side menu
 	<!-- Check if OWF is running -->
@@ -214,6 +215,7 @@
 		*/	
 			// Add channel listener
 			OWF.Eventing.subscribe("queryBuilderToMap", this.updateQuery);
+			OWF.Eventing.subscribe("qbToMap",this.qbToMap);
 		}
 		
 		// Event handler for Query Builder Channel
@@ -239,7 +241,9 @@
 		}); 
 	}
 	 </script>
-	 <!-- End OWF Section -->
+<!-- --------------- -->	 
+<!-- End OWF Section -->
+<!-- --------------- -->
 
      <script>
         $(function() {
@@ -719,7 +723,9 @@
               </div>
 
               <p align=center>
-              <input id="setupAlert" type="button" onClick="$('#alertSummaryheading').click();setupAlertInitialize(); return false;" value="Setup New Alert">
+              Setup your email alerts here.
+              <br>
+              <input id="setupAlert" type="button" onClick="$('#alertSummaryheading').click();setupAlertInitialize(); return false;" value="Setup Alert">
               </p>
 
               <div id="content"></div>
