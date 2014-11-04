@@ -117,80 +117,74 @@ function alertClient() {
          return;
       }
 
-      //---------------------- Server connection response received ----------------
-      if (json.type === 'response') {
-         var serverResponse = json.data;
-         console.log('Alert server accepted the connection: ', serverResponse);
-      }
-      else if (json.type === 'resetRules') {
-         console.log('Resetting alert rules as signaled by alert server');
+      switch (json.type) {
+         case 'response':
+            //---------------------- Server connection response received ----------------
+            var serverResponse = json.data;
+            console.log('Alert server accepted the connection: ', serverResponse);
+            break;
+         case 'resetRules':
+            //---------------------- Alert Rule received -------------------------------
+            console.log('Resetting alert rules as signaled by alert server');
 
-         //Reset received alertRules
-         receivedAlertRules = false;
-         console.log('Removing old alert panels');
-         //TODO: Set focus to be summary panel first to prevent funky behavior
-         $('.alertPanel').remove();  //Remove all accordion alert titles
-         $('[id^=alert_id]').remove(); //Remove all accordion alert panels
+            //Reset received alertRules
+            receivedAlertRules = false;
+            console.log('Removing old alert panels');
+            //TODO: Set focus to be summary panel first to prevent funky behavior
+            $('.alertPanel').remove();  //Remove all accordion alert titles
+            $('[id^=alert_id]').remove(); //Remove all accordion alert panels
 
-         alertRulesArray = [];
-      }
-      //---------------------- Alert Rule received -------------------------------
-      else if (json.type === 'alertRule') {
-         //Set received alertRules to true now that we are receiving the alerts
-         receivedAlertRules = true;
+            alertRulesArray = [];
+            break;
+         case 'alertRule':
+            //---------------------- Alert received -------------------------------------
+            //Set received alertRules to true now that we are receiving the alerts
+            receivedAlertRules = true;
 
-         //Create a new menu panel content for the alert accordion panel
-         var singleAlertRule = json.data;
-         console.log('Received alert:', singleAlertRule.alert_id);
+            //Create a new menu panel content for the alert accordion panel
+            var singleAlertRule = json.data;
+            console.log('Received alert rule to create accordion element:', singleAlertRule.alert_id);
 
-         //store alert rule to array
-         alertRulesArray.push(singleAlertRule);
+            //store alert rule to array
+            alertRulesArray.push(singleAlertRule);
 
-         //Create the accordion panel with new received rule
-         createAccordionElement(singleAlertRule);
-      }
-      //---------------------- Alert received -------------------------------------
-      else if (json.type === 'alertNotification') {
-         var decodedAIS = JSON.parse(json.data);
-         var vessel = JSON.parse(json.vessel);
-         var timestamp = parseInt(json.timestamp);
+            //Create the accordion panel with new received rule
+            createAccordionElement(singleAlertRule);
+            break;
+         case 'alertNotification':
+            //---------------------- Alert notification received ------------------------
+            var decodedAIS = JSON.parse(json.data);
+            var vessel = JSON.parse(json.vessel);
+            var timestamp = parseInt(json.timestamp);
 
-         if (DEBUG) {
-            console.log('Alert server sent alert');
-         }
+            if (DEBUG) {
+               console.log('Alert server sent alert');
+            }
 
-         //Display the data in the specific alert accordion panel
-         var matchingAlertRule = json.alertRule;   //alertRule that matched notification
+            //Display the data in the specific alert accordion panel
+            var matchingAlertRule = json.alertRule;   //alertRule that matched notification
 
-         //Add notification to appropriate places
-         newAlertReceived(matchingAlertRule, decodedAIS, vessel, timestamp);
-      }
-      //---------------------- Alert History --------------------------------------
-      else if (json.type === 'alertHistory') {
-         //TODO
-      }
-      //---------------------- Progress received ----------------------------------
-      else if (json.type === 'totalDecoded') {
-         if (DEBUG) {
-            console.log('Alert server sent progress report');
-         }
-         //content.prepend(json.data + '<br>');
-         processedCountLabel.html(json.data);
-      }
-      //---------------------- Alert History --------------------------------------
-      else if (json.type === 'readcountreset') {
-         //reset count on a certain id
-         var id = parseInt(json.data);
-
-         console.log('Alert count was reset on alert', id);
-
-         fetchAlertsArchiveCount(id);
-      }
-      //---------------------- Unknown message received ---------------------------
-      else {
-         if (DEBUG) {
-            console.log('Alert server sent unrecognized data', json);
-         }
+            //Add notification to appropriate places
+            newAlertReceived(matchingAlertRule, decodedAIS, vessel, timestamp);
+            break;
+         case 'alertHistory':
+            //---------------------- Alert History --------------------------------------
+            //TODO
+            break;
+         case 'totalDecoded':
+            //---------------------- Progress received ----------------------------------
+            if (DEBUG) {
+               console.log('Alert server sent progress report');
+            }
+            //content.prepend(json.data + '<br>');
+            processedCountLabel.html(json.data);
+            break;
+         default:
+            //---------------------- Unknown message received ---------------------------
+            if (DEBUG) {
+               console.log('Alert server sent unrecognized data', json);
+            }
+            break;
       }
    };
 
@@ -283,8 +277,14 @@ function alertClient() {
       });
 
       //Fetch missed alerts from archive and populate rule
-      //fetchAlertsArchive(id);
-      fetchAlertsArchiveCount(id);
+      fetchAlertsArchiveCount(id); //call once the first time
+      //Subsequently, call again
+      /*
+      setInterval(function () {
+         console.log('Updating alert archive count for alert %d', id);
+         fetchAlertsArchiveCount(id);
+      }, 1000*60*0.5);
+      */
    }
 
    /* -------------------------------------------------------------------------------- */
@@ -589,9 +589,6 @@ function alertClient() {
             phpWithArg, 
             function (){ 
                console.log('markAsRead(): Success on marking as read');
-
-               //Notify all clients (via server's relay) that count was reset on this id
-               connection.send(JSON.stringify({type:'readcountreset', data: id }));
             }
             )
          .done(function (response) {
@@ -643,7 +640,7 @@ function alertClient() {
             }
             )
          .done(function (response) {
-            console.log(response);
+            //console.log(response);
 
             $.each(response.alert_array, function(key, alertRow) {
                newAlertReceived(alertRulesArray[alertArrayIndexByID(id)], JSON.parse(alertRow.aisdata), JSON.parse(alertRow.vesseldata), alertRow.timestamp);
@@ -668,24 +665,24 @@ function alertClient() {
       //Get count only, so add a flag to indicate it
       var phpWithArg = 'query_alert_archive.php?alertid=' + id + '&countOnly=1';
 
-      console.log(phpWithArg);      
+      //console.log(phpWithArg);      
 
       //Call the PHP script to insert new alert row to alert database
-      console.log('Calling PHP script to fetch alert archive count...');
+      //console.log('Calling PHP script to fetch alert archive count...');
       $.getJSON(
             phpWithArg, 
             function (){ 
-               console.log('fetchAlertsArchiveCount(): Success on fetching archive count for alert');
+               //console.log('fetchAlertsArchiveCount(): Success on fetching archive count for alert');
             }
             )
          .done(function (response) {
-            console.log(response);
+            //console.log(response);
 
             var count = JSON.parse(response.count);
 
             alertCountReceived(id, count);
 
-            console.log('fetchAlertsArchiveCount(): Fetched archive count for alert id ' + response.alert_id);
+            //console.log('fetchAlertsArchiveCount(): Fetched archive count for alert id ' + response.alert_id);
 
             return count;
          }) // END .done()
