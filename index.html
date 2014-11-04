@@ -304,116 +304,159 @@
                  </path>
                  </svg>
                  LAISIC AIS Track<br>
-                 <input class="checkboxtype" id="radarvessels" name="radarvessels" checked="checked" type="checkbox" onclick="refreshMaps(true);"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="16" width="30" viewBox="-6 -12 15 16">
-                 <path d="M 0, -3 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0" style="fill:#F078FF;stroke:#222200;stroke-width:1;fill-rule:evenodd;">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 RADAR Vessels<br>
-                 <input class="checkboxtype" id="livelaisic" name="livelaisic" checked="checked" type="checkbox" onclick="refreshMaps(true);">
-                 <svg width="26" height="15" version="1.1" xmlns="https://svgwg.org/svg2-draft/"  viewBox="0 3 20 10"><path d="M 12,0 22,15 19,21 12,24 6,21 3,15 Z" fill="#FF0000" stroke="#000000" stroke-width="3" transform="rotate(90 6 6) scale(0.5) translate(5 -4)"></path></svg>
-                 Live LAISIC Correlations<br>
-                 <input class="checkboxallships" id="All Other Vessels" name="All Other Vessels" checked="false" type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#FFFFFF;stroke:#444444;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 All Other Vessels<br>
-                 <input class="checkboxtype" id="0-Unspecified Ships" name="0-Unspecified Ships" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#F78181;stroke:#780202;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 0 - Unspecified Ships<br>
-                 <input class="checkboxtype" id="30-Fishing" name="30-Fishing" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#01DFD7;stroke:#006058;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 30 - Fishing<br>
-                 <input class="checkboxtype" id="31-Towing" name="31-Towing" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#DF7401;stroke:#600000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 31 - Towing<br>
-                 <input class="checkboxtype" id="32-Big Tow" name="32-Big Tow" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#DF7401;stroke:#600000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 32 - Big Tow<br>
-                 <input class="checkboxtype" id="35-Military" name="35-Military" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#0000FF;stroke:#000080;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 35 - Military<br>
-                 <input class="checkboxtype" id="37-Pleasure Craft" name="37-Pleasure Craft" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#8904B1;stroke:#0a0032;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 37 - Pleasure Craft<br>
-                 <input class="checkboxtype" id="51-Search and Rescue" name="51-Search and Rescue" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#BE3C14;stroke:#3f0000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 51 - Search & Rescue<br>
-                 <input class="checkboxtype" id="52-Tug" name="52-Tug" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#DF7401;stroke:#600000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 52 - Tug<br>
-                 <input class="checkboxtype" id="33-Dredge" name="33-Dredge" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#DF7401;stroke:#600000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 33 - Dredge<br>
-                 <input class="checkboxtype" id="50-Pilot" name="50-Pilot" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#DF7401;stroke:#600000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 50 - Pilot<br>
-                 <input class="checkboxtype" id="55-Law Enforcement" name="55-Law Enforcement" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#0000FF;stroke:#000080;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 55 - Law Enforcement<br>
-                 <input class="checkboxtype" id="6x-Passenger Vessels" name="6x-Passenger Vessels" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#01DF01;stroke:#006000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 6x - Passenger Vessels<br>
-                 <input class="checkboxtype" id="7x-Cargo Vessels" name="7x-Cargo Vessels" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#01DF01;stroke:#006000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 7x - Cargo Vessels<br>
-                 <input class="checkboxtype" id="8x-Tankers" name="8x-Tankers" checked="checked"  type="checkbox" onclick="typeSelectUpdated();"> 
-                 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                 <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#01DF01;stroke:#006000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                 </path>
-                 </svg>
-                 8x - Tankers<br>
+                 <label>
+                    <input class="checkboxtype" id="radarvessels" name="radarvessels" checked="checked" type="checkbox" onclick="refreshMaps(true);"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="16" width="30" viewBox="-6 -12 15 16">
+                    <path d="M 0, -3 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0" style="fill:#F078FF;stroke:#222200;stroke-width:1;fill-rule:evenodd;">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    RADAR Vessels
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="livelaisic" name="livelaisic" checked="checked" type="checkbox" onclick="refreshMaps(true);">
+                    <svg width="26" height="15" version="1.1" xmlns="https://svgwg.org/svg2-draft/"  viewBox="0 3 20 10"><path d="M 12,0 22,15 19,21 12,24 6,21 3,15 Z" fill="#FF0000" stroke="#000000" stroke-width="3" transform="rotate(90 6 6) scale(0.5) translate(5 -4)"></path></svg>
+                    Live LAISIC Correlations
+                 </label><br>
+                 <label>
+                    <input class="checkboxallships" id="All Other Vessels" name="All Other Vessels" checked="false" type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#FFFFFF;stroke:#444444;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    All Other Vessels
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="0-Unspecified Ships" name="0-Unspecified Ships" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#F78181;stroke:#780202;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    0 - Unspecified Ships
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="30-Fishing" name="30-Fishing" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#01DFD7;stroke:#006058;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    30 - Fishing
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="31-Towing" name="31-Towing" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#DF7401;stroke:#600000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    31 - Towing
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="32-Big Tow" name="32-Big Tow" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#DF7401;stroke:#600000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    32 - Big Tow
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="35-Military" name="35-Military" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#0000FF;stroke:#000080;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    35 - Military
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="37-Pleasure Craft" name="37-Pleasure Craft" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#8904B1;stroke:#0a0032;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    37 - Pleasure Craft
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="51-Search and Rescue" name="51-Search and Rescue" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#BE3C14;stroke:#3f0000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    51 - Search & Rescue
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="52-Tug" name="52-Tug" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#DF7401;stroke:#600000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    52 - Tug
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="33-Dredge" name="33-Dredge" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#DF7401;stroke:#600000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    33 - Dredge
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="50-Pilot" name="50-Pilot" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#DF7401;stroke:#600000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    50 - Pilot
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="55-Law Enforcement" name="55-Law Enforcement" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#0000FF;stroke:#000080;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    55 - Law Enforcement
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="6x-Passenger Vessels" name="6x-Passenger Vessels" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#01DF01;stroke:#006000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    6x - Passenger Vessels
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="7x-Cargo Vessels" name="7x-Cargo Vessels" checked="checked" type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#01DF01;stroke:#006000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    7x - Cargo Vessels
+                 </label><br>
+                 <label>
+                    <input class="checkboxtype" id="8x-Tankers" name="8x-Tankers" checked="checked"  type="checkbox" onclick="typeSelectUpdated();"> 
+                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                    <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#01DF01;stroke:#006000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                    </path>
+                    </svg>
+                    8x - Tankers
+                 </label><br>
+                 <label>
                  <hr>
 
                  <center><b>AIS Sources</b><br></center>
                  <form>
-                    <input type="radio" id="allaissources" name="aissources" checked="checked" onclick="refreshMaps(true);"> All AIS Sources</input><br>
-                    <input type="radio" id="mssisonly" name="aissources" onclick="refreshMaps(true);"> Terrestrial AIS Only</input><br>
-                    <input type="radio" id="sataisonly" name="aissources" onclick="refreshMaps(true);"> Satellite AIS Only</input><br>
+                    <label>
+                       <input type="radio" id="allaissources" name="aissources" checked="checked" onclick="refreshMaps(true);"> All AIS Sources</input>
+                    </label><br>
+                    <label>
+                       <input type="radio" id="mssisonly" name="aissources" onclick="refreshMaps(true);"> Terrestrial AIS Only</input>
+                    </label><br>
+                    <label>
+                       <input type="radio" id="sataisonly" name="aissources" onclick="refreshMaps(true);"> Satellite AIS Only</input>
+                    </label><br>
                  </form>
 
                  <hr>
                  <center><b>Risk Level</b><br>(vessel outline)</center>
-                 <input class="checkbox" id="Risk" name="Risk" type="checkbox" onclick="toggleRisk();refreshMaps(true);"> Enable risk information<br>
+                 <label>
+                    <input class="checkbox" id="Risk" name="Risk" type="checkbox" onclick="toggleRisk();refreshMaps(true);"> Enable risk information
+                 </label><br>
                  <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
                  <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#FFFFFF;stroke:#00F014;stroke-width:2;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
                  </path>
@@ -435,33 +478,53 @@
               <div id="layer_types">
                  <div id="tmacslayer">
                     <center><b>TMACS WMS</b></center>
-                    <input class="checkbox" id="TMACShead" name="TMACShead" type="checkbox" onclick="toggleTMACSHeadWMSLayer();"> TMAC Trackheads<br>
-                    <input class="checkbox" id="TMACShistory" name="TMACShistory" type="checkbox" onclick="toggleTMACSHistoryWMSLayer();"> Track History<br>
+                    <label>
+                       <input class="checkbox" id="TMACShead" name="TMACShead" type="checkbox" onclick="toggleTMACSHeadWMSLayer();"> TMAC Trackheads
+                    </label><br>
+                    <label>
+                       <input class="checkbox" id="TMACShistory" name="TMACShistory" type="checkbox" onclick="toggleTMACSHistoryWMSLayer();"> Track History
+                    </label><br>
                  </div>
                  <br>
                  <hr>
                  <center><b>Other Information</b></center>
-                 <input class="checkbox" id="enableCountryBorders" name="enableCountryBorders" type="checkbox" onclick="toggleCountryBorders();"> Enable country borders<br>
-                 <input class="checkbox" id="enableCluster" name="Enable Clusters" type="checkbox" checked="checked" onclick="toggleCluster(true);"> Enable Clusters when zoomed out<br>
+                 <label>
+                    <input class="checkbox" id="enableCountryBorders" name="enableCountryBorders" type="checkbox" onclick="toggleCountryBorders();"> Enable country borders
+                 </label><br>
+                 <label>
+                    <input class="checkbox" id="enableCluster" name="Enable Clusters" type="checkbox" checked="checked" onclick="toggleCluster(true);"> Enable Clusters when zoomed out
+                 </label><br>
                  <!-- <input class="checkbox" id="HeatmapLayer" name="HeatmapLayer" type="checkbox" onclick="toggleHeatmapLayer();"> <img align="top" width="20px" src="icons/heatmap.png" style="padding-bottom: 4px; vertical-align: middle;"> Heatmap Layer<br> -->
-                 <input class="checkbox" id="EEZLayer" name="EEZLayer" type="checkbox" onclick="toggleEEZLayer();"> EEZ Layer<br>
-                 <input class="checkbox" id="WeatherLayer" name="WeatherLayer" type="checkbox" onclick="toggleWeatherLayer();"> <img align="top" width="20px" src="icons/weather_icon.png" style="padding-bottom: 4px; vertical-align: middle;"> Weather Layer<br>
+                 <label>
+                    <input class="checkbox" id="EEZLayer" name="EEZLayer" type="checkbox" onclick="toggleEEZLayer();"> EEZ Layer
+                 </label><br>
+                 <label>
+                    <input class="checkbox" id="WeatherLayer" name="WeatherLayer" type="checkbox" onclick="toggleWeatherLayer();"> <img align="top" width="20px" src="icons/weather_icon.png" style="padding-bottom: 4px; vertical-align: middle;"> Weather Layer
+                 </label><br>
                  <!-- input class="checkbox" id="KMLLayer" name="KMLLayer" type="checkbox" onclick="toggleKMLLayer();"> <img align="top" width="20px" src="icons/kml.png" style="padding-bottom: 4px; vertical-align: middle;"> KML Layer<br> -->
-                 <input class="checkbox" id="PortLayer" name="PortLayer" type="checkbox" onclick="togglePortLayer();"> <img align="top" height="20px" src="icons/anchor_port.png" style="padding-bottom: 4px; vertical-align: middle;"> Port Layer<br>
-                 <input class="checkbox" id="HeatmapLayer" name="HeatmapLayer" type="checkbox" onclick="toggleHeatmapLayer();"> Heatmap Layer<br>
+                 <label>
+                    <input class="checkbox" id="PortLayer" name="PortLayer" type="checkbox" onclick="togglePortLayer();"> <img align="top" height="20px" src="icons/anchor_port.png" style="padding-bottom: 4px; vertical-align: middle;"> Port Layer
+                 </label><br>
+                 <label>
+                    <input class="checkbox" id="HeatmapLayer" name="HeatmapLayer" type="checkbox" onclick="toggleHeatmapLayer();"> Heatmap Layer
+                 </label><br>
                  </p>
               </div>
 
               <h3>Vessels Tables</h3>
               <div>
-                 <input class="checkbox" id="LAISIC_TARGETS" name="LAISIC_TARGETS" type="checkbox" onclick="refreshMaps(true);"> Display LAISIC targets<br><br>
+                 <label>
+                    <input class="checkbox" id="LAISIC_TARGETS" name="LAISIC_TARGETS" type="checkbox" onclick="refreshMaps(true);"> Display LAISIC targets
+                 </label><br><br>
                  <center>
                     <button id="vesselstableherebutton" class="button" onClick="if ($('#vessels-modal').dialog('isOpen')){$('#vessels-modal').dialog('close'); $('#vesselstableherebutton').text('Open Vessels Tables here');} else {$('#vessels-modal').dialog('open'); $('#vesselstableherebutton').text('Close Vessels Tables');}">Open Vessels Tables here</button>
                     <br>
                     <button id="vesselstablenewwindowbutton" class="button" onClick="window.open('icode-table.html');">Open Vessels Tables (new window)</button>
                  </center>
                  <br>
-                 <input class="checkbox" id="error ellipses" name="error ellipses" type="checkbox" checked="checked" onclick=";"> Draw error ellipses on trackicons<br><br>
+                 <label>
+                    <input class="checkbox" id="error ellipses" name="error ellipses" type="checkbox" checked="checked" onclick=";"> Draw error ellipses on trackicons
+                 </label><br><br>
               </div>
 
               <h3>Upload KMZ</h3>
@@ -476,7 +539,9 @@
 
               <h3>Time Machine</h3>
               <div>
-                 <input class="checkbox" id="enabletimemachine" name="Enable Time Machine" type="checkbox" onclick="toggleTimeMachine();"> Enable Time Machine
+                 <label>
+                    <input class="checkbox" id="enabletimemachine" name="Enable Time Machine" type="checkbox" onclick="toggleTimeMachine();"> Enable Time Machine
+                 </label>
                  <br>
                  <br>
                  <!-- http://trentrichardson.com/examples/timepicker/ -->
@@ -508,9 +573,15 @@
                     <input class="inputfilebutton" id="distancetooltoggle" type="button" onClick="toggleDistanceTool();" value="Enable distance tool">
                  </form>
                  -->
-                 <input class="checkbox" id="showvesselnames" name="Show Vessel Names" type="checkbox" checked="checked" onclick="toggleShowNames();"> Show vessel names<br>
-                 <input class="checkbox" id="distancetooltoggle" name="distancetooltoggle" type="checkbox" onclick="toggleDistanceTool();"> Enable distance tool<br>
-                 <input class="checkbox" id="IHSTabs" name="IHSTabs" type="checkbox" onclick="toggleIHSTabs();"> Enable IHS Tabs<br>
+                 <label>
+                    <input class="checkbox" id="showvesselnames" name="Show Vessel Names" type="checkbox" checked="checked" onclick="toggleShowNames();"> Show vessel names
+                 </label><br>
+                 <label>
+                    <input class="checkbox" id="distancetooltoggle" name="distancetooltoggle" type="checkbox" onclick="toggleDistanceTool();"> Enable distance tool
+                 </label><br>
+                 <label>
+                    <input class="checkbox" id="IHSTabs" name="IHSTabs" type="checkbox" onclick="toggleIHSTabs();"> Enable IHS Tabs<br>
+                 </label>
                  <hr>
                  Only show vessels up to 
                  <select id="vessel_age" onChange="vessel_age_changed(true);">
@@ -557,11 +628,17 @@
                     <option value="31">31 days</option>
                  </select>
                  <br>
-                 <input class="checkbox" id="showtrackicons" name="showtrackicons" type="checkbox" checked="checked" onclick="toggleTrackIcons();"> Enable track icons<br>
-                 <input class="checkbox" id="queryalltracks" name="queryalltracks" type="checkbox" onclick="toggleQueryAllTracks();"> Query tracks for vessels in view<br>
+                 <label>
+                    <input class="checkbox" id="showtrackicons" name="showtrackicons" type="checkbox" checked="checked" onclick="toggleTrackIcons();"> Enable track icons
+                 </label><br>
+                 <label>
+                    <input class="checkbox" id="queryalltracks" name="queryalltracks" type="checkbox" onclick="toggleQueryAllTracks();"> Query tracks for vessels in view
+                 </label><br>
                  <hr>
                  <div id="refreshoptions">
-                    <input class="checkbox" id="autoRefresh" name="autoRefresh" type="checkbox" checked="checked" onclick="toggleAutoRefresh();"> Automatically refresh (1 min)<br>
+                    <label>
+                       <input class="checkbox" id="autoRefresh" name="autoRefresh" type="checkbox" checked="checked" onclick="toggleAutoRefresh();"> Automatically refresh (1 min)
+                    </label><br>
                     Auto-refresh rate: 
                     <select id="refresh_rate" onChange="refresh_rate_changed(true);">
                        <option value="0.16">10 seconds</option>
@@ -577,7 +654,9 @@
                        <option value="3">3</option>
                     </select> seconds<br>
                  </div>
-                 <input class="checkbox" id="neverRefresh" name="neverRefresh" type="checkbox" onclick="toggleNeverAutoRefresh();"> Never refresh unless manually triggered (by hitting spacebar)<br>
+                 <label>
+                    <input class="checkbox" id="neverRefresh" name="neverRefresh" type="checkbox" onclick="toggleNeverAutoRefresh();"> Never refresh unless manually triggered (by hitting spacebar)
+                 </label><br>
                  <hr>
                  Vessel Icon Size: 
                  <input type="button" onclick="decreaseVesselIconSize()" value="-"></input>
@@ -585,7 +664,9 @@
                  <input type="button" onclick="resetVesselIconSize()" value="Reset"></input>
                  <hr>
 
-                 <input class="checkbox" id="showdaynightoverlay" name="Show Day/Night Overlay" type="checkbox" onclick="toggleDayNightOverlay();"> Show Day/Night Overlay<br>
+                 <label>
+                    <input class="checkbox" id="showdaynightoverlay" name="Show Day/Night Overlay" type="checkbox" onclick="toggleDayNightOverlay();"> Show Day/Night Overlay
+                 </label><br>
                  <hr>
                  <p>
                  <b>Hidden Tricks:</b><br>

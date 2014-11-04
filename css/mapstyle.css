@@ -325,6 +325,11 @@ table
 	width: 290px;
 	z-index: 1;
 }
+#panel label
+{
+	text-align: left;
+   width: 300px;
+}
 #map_canvas
 {
 	background-color: rgb(229, 227, 223);
