@@ -4,26 +4,99 @@ html
 }
 body
 {
-	font: 12px/1.7 Verdana,'Lucida Grande', Arial, "Trebuchet MS", Helvetica, sans-serif;
 	height: 100%;
 	margin: 0px;
 	overflow: hidden;
 	padding: 0px;
 	width: 100%;
 }
-.navbar {
-   background-color: transparent;
-   background: transparent;
+.claro {
+  font-family: 'Open Sans',Verdana,Arial,Helvetica,sans-serif;
 }
-.navbar li { color: #000 } 
-#query
-{
-	width: calc(100% - (20px));
-	width: -webkit-calc(100% - (20px));
+.claro .dijitRuleLabel {
+   /* make map zoom slider labels white, claro uses black by default */
+   //display: none;
+   color: white;
 }
+.claro .dijitRuleMark {
+   border: 1px solid #fff;
+}
+.esriLargeSliderTicks { 
+   //display: none; 
+}
+.claro label {
+   font-weight: 400;
+}
+.claro .navbar {
+	background-color: rgba(0, 0, 0, 0.8);   
+}
+#map-container {
+	border: 0px solid gray;
+	height: 100%;
+	left: 0px;
+	margin: 0 0 0 0;
+	overflow: hidden;
+	padding: 0px;
+	position: absolute;
+	top: 0px;
+	width: 100%;
+}
+#mapDiv {
+   padding: 0;
+   margin: 0;
+   height: 100%;
+	background-color: rgb(229, 227, 223);
+	border: 0px solid transparent;
+	height: 100%;
+	left: 0px;
+	overflow: hidden;
+	position: relative;
+	top: 0px;
+	width: 100%;
+}
+#menuDiv {
+   right: 10px;
+   top: 65px;
+}
+.claro .panel-fixed .panel-body {
+   /*
+   max-height: calc(100% - (500px));
+	max-height: -webkit-calc(100% - (500px));
+   */
+   max-height: 600px;
+}
+.claro .panel-heading {
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+}
+@media (max-width: 760px) {
+   #query {
+      /*
+      width: calc(100% - (20px));
+      width: -webkit-calc(100% - (20px));
+       */
+      width: 200px;
+   }
+   #navbar > .navbar-form {
+      width: 300px;
+   }
+}
+@media (min-width: 1200px) {
+   #query {
+      width: 475px;
+   }
+   #navbar > .navbar-form {
+      width: 525px;
+   }
+}   
+
 #stats_nav
 {
-	border: 0px solid blue;
+   border: 0px solid blue;
 	display: inline-block;
 	float: left;
 	height: 60px;
@@ -55,29 +128,6 @@ body
 	visibility: visible;
 	width: 32px;
 	z-index: 2;
-}
-#container
-{
-	border: 0px solid gray;
-	height: 100%;
-	left: 0px;
-	margin: 0 0 0 0;
-	overflow: hidden;
-	padding: 0px;
-	position: absolute;
-	top: 0px;
-	width: 100%;
-}
-#mapDiv
-{
-	background-color: rgb(229, 227, 223);
-	border: 0px solid transparent;
-	height: 100%;
-	left: 0px;
-	overflow: hidden;
-	position: relative;
-	top: 0px;
-	width: 100%;
 }
 #content
 {
@@ -122,9 +172,4 @@ body
 }
 #keyboard-shortcut-modal {
    display: none;
-}
-#menuDiv
-{
-   right: 10px;
-   top: 65px;
 }

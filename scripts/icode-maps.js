@@ -243,17 +243,6 @@ function initialize() {
                markerSymbol.setOutline(null);
                return markerSymbol;
             }
-
-            // Toggle panel
-            on(query(".panel-heading")[0], "click", function () {
-               if (query(".glyphicon.glyphicon-chevron-up")[0]) {
-                  query(".glyphicon").replaceClass("glyphicon-chevron-down", "glyphicon-chevron-up");
-                  query(".panel-body.collapse").removeClass("in");
-               } else {
-                  query(".glyphicon").replaceClass("glyphicon-chevron-up", "glyphicon-chevron-down");
-                  query(".panel-body.collapse").addClass("in");
-               }
-            });
          });
 
    
