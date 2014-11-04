@@ -78,6 +78,11 @@ var queryid;                  //ID of query based on timestamp to keep track of 
 //Enable risk info flag
 var enableRisk;               //Flag to enable or disable risk information in info bubbles
 
+//Enable FMV data
+var enableFMV;               //Flag to enable or disable risk information in info bubbles
+var fmvtargets = [];
+var fmvinfowindow = new google.maps.InfoWindow({});;
+
 //IHS Tabs global
 var NUM_INFO_BUBBLE = 4;      //AIS info at Tab=0 and IHS Fairplay data at  Tab = 1 thru 4
 var enableIHSTabs;            //Flag to enable or disable IHS tabs in info bubbles
@@ -4862,4 +4867,145 @@ function fetchVesselArray(mmsiToSearch) {
       }
    }
    return null;
+}
+
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Function to check if display FMV data
+ **/
+function toggleFMV() {
+   if (document.getElementById("FMVLayer") && document.getElementById("FMVLayer").checked) {
+      console.log("Turning on fmv information");
+      enableFMV = true;
+      getFMVTargets(map.getBounds());
+   }
+   else {
+      console.log("Turning off fmv information");
+      enableFMV = false;
+
+      $.each(fmvtargets, function(key, target) {
+         target.setMap(null);
+      });
+      //Clearing all previous markers
+      emptyArray(fmvtargets);
+   }
+}
+
+
+/* -------------------------------------------------------------------------------- */
+/** 
+ * Get AIS data from JSON, which is from database, with bounds.
+ */
+function getFMVTargets(bounds) {
+   //Set buffer around map bounds to expand queried area slightly outside viewable area
+   var latLonBuffer = expandFactor / Math.pow(map.getZoom(),3);
+   console.log('Current zoom: ' + map.getZoom());
+
+   var ne = bounds.getNorthEast();
+   var sw = bounds.getSouthWest();
+
+   var viewMinLat = sw.lat();
+   var viewMaxLat = ne.lat();
+   var viewMinLon = sw.lng();
+   var viewMaxLon = ne.lng();
+
+   var minLat = viewMinLat;// - latLonBuffer;
+   var maxLat = viewMaxLat;// + latLonBuffer;
+   var minLon = viewMinLon;// - latLonBuffer;
+   var maxLon = viewMaxLon;// + latLonBuffer;
+
+
+   queryBounds = new google.maps.LatLngBounds(
+         new google.maps.LatLng(minLat, minLon), 
+         new google.maps.LatLng(maxLat, maxLon));
+
+   var phpWithArg;
+
+   var boundStr = "&minlat=" + Math.round(minLat*1000)/1000 + "&maxlat=" + Math.round(maxLat*1000)/1000 + "&minlon=" + Math.round(minLon*1000)/1000 + "&maxlon=" + Math.round(maxLon*1000)/1000;
+
+   phpWithArg = "query_fmv_data.php?";
+
+   //if vessel age limit was chosen, then add option
+   if (vessel_age != -1) {
+      phpWithArg += "&contact_age=" + vessel_age;
+   }
+
+   phpWithArg += boundStr;
+
+
+   //Debug query output
+   console.log('getFMVTargets(): ' + phpWithArg);
+
+   //Ship shape
+   var markerpathFMV = 'M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0';
+
+   //Call PHP and get results as markers
+   $.getJSON(
+         phpWithArg, // The server URL 
+         { }
+         ) //end .getJSON()
+            .done(function (response) {
+               console.log('Received data from FMV php');
+
+               //Clearing all previous markers
+               emptyArray(fmvtargets);
+              
+               //Prepare to grab PHP results as JSON objects
+               $.each(response.vessels, function(key,vessel) {
+                  var point = new google.maps.LatLng(
+                     parseFloat(vessel.lat),
+                     parseFloat(vessel.lon));
+
+                  var marker = new google.maps.Marker({
+                     position: point,
+                      icon: {
+                         path:         markerpathFMV,
+                      strokeColor:  '#000000',
+                      strokeWeight: 1,
+                      fillColor:    '#ff0000',
+                      fillOpacity:  0.5,
+                      },
+                      map: map
+                  });
+
+
+                  //Listener for click on marker to display infoBubble
+                  google.maps.event.addListener(marker, 'click', function () {
+                     var contentString = '<div id="content">'+
+                     '<h1 id="firstHeading" class="firstHeading">Target ' + vessel.id + '</h1>'+
+                     '<div id="bodyContent">'+
+                     'Latitude: ' + vessel.lat + '<br>'+
+                     'Longitude: ' + vessel.lon + '<br>'+
+                     '</div>'+
+                     '</div>';
+
+                     fmvinfowindow.setContent(contentString);
+
+                     fmvinfowindow.open(map,marker);
+
+                     //Close the infoBubble if user clicks outside of infoBubble area
+                     google.maps.event.addListenerOnce(map, 'click', function() {
+                        fmvinfowindow.setMap(null);
+                        fmvinfowindow.close(); 
+                     });
+                  });
+
+                  //Prepare data for creating marker infoWindows/infoBubbles later
+                  fmvtargets.push(marker);
+               });
+
+            }) //END .done()
+         .fail(function(d, textStatus, error) { 
+            if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+               console.log('getTargetsFromDB(): ' +  'Database is down'); 
+               document.getElementById("query").value = "DATABASE IS DOWN.";
+            }
+            else {
+               //Update activity status spinner and results
+               console.log('getTargetsFromDB(): ' +  'No response from track query; error in php?'); 
+               document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
+            }
+         }); //END .fail()
+         return true;
 }
