@@ -4975,6 +4975,7 @@ function getFMVTargets(bounds) {
                      var contentString = '<div id="content">'+
                      '<h1 id="firstHeading" class="firstHeading">Target ' + vessel.id + '</h1>'+
                      '<div id="bodyContent">'+
+                     '<img src="fmvdata/11254.png" width="200px" height="200px"><br>'+
                      'Latitude: ' + vessel.lat + '<br>'+
                      'Longitude: ' + vessel.lon + '<br>'+
                      '</div>'+
