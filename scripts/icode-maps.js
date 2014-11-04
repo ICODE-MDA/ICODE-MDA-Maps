@@ -1698,11 +1698,11 @@ function checkImageExistOrReplace(url) {
 function markerInfoBubble(marker, vessel, infoBubble) {
    //Prepare vessel image from Marine Traffic
    if (passIMOChecksum(vessel.imo)) {
-      //imgURL = 'http://photos2.marinetraffic.com/ais/showphoto.aspx?mmsi=' + vessel.mmsi + '&imo=' + vessel.imo;
-      imgURL = 'fetch_photo.php?imo=' + vessel.imo;
+      imgURL = 'http://photos.marinetraffic.com/ais/showphoto.aspx?mmsi=' + vessel.mmsi + '&imo=' + vessel.imo;
+      //imgURL = 'fetch_photo.php?imo=' + vessel.imo;
    }
    else {
-      imgURL = 'http://photos2.marinetraffic.com/ais/showphoto.aspx?mmsi=' + vessel.mmsi;
+      imgURL = 'http://photos.marinetraffic.com/ais/showphoto.aspx?mmsi=' + vessel.mmsi;
    }
    //Check if MarineTraffic image exists; if not, then fill in default PNG image
    checkImageExistOrReplace(imgURL);
