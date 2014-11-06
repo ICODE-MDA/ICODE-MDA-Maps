@@ -168,7 +168,7 @@ InfoBox.prototype.createInfoBoxDiv_ = function () {
     this.div_ = document.createElement("div");
    
     //Add class to div to set text style
-    this.div_.setAttribute("id","vessellabel");
+    this.div_.setAttribute("id","clusterlabel");
 
     this.setBoxStyle_();
 

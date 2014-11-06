@@ -229,7 +229,7 @@ body.modal-open, .modal-open .navbar-fixed-top, .modal-open .navbar-fixed-bottom
 }
 
 .panel-fixed .panel-body {
-  max-height: 350px;
+  max-height: 560px;
   overflow: auto;
 }
 

@@ -10,7 +10,10 @@ $laisic_live_database  = 'icodemaps';
 $ihs_database     = 'wros';
 $port_database    = 'risk';
 $alert_database   = 'alerts';
-$odbc_host        = 'localhost';
-$odbc_user        = 'USERNAME';
-$odbc_password    = 'PASSWORD';
+$odbc_host        = '128.49.79.26';
+$odbc_user        = 'icode';
+$odbc_password    = 'icode';
+$fmv_database     = 'fmv';
+$fmv_user         = 'fmvuser';
+$fmv_password     = 'fmvuser';
 ?>

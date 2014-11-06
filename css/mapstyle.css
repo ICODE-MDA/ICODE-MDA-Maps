@@ -10,9 +10,11 @@ body
 	padding: 0px;
 	width: 100%;
 }
+/*
 .claro {
   font-family: 'Open Sans',Verdana,Arial,Helvetica,sans-serif;
 }
+*/
 .claro .dijitRuleLabel {
    /* make map zoom slider labels white, claro uses black by default */
    //display: none;
@@ -26,9 +28,15 @@ body
 }
 .claro label {
    font-weight: 400;
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
 }
 .claro .navbar {
-	background-color: rgba(0, 0, 0, 0.8);   
+	background: rgba(0, 0, 0, 0.8);
 }
 #map-container {
 	border: 0px solid gray;
@@ -41,7 +49,7 @@ body
 	top: 0px;
 	width: 100%;
 }
-#mapDiv {
+#map_canvas {
    padding: 0;
    margin: 0;
    height: 100%;
@@ -54,16 +62,28 @@ body
 	top: 0px;
 	width: 100%;
 }
+.panel-heading {
+   position: relative;
+}
+.panel-heading .btn {
+   position: absolute;
+   top: 9px;
+   right: 9px;
+   border: none;
+   outline: none;
+}
 #menuDiv {
    right: 10px;
    top: 65px;
+   background: transparent;
+   border: none;
 }
 .claro .panel-fixed .panel-body {
    /*
    max-height: calc(100% - (500px));
 	max-height: -webkit-calc(100% - (500px));
    */
-   max-height: 600px;
+   max-height: 560px;
 }
 .claro .panel-heading {
    -webkit-touch-callout: none;
@@ -75,14 +95,10 @@ body
 }
 @media (max-width: 760px) {
    #query {
-      /*
-      width: calc(100% - (20px));
-      width: -webkit-calc(100% - (20px));
-       */
       width: 200px;
    }
    #navbar > .navbar-form {
-      width: 300px;
+      width: 500px;
    }
 }
 @media (min-width: 1200px) {
@@ -92,42 +108,107 @@ body
    #navbar > .navbar-form {
       width: 525px;
    }
-}   
-
-#stats_nav
-{
-   border: 0px solid blue;
-	display: inline-block;
-	float: left;
-	height: 60px;
-	line-height: 20px;
-	position: relative;
-	text-align: left;
-	vertical-align: middle;
-	width: 100px;
+}
+#search-bar-nav {
+    border: 0px solid red;
+    max-height: 34px;
+    width: 350px;
 }
 #stats
 {
-	border: 0px solid red;
-	display: inline-block;
-	height: 40px;
+	background: transparent;
+	border: 0px solid transparent;
+	bottom: 50px;
+	color: white;
+	display: block;
+	font-size: 14px;
+   font-weight: bold;
 	line-height: 20px;
-	position: relative;
-	text-align: left;
-	top: 10px;
+	opacity: 1;
+	padding: 2px;
+	position: absolute;
+	right: 19px;
+	text-align: right;
+	text-shadow: black 2px 2px 3px;
 	vertical-align: middle;
+	webkit-text-shadow: black 2px 2px 3px;
 }
 #busy_indicator
 {
-	border: 0px red solid;
-	display: inline-block;
-	float: left;
-	height: 60px;
-	left: 20px;
+	background: transparent;
+	border: 0px solid transparent;
+	bottom: 65px;
+	display: block;
+	opacity: 1;
+	padding: 2px;
 	position: absolute;
-	visibility: visible;
-	width: 32px;
-	z-index: 2;
+	right: 35px;
+	text-align: right;
+	text-shadow: black 2px 2px 3px;
+	vertical-align: middle;
+	webkit-text-shadow: black 2px 2px 3px;
+}
+#geocodepanel
+{
+	background-color: #fff;
+	border: 1px solid #999;
+	left: 5px;
+   max-width: 300px;
+	padding: 5px;
+	position: absolute;
+	top: 65px;
+	z-index: 5;
+}
+#keyboard-shortcut-modal {
+   display: none;
+}
+#latlong {
+	background: transparent;
+	border: 0px solid transparent;
+	bottom: 20px;
+	color: white;
+	display: block;
+	font-size: 11px;
+	line-height: 12px;
+	opacity: 1;
+	padding: 2px;
+	position: absolute;
+	right: 19px;
+	text-align: left;
+	text-shadow: black 2px 2px 3px;
+	vertical-align: middle;
+	webkit-text-shadow: black 2px 2px 3px;
+}
+#lastUpdated {
+	background: transparent;
+	border: 0px solid transparent;
+	bottom: 35px;
+	color: white;
+	display: block;
+	font-size: 11px;
+	line-height: 12px;
+	opacity: 1;
+	padding: 2px;
+	position: absolute;
+	right: 19px;
+	text-align: left;
+	text-shadow: black 2px 2px 3px;
+	vertical-align: middle;
+	webkit-text-shadow: black 2px 2px 3px;
+}
+#clusterlabel {
+	filter: Shadow(Color=#FFF, Direction=45, Strength=2);
+	font-size: 14px;
+	font-weight: bold;
+	line-height: 12px;
+	text-shadow: -1px -1px 0 #FFF,
+   1px -1px 0 #FFF,
+   -1px 1px 0 #FFF,
+   1px 1px 0 #FFF;
+   webkit-text-shadow: -1px -1px 0 #FFF,
+   1px -1px 0 #FFF,
+   -1px 1px 0 #FFF,
+   1px 1px 0 #FFF;
 }
 #content
 {
@@ -159,17 +240,10 @@ body
 	border: 1px solid #cccccc;
 	padding: 2px;
 }
-#geocodepanel
+#content-port
 {
-	background-color: #fff;
-	border: 1px solid #999;
-	left: 5px;
-   max-width: 300px;
-	padding: 5px;
-	position: absolute;
-	top: 65px;
-	z-index: 5;
-}
-#keyboard-shortcut-modal {
-   display: none;
+	border: 1px solid #cccccc;
+	display: block;
+	max-width: 174px;
+	padding: 2px;
 }
