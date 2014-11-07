@@ -58,11 +58,15 @@ body {
 	background-color: rgba(0,0,0,0.2);
 	text-align: right;
 }
+.customBtn {
+	font-size: 0.7em;
+}
 .button1 {
 	border: 3px solid rgb(0,0,0);
 	border-radius: 7px;
 	color: rgb(0,0,0);
 	font-weight: bold;
+	font-size: 0.7em;
 	padding: 2px;
 	background-color: rgb(192,192,192);
 	text-align: center;

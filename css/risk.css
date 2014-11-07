@@ -1,0 +1,185 @@
+body {
+	font: 12px/1.7 Verdana,'Lucida Grande', Arial, "Trebuchet MS", Helvetica, sans-serif;
+}
+.outerContainer {
+	width: 700px;
+	height: 600px;
+	height: 500px;
+	clear: both;
+}
+.leftPanel {
+	float: left;
+	width: 250px;
+	height: 550px;
+	margin-right: 20px;
+	overflow: hidden;
+}
+.leftPanelButton {
+	border: 0;
+}
+.rightPanel {
+	float: left;
+	width: 430px;
+	height: 550px;
+}
+.title {
+	background: rgb(120,160,224);
+	color: rgb(255,255,255);
+	padding-left: 5px;
+	font-size: 1.5em;
+	font-weight: bold;
+}
+.subtitle {
+	background: rgb(192,192,192);
+	color: rgb(0,0,0);
+	padding-left: 5px;
+	font-size: 1.2em;
+	font-weight: bold;
+}
+.subtitle2 {
+	padding-left: 5px;
+	font-size: 1.2em;
+	font-weight: bold;
+	text-decoration: underline;
+}
+.errorLog {
+	color: rgb(255,0,0);
+	font-weight: bold;
+}
+.blueTitle {
+	font-size: 1.5em;
+	font-weight: bold;
+	color: rgb(120,160,224);
+}
+
+.ui-tabs-vertical {
+	width: 693px;
+	height: 450px;
+	overflow-y: auto;
+}
+.ui-tabs-vertical .ui-tabs-nav {
+	padding: 0.2em 0.1em 0.2em 0.2em;
+	float: left;
+	width: 180px;
+}
+.ui-tabs-vertical .ui-tabs-nav  li {
+	clear: left;
+	width: 100%;
+	border-bottom-width: 1px !important;
+	border-right-width: 0 !important;
+	margin: 0 -1px 0.2em 0;
+}
+.ui-tabs-vertical .ui-tabs-nav  li a {
+	display: block;
+}
+.ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active {
+	padding-bottom: 0;
+	padding-right: 0.1em;
+	border-right-width: 1px;
+	border-right-width: 1px;
+}
+.ui-tabs-vertical .ui-tabs-panel {
+	padding: 1em;
+	float: right;
+	width: 450px;
+}
+
+.slider-container {
+	clear: both;
+}
+.slider-left {
+	float: left;
+	width: 40%;
+}
+.slider-center {
+	display: inline-block;
+	width: 40%;
+}
+.slider-right {
+	float: right;
+	width: 15%;
+	margin-left: 10px;
+	border: 0; 
+	color: rgb(120,160,224);
+	color: rgb(0,0,0);
+	font-size: 2em;
+	font-weight: bold;
+}
+.sub-left {
+	float: left;
+	width: 50%;
+	text-align: left;
+	font-weight: bold;
+	font-size: 0.7em;
+	color: rgb(0,140,0);
+}
+.sub-right {
+	float: left;
+	width: 50%;
+	text-align: right;
+	font-weight: bold;
+	font-size: 0.7em;
+	color: rgb(255,0,0);
+}
+.colLeft {
+	float: left;
+	width: 50%;
+}
+.colRight {
+	float: right;
+	width: 50%;
+}
+.colClear {
+	clear: both;
+	text-align: center;
+}
+.defLeft {
+	float: left;
+	width: 32%;
+	font-weight: bold;
+}
+.defRight {
+	float: left;
+	width: 68%;
+}
+.defClear {
+	clear: both;
+}
+
+#slider {
+	width: 250px;
+}
+
+#calculate {
+	margin: 5px;
+}
+.note {
+	font-weight: bold;
+}
+.footnote {
+	font-weight: bold;
+	font-size: 0.7em;
+	color: rgb(255,0,0);
+}
+.customBtn {
+	font-size:0.7em;
+	margin-left:3px;
+}
+.resultImo, .resultSafScore,  .resultSafRating, .resultSecScore, .resultSecRating {
+	float: left;
+	width: 20%;
+}
+.boundsLeft {
+	float: left;
+	width: 200px;
+	margin-right: 5px;
+}
+.boundsRight {
+	float: left;
+}
+.boundsRight input {
+	width: 50px;
+}
+.boundsClear {
+	clear: both;
+}

@@ -2,7 +2,7 @@
  * @name searchgui.js
  * @author Julie Luu
  * @fileoverview
- * Script to build MySQL queries from user selected preferences and search terms
+ * Script to build MySQL query sentences from user selected preferences and search terms
  */
 
  /* -------------------------------------------------------------------------------- */
@@ -732,12 +732,18 @@ function saveSearch(type,str) {
 	savedString[idx] = str;
 	
 	$('#searchHistory').append(
-		'<p class="savedSearchLabel">' + savedName[idx] + '<br />' +
+		'<p class="savedSearchLabel">' + savedName[idx] + '</p><p class="customBtn">' +
 		'<button class="button1" onclick="triggerSavedSearch(' + idx + ');">Select</button> ' +
 		'<button class="button1" onclick="triggerRenameSavedSearch(' + idx + ');">Rename</button> ' +
 		'<button class="button1" onclick="triggerRemoveSavedSearch(' + idx + ');">Remove</button>' +
 		'</p>'
 	);
+	
+	// TO-DO: show saved search; will not stay down when already open; undefined
+	if(!($('#historytab').prop('aria-selected'))){
+		$('#historytab').click();
+		console.log($('#historytab').prop('aria-selected'));
+	}
 }
 
 // select search from Results List 
@@ -818,7 +824,7 @@ function triggerSavedSearch(idx) {
 	$('#searchHistory').html('');
 	for(var i=0; i < searchSize; i++) {
 		$('#searchHistory').append(
-			'<p class="savedSearchLabel">' + savedName[i] + '<br />' +
+			'<p class="savedSearchLabel">' + savedName[i] + '</p><p class="customBtn">' +
 			'<button class="button1" onclick="triggerSavedSearch(' + i + ');">Select</button> ' +
 			'<button class="button1" onclick="triggerRenameSavedSearch(' + i + ');">Rename</button> ' +
 			'<button class="button1" onclick="triggerRemoveSavedSearch(' + i + ');">Remove</button>' +
@@ -849,19 +855,10 @@ function callback() {
 	// placeholder for launchMaps function
 }
 
-
 var latMinMsg;
 var lonMinMsg;
 var latMaxMsg;
 var lonMaxMsg;
-function launchTest() {
-	OWF.Launcher.launch({
-		universalName: '26bbdeca-0473-5735-ec5a-6cef1e62c17e',
-		guid: '26bbdeca-0473-5735-ec5a-6cef1e62c17e',
-		title: 'ICODE-MDA Maps',
-		launchOnlyIfClosed: true
-	}, callback);
-}
 
 function toggleButtons(){
 	$('#launchMaps').hide();

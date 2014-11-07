@@ -344,6 +344,15 @@ function searchResults() {
 			'<div style="color:red;font-weight:bold;">Widget was launched manually. Please input a vessel in search bar or click on a ship in the Maps widget to see vessel details.</div>'
 		);
 	} else {
+		// check for valid imo
+		if ((!($.isNumeric(searchTerm)))||(searchTerm.length != 7)) {
+			$(".mainPanel").html(
+				'<div class="title">Notice</div>' +
+				'<div style="color:red;font-weight:bold;">' + searchTerm + ' is not a valid IMO number.</div>'
+			);
+			return;
+		}
+		
 		// launched via maps widget: retrieve info for vessel using IMO and display in main panel
 		var phpWithArg = "query_vessel_details.php?source=initialize&searchType=" + searchType + "&searchTerm=" + searchTerm;
 		console.log('phpWithArg: ' + phpWithArg);
@@ -3153,7 +3162,7 @@ function triggerPerformance() {
 function triggerTutorial() {
 	$(".mainPanel").html(
 		'<div class="title">Tutorial</div>' +
-		'<div>There are two methods to access vessel data: (1) using the search box above or (2) clicking a vessel on the Maps Widget.</div>' +
+		'<div>There are two methods to access vessel data: (1) using the search panel above or (2) clicking a vessel on the <i>Maps Widget</i>.</div>' +
 		'<div>&nbsp;</div>' +
 		'<div class="tutorialSubhead">Method 1: Vessel Details Widget</div>' +
 		'<div>' +

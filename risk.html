@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ICODE-MDA RISK Config Tool</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	
+	<link rel="stylesheet" type="text/css" href="css/risk.css">
+	
+	<!-- OWF library -->
+	<script type="text/javascript" src="/ICODEMDAMaps-Julie/owf/js-min/owf-widget-debug.js"></script>
+	 
+	<!-- jquery library -->
+    <script type="text/javascript" language="Javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+
+	<!-- accordion UI library -->
+	<script type="text/javascript" src="scripts/jquery-ui-1.10.3.custom.js"></script>
+    <link rel="stylesheet" href="css/custom-theme/jquery-ui-1.10.3.custom.css">
+	
+	<script type="text/javascript" src="scripts/risk.js"></script>
+	
+	<!-- call jquery accordion -->
+	<!--
+	<script>
+    $(function() {
+        $( "#accordion" ).accordion({
+            collapsible: true,
+            heightStyle: "fill"
+        });
+        $(window).resize(function(){
+            $("#accordion").accordion("refresh");
+        });           
+    });
+	</script>
+	-->	
+	
+	<!-- call jquery tabs -->
+	<script>
+	$(function() {
+		$("#tabs").tabs().addClass("ui-tabs-vertical ui-helper-clearfix");
+		$("#tabs li").removeClass("ui-corner-top").addClass("ui-corner-left");
+	});
+	</script>
+</head>
+
+<body onload="initialize();">
+<div class="outerContainer">
+	<div class="title"><center>RISK Configuration Tool</center></div>
+	<div id="tabs">
+		<ul>
+			<li><a href="#tutorial">Tutorial</a></li>		
+			<li><a href="#security">Security</a></li>
+			<li><a href="#safety">Safety</a></li>
+			<li><a href="#mou">MOU List</a></li>
+			<li><a href="#summary" id="summarytab" onclick="summary();">Summary</a></li>
+			<li><a href="#history" id="historytab" onclick="history();">History</a></li>
+			<li><a href="#definitions" onclick="showDefs();">Definitions</a></li>
+		</ul>
+		
+		<!-- Tutorial Section -->
+		<div id="tutorial">
+			<div class="blueTitle">Tutorial</div>
+			<div>The RISK Configuration Tool will enable you to specify how you want the RISK score calculated.<br /></div>
+			<div>&nbsp;</div>
+			<div class="subtitle">Specify RISK score settings</div>
+			<div>
+				Using the tabs on the navigation bar, specify how you want to weigh each security and safety field. Click on the <i>Security</i> tab to begin.<br />
+				<br /><img src="img/tutorial_risk_menu1.jpg" width="25%"><br /><br />
+				The <i>Security</i> tab panel will be displayed. Specify boundaries for Priority I and Priority II using the text boxes. Priority I recommends inspecting vessel before arrival in port. Priority II recommends inspecting vessel while in port. You can also specify the max value for the sliders in "Max Points". Click on the "Set" button to set these changes.<br />
+				<br /><img src="img/tutorial_risk_sec1.jpg" width="50%"><br />
+				<br /><img src="img/tutorial_risk_sec2.jpg" width="50%"><br /><br />
+				Adjust the sliders left or right to the desired levels. To specify a high risk field, move the slider to the right. To specify a low risk field, move the slider to the left. To specify a field as Priority I or II, move the slider to -1 or -2, respectively.<br /><br />
+				Do the same for the <i>Safety</i> tab panel.<br /><br />
+				Next, specify which Black-Gray-White MOU List to use by selecting a list from the drop-down menu.<br /><br />
+				<img src="img/tutorial_risk_menu2.jpg" width="25%"><br />
+				<img src="img/tutorial_risk_mou.jpg" width="50%">
+			</div>
+			<div>&nbsp;</div>
+			<div class="subtitle">Request RISK score calculation</div>
+			<div>
+				After you are done adjusting the RISK score settings, click on the <i>Summary</i> tab.<br />
+				<br /><img src="img/tutorial_risk_menu3.jpg" width="25%"><br /><br />
+				This will show you a summary of what you have chosen as well as a choice to save these settings or request the RISK score to be calculated.<br />
+				<br /><img src="img/tutorial_risk_sum1.jpg" width="50%">
+				<br /><img src="img/tutorial_risk_sum2.jpg" width="50%"><br /><br />
+				When you are satisfied with the results, click on the "Calculate" button to request the RISK score to be calculated using the current settings. A summary will be displayed once the calculations are done.<br />
+				<br /><img src="img/tutorial_risk_sum3.jpg" width="50%"><br /><br />
+				You may also save the settings to load at a later time by clicking on the "Save" button. It will prompt you to enter a name for the entry. To access your saved entries click on the <i>History</i> tab on the navigation menu.<br />
+				<br /><img src="img/tutorial_risk_menu4.jpg" width="25%"><br /><br />
+			</div>
+			<div>&nbsp;</div>
+			<div class="subtitle">Save RISK score settings</div>
+			<div>
+				To access saved RISK score settings select the <i>History</i> tab. This will bring up the <i>History</i> panel.<br />
+				<br /><img src="img/tutorial_risk_hist.jpg" width="50%"><br /><br />
+				All saved entries will be displayed. You have the option of loading, renaming, or removing each saved entry. Loading an entry will load the saved settings but will not calculate the RISK score. You must press the "Calculate" button on the <i>Summary</i> panel to see the RISK score.
+			</div>
+			<div>&nbsp;</div>
+			<div class="subtitle">Help</div>
+			<div>
+				For a list of terms and definitions, click on the <i>Definitions</i> tab.<br />
+				<br /><img src="img/tutorial_risk_menu5.jpg" width="25%"><br />
+				<br /><img src="img/tutorial_risk_defs.jpg" width="50%"><br /><br />	
+			</div>
+		</div>
+		
+		<!-- Security Section -->
+		<div id="security">
+			<div class="blueTitle">ISPS Compliance</div>
+			<div class="note">Specify point value definition:</div>
+			<div class="boundsClear">
+				<div class="boundsLeft"><label>ISPS 1 and 2 Boundary</label></div>
+				<div class="boundsRight"><input id="secBound1" type="text" value="14"></div>
+			</div>
+			<div class="boundsClear">
+				<div class="boundsLeft"><label>ISPS 2 and 3 Boundary</label></div>
+				<div class="boundsRight"><input id="secBound2" type="text" value="21"></div>
+			</div>
+			<div class="boundsClear">
+				<div class="boundsLeft">Max Points</div>
+				<div class="boundsRight"><input id="secSliderMax" type="text" value="7"></div>
+			</div>
+			<div class="boundsClear">
+				<div class="boundsLeft">&nbsp;</div>
+				<div class="boundsRight"><button onclick="setSecSliderMax();">Set</button></div>
+			</div>
+			<div class="colClear">&nbsp;</div>
+			<div class="note">Assign point value for each category below:</div>
+			<div>&nbsp;</div>
+			<div class="slider-container">
+				<div class="slider-left"><b>RISK</b></div>
+				<div class="slider-center" style="clear:both;">
+					<div class="sub-left">LOW</div>
+					<div class="sub-right">HIGH</div>
+				</div>			
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="secACompany">Company Security</label>
+				<span class="slider-center" id="secSCompany"></span>
+				<span><input class="slider-right" id="secACompany" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="secABlackFlag">Black Flag Security</label>
+				<span class="slider-center" id="secSBlackFlag"></span>
+				<span><input class="slider-right" id="secABlackFlag" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="secAGrayFlag">Gray Flag Security</label>
+				<span class="slider-center" id="secSGrayFlag"></span>
+				<span><input class="slider-right" id="secAGrayFlag" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="secANoInsp">No ISPS Inspection</label>
+				<span class="slider-center" id="secSNoInsp"></span>
+				<span><input class="slider-right" id="secANoInsp" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="secAInspHist">ISPS Inspection History</label>
+				<span class="slider-center" id="secSInspHist"></span>
+				<span><input class="slider-right" id="secAInspHist" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="secADetention">ISPS Detention</label>
+				<span class="slider-center" id="secSDetention"></span>
+				<span><input class="slider-right" id="secADetention" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="secAMinorControl">ISPS Minor Control</label>
+				<span class="slider-center" id="secSMinorControl"></span>
+				<span><input class="slider-right" id="secAMinorControl" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="secANationality">Nationalities Risk</label>
+				<span class="slider-center" id="secSNationality"></span>
+				<span><input class="slider-right" id="secANationality" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="secAInsPort">Insecure Port</label>
+				<span class="slider-center" id="secSInsPort"></span>
+				<span><input class="slider-right" id="secAInsPort" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="secAPortNotISPS">Port Not ISPS</label>
+				<span class="slider-center" id="secSPortNotISPS"></span>
+				<span><input class="slider-right" id="secAPortNotISPS" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="secANoPortHist">No Port History</label>
+				<span class="slider-center" id="secSNoPortHist"></span>
+				<span><input class="slider-right" id="secANoPortHist" type="text" readonly></span>
+			</div>			
+			<div class="slider-container">
+				<label class="slider-left" for="secACrewData">No Crew Data</label>
+				<span class="slider-center" id="secSCrewData"></span>
+				<span><input class="slider-right" id="secACrewData" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left">Allow ISPS Downgrade</label>
+				<span class="slider-center">
+					<select id="secDowngrade">
+						<option value="0" selected="selected">No</option>
+						<option value="1">Yes</option>
+					</select>
+				</span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left">&nbsp;</label>
+				<span class="slider-center" style="text-align:right;font-size:0.7em;"><button onclick="setDefaultSecurity();">Default</button></span>
+				<span><input class="slider-right" type="text" readonly></span>
+			</div>
+			<div>&nbsp;</div>
+			<div class="footnote">Tip: Slider value of: '-2' means Priority I (inspect before arrival in port), '-2' means Priority II (inspect while in port)</div>
+		</div>
+		
+		<!-- Safety Section -->
+		<div id="safety">
+			<div class="blueTitle">PSC Safety & Environmental Compliance</div>
+			<div class="note">Specify point value definition:</div>
+			<div class="boundsClear">
+				<div class="boundsLeft"><label>PSC 1 and 2 Boundary</label></div>
+				<div class="boundsRight"><input id="safBound1" type="text" value="14"></div>
+			</div>
+			<div class="boundsClear">
+				<div class="boundsLeft"><label>PSC 2 and 3 Boundary</label></div>
+				<div class="boundsRight"><input id="safBound2" type="text" value="21"></div>
+			</div>
+			<div class="boundsClear">
+				<div class="boundsLeft">Max Points</div>
+				<div class="boundsRight"><input id="safSliderMax" type="text" value="7"></div>
+			</div>
+			<div class="boundsClear">
+				<div class="boundsLeft">&nbsp;</div>
+				<div class="boundsRight"><button onclick="setSafSliderMax();">Set</button></div>
+			</div>
+			<div class="colClear">&nbsp;</div>
+			<div class="note">Assign point value for each category below:</div>
+			<div>&nbsp;</div>
+			<div class="slider-container">
+				<div class="slider-left"><b>RISK</b></div>
+				<div class="slider-center" style="clear:both;">
+					<div class="sub-left">LOW</div>
+					<div class="sub-right">HIGH</div>
+				</div>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safACompany">Company Safety</label>
+				<span class="slider-center" id="safSCompany"></span>
+				<span><input class="slider-right" id="safACompany" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safABlackFlag">Black Flag Safety</label>
+				<span class="slider-center" id="safSBlackFlag"></span>
+				<span><input class="slider-right" id="safABlackFlag" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safAGrayFlag">Gray Flag Safety</label>
+				<span class="slider-center" id="safSGrayFlag"></span>
+				<span><input class="slider-right" id="safAGrayFlag" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safAHighClass">High Class</label>
+				<span class="slider-center" id="safSHighClass"></span>
+				<span><input class="slider-right" id="safAHighClass" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safAMedClass">Medium Class</label>
+				<span class="slider-center" id="safSMedClass"></span>
+				<span><input class="slider-right" id="safAMedClass" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safALowClass">Low Class</label>
+				<span class="slider-center" id="safSLowClass"></span>
+				<span><input class="slider-right" id="safALowClass" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safANoInsp">No PSC Inspection</label>
+				<span class="slider-center" id="safSNoInsp"></span>
+				<span><input class="slider-right" id="safANoInsp" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safADetention">PSC Detention</label>
+				<span class="slider-center" id="safSDetention"></span>
+				<span><input class="slider-right" id="safADetention" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safAControl">Other Control</label>
+				<span class="slider-center" id="safSControl"></span>
+				<span><input class="slider-right" id="safAControl" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safACasualty">Casualty/Pollution</label>
+				<span class="slider-center" id="safSCasualty"></span>
+				<span><input class="slider-right" id="safACasualty" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safAViolation">Marine Violation</label>
+				<span class="slider-center" id="safSViolation"></span>
+				<span><input class="slider-right" id="safAViolation" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safATankerPass">Tanker/Passenger</label>
+				<span class="slider-center" id="safSTankerPass"></span>
+				<span><input class="slider-right" id="safATankerPass" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safALt10">Age Less Than 10</label>
+				<span class="slider-center" id="safSLt10"></span>
+				<span><input class="slider-right" id="safALt10" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safA10to20">Age 10 to 20</label>
+				<span class="slider-center" id="safS10to20"></span>
+				<span><input class="slider-right" id="safA10to20" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safAGt20">Age Greater Than 20</label>
+				<span class="slider-center" id="safSGt20"></span>
+				<span><input class="slider-right" id="safAGt20" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left" for="safAMultiAdmin">Multiple Admin Changes</label>
+				<span class="slider-center" id="safSMultiAdmin"></span>
+				<span><input class="slider-right" id="safAMultiAdmin" type="text" readonly></span>
+			</div>
+			<div class="slider-container">
+				<label class="slider-left">&nbsp;</label>
+				<span class="slider-center" style="text-align:right;font-size:0.7em;"><button onclick="setDefaultSafety();">Default</button></span>
+				<span><input class="slider-right" type="text" readonly></span>
+			</div>
+			<div>&nbsp;</div>
+			<div class="footnote">Tip: Slider value of: '-2' means Priority I (inspect before arrival in port), '-2' means Priority II (inspect while in port)</div>
+		</div>
+		
+		<!-- MOU List Section -->
+		<div id="mou">
+			<div class="blueTitle">MOU List</div>
+			<div class="note">Select which set of Black-Gray-White list to use:</div>
+			<div>
+				<select id="moulist">
+					<option value="gLOBAL" selected="selected">Global</option>
+					<option value="blacksea">Black Sea MOU</option>
+					<option value="carribean">Carribean MOU</option>
+					<option value="indianocean">Indian Ocean MOU</option>
+					<option value="mediterranean">Mediterranean MOU</option>
+					<option value="paris">Paris MOU</option>
+					<option value="riyadh">Riyadh MOU</option>
+					<option value="tokyo">Tokyo MOU</option>
+					<option value="uscg">US Coast Guard</option>
+					<option value="vinadelmar">Vina del Mar MOU</option>
+				</select>
+			</div>
+		</div>
+		
+		<!-- Summary Section -->
+		<div id="summary"></div>
+		
+		<!-- History Section -->
+		<div id="history"></div>
+		
+		<!-- Definitions -->
+		<div id="definitions"></div>
+		
+	</div>
+</div>
+</body>
+</html>

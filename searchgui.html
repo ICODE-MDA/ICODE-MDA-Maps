@@ -31,7 +31,6 @@
         });           
     });
     </script>
-	
 </head>
 
 <body onload="initialize();">
@@ -42,7 +41,7 @@
 		<div id="accordion" class="accordion">
 			<h3>Help</h3>
 			<div><button style="border:0;" onclick="triggerTutorial();">Tutorial</button></div>
-			<h3>Saved Searches</h3>
+			<h3 id="historytab">Saved Searches</h3>
 			<div id="searchHistory"></div>
 			<h3>Tables</h3>
 			<div id="tables">
@@ -60,7 +59,13 @@
 				to <input id="maxLat" name="maxLat" type="text" value="90" style="width: 50px"><br /><br />
 				<b>Longitude:</b><br />
 				Between <input id="minLon" name="minLon" type="text" value="-180" style="width: 50px">
-				to <input id="maxLon" name="maxLon" type="text" value="180" style="width: 50px"><br /><br />				
+				to <input id="maxLon" name="maxLon" type="text" value="180" style="width: 50px"><br /><br />
+				<center><b>OR</b></center><br />
+				<b>Draw ROI on Map:</b><br />
+				<button id="launchMaps" onclick="toggleButtons();launchMaps();">Launch</button>
+				<span><button id="addRectangle" onclick="addRectangle();">Add</button></span>
+				<span><button id="acceptCoordinates" onclick="acceptCoordinates();" disabled>Accept</button></span>
+				<p id="rectUpdate"></p>
 			</div>
 			<h3>Date-Time</h3>			
 			<div id="datetime">

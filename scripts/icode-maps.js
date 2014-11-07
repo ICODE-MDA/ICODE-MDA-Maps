@@ -4881,7 +4881,8 @@ var qbToMap = function(sender,msg){
 	if(msgStr[0] == 'Add'){
 		addRectangle();
 	} else if(msgStr[0] == 'Accept') {
-		google.maps.event.clearListeners(owfRectangle,'bounds_changed');
+		//google.maps.event.clearListeners(owfRectangle,'bounds_changed');
+		google.maps.event.clearInstanceListeners(owfRectangle);
 		owfRectangle.setMap(null);
 		owfRectangleStatus = false;
 	}
