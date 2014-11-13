@@ -160,6 +160,7 @@
      </script>
 
      <script>
+        /*
         $(document).ready(function() {
            var vesselsModal = $('#vessels-modal')
            .dialog({
@@ -175,6 +176,7 @@
               }
            });
         });
+        */
      </script>
 
      <script>
@@ -524,8 +526,10 @@
                     <input class="checkbox" id="LAISIC_TARGETS" name="LAISIC_TARGETS" type="checkbox" onclick="refreshMaps(true);"> Display LAISIC targets
                  </label><br><br>
                  <center>
+                    <!--
                     <button id="vesselstableherebutton" class="button" onClick="if ($('#vessels-modal').dialog('isOpen')){$('#vessels-modal').dialog('close'); $('#vesselstableherebutton').text('Open Vessels Tables here');} else {$('#vessels-modal').dialog('open'); $('#vesselstableherebutton').text('Close Vessels Tables');}">Open Vessels Tables here</button>
                     <br>
+                    -->
                     <button id="vesselstablenewwindowbutton" class="button" onClick="window.open('icode-table.html');">Open Vessels Tables (new window)</button>
                  </center>
                  <br>
@@ -745,10 +749,12 @@
         <!-- Content here defined in separate alerts/setup-alerts.html file -->
      </div>
 
+     <!--
      <div id="vessels-modal">
         <iframe src="icode-table.html" height="100%" width="100%" style="margin-top:-65px">
         </iframe>
      </div>
+     -->
 
 
      <div id="alertPanel">
