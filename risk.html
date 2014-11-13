@@ -15,30 +15,41 @@
 
 	<!-- accordion UI library -->
 	<script type="text/javascript" src="scripts/jquery-ui-1.10.3.custom.js"></script>
+	<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
     <link rel="stylesheet" href="css/custom-theme/jquery-ui-1.10.3.custom.css">
 	
 	<script type="text/javascript" src="scripts/risk.js"></script>
 	
-	<!-- call jquery accordion -->
-	<!--
 	<script>
-    $(function() {
-        $( "#accordion" ).accordion({
-            collapsible: true,
-            heightStyle: "fill"
-        });
-        $(window).resize(function(){
-            $("#accordion").accordion("refresh");
-        });           
-    });
-	</script>
-	-->	
-	
 	<!-- call jquery tabs -->
-	<script>
 	$(function() {
 		$("#tabs").tabs().addClass("ui-tabs-vertical ui-helper-clearfix");
 		$("#tabs li").removeClass("ui-corner-top").addClass("ui-corner-left");
+	});
+	
+	<!-- call sortable lists -->
+	$(function() {
+		$("#sortable1, #sortable2").sortable({
+			connectWith: ".connectedSortable"
+		}).disableSelection();
+	});
+	
+	<!-- call custom tooltip styling -->
+	$(function() {
+		$(document).tooltip({
+			position: {
+				my: "center bottom-20",
+				at: "center top",
+				using: function(position,feedback) {
+					$(this).css(position);
+					$("<div>")
+						.addClass("arrow")
+						.addClass(feedback.vertical)
+						.addClass(feedback.horizontal)
+						.appendTo(this);
+				}
+			}
+		});
 	});
 	</script>
 </head>
@@ -52,9 +63,10 @@
 			<li><a href="#security">Security</a></li>
 			<li><a href="#safety">Safety</a></li>
 			<li><a href="#mou">MOU List</a></li>
+			<li><a href="#nationalities">Nationalities List</a></li>
 			<li><a href="#summary" id="summarytab" onclick="summary();">Summary</a></li>
 			<li><a href="#history" id="historytab" onclick="history();">History</a></li>
-			<li><a href="#definitions" onclick="showDefs();">Definitions</a></li>
+<!--			<li><a href="#definitions" onclick="showDefs();">Definitions</a></li> -->
 		</ul>
 		
 		<!-- Tutorial Section -->
@@ -69,24 +81,27 @@
 				The <i>Security</i> tab panel will be displayed. Specify boundaries for Priority I and Priority II using the text boxes. Priority I recommends inspecting vessel before arrival in port. Priority II recommends inspecting vessel while in port. You can also specify the max value for the sliders in "Max Points". Click on the "Set" button to set these changes.<br />
 				<br /><img src="img/tutorial_risk_sec1.jpg" width="50%"><br />
 				<br /><img src="img/tutorial_risk_sec2.jpg" width="50%"><br /><br />
-				Adjust the sliders left or right to the desired levels. To specify a high risk field, move the slider to the right. To specify a low risk field, move the slider to the left. To specify a field as Priority I or II, move the slider to -1 or -2, respectively.<br /><br />
+				Adjust the sliders left or right to the desired levels. To signify if a field is more important in calculating the risk score, move the slider to the right. To signify if a field is less important in calculating the risk score, move the slider to the left. To specify a field as Priority I or II, move the slider to -1 or -2, respectively. The question mark besides each field name will display a definition for that term.<br /><br />
 				Do the same for the <i>Safety</i> tab panel.<br /><br />
-				Next, specify which Black-Gray-White MOU List to use by selecting a list from the drop-down menu.<br /><br />
-				<img src="img/tutorial_risk_menu2.jpg" width="25%"><br />
-				<img src="img/tutorial_risk_mou.jpg" width="50%">
+				Next, specify which set of Black-Gray-White MOU list to use by selecting the drop-down menu.<br /><br />
+				<img src="img/tutorial_risk_menu2.jpg" width="25%"><br /><br />
+				<img src="img/tutorial_risk_mou.jpg" width="50%"><br /><br />
+				Specify which nationalities to flag when calculating the Risk score by adding it to the Nationalities list. To do this, click on the <i>Nationalities List</i> tab.<br /><br />
+				<img src="img/tutorial_risk_menu3.jpg" width="25%"><br /><br />
+				The <i>Nationalities List</i> tab will list all nationalities available to add. Drag and drop the desired nationality from the list on the left to the list on the right. If the desired nationality is not found from the available list, you may add one by typing it into the text box on the bottom and clicking the "Add to List" button. To add all nationalities to the list, click on the "Add All" button. To remove all nationalities from the list, click on the "Clear All" button.<br /><br />
+				<img src="img/tutorial_risk_sec3.jpg" width="75%"><br />
 			</div>
 			<div>&nbsp;</div>
 			<div class="subtitle">Request RISK score calculation</div>
 			<div>
 				After you are done adjusting the RISK score settings, click on the <i>Summary</i> tab.<br />
-				<br /><img src="img/tutorial_risk_menu3.jpg" width="25%"><br /><br />
-				This will show you a summary of what you have chosen as well as a choice to save these settings or request the RISK score to be calculated.<br />
-				<br /><img src="img/tutorial_risk_sum1.jpg" width="50%">
-				<br /><img src="img/tutorial_risk_sum2.jpg" width="50%"><br /><br />
+				<br /><img src="img/tutorial_risk_menu4.jpg" width="25%"><br /><br />
+				This will summarize your settings as well as a choice to save these settings or request the RISK score to be calculated.<br />
+				<br /><img src="img/tutorial_risk_sum1.jpg" width="50%"><br /><br />
 				When you are satisfied with the results, click on the "Calculate" button to request the RISK score to be calculated using the current settings. A summary will be displayed once the calculations are done.<br />
 				<br /><img src="img/tutorial_risk_sum3.jpg" width="50%"><br /><br />
 				You may also save the settings to load at a later time by clicking on the "Save" button. It will prompt you to enter a name for the entry. To access your saved entries click on the <i>History</i> tab on the navigation menu.<br />
-				<br /><img src="img/tutorial_risk_menu4.jpg" width="25%"><br /><br />
+				<br /><img src="img/tutorial_risk_menu5.jpg" width="25%"><br />
 			</div>
 			<div>&nbsp;</div>
 			<div class="subtitle">Save RISK score settings</div>
@@ -96,12 +111,6 @@
 				All saved entries will be displayed. You have the option of loading, renaming, or removing each saved entry. Loading an entry will load the saved settings but will not calculate the RISK score. You must press the "Calculate" button on the <i>Summary</i> panel to see the RISK score.
 			</div>
 			<div>&nbsp;</div>
-			<div class="subtitle">Help</div>
-			<div>
-				For a list of terms and definitions, click on the <i>Definitions</i> tab.<br />
-				<br /><img src="img/tutorial_risk_menu5.jpg" width="25%"><br />
-				<br /><img src="img/tutorial_risk_defs.jpg" width="50%"><br /><br />	
-			</div>
 		</div>
 		
 		<!-- Security Section -->
@@ -109,15 +118,24 @@
 			<div class="blueTitle">ISPS Compliance</div>
 			<div class="note">Specify point value definition:</div>
 			<div class="boundsClear">
-				<div class="boundsLeft"><label>ISPS 1 and 2 Boundary</label></div>
+				<div class="boundsLeft">
+					ISPS 1 and 2 Boundary
+					<span><img class="question" src="img/question2.jpg" title="Threshold for security risk score that recommends vessel be inspected before arrival in port (Priority 1)." /></span>
+				</div>
 				<div class="boundsRight"><input id="secBound1" type="text" value="14"></div>
 			</div>
 			<div class="boundsClear">
-				<div class="boundsLeft"><label>ISPS 2 and 3 Boundary</label></div>
+				<div class="boundsLeft">
+					ISPS 2 and 3 Boundary
+					<span><img class="question" src="img/question2.jpg" title="Threshold for security risk score that recommends vessel be inspected after arrival in port (Priority 2)." /></span>
+				</div>
 				<div class="boundsRight"><input id="secBound2" type="text" value="21"></div>
 			</div>
 			<div class="boundsClear">
-				<div class="boundsLeft">Max Points</div>
+				<div class="boundsLeft">
+					Max Points
+					<span><img class="question" src="img/question2.jpg" title="Maximum allowed points user can assign to a field. This corresponds to the maximum value the user can adjust the slider." /></span>
+				</div>
 				<div class="boundsRight"><input id="secSliderMax" type="text" value="7"></div>
 			</div>
 			<div class="boundsClear">
@@ -135,67 +153,80 @@
 				</div>			
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="secACompany">Company Security</label>
+				<label class="slider-left" for="secACompany">Company Security
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the owner/operator/manager appears on the targeted company (black) list." /></span></label>				
 				<span class="slider-center" id="secSCompany"></span>
 				<span><input class="slider-right" id="secACompany" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="secABlackFlag">Black Flag Security</label>
+				<label class="slider-left" for="secABlackFlag">Black Flag Security
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel's country of registry appears on the flag state black list." /></span></label>
 				<span class="slider-center" id="secSBlackFlag"></span>
 				<span><input class="slider-right" id="secABlackFlag" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="secAGrayFlag">Gray Flag Security</label>
+				<label class="slider-left" for="secAGrayFlag">Gray Flag Security
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel's country of registry appears on the flag state gray list." /></span></label>
 				<span class="slider-center" id="secSGrayFlag"></span>
 				<span><input class="slider-right" id="secAGrayFlag" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="secANoInsp">No ISPS Inspection</label>
+				<label class="slider-left" for="secANoInsp">No ISPS Inspection
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if there is no record of an ISPS inspection within the previous year." /></span></label>
 				<span class="slider-center" id="secSNoInsp"></span>
 				<span><input class="slider-right" id="secANoInsp" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="secAInspHist">ISPS Inspection History</label>
+				<label class="slider-left" for="secAInspHist">ISPS Inspection History
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if there have been 5 or fewer ISPS inspections within the past 3 years." /></span></label>
 				<span class="slider-center" id="secSInspHist"></span>
 				<span><input class="slider-right" id="secAInspHist" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="secADetention">ISPS Detention</label>
+				<label class="slider-left" for="secADetention">ISPS Detention
+				<span><img class="question" src="img/question2.jpg" title="Points assessed for an ISPS detention within the previous year." /></span></label>
 				<span class="slider-center" id="secSDetention"></span>
 				<span><input class="slider-right" id="secADetention" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="secAMinorControl">ISPS Minor Control</label>
+				<label class="slider-left" for="secAMinorControl">ISPS Minor Control
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel has been subject to a minor ISPS control action (not an inspection or detention)." /></span></label>
 				<span class="slider-center" id="secSMinorControl"></span>
 				<span><input class="slider-right" id="secAMinorControl" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="secANationality">Nationalities Risk</label>
+				<label class="slider-left" for="secANationality">Nationalities Risk
+				<span><img class="question" src="img/question2.jpg" title="Points assessed when members of the crew are from countries the user defines as posing a threat to security." /></span></label>
 				<span class="slider-center" id="secSNationality"></span>
 				<span><input class="slider-right" id="secANationality" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="secAInsPort">Insecure Port</label>
+				<label class="slider-left" for="secAInsPort">Insecure Port
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel visits a port deemed insecure by the International Port Security Program within the last 5 ports visited." /></span></label>
 				<span class="slider-center" id="secSInsPort"></span>
 				<span><input class="slider-right" id="secAInsPort" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="secAPortNotISPS">Port Not ISPS</label>
+				<label class="slider-left" for="secAPortNotISPS">Port Not ISPS
+				<span><img class="question" src="img/question2.jpg" title="Points assessed per visit to a port deemed not to be ISPS compliant (within the previous 5 ports of call)." /></span></label>
 				<span class="slider-center" id="secSPortNotISPS"></span>
 				<span><input class="slider-right" id="secAPortNotISPS" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="secANoPortHist">No Port History</label>
+				<label class="slider-left" for="secANoPortHist">No Port History
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if there is no port call data for this vessel (occurs when we don't have  a MMSI for the vessel)." /></span></label>
 				<span class="slider-center" id="secSNoPortHist"></span>
 				<span><input class="slider-right" id="secANoPortHist" type="text" readonly></span>
 			</div>			
 			<div class="slider-container">
-				<label class="slider-left" for="secACrewData">No Crew Data</label>
+				<label class="slider-left" for="secACrewData">No Crew Data
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if there is no information about the crew available for this vessel." /></span></label>
 				<span class="slider-center" id="secSCrewData"></span>
 				<span><input class="slider-right" id="secACrewData" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left">Allow ISPS Downgrade</label>
+				<label class="slider-left">Allow ISPS Downgrade
+				<span><img class="question" src="img/question2.jpg" title="Indication to allow points assessed for visiting an insecure port." /></span></label>
 				<span class="slider-center">
 					<select id="secDowngrade">
 						<option value="0" selected="selected">No</option>
@@ -209,7 +240,7 @@
 				<span><input class="slider-right" type="text" readonly></span>
 			</div>
 			<div>&nbsp;</div>
-			<div class="footnote">Tip: Slider value of: '-2' means Priority I (inspect before arrival in port), '-2' means Priority II (inspect while in port)</div>
+			<div class="footnote">Tip: Slider value of: '-1' means Priority I (inspect before arrival in port), '-2' means Priority II (inspect while in port)</div>
 		</div>
 		
 		<!-- Safety Section -->
@@ -217,15 +248,24 @@
 			<div class="blueTitle">PSC Safety & Environmental Compliance</div>
 			<div class="note">Specify point value definition:</div>
 			<div class="boundsClear">
-				<div class="boundsLeft"><label>PSC 1 and 2 Boundary</label></div>
+				<div class="boundsLeft">
+					PSC 1 and 2 Boundary
+					<span><img class="question" src="img/question2.jpg" title="Threshold for safety risk score that recommends vessel be inspected before arrival in port (Priority 1)." /></span>
+				</div>
 				<div class="boundsRight"><input id="safBound1" type="text" value="14"></div>
 			</div>
 			<div class="boundsClear">
-				<div class="boundsLeft"><label>PSC 2 and 3 Boundary</label></div>
+				<div class="boundsLeft">
+					PSC 2 and 3 Boundary
+					<span><img class="question" src="img/question2.jpg" title="Threshold for safety risk score that recommends that the vessel be inspected while in port (Priority 2)." /></span>
+				</div>
 				<div class="boundsRight"><input id="safBound2" type="text" value="21"></div>
 			</div>
 			<div class="boundsClear">
-				<div class="boundsLeft">Max Points</div>
+				<div class="boundsLeft">
+					Max Points
+					<span><img class="question" src="img/question2.jpg" title="Maximum allowed points user can assign to a field. This corresponds to the maximum value the user can adjust the slider." /></span>
+				</div>
 				<div class="boundsRight"><input id="safSliderMax" type="text" value="7"></div>
 			</div>
 			<div class="boundsClear">
@@ -243,82 +283,98 @@
 				</div>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safACompany">Company Safety</label>
+				<label class="slider-left" for="safACompany">Company Safety
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the owner/operator/manager of a vessel is on the targeted (black) list for safety." /></span></label>
 				<span class="slider-center" id="safSCompany"></span>
 				<span><input class="slider-right" id="safACompany" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safABlackFlag">Black Flag Safety</label>
+				<label class="slider-left" for="safABlackFlag">Black Flag Safety
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel's country of registry appears on the targeted (black) flag state list for safety." /></span></label>
 				<span class="slider-center" id="safSBlackFlag"></span>
 				<span><input class="slider-right" id="safABlackFlag" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safAGrayFlag">Gray Flag Safety</label>
+				<label class="slider-left" for="safAGrayFlag">Gray Flag Safety
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel's country of registry appears on the targeted (gray) flag state list for safety." /></span></label>
 				<span class="slider-center" id="safSGrayFlag"></span>
 				<span><input class="slider-right" id="safAGrayFlag" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safAHighClass">High Class</label>
+				<label class="slider-left" for="safAHighClass">High Class
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel's classification society appears in the targeted (high) list for safety." /></span></label>
 				<span class="slider-center" id="safSHighClass"></span>
 				<span><input class="slider-right" id="safAHighClass" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safAMedClass">Medium Class</label>
+				<label class="slider-left" for="safAMedClass">Medium Class
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel's classification society appears in the targeted (medium) list for safety." /></span></label>
 				<span class="slider-center" id="safSMedClass"></span>
 				<span><input class="slider-right" id="safAMedClass" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safALowClass">Low Class</label>
+				<label class="slider-left" for="safALowClass">Low Class
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel's classification society appears in the targeted (low) list for safety." /></span></label>
 				<span class="slider-center" id="safSLowClass"></span>
 				<span><input class="slider-right" id="safALowClass" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safANoInsp">No PSC Inspection</label>
+				<label class="slider-left" for="safANoInsp">No PSC Inspection
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel has not undergone a port state control inspection within the previous year." /></span></label>
 				<span class="slider-center" id="safSNoInsp"></span>
 				<span><input class="slider-right" id="safANoInsp" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safADetention">PSC Detention</label>
+				<label class="slider-left" for="safADetention">PSC Detention
+				<span><img class="question" src="img/question2.jpg" title="Points assessed for each time the vessel has been detained for port state control violations within the previous year." /></span></label>
 				<span class="slider-center" id="safSDetention"></span>
 				<span><input class="slider-right" id="safADetention" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safAControl">Other Control</label>
+				<label class="slider-left" for="safAControl">Other Control
+				<span><img class="question" src="img/question2.jpg" title="Points assessed for each time the vessel has been detained for port state control violations within the previous year." /></span></label>
 				<span class="slider-center" id="safSControl"></span>
 				<span><input class="slider-right" id="safAControl" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safACasualty">Casualty/Pollution</label>
+				<label class="slider-left" for="safACasualty">Casualty/Pollution
+				<span><img class="question" src="img/question2.jpg" title="Points assessed for each casualty or pollution event within the previous year." /></span></label>
 				<span class="slider-center" id="safSCasualty"></span>
 				<span><input class="slider-right" id="safACasualty" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safAViolation">Marine Violation</label>
+				<label class="slider-left" for="safAViolation">Marine Violation
+				<span><img class="question" src="img/question2.jpg" title="Points assessed for each marine violation (except pollution) within the previous year." /></span></label>
 				<span class="slider-center" id="safSViolation"></span>
 				<span><input class="slider-right" id="safAViolation" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safATankerPass">Tanker/Passenger</label>
+				<label class="slider-left" for="safATankerPass">Tanker/Passenger
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel is a tanker or passenger vessel." /></span></label>
 				<span class="slider-center" id="safSTankerPass"></span>
 				<span><input class="slider-right" id="safATankerPass" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safALt10">Age Less Than 10</label>
+				<label class="slider-left" for="safALt10">Age Less Than 10
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel is a cargo vessel less than 10 years old." /></span></label>
 				<span class="slider-center" id="safSLt10"></span>
 				<span><input class="slider-right" id="safALt10" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safA10to20">Age 10 to 20</label>
+				<label class="slider-left" for="safA10to20">Age 10 to 20
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel is a cargo vessel between 10 and 20 years old." /></span></label>
 				<span class="slider-center" id="safS10to20"></span>
 				<span><input class="slider-right" id="safA10to20" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safAGt20">Age Greater Than 20</label>
+				<label class="slider-left" for="safAGt20">Age Greater Than 20
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel is a cargo vessel greater than 20 years old. This penalty is assessed if the age of the vessel is unknown." /></span></label>
 				<span class="slider-center" id="safSGt20"></span>
 				<span><input class="slider-right" id="safAGt20" type="text" readonly></span>
 			</div>
 			<div class="slider-container">
-				<label class="slider-left" for="safAMultiAdmin">Multiple Admin Changes</label>
+				<label class="slider-left" for="safAMultiAdmin">Multiple Admin Changes
+				<span><img class="question" src="img/question2.jpg" title="Points assessed if the vessel's owner/operator/manager/flag has changed multiple times within the previous year. Multiple changes occurring on a single day are considered a single change." /></span></label>
 				<span class="slider-center" id="safSMultiAdmin"></span>
 				<span><input class="slider-right" id="safAMultiAdmin" type="text" readonly></span>
 			</div>
@@ -328,7 +384,7 @@
 				<span><input class="slider-right" type="text" readonly></span>
 			</div>
 			<div>&nbsp;</div>
-			<div class="footnote">Tip: Slider value of: '-2' means Priority I (inspect before arrival in port), '-2' means Priority II (inspect while in port)</div>
+			<div class="footnote">Tip: Slider value of: '-1' means Priority I (inspect before arrival in port), '-2' means Priority II (inspect while in port)</div>
 		</div>
 		
 		<!-- MOU List Section -->
@@ -351,6 +407,245 @@
 			</div>
 		</div>
 		
+		<!-- Nationalities List Section -->
+		<div id="nationalities">
+			<div class="blueTitle">Nationalities List</div>
+			<div><label class="note">Select the nationalities to include on the Nationalities List by dragging and dropping.<label></div>
+			<div>&nbsp;</div>
+			<div class="sortableTitles">Available:</div>
+			<div class="sortableTitles">Added to List:</div>
+			<div class="boundsClear"></div>
+			<ul id="sortable1" class="connectedSortable">
+				<li class="ui-state-default">Afghan<span class="natFlag"><img src="flags/Afghanistan.gif" /></span></li>
+				<li class="ui-state-default">&#197;land Islander<span class="natFlag"><img src="flags/AlandIslands.gif" /></span></li>
+				<li class="ui-state-default">Albanian<span class="natFlag"><img src="flags/Albania.gif" /></span></li>
+				<li class="ui-state-default">Algerian<span class="natFlag"><img src="flags/Algeria.gif" /></span></li>
+				<li class="ui-state-default">American<span class="natFlag"><img src="flags/UnitedStatesofAmerica.gif" /></span></li>
+				<li class="ui-state-default">Andorran<span class="natFlag"><img src="flags/Andorra.gif" /></span></li>
+				<li class="ui-state-default">Angolan<span class="natFlag"><img src="flags/Angola.gif" /></span></li>
+				<li class="ui-state-default">Anguillan<span class="natFlag"><img src="flags/Anguilla.gif" /></span></li>
+				<li class="ui-state-default">Antiguan<span class="natFlag"><img src="flags/AntiguaAndBarbuda.gif" /></span></li>
+				<li class="ui-state-default">Argentine<span class="natFlag"><img src="flags/Argentina.gif" /></span></li>
+				<li class="ui-state-default">Armenian<span class="natFlag"><img src="flags/Armenia.gif" /></span></li>
+				<li class="ui-state-default">Australian<span class="natFlag"><img src="flags/Australia.gif" /></span></li>
+				<li class="ui-state-default">Austrian<span class="natFlag"><img src="flags/Austria.gif" /></span></li>
+				<li class="ui-state-default">Azerbaijani<span class="natFlag"><img src="flags/Azerbaijan.gif" /></span></li>
+				<li class="ui-state-default">Bahamian<span class="natFlag"><img src="flags/Bahamas.gif" /></span></li>
+				<li class="ui-state-default">Bangladeshi<span class="natFlag"><img src="flags/Bangladesh.gif" /></span></li>
+				<li class="ui-state-default">Barbadian<span class="natFlag"><img src="flags/Barbados.gif" /></span></li>
+				<li class="ui-state-default">Belarusian<span class="natFlag"><img src="flags/Belarus.gif" /></span></li>
+				<li class="ui-state-default">Belgian<span class="natFlag"><img src="flags/Belgium.gif" /></span></li>
+				<li class="ui-state-default">Belizean<span class="natFlag"><img src="flags/Beliz.gif" /></span></li>
+				<li class="ui-state-default">Beninese<span class="natFlag"><img src="flags/Benin.gif" /></span></li>
+				<li class="ui-state-default">Bermudian<span class="natFlag"><img src="flags/Bermuda.gif" /></span></li>
+				<li class="ui-state-default">Bhutanese<span class="natFlag"><img src="flags/Bhutan.gif" /></span></li>
+				<li class="ui-state-default">Bolivian<span class="natFlag"><img src="flags/Bolivia.gif" /></span></li>
+				<li class="ui-state-default">Bosnian<span class="natFlag"><img src="flags/BosniaAndHerzegovina.gif" /></span></li>
+				<li class="ui-state-default">Batswana<span class="natFlag"><img src="flags/Botswana.gif" /></span></li>
+				<li class="ui-state-default">Brazilian<span class="natFlag"><img src="flags/Brazil.gif" /></span></li>
+				<li class="ui-state-default">British<span class="natFlag"><img src="flags/UnitedKingdom.gif" /></span></li>
+				<li class="ui-state-default">British Virgin Islanders<span class="natFlag"><img src="flags/BritishVirginIslands.gif" /></span></li>
+				<li class="ui-state-default">Bruneian<span class="natFlag"><img src="flags/Brunei.gif" /></span></li>
+				<li class="ui-state-default">Bulgarian<span class="natFlag"><img src="flags/Bulgaria.gif" /></span></li>
+				<li class="ui-state-default">Burkinabe<span class="natFlag"><img src="flags/BurkinaFaso.gif" /></span></li>
+				<li class="ui-state-default">Burmese<span class="natFlag"><img src="flags/Burma.gif" /></span></li>
+				<li class="ui-state-default">Burundian<span class="natFlag"><img src="flags/Burundi.gif" /></span></li>
+				<li class="ui-state-default">Cambodian<span class="natFlag"><img src="flags/Cambodia.gif" /></span></li>
+				<li class="ui-state-default">Cameroonian<span class="natFlag"><img src="flags/Cameroon.gif" /></span></li>
+				<li class="ui-state-default">Canadian<span class="natFlag"><img src="flags/Canada.gif" /></span></li>
+				<li class="ui-state-default">Cape Verdian<span class="natFlag"><img src="flags/CapeVerdeIslands.gif" /></span></li>
+				<li class="ui-state-default">Chadian<span class="natFlag"><img src="flags/Chad.gif" /></span></li>
+				<li class="ui-state-default">Channel Islander<span class="natFlag"><img src="flags/Guernsey.gif" /></span></li> 
+				<li class="ui-state-default">Chilean<span class="natFlag"><img src="flags/Chile.gif" /></span></li>
+				<li class="ui-state-default">Chinese<span class="natFlag"><img src="flags/China.gif" /></span></li>
+				<li class="ui-state-default">Christmas Islander<span class="natFlag"><img src="flags/ChristmasIsland.gif" /></span></li>
+				<li class="ui-state-default">Cocos Islander<span class="natFlag"><img src="flags/CocosIslands.gif" /></span></li>
+				<li class="ui-state-default">Colombian<span class="natFlag"><img src="flags/Colombia.gif" /></span></li>
+				<li class="ui-state-default">Congolese<span class="natFlag"><img src="flags/Congo.gif" /></span></li>
+				<li class="ui-state-default">Congolese (DRC)<span class="natFlag"><img src="flags/DemocraticRepublicofCongo.gif" /></span></li>
+				<li class="ui-state-default">Costa Rican<span class="natFlag"><img src="flags/CostaRica.gif" /></span></li>
+				<li class="ui-state-default">Croat<span class="natFlag"><img src="flags/Croatia.gif" /></span></li>
+				<li class="ui-state-default">Cuban<span class="natFlag"><img src="flags/Cuba.gif" /></span></li>
+				<li class="ui-state-default">Cypriot<span class="natFlag"><img src="flags/Cyprus.gif" /></span></li>
+				<li class="ui-state-default">Czech/Czechoslavakian<span class="natFlag"><img src="flags/CzechRepublic.gif" /></span></li>
+				<li class="ui-state-default">Dane<span class="natFlag"><img src="flags/Denmark.gif" /></span></li>
+				<li class="ui-state-default">Djibouti<span class="natFlag"><img src="flags/Djibouti.gif" /></span></li>
+				<li class="ui-state-default">Dominican<span class="natFlag"><img src="flags/Dominica.gif" /></span></li>
+				<li class="ui-state-default">Dominican (Republic)<span class="natFlag"><img src="flags/DominicanRepublic.gif" /></span></li>
+				<li class="ui-state-default">Dutch<span class="natFlag"><img src="flags/Netherlands.gif" /></span></li>
+				<li class="ui-state-default">East Timorese<span class="natFlag"><img src="flags/EastTimor.gif" /></span></li>
+				<li class="ui-state-default">Ecuadorian<span class="natFlag"><img src="flags/Ecuador.gif" /></span></li>
+				<li class="ui-state-default">Egyptian<span class="natFlag"><img src="flags/Egypt.gif" /></span></li>
+				<li class="ui-state-default">Emirati<span class="natFlag"><img src="flags/UnitedArabEmirates.gif" /></span></li>
+				<li class="ui-state-default">Equatorial Guinean<span class="natFlag"><img src="flags/EquatorialGuinea.gif" /></span></li>
+				<li class="ui-state-default">Eritrean<span class="natFlag"><img src="flags/Eritrea.gif" /></span></li>
+				<li class="ui-state-default">Estonian<span class="natFlag"><img src="flags/Estonia.gif" /></span></li>
+				<li class="ui-state-default">Ethioian<span class="natFlag"><img src="flags/Ethiopia.gif" /></span></li>
+				<li class="ui-state-default">Falkland Islander<span class="natFlag"><img src="flags/FalklandIslands.gif" /></span></li>
+				<li class="ui-state-default">Faroese<span class="natFlag"><img src="flags/FaroeIslands.gif" /></span></li>
+				<li class="ui-state-default">Fijian<span class="natFlag"><img src="flags/Fiji.gif" /></span></li>
+				<li class="ui-state-default">Filipino<span class="natFlag"><img src="flags/Philippines.gif" /></span></li>
+				<li class="ui-state-default">Finn<span class="natFlag"><img src="flags/Finland.gif" /></span></li>
+				<li class="ui-state-default">French<span class="natFlag"><img src="flags/France.gif" /></span></li>
+				<li class="ui-state-default">French Guianese<span class="natFlag"><img src="flags/FrenchGuiana.gif" /></span></li>
+				<li class="ui-state-default">Gambian<span class="natFlag"><img src="flags/Gambia.gif" /></span></li>
+				<li class="ui-state-default">Georgian<span class="natFlag"><img src="flags/Georgia.gif" /></span></li>
+				<li class="ui-state-default">German<span class="natFlag"><img src="flags/Germany.gif" /></span></li>
+				<li class="ui-state-default">Ghanaian<span class="natFlag"><img src="flags/Ghana.gif" /></span></li>
+				<li class="ui-state-default">Gibraltarian<span class="natFlag"><img src="flags/Gibraltar.gif" /></span></li>
+				<li class="ui-state-default">Greek<span class="natFlag"><img src="flags/Greece.gif" /></span></li>
+				<li class="ui-state-default">Greenlander<span class="natFlag"><img src="flags/Greenland.gif" /></span></li>
+				<li class="ui-state-default">Grenadan<span class="natFlag"><img src="flags/Grenada.gif" /></span></li>
+				<li class="ui-state-default">Guadeloupean<span class="natFlag"><img src="flags/Guadeloupe.gif" /></span></li>
+				<li class="ui-state-default">Guatemalan<span class="natFlag"><img src="flags/Guatamala.gif" /></span></li>			
+				<li class="ui-state-default">Guinean<span class="natFlag"><img src="flags/Guinea.gif" /></span></li>
+				<li class="ui-state-default">Guinea-Bissauan<span class="natFlag"><img src="flags/GuineaBissau.gif" /></span></li>
+				<li class="ui-state-default">Guyanese<span class="natFlag"><img src="flags/Guyana.gif" /></span></li>
+				<li class="ui-state-default">Haitian<span class="natFlag"><img src="flags/Haiti.gif" /></span></li>
+				<li class="ui-state-default">Honduran<span class="natFlag"><img src="flags/Honduras.gif" /></span></li>
+				<li class="ui-state-default">Hong Kong Chinese<span class="natFlag"><img src="flags/HongKong.gif" /></span></li>
+				<li class="ui-state-default">Hungarian<span class="natFlag"><img src="flags/Hungary.gif" /></span></li>
+				<li class="ui-state-default">Icelander<span class="natFlag"><img src="flags/Iceland.gif" /></span></li>
+				<li class="ui-state-default">Indian<span class="natFlag"><img src="flags/India.gif" /></span></li>
+				<li class="ui-state-default">Indonesian<span class="natFlag"><img src="flags/Indonesia.gif" /></span></li>
+				<li class="ui-state-default">Iranian<span class="natFlag"><img src="flags/Iran.gif" /></span></li>
+				<li class="ui-state-default">Iraqi<span class="natFlag"><img src="flags/Iraq.gif" /></span></li>
+				<li class="ui-state-default">Irish<span class="natFlag"><img src="flags/Ireland.gif" /></span></li>
+				<li class="ui-state-default">Israeli<span class="natFlag"><img src="flags/Israel.gif" /></span></li>
+				<li class="ui-state-default">Italian<span class="natFlag"><img src="flags/Italy.gif" /></span></li>
+				<li class="ui-state-default">Ivorian<span class="natFlag"><img src="flags/CotedIvoire.gif" /></span></li>
+				<li class="ui-state-default">Jamaican<span class="natFlag"><img src="flags/Jamaica.gif" /></span></li>
+				<li class="ui-state-default">Japanese<span class="natFlag"><img src="flags/Japan.gif" /></span></li>
+				<li class="ui-state-default">Jordanian<span class="natFlag"><img src="flags/Jordan.gif" /></span></li>
+				<li class="ui-state-default">Kazakhstani<span class="natFlag"><img src="flags/Kazakhstan.gif" /></span></li>
+				<li class="ui-state-default">Kenyan<span class="natFlag"><img src="flags/Kenya.gif" /></span></li>
+				<li class="ui-state-default">Kiribati<span class="natFlag"><img src="flags/Kiribati.gif" /></span></li>
+				<li class="ui-state-default">Kittian/Nevisian<span class="natFlag"><img src="flags/SaintKittsAndNevis.gif" /></span></li> 
+				<li class="ui-state-default">Korean, North<span class="natFlag"><img src="flags/KoreaNorth.gif" /></span></li>
+				<li class="ui-state-default">Korean, South<span class="natFlag"><img src="flags/KoreaSouth.gif" /></span></li>
+				<li class="ui-state-default">Kuwaiti<span class="natFlag"><img src="flags/Kuwait.gif" /></span></li>
+				<li class="ui-state-default">Kyrgyz<span class="natFlag"><img src="flags/Kyrgyzstan.gif" /></span></li>
+				<li class="ui-state-default">Laotian<span class="natFlag"><img src="flags/Laos.gif" /></span></li>
+				<li class="ui-state-default">Latvian<span class="natFlag"><img src="flags/Latvia.gif" /></span></li>
+				<li class="ui-state-default">Lebanese<span class="natFlag"><img src="flags/Lebanon.gif" /></span></li>
+				<li class="ui-state-default">Lesotho<span class="natFlag"><img src="flags/Lesotho.gif" /></span></li>
+				<li class="ui-state-default">Liberian<span class="natFlag"><img src="flags/Liberia.gif" /></span></li>
+				<li class="ui-state-default">Libyan<span class="natFlag"><img src="flags/Libya.gif" /></span></li>
+				<li class="ui-state-default">Liechtensteiner<span class="natFlag"><img src="flags/Liechtenstein.gif" /></span></li>
+				<li class="ui-state-default">Lithuanian<span class="natFlag"><img src="flags/Lithuania.gif" /></span></li>
+				<li class="ui-state-default">Luxembourger<span class="natFlag"><img src="flags/Luxembourg.gif" /></span></li>
+				<li class="ui-state-default">Macaun<span class="natFlag"><img src="flags/Macao.gif" /></span></li>
+				<li class="ui-state-default">Macedonian<span class="natFlag"><img src="flags/Macedonia.gif" /></span></li> 
+				<li class="ui-state-default">Madagasy<span class="natFlag"><img src="flags/Madagascar.gif" /></span></li> 
+				<li class="ui-state-default">Madeiran<span class="natFlag"><img src="flags/Madeira.gif" /></span></li> 
+				<li class="ui-state-default">Mahorais<span class="natFlag"><img src="flags/Mayotte.gif" /></span></li>
+				<li class="ui-state-default">Malawian<span class="natFlag"><img src="flags/Malawi.gif" /></span></li> 
+				<li class="ui-state-default">Malaysian<span class="natFlag"><img src="flags/Malaysia.gif" /></span></li> 
+				<li class="ui-state-default">Maldivian<span class="natFlag"><img src="flags/Maldives.gif" /></span></li> 
+				<li class="ui-state-default">Malian<span class="natFlag"><img src="flags/Mali.gif" /></span></li> 
+				<li class="ui-state-default">Maltese<span class="natFlag"><img src="flags/Malta.gif" /></span></li> 
+				<li class="ui-state-default">Manx<span class="natFlag"><img src="flags/IsleofMan.gif" /></span></li>
+				<li class="ui-state-default">Marshallese<span class="natFlag"><img src="flags/MarshallIslands.gif" /></span></li>
+				<li class="ui-state-default">Martinican<span class="natFlag"><img src="flags/Martinique.gif" /></span></li>
+<!--				<li class="ui-state-default">Mauri<span class="natFlag"><img src="flags/.gif" /></span></li>  -->
+				<li class="ui-state-default">Mauritanian<span class="natFlag"><img src="flags/Mauritania.gif" /></span></li> 
+				<li class="ui-state-default">Mauritian<span class="natFlag"><img src="flags/Mauritius.gif" /></span></li> 
+				<li class="ui-state-default">Mexican<span class="natFlag"><img src="flags/Mexico.gif" /></span></li> 
+				<li class="ui-state-default">Micronesian<span class="natFlag"><img src="flags/Micronesia.gif" /></span></li>
+				<li class="ui-state-default">Maldovan<span class="natFlag"><img src="flags/Maldova.gif" /></span></li> 
+				<li class="ui-state-default">Monacan<span class="natFlag"><img src="flags/Monaco.gif" /></span></li>	
+				<li class="ui-state-default">Mongolian<span class="natFlag"><img src="flags/Mongolia.gif" /></span></li> 
+				<li class="ui-state-default">Montserratian<span class="natFlag"><img src="flags/Montserrat.gif" /></span></li>
+				<li class="ui-state-default">Montenegro<span class="natFlag"><img src="flags/Montenegro.gif" /></span></li> 
+				<li class="ui-state-default">Moroccan<span class="natFlag"><img src="flags/Morocco.gif" /></span></li> 
+				<li class="ui-state-default">Mozambican<span class="natFlag"><img src="flags/Mozambique.gif" /></span></li> 
+				<li class="ui-state-default">Namibian<span class="natFlag"><img src="flags/Namibia.gif" /></span></li> 
+				<li class="ui-state-default">Nauruan<span class="natFlag"><img src="flags/Nauru.gif" /></span></li>
+				<li class="ui-state-default">Nepalese<span class="natFlag"><img src="flags/Nepal.gif" /></span></li> 
+				<li class="ui-state-default">New Zealander<span class="natFlag"><img src="flags/NewZealand.gif" /></span></li> 
+				<li class="ui-state-default">Nicaraguan<span class="natFlag"><img src="flags/Nicaragua.gif" /></span></li> 
+				<li class="ui-state-default">Nigerian<span class="natFlag"><img src="flags/Nigeria.gif" /></span></li> 
+				<li class="ui-state-default">Norwegian<span class="natFlag"><img src="flags/Norway.gif" /></span></li> 
+				<li class="ui-state-default">Omani<span class="natFlag"><img src="flags/Oman.gif" /></span></li> 
+				<li class="ui-state-default">Pakistani<span class="natFlag"><img src="flags/Pakistan.gif" /></span></li> 
+				<li class="ui-state-default">Palauan<span class="natFlag"><img src="flags/Palau.gif" /></span></li>
+				<li class="ui-state-default">Palestinian<span class="natFlag"><img src="flags/Palestine.gif" /></span></li> 
+				<li class="ui-state-default">Panamanian<span class="natFlag"><img src="flags/Panama.gif" /></span></li> 
+				<li class="ui-state-default">Papua New Guinean<span class="natFlag"><img src="flags/PapuaNewGuinea.gif" /></span></li> 
+				<li class="ui-state-default">Paraguayan<span class="natFlag"><img src="flags/Paraguay.gif" /></span></li> 
+				<li class="ui-state-default">Peruvian<span class="natFlag"><img src="flags/Peru.gif" /></span></li> 
+				<li class="ui-state-default">Pole<span class="natFlag"><img src="flags/Poland.gif" /></span></li> 
+				<li class="ui-state-default">Portuguese<span class="natFlag"><img src="flags/Portugal.gif" /></span></li>
+				<li class="ui-state-default">Puerto Rican<span class="natFlag"><img src="flags/PuertoRico.gif" /></span></li> 
+				<li class="ui-state-default">Qatari<span class="natFlag"><img src="flags/Qatar.gif" /></span></li> 
+				<li class="ui-state-default">Reunionese<span class="natFlag"><img src="flags/Reunion.gif" /></span></li> 
+				<li class="ui-state-default">Romanian<span class="natFlag"><img src="flags/Romania.gif" /></span></li> 
+				<li class="ui-state-default">Russian<span class="natFlag"><img src="flags/Russia.gif" /></span></li> 
+				<li class="ui-state-default">Rwandan<span class="natFlag"><img src="flags/Rwanda.gif" /></span></li> 
+				<li class="ui-state-default">Salvadorian<span class="natFlag"><img src="flags/ElSalvador.gif" /></span></li> 
+				<li class="ui-state-default">Samoan<span class="natFlag"><img src="flags/Samoa.gif" /></span></li> 
+				<li class="ui-state-default">San Marinese<span class="natFlag"><img src="flags/SanMarino.gif" /></span></li> 
+				<li class="ui-state-default">Saudi Arabian<span class="natFlag"><img src="flags/SaudiArabia.gif" /></span></li> 
+				<li class="ui-state-default">Senegalese<span class="natFlag"><img src="flags/Senegal.gif" /></span></li> 
+				<li class="ui-state-default">Serbian<span class="natFlag"><img src="flags/Serbia.gif" /></span></li> 
+				<li class="ui-state-default">Seychellois<span class="natFlag"><img src="flags/Seychelles.gif" /></span></li> 
+				<li class="ui-state-default">Sierra Leonean<span class="natFlag"><img src="flags/SierraLeone.gif" /></span></li> 
+				<li class="ui-state-default">Singaporean<span class="natFlag"><img src="flags/Singapore.gif" /></span></li> 
+				<li class="ui-state-default">Slovak<span class="natFlag"><img src="flags/Slovakia.gif" /></span></li> 
+				<li class="ui-state-default">Slovene<span class="natFlag"><img src="flags/Slovenia.gif" /></span></li> 
+				<li class="ui-state-default">Solomon Islander<span class="natFlag"><img src="flags/SolomanIslands.gif" /></span></li> 
+				<li class="ui-state-default">Somali<span class="natFlag"><img src="flags/Somalia.gif" /></span></li> 
+				<li class="ui-state-default">South African<span class="natFlag"><img src="flags/SouthAfrica.gif" /></span></li> 
+				<li class="ui-state-default">Spaniard<span class="natFlag"><img src="flags/Spain.gif" /></span></li> 
+				<li class="ui-state-default">Sri Lankan<span class="natFlag"><img src="flags/SriLanka.gif" /></span></li>
+				<li class="ui-state-default">St Helenian<span class="natFlag"><img src="flags/SaintHelena.gif" /></span></li>
+				<li class="ui-state-default">St Lucian<span class="natFlag"><img src="flags/SaintLucia.gif" /></span></li> 
+				<li class="ui-state-default">St Vincentian<span class="natFlag"><img src="flags/SaintVincentAndGrenadines.gif" /></span></li> 
+				<li class="ui-state-default">Sudanese<span class="natFlag"><img src="flags/Sudan.gif" /></span></li> 
+				<li class="ui-state-default">Surinamer<span class="natFlag"><img src="flags/Suriname.gif" /></span></li> 
+				<li class="ui-state-default">Swazi<span class="natFlag"><img src="flags/Swaziland.gif" /></span></li> 
+				<li class="ui-state-default">Swede<span class="natFlag"><img src="flags/Sweden.gif" /></span></li> 
+				<li class="ui-state-default">Swiss<span class="natFlag"><img src="flags/Switzerland.gif" /></span></li> 
+				<li class="ui-state-default">Syrian<span class="natFlag"><img src="flags/Syria.gif" /></span></li> 
+				<li class="ui-state-default">Tahitian<span class="natFlag"><img src="flags/Tahiti.gif" /></span></li>
+				<li class="ui-state-default">Taiwanese<span class="natFlag"><img src="flags/Taiwan.gif" /></span></li>
+				<li class="ui-state-default">Tajik<span class="natFlag"><img src="flags/Tajikistan.gif" /></span></li>
+				<li class="ui-state-default">Tanzanian<span class="natFlag"><img src="flags/Tanzania.gif" /></span></li>
+				<li class="ui-state-default">Thai<span class="natFlag"><img src="flags/Thailand.gif" /></span></li>
+				<li class="ui-state-default">Tongan<span class="natFlag"><img src="flags/Tonga.gif" /></span></li> 
+				<li class="ui-state-default">Tongolese<span class="natFlag"><img src="flags/Tonga.gif" /></span></li>
+				<li class="ui-state-default">Trinidadian<span class="natFlag"><img src="flags/TrinidadAndTobago.gif" /></span></li>
+				<li class="ui-state-default">Tunisian<span class="natFlag"><img src="flags/Tunisia.gif" /></span></li>
+				<li class="ui-state-default">Turk<span class="natFlag"><img src="flags/Turkey.gif" /></span></li>
+				<li class="ui-state-default">Turkmen<span class="natFlag"><img src="flags/Turkmenistan.gif" /></span></li>
+				<li class="ui-state-default">Turks & Caicos Islanders<span class="natFlag"><img src="flags/TurksAndCaicos.gif" /></span></li>
+				<li class="ui-state-default">Tuvaluan<span class="natFlag"><img src="flags/Tuvalu.gif" /></span></li>
+				<li class="ui-state-default">Ugandan<span class="natFlag"><img src="flags/Uganda.gif" /></span></li>
+				<li class="ui-state-default">Ukrainian<span class="natFlag"><img src="flags/Ukraine.gif" /></span></li>			
+				<li class="ui-state-default">Uruguayan<span class="natFlag"><img src="flags/Uruguay.gif" /></span></li>
+				<li class="ui-state-default">Uzbek<span class="natFlag"><img src="flags/Uzbekistan.gif" /></span></li> 
+				<li class="ui-state-default">Vanuatian<span class="natFlag"><img src="flags/Vanuatu.gif" /></span></li>
+				<li class="ui-state-default">Venezuelan<span class="natFlag"><img src="flags/Venezuela.gif" /></span></li>
+				<li class="ui-state-default">Vietnamese<span class="natFlag"><img src="flags/Vietnam.gif" /></span></li>
+				<li class="ui-state-default">Virgin Islander<span class="natFlag"><img src="flags/VirginIslands.gif" /></span></li>
+				<li class="ui-state-default">Yemeni<span class="natFlag"><img src="flags/Yemen.gif" /></span></li>
+				<li class="ui-state-default">Zambian<span class="natFlag"><img src="flags/Zambia.gif" /></span></li>
+				<li class="ui-state-default">Zimbabwean<span class="natFlag"><img src="flags/Zimbabwe.gif" /></span></li>
+<!--				<li class="ui-state-default"><span class="natFlag"><img src="flags/.gif" /></span></li> 
+-->
+			</ul>
+ 
+			<ul id="sortable2" class="connectedSortable">
+			</ul>
+			<div class="boundsClear">&nbsp;</div>
+			<div>
+				<input id="addNationality" type="text" placeholder="Enter Nationality here." />
+				<span class="customBtn"><button onclick="addNat();">Add to List</button></span>
+				<span class="customBtn"><button onclick="addAllNat();">Add All</button></span>
+				<span class="customBtn"><button onclick="clearAllNat();">Clear All</button></span>
+			</div>
+		</div>
+		
 		<!-- Summary Section -->
 		<div id="summary"></div>
 		
@@ -358,7 +653,7 @@
 		<div id="history"></div>
 		
 		<!-- Definitions -->
-		<div id="definitions"></div>
+<!--		<div id="definitions"></div> -->
 		
 	</div>
 </div>

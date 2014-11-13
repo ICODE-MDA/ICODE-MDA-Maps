@@ -52,6 +52,7 @@ body {
 	color: rgb(120,160,224);
 }
 
+/* menu tabs */
 .ui-tabs-vertical {
 	width: 693px;
 	height: 450px;
@@ -84,12 +85,13 @@ body {
 	width: 450px;
 }
 
+/* sliders */
 .slider-container {
 	clear: both;
 }
 .slider-left {
 	float: left;
-	width: 40%;
+	width: 45%;
 }
 .slider-center {
 	display: inline-block;
@@ -97,7 +99,7 @@ body {
 }
 .slider-right {
 	float: right;
-	width: 15%;
+	width: 10%;
 	margin-left: 10px;
 	border: 0; 
 	color: rgb(120,160,224);
@@ -132,6 +134,9 @@ body {
 .colClear {
 	clear: both;
 	text-align: center;
+}
+div textarea {
+	overflow-y: auto;
 }
 .defLeft {
 	float: left;
@@ -182,4 +187,85 @@ body {
 }
 .boundsClear {
 	clear: both;
+}
+
+/* sortable list */
+.sortableTitles {
+	font-size: 0.8em;
+	font-weight: bold;
+	float: left;
+	width: 215px;
+}
+#sortable1, #sortable2 {
+	border: 1px solid rgb(0,0,0);
+	width: 200px;
+	height:250px;
+	list-style-type: none;
+	margin: 0;
+	padding: 5px 0 0 0;
+	float: left;
+	margin-right: 10px;
+	overflow-y: auto;
+}
+#sortable1 li, #sortable2 li {
+	margin: 0 5px 5px 5px;
+	padding: 5px;
+	font-size: 0.8em;
+	width: 165px;
+}
+.natFlag img{
+	height: 14px;
+	width: 20px;
+	float: right;
+}
+
+/* custom tooltip */
+.ui-tooltip, .arrow:after {
+    background: rgb(0,0,0);
+    border: 2px solid white;
+}
+.ui-tooltip {
+    padding: 10px 20px;
+    color: white;
+    border-radius: 20px;
+    font: bold 14px "Helvetica Neue", Sans-Serif;
+    text-transform: uppercase;
+    box-shadow: 0 0 7px rgb(0,0,0);
+}
+.arrow {
+    width: 70px;
+    height: 16px;
+    overflow: hidden;
+    position: absolute;
+    left: 50%;
+    margin-left: -35px;
+    bottom: -16px;
+}
+.arrow.top {
+    top: -16px;
+    bottom: auto;
+}
+.arrow.left {
+    left: 20%;
+}
+.arrow:after {
+    content: "";
+    position: absolute;
+    left: 20px;
+    top: -20px;
+    width: 25px;
+    height: 25px;
+    box-shadow: 6px 5px 9px -9px rgb(0,0,0);
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+.arrow.top:after {
+    bottom: -20px;
+    top: auto;
+}
+.question {
+	margin-left: 5px;
+	height: 15px;
+	width: 15px;
 }

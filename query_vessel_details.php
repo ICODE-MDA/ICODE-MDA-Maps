@@ -71,7 +71,7 @@ switch ($source) {
 		break;
 	case "conStatus":
 		$fromSources = "(SELECT Status FROM wros.tblship WHERE IMO_No like ('$imo') GROUP BY IMO_No) VESSELS";
-			break;
+		break;
 	case "conShipbuilder":
 		$fromSources = "(SELECT Hull_Number,Hull_Type,Main_HC_Country,Main_HC_Hull_Number,Shipyard_Hull_Number,Builder_ID,ID_Main_Hull_Contractor,ID_Main_Newbuild_Contractor,Main_NBC_Country,Main_NBC_Hull_Number,Newbuilding_Price,USD_Newbuilding_Price,Builder_CoD,Builder,Main_Hull_Contractor,Main_Newbuild_Contractor,Shipyard,Shipyard_Country FROM wros.tblship WHERE IMO_No like ('$imo') GROUP BY IMO_No) VESSELS";
 		break;
@@ -161,7 +161,7 @@ while (odbc_fetch_row($result)){
    $count_results = $count_results + 1;
 
    // Output JSON object per row
-   if ($source === "initialize") {  
+	if ($source === "initialize") {  
         $vessel = array(shipName=>htmlspecialchars(odbc_result($result,"Vessel_Name")),
             imo=>odbc_result($result,"IMO_No"),			
 			mmsi=>odbc_result($result,"Maritime_Mobile_Service_ID"),

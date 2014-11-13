@@ -4275,7 +4275,7 @@ function MIDtoCountry(mmsi) {
       case 615: countryName = "Congo (Republic of the)"; break;
       case 518: countryName = "Cook Islands"; break;
       case 321: countryName = "Costa Rica"; break;
-      case 619: countryName = "Côte d'Ivoire (Republic of)"; break;
+      case 619: countryName = "Cð´¥ d'Ivoire (Republic of)"; break;
       case 238: countryName = "Croatia (Republic of)"; break;
       case 618: countryName = "Crozet Archipelago"; break;
       case 323: countryName = "Cuba"; break;
@@ -4426,7 +4426,7 @@ function MIDtoCountry(mmsi) {
       case 263: countryName = "Portugal"; break;
       case 358: countryName = "Puerto Rico"; break;
       case 466: countryName = "Qatar (State of)"; break;
-      case 660: countryName = "Réunion (French Department of)"; break;
+      case 660: countryName = "Rê¶®ion (French Department of)"; break;
       case 264: countryName = "Romania"; break;
       case 273: countryName = "Russian Federation"; break;
       case 661: countryName = "Rwandese Republic"; break;
@@ -4440,7 +4440,7 @@ function MIDtoCountry(mmsi) {
       case 377: countryName = "Saint Vincent and the Grenadines"; break;
       case 561: countryName = "Samoa (Independent State of)"; break;
       case 268: countryName = "San Marino (Republic of)"; break;
-      case 668: countryName = "São Tomé and Príncipe (Democratic Republic of)"; break;
+      case 668: countryName = "Sä¯ Tomé¡¡nd Prî¯£ipe (Democratic Republic of)"; break;
       case 403: countryName = "Saudi Arabia (Kingdom of)"; break;
       case 663: countryName = "Senegal (Republic of)"; break;
       case 279: countryName = "Serbia"; break;

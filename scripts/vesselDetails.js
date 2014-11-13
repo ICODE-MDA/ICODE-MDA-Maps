@@ -289,23 +289,23 @@ function searchResults() {
 	var searchTerm = $('#searchTerm').val();
 	
 	// check to ensure user entered valid info in search box
-	if (searchTerm == "") {
+	if (searchTerm === "") {
 		$(".mainPanel").html(
 			'<div class="title">Notice</div>' +
 			'<div style="color:red;font-weight:bold;">A valid search term must be entered.</div>'
 		);
 		return;
 	}
-	if (searchType == "selectImo") {
-		if ((!($.isNumeric(searchTerm)))||(searchTerm.length != 7)) {
+	if (searchType === "selectImo") {
+		if ((!($.isNumeric(searchTerm)))||(searchTerm.toString().length != 7)) {
 			$(".mainPanel").html(
 				'<div class="title">Notice</div>' +
 				'<div style="color:red;font-weight:bold;">Invalid IMO Number entered.</div>'
 			);
 			return;
 		}
-	} else if (searchType == "selectMmsi") {
-		if ((!($.isNumeric(searchTerm)))||(searchTerm.length != 9)) {
+	} else if (searchType === "selectMmsi") {
+		if ((!($.isNumeric(searchTerm)))||(searchTerm.toString().length != 9)) {
 			$(".mainPanel").html(
 				'<div class="title">Notice</div>' +
 				'<div style="color:red;font-weight:bold;">Invalid MMSI entered.</div>'
@@ -314,7 +314,62 @@ function searchResults() {
 		}
 	}
 	
-	initialize(true,searchType,searchTerm);
+	// launched via maps widget: retrieve info for vessel using IMO and display in main panel
+	var phpWithArg = "query_vessel_details.php?source=initialize&searchType=" + searchType + "&searchTerm=" + searchTerm;
+	console.log('phpWithArg: ' + phpWithArg);
+	
+	// retrieve info from database using query request parameters
+	$.getJSON(
+		phpWithArg, // server URL
+		function () { 
+		}
+	).done(function (response) {
+		console.log('Vessels Detail: ' + response.query);		
+		if(response.resultcount > 0) {
+			//display vessel list with links
+			$(".mainPanel").html(
+				'<div class="title">Search Results</div>' +
+				'<div style="color:red;font-weight:bold;">Found ' +
+				response.resultcount + 
+				' results.</div><div>&nbsp;</div>'
+			);
+			for(var i=0; i<response.vesseldata.length; i++) {
+				var shipName = response.vesseldata[i].shipName;
+				var dimo = response.vesseldata[i].imo;
+				var callSign = response.vesseldata[i].callSign;
+				var mmsi = response.vesseldata[i].mmsi;
+				var flag = response.vesseldata[i].flag;
+				var operator = response.vesseldata[i].operator;
+				var shipType = response.vesseldata[i].shipType;
+				var shipSubtype = response.vesseldata[i].shipSubtype;
+				var gross = response.vesseldata[i].gross;
+				var deadweight = response.vesseldata[i].deadweight;
+				var dateOfBuild = ((response.vesseldata[i].dateOfBuild).split(" "))[0];
+				var shipStatus = response.vesseldata[i].shipStatus;
+				var shipSubstatus = response.vesseldata[i].shipSubstatus;
+				var shipBuilder = response.vesseldata[i].shipBuilder;
+				var num = i+1;
+				var str = "'selectImo'";
+				$(".mainPanel").append(
+				'<div class="fourColsContainer">' +
+					'<button style="border: 0;" onclick="initialize(true,' + str + ',' + dimo + ');">' + 
+						num + ' |  Name: ' + shipName + ' | IMO No: ' + dimo + ' | MMSI: ' + mmsi + ' | Call Sign: ' + callSign + ' | Flag: ' + flag + 
+					'</button>' +
+				'</div>'
+				);
+			}
+			$(".mainPanel").append('<div>&nbsp;</div><div>&nbsp;</div>');
+		} else {
+			// no vessel retrieved
+			$(".mainPanel").html(
+				'<div class="title">Notice</div>' +
+				'<div style="color:red;font-weight:bold;">Unable to find vessel in database.</div>'
+			);
+		}				
+	}).fail(function() {
+		console.log('Vessels Detail: No response from database; error in php?');
+		return;
+	});
 }
 
 // Get information from database and show Initial info in main panel
@@ -345,7 +400,7 @@ function searchResults() {
 		);
 	} else {
 		// check for valid imo
-		if ((!($.isNumeric(searchTerm)))||(searchTerm.length != 7)) {
+		if ((!($.isNumeric(searchTerm)))||(searchTerm.toString().length != 7)) {
 			$(".mainPanel").html(
 				'<div class="title">Notice</div>' +
 				'<div style="color:red;font-weight:bold;">' + searchTerm + ' is not a valid IMO number.</div>'
