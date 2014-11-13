@@ -94,7 +94,6 @@ else {
       $count_results = $count_results + 1;
 
       $alert = array(timestamp=>odbc_result($result,"timestamp"),
-         mmsi=>odbc_result($result,"mmsi"),
          aisdata=>odbc_result($result,"aisdata"),
          vesseldata=>odbc_result($result,"vessel"),
          dismissed=>(intval(odbc_result($result,"dismissed")) == 0) ? false : true
