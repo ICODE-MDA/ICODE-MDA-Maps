@@ -127,8 +127,45 @@ function handleDrop(e) {
 
       //Load GeoJSON data
       if (plainText) {
-         //Example plaintext to try: https://storage.googleapis.com/maps-devrel/google.json
-         loadGeoJsonString(plainText);
+         //Plaintext could either be geoJSON format, or plaintext with [lat lon]
+         if (plainText.indexOf('{') == 0) {
+            console.log('Dragged in geoJSON plaintext');
+            //Example plaintext to try: https://storage.googleapis.com/maps-devrel/google.json
+            //https://developers.google.com/maps/documentation/javascript/examples/layer-data-dragndrop
+            loadGeoJsonString(plainText);
+         }
+         else {
+            console.log('Dragged in plaintext with rows of "lat lon"');
+
+            var geojsonFeature = {
+               "type": "FeatureCollection",
+               "features": [ ]
+            };
+
+            console.log(plainText);
+
+            var coordArray = plainText.split('\n');
+
+            coordArray.forEach(function(entry) {
+               var latlonarray = entry.split('\t');
+
+               geojsonFeature.features.push({
+                  "type": "Feature",
+                  "id": 0,
+                  "geometry": {
+                     "type": "Point",
+                     "color": "#ff0000",
+                     "coordinates": [  //lon, lat
+                        parseFloat(latlonarray[1]),
+                        parseFloat(latlonarray[0])
+                        ]
+                  }
+               });
+            });
+            
+
+            loadGeoJsonString(JSON.stringify(geojsonFeature));
+         }
       }
    }
 
