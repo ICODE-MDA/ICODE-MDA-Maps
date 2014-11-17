@@ -129,9 +129,19 @@ body
 	position: absolute;
 	right: 19px;
 	text-align: right;
-	text-shadow: black 2px 2px 3px;
+	//text-shadow: black 2px 2px 3px;
+   text-shadow:
+   -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 	vertical-align: middle;
-	webkit-text-shadow: black 2px 2px 3px;
+	//webkit-text-shadow: black 2px 2px 3px;
+	webkit-text-shadow: 
+   -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
 }
 #busy_indicator
 {
@@ -144,9 +154,6 @@ body
 	position: absolute;
 	right: 35px;
 	text-align: right;
-	text-shadow: black 2px 2px 3px;
-	vertical-align: middle;
-	webkit-text-shadow: black 2px 2px 3px;
 }
 #geocodepanel
 {
@@ -176,8 +183,22 @@ body
 	right: 19px;
 	text-align: left;
 	text-shadow: black 2px 2px 3px;
+   /*
+   text-shadow:
+   -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+    */
 	vertical-align: middle;
 	webkit-text-shadow: black 2px 2px 3px;
+	/*
+   webkit-text-shadow: 
+   -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+    */
 }
 #lastUpdated {
 	background: transparent;
@@ -193,8 +214,22 @@ body
 	right: 19px;
 	text-align: left;
 	text-shadow: black 2px 2px 3px;
+   /*
+   text-shadow:
+   -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+    */
 	vertical-align: middle;
 	webkit-text-shadow: black 2px 2px 3px;
+	/*
+   webkit-text-shadow: 
+   -1px -1px 0 #000,
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+    1px 1px 0 #000;
+    */
 }
 #clusterlabel {
 	filter: Shadow(Color=#FFF, Direction=45, Strength=2);
@@ -231,7 +266,7 @@ body
 	display: inline-block;
 	float: left;
 	margin-left: auto;
-	min-width: 180px;
+	min-width: 160px;
 	overflow: hidden;
 	padding: 2px;
 }

@@ -920,7 +920,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
    console.log("Refreshing target points...");
    document.getElementById("query").value = "QUERY RUNNING...";
    document.getElementById('stats').innerHTML = '';
-   $('#busy_indicator').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#fff', speed: 2.0}); //show spinner
+   showBusyIndicator(); //show spinner
    NProgress.start();   //JS library top progress bar
 
    var phpWithArg;
@@ -1414,8 +1414,8 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
          $('#busy_indicator').activity(false); //hide spinner
          document.getElementById('stats').innerHTML = 
             //response.resultcount + " results<br>" + 
-            markersDisplayed.length + " results<br>" + //Use markersDisplayed array length to include RADAR and LAISIC markers
-            Math.round(response.exectime*1000)/1000 + " secs";
+            markersDisplayed.length + " results" + //Use markersDisplayed array length to include RADAR and LAISIC markers
+            "<br>Retrieved in " + Math.round(response.exectime*1000)/1000 + " secs";
          NProgress.done();   //JS library top progress bar
       }) //END .done()
       .fail(function(d, textStatus, error) { 
@@ -1443,7 +1443,7 @@ function getClustersFromDB(bounds, customQuery) {
    console.log("Refreshing target points...");
    document.getElementById("query").value = "QUERY RUNNING...";
    document.getElementById('stats').innerHTML = '';
-   $('#busy_indicator').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#fff', speed: 2.0}); //show spinner
+   showBusyIndicator(); //show spinner
    NProgress.start();   //JS library top progress bar
 
    //Set buffer around map bounds to expand queried area slightly outside viewable area
@@ -1640,8 +1640,8 @@ function getClustersFromDB(bounds, customQuery) {
 
          $('#busy_indicator').activity(false); //hide spinner
          document.getElementById('stats').innerHTML = 
-            totalsum + " results<br>" + 
-            Math.round(response.exectime*1000)/1000 + " secs";
+            totalsum + " results" + 
+            "<br>Retrieved in " + Math.round(response.exectime*1000)/1000 + " secs";
          NProgress.done();   //JS library top progress bar
       }) //end .done()
       .fail(function(d, textStatus, error) { 
@@ -2233,7 +2233,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
        $.inArray(trknum, tracksDisplayedID) == -1) {
       document.getElementById("query").value = "QUERY RUNNING FOR TRACK...";
       document.getElementById('stats').innerHTML = '';
-      $('#busy_indicator').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#fff', speed: 2.0}); //show spinner
+      showBusyIndicator();
       NProgress.start();   //JS library top progress bar
 
       var phpWithArg = "query_track.php?source=" + source;
@@ -2659,7 +2659,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
                   }
 
                   $('#busy_indicator').activity(false); //hide spinner
-                  document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+                  document.getElementById('stats').innerHTML = response.resultcount + " results<br>Retreived in " + Math.round(response.exectime*1000)/1000 + " secs";
                   NProgress.done();   //JS library top progress bar
                }) //end .done()
             .fail(function() { 
@@ -2724,6 +2724,20 @@ function toggleDayNightOverlay() {
       else {
          daynightlayer.setMap(map);
       }
+
+      if (map.getZoom() > 9) {
+         console.log('Zoomed in, hide day/night layer');
+
+         if (typeof daynightlayer !== 'undefined') {
+            daynightlayer.setMap(null);
+         }
+         map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+
+         return;
+      }
+      else {
+         map.setMapTypeId(google.maps.MapTypeId.HYBRID);         
+      }
    }
    else {
       console.log('Hiding day/night overlay');
@@ -2738,9 +2752,26 @@ function toggleDayNightOverlay() {
 function refreshDayNightOverlay() {
    if (document.getElementById("showdaynightoverlay") != null &&
        document.getElementById("showdaynightoverlay").checked) {
+
+      if (map.getZoom() > 9) {
+         console.log('Zoomed in, hide day/night layer');
+
+         if (typeof daynightlayer !== 'undefined') {
+            daynightlayer.setMap(null);
+         }
+         map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+
+         return;
+      }
+
+      map.setMapTypeId(google.maps.MapTypeId.HYBRID);
+
+
       console.log('Refreshing day/night overlay');
 
-      daynightlayer.setMap(null);
+      if (typeof daynightlayer !== 'undefined') {
+         daynightlayer.setMap(null);
+      }
 
       daynightlayer = new DayNightOverlay({
          map: map
@@ -3171,7 +3202,7 @@ function togglePortLayer() {
 function showPorts() {
    document.getElementById("query").value = "QUERY RUNNING FOR PORTS...";
    document.getElementById('stats').innerHTML = '';
-   $('#busy_indicator').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#fff', speed: 2.0}); //show spinner
+   showBusyIndicator(); //show spinner
    NProgress.start();   //JS library top progress bar
 
    var bounds = map.getBounds();
@@ -3242,7 +3273,7 @@ function showPorts() {
       });
 
       $('#busy_indicator').activity(false); //hide spinner
-      document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      document.getElementById('stats').innerHTML = response.resultcount + " results<br>Retreived in " + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
@@ -3313,7 +3344,7 @@ function showPorts() {
       });
 
       $('#busy_indicator').activity(false); //hide spinner
-      document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      document.getElementById('stats').innerHTML = response.resultcount + " results<br>Retreived in " + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
@@ -3418,7 +3449,7 @@ function showPorts() {
 
 
       $('#busy_indicator').activity(false); //hide spinner
-      document.getElementById('stats').innerHTML = response.resultcount + " results<br>" + Math.round(response.exectime*1000)/1000 + " secs";
+      document.getElementById('stats').innerHTML = response.resultcount + " results<br>Retreived in " + Math.round(response.exectime*1000)/1000 + " secs";
       NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
@@ -5014,4 +5045,10 @@ function getFMVTargets(bounds) {
             }
          }); //END .fail()
          return true;
+}
+
+function showBusyIndicator() {
+   $('#busy_indicator').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#888', speed: 3.0}); //show spinner
+
+   return;
 }

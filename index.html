@@ -23,6 +23,7 @@
      <script type="text/javascript" src="scripts/trackTimeSlider.js"></script>     
      <script type="text/javascript" src="scripts/distanceWidget.js"></script>
      <script type="text/javascript" src="scripts/CSJSRequestObject.js"></script>
+     <script type="text/javascript" src="scripts/daynightoverlay.js"></script>     
      <script type="text/javascript" src="scripts/jquery.activity-indicator-1.0.0.js"></script>
      <script type="text/javascript" src="scripts/nprogress.js"></script>
      <link rel="stylesheet" type="text/css" href="css/nprogress.css">
@@ -49,9 +50,10 @@
 
 
      <script>
-        //Select all text if query bar comes into focus
+        //Initialization scripts on page load
         $(document).ready(function() {
            //Query bar text control
+           //Select all text if query bar comes into focus
            $('#query:text').focus(function() { 
               $(this).one('mouseup', function(event){
                  event.preventDefault();
@@ -65,32 +67,19 @@
               }).select();
            });
 
+           //Initialize the menuDiv panels' collapsing behavior
+           $('.panel-collapse').collapse({'toggle': false});
+
            //Control the behavior of menu heading clicking
            $('.panel-heading').on('click', function(e) {
-              var panelCollapse = $(this).parents('.panel').children('.panel-collapse');
-              var glyphiconMenu = $(this).children('.btn').children('.glyphicon-menu');
+              var panelToToggle = $(this).parents('.panel').children('.panel-collapse');
+              var glyphiconToToggle = $(this).children('.btn').children('.glyphicon-menu');
 
-              if (panelCollapse.hasClass('in')) {
-                 //This panel is already opened, so just collapse all panels
-                 $('.glyphicon-menu').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
-                 $('.panel-collapse').removeClass('in');
-              }
-              else {
-                 //Another panel was opened, or all was collapsed, so open the one that is clicked
-
-                 //Collapse all collapsible panels first
-                 $('.glyphicon-menu').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
-                 $('.panel-collapse').removeClass('in');
-                 //Open up the panel for this element
-                 glyphiconMenu.removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
-                 panelCollapse.addClass('in');
-              }
+              $('.panel-collapse').collapse('hide');
+              panelToToggle.collapse('toggle');
            });
-        });
-     </script>   
 
-     <script>
-        $(document).ready(function() {
+           //Data reload progress bar style behavior initialization
            NProgress.configure({ 
               ease: 'ease', 
               trickleRate: 0.02,
@@ -99,31 +88,15 @@
               minimum: 0.3,
            });
         });
-
+     </script>   
+     <script>
         //Main userid global setting
         var userid = 'icodeuser';   //temporarily set to icodeuser for testing
 
         $(document).ready(function() {
            $('#username').text(userid);
         });
-
-
-        $(document).ready(function() {
-           var vesselsModal = $('#vessels-modal')
-           .dialog({
-              autoOpen: false,
-              title: 'Vessels Table',
-              width: 700,
-              height: $('#menuDiv').height(),
-              modal: false,
-              position: [$('#menuDiv').position().left - 650,$('#menuDiv').position().top],
-              open: function (event, ui) {
-                 $('#vessels-modal').css('overflow', 'hidden');
-                 $('#vessels-modal').css('padding', '0');
-              }
-           });
-        });
-     </script>
+     </script>   
 
      <!-- Main JavaScript for controlling map -->
      <script type="text/javascript" src="scripts/icode-maps-google.js"></script>
@@ -152,7 +125,7 @@
               <div class="form-group" style="width:100%">
                  <div class="input-group">
                     <span class="input-group-addon"><span id="search-icon" class="glyphicon glyphicon-search"></span></span>
-                    <input id="query" class="form-control" type="text" name="query" onkeypress="if (event.which == 13) {enteredQuery();return false;}" value="QUERY RUNNING..." autofocus="autofocus"><input hidden="true" type="hidden">
+                    <input id="query" class="form-control" type="text" name="query" onkeypress="if (event.which == 13) {enteredQuery();return false;}" value="QUERY RUNNING..."><input hidden="true" type="hidden">
                  </div>
               </div>
            </form>
@@ -209,7 +182,7 @@
                        <span id="legend-icon" class="glyphicon glyphicon-chevron-up glyphicon-menu"></span>
                     </button>
                  </div>
-                 <div id="collapseOne" class="panel-collapse collapse in">
+                 <div id="legend-collapse" class="panel-collapse collapse in">
                     <div id="legend-body" class="panel-body text-left">
                        <h4 class="text-center">Vessel Types</h4>
                        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
@@ -427,6 +400,23 @@
                  </div>
               </div>
 
+              <!-- DATA LAYERS PANEL ===================================================================== -->
+              <div id="data-panel" class="panel panel-primary">
+                 <div id="data-heading" class="panel-heading">
+                    <h4 class="panel-title">
+                       <span data-toggle="collapse" data-parent="#accordion">Data Layers</span>
+                    </h4>
+                    <button id="data-chevron" class="btn btn-primary btn-xs">      
+                       <span id="data-icon" class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
+                    </button>
+                 </div>
+                 <div id="data-collapse" class="panel-collapse collapse">
+                    <div class="panel-body text-left">
+                       
+                    </div>
+                 </div>
+              </div> <!-- END data-panel -->
+
               <!-- LAYERS PANEL ========================================================================== -->
               <div id="layers-panel" class="panel panel-primary">
                  <div id="layers-heading" class="panel-heading">
@@ -437,7 +427,7 @@
                        <span id="layers-icon" class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                     </button>
                  </div>
-                 <div id="collapseTwo" class="panel-collapse collapse">
+                 <div id="layers-collapse" class="panel-collapse collapse">
                     <div id="layers-body" class="panel-body text-left">
                        <div id="tmacslayer">
                           <center><b>TMACS WMS</b></center>
@@ -498,18 +488,7 @@
 
                        <hr>
                        <div class="btn-group">
-                          <button id="vesselstableherebutton" class="btn btn-success" onClick="if ($('#vessels-modal').dialog('isOpen')){$('#vessels-modal').dialog('close'); $('#vesselstableherebutton').text('Open Vessels Tables');} else {$('#vessels-modal').dialog('open'); $('#vesselstableherebutton').text('Close Vessels Tables');}">Open Vessels Tables</button>
-                          <button class="btn btn-success dropdown-toggle" data-toggle="dropdown">
-                             <span class="caret"></span>
-                          </button>
-                          <ul class="dropdown-menu">
-                             <li>
-                             <a href="#" id="vesselstableherebutton" onClick="if ($('#vessels-modal').dialog('isOpen')){$('#vessels-modal').dialog('close'); $('#vesselstableherebutton').text('Open Vessels Tables');} else {$('#vessels-modal').dialog('open'); $('#vesselstableherebutton').text('Close Vessels Tables');}; return false;">Open table here</a>
-                             </li>
-                             <li>
-                             <a href="#" id="vesselstablenewwindowbutton" onClick="window.open('icode-table.html'); return false;">Open in new window</a>
-                             </li>
-                          </ul>
+                          <button id="vesselstablenewwindowbutton" class="btn btn-success" onClick="window.open('icode-table.html'); return false;">Open Vessels Tables</button>
                        </div>
                        <div class="checkbox">
                           <label>
@@ -535,7 +514,7 @@
                        <span id="options-icon" class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                     </button>
                  </div>
-                 <div id="collapseThree" class="panel-collapse collapse">
+                 <div id="options-collapse" class="panel-collapse collapse">
                     <div class="panel-body text-left">
                        <!--
                        <form id="distancetoolform" >
@@ -635,8 +614,8 @@
                           <form role="form">
                              <label>Reload delay:</label>
                              <select id="reload_delay" onChange="reload_delay_changed();">
-                                <option value="0" selected="selected">0</option>
-                                <option value="1">1</option>
+                                <option value="0">0</option>
+                                <option value="1" selected="selected">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
                              </select> seconds
@@ -659,7 +638,7 @@
                        <hr>
                        <div class="checkbox">
                           <label>
-                             <input class="checkbox" id="showdaynightoverlay" name="Show Day/Night Overlay" type="checkbox" onclick="toggleDayNightOverlay();"> Show Day/Night Overlay
+                             <input class="checkbox" id="showdaynightoverlay" name="Show Day/Night Overlay" type="checkbox" onclick="toggleDayNightOverlay();" checked="checked"> Show Day/Night Overlay
                           </label>
                        </div>
 
@@ -685,12 +664,6 @@
 
 
      <!-- OTHER ELEMENTS ===================================================================== -->
-
-     <div id="vessels-modal">
-        <iframe src="icode-table.html" height="100%" width="100%" style="margin-top:-65px">
-        </iframe>
-     </div>
-
 
      <!-- Status, results, and busy indicator -->
      <div id="busy_indicator">
