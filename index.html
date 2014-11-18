@@ -747,8 +747,17 @@
      <!-- OTHER ELEMENTS ===================================================================== -->
 
      <!-- Status, results, and busy indicator -->
-     <div id="busy_indicator">
-        <!-- spinning activity indicator visible when queries are running -->
+     <div id="loadingPanel" class="panel panel-info">
+        <!-- Loading panel and spinning activity indicator visible when queries are running -->
+        <div class="panel-heading">
+           <h4>
+              Loading
+              <div id="spinnerContainer">
+                 <span id="spinner">
+                 </span>
+              </div>
+           </h4>
+        </div>
      </div>
 
      <div id="stats">
@@ -791,7 +800,7 @@
      <form role="form">
         <div id="geocodepanel" class="form-group">
            <div class="input-group">
-              <input id="geocodeAddress" class="form-control" type="textbox" placeholder="San Diego, CA">
+              <input id="geocodeAddress" class="form-control" type="textbox" placeholder="Enter Location Name or Lat,Lon" value="San Diego, CA">
               <span class="input-group-btn">
                  <input type="button" class="btn btn-success" value="Set Map Center" onclick="codeAddress()">
               </span>

@@ -140,18 +140,25 @@ body {
     -1px 1px 0 #000,
     1px 1px 0 #000;
 }
-#busy_indicator {
-	background: transparent;
-	border: 0px solid transparent;
-	bottom: 65px;
-	display: block;
-	opacity: 1;
-	padding: 2px;
+#loadingPanel {
+   display: none;
 	position: absolute;
-	right: 35px;
-	text-align: right;
+	bottom: 35px;
+	right: 19px;
+	z-index: 5;
+}
+#spinnerContainer {
+	display: inline-block;
+	border: 0px solid red;
+	padding: 0px 20px;
+	color: #000;
+}
+#spinner {
+	background: transparent;
+	opacity: 1;
 }
 #geocodepanel {
+   opacity: 0.2;
 	background-color: #fff;
 	border: 1px solid #999;
 	left: 5px;
@@ -160,6 +167,9 @@ body {
 	position: absolute;
 	top: 65px;
 	z-index: 5;
+}
+#geocodepanel:hover {
+   opacity: 1.0;
 }
 #keyboard-shortcut-modal {
    display: none;
