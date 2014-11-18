@@ -176,6 +176,9 @@ body {
 }
 #geocodepanel {
    opacity: 0.2;
+   transition: opacity .25s ease-in-out;
+   -moz-transition: opacity .25s ease-in-out;
+   -webkit-transition: opacity .25s ease-in-out;
 	background-color: #fff;
 	border: 1px solid #999;
 	left: 5px;

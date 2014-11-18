@@ -32,11 +32,19 @@ $(function() { //shorthand for: $(document).ready(function() {
 
    function geocodingBox() {
       //Geocoding text box control
-      $('#geocodeAddress').focus(function() { 
-         $(this).one('mouseup', function(event){
-            event.preventDefault();
-         }).select();
-      });
+      $('#geocodeAddress')
+         .focus(function() { 
+            $(this).one('mouseup', function(event){
+               event.preventDefault();
+            }).select();
+
+            //Release focus on input field if clicked outside
+            $(document).mouseup(function (e) {
+               if (!$('#geocodeAddress').is(e.target)) {
+                  $('#geocodeAddress').blur();
+               }
+            });
+         });
    }
 
    function menuDivPanels() {
