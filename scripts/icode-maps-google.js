@@ -921,7 +921,6 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
    document.getElementById("query").value = "QUERY RUNNING...";
    document.getElementById('stats').innerHTML = '';
    showBusyIndicator(); //show spinner
-   NProgress.start();   //JS library top progress bar
 
    var phpWithArg;
 
@@ -1416,7 +1415,6 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
             //response.resultcount + " results<br>" + 
             markersDisplayed.length + " results" + //Use markersDisplayed array length to include RADAR and LAISIC markers
             "<br>Retrieved in " + Math.round(response.exectime*1000)/1000 + " secs";
-         NProgress.done();   //JS library top progress bar
       }) //END .done()
       .fail(function(d, textStatus, error) { 
          if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
@@ -1429,7 +1427,6 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
             document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
          }
          hideBusyIndicator();
-         NProgress.done();   //JS library top progress bar
          return false; 
       }); //END .fail()
    return true;
@@ -1444,7 +1441,6 @@ function getClustersFromDB(bounds, customQuery) {
    document.getElementById("query").value = "QUERY RUNNING...";
    document.getElementById('stats').innerHTML = '';
    showBusyIndicator(); //show spinner
-   NProgress.start();   //JS library top progress bar
 
    //Set buffer around map bounds to expand queried area slightly outside viewable area
    var latLonBuffer = 0.1 * map.getZoom();
@@ -1642,7 +1638,6 @@ function getClustersFromDB(bounds, customQuery) {
          document.getElementById('stats').innerHTML = 
             totalsum + " results" + 
             "<br>Retrieved in " + Math.round(response.exectime*1000)/1000 + " secs";
-         NProgress.done();   //JS library top progress bar
       }) //end .done()
       .fail(function(d, textStatus, error) { 
          if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
@@ -1655,7 +1650,6 @@ function getClustersFromDB(bounds, customQuery) {
             document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
          }
          hideBusyIndicator();
-         NProgress.done();   //JS library top progress bar
          return; 
       }); //end .fail()
 }
@@ -2234,7 +2228,6 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
       document.getElementById("query").value = "QUERY RUNNING FOR TRACK...";
       document.getElementById('stats').innerHTML = '';
       showBusyIndicator();
-      NProgress.start();   //JS library top progress bar
 
       var phpWithArg = "query_track.php?source=" + source;
 
@@ -2660,13 +2653,11 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
 
                   hideBusyIndicator();
                   document.getElementById('stats').innerHTML = response.resultcount + " results<br>Retreived in " + Math.round(response.exectime*1000)/1000 + " secs";
-                  NProgress.done();   //JS library top progress bar
                }) //end .done()
             .fail(function() { 
                console.log('GETTRACK(): ' +  'No response from track query; error in php?'); 
                document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
                hideBusyIndicator();
-               NProgress.done();   //JS library top progress bar
                return; 
             }); //end .fail()
    }
@@ -3203,7 +3194,6 @@ function showPorts() {
    document.getElementById("query").value = "QUERY RUNNING FOR PORTS...";
    document.getElementById('stats').innerHTML = '';
    showBusyIndicator(); //show spinner
-   NProgress.start();   //JS library top progress bar
 
    var bounds = map.getBounds();
    var ne = bounds.getNorthEast();
@@ -3274,13 +3264,11 @@ function showPorts() {
 
       hideBusyIndicator();
       document.getElementById('stats').innerHTML = response.resultcount + " results<br>Retreived in " + Math.round(response.exectime*1000)/1000 + " secs";
-      NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
       console.log('SHOWPORTS(): ' +  'No response from port query; error in php?'); 
       document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
       hideBusyIndicator();
-      NProgress.done();   //JS library top progress bar
       return; 
    }); //end .fail()
 
@@ -3345,13 +3333,11 @@ function showPorts() {
 
       hideBusyIndicator();
       document.getElementById('stats').innerHTML = response.resultcount + " results<br>Retreived in " + Math.round(response.exectime*1000)/1000 + " secs";
-      NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
       console.log('SHOWPORTS() part 2: ' +  'No response from port query; error in php?'); 
       document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
       hideBusyIndicator();
-      NProgress.done();   //JS library top progress bar
       return; 
    }); //end .fail()
 
@@ -3450,13 +3436,11 @@ function showPorts() {
 
       hideBusyIndicator();
       document.getElementById('stats').innerHTML = response.resultcount + " results<br>Retreived in " + Math.round(response.exectime*1000)/1000 + " secs";
-      NProgress.done();   //JS library top progress bar
    }) //end .done()
    .fail(function() { 
       console.log('SHOWPORTS() part 3: ' +  'No response from port query; error in php?'); 
       document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
       hideBusyIndicator();
-      NProgress.done();   //JS library top progress bar
       return; 
    }); //end .fail()   
 }
@@ -5049,6 +5033,7 @@ function getFMVTargets(bounds) {
 
 function showBusyIndicator() {
    $('#loadingPanel').show();
+
    $('#spinner').activity({
       segments: 8, 
       steps: 3, 
@@ -5059,11 +5044,15 @@ function showBusyIndicator() {
       color: '#4D708F', 
       speed: 3.0,
    }); //show spinner
+
+   NProgress.start();   //JS library top progress bar
+
    return;
 }
 
 function hideBusyIndicator() {
    $('#loadingPanel').hide();
    $('#spinner').activity(false); //hide spinner
+   NProgress.done();   //JS library top progress bar
     return;
 }

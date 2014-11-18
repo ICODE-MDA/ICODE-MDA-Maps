@@ -147,11 +147,17 @@ body {
 	right: 19px;
 	z-index: 5;
 }
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
+}
 #spinnerContainer {
 	display: inline-block;
-	border: 0px solid red;
-	padding: 0px 20px;
-	color: #000;
+	border: 1px solid red;
+	padding: 20px;
+   height: 20px;
+   width: 40px;
 }
 #spinner {
 	background: transparent;

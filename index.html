@@ -749,14 +749,17 @@
      <!-- Status, results, and busy indicator -->
      <div id="loadingPanel" class="panel panel-info">
         <!-- Loading panel and spinning activity indicator visible when queries are running -->
-        <div class="panel-heading">
-           <h4>
-              Loading
-              <div id="spinnerContainer">
-                 <span id="spinner">
-                 </span>
+        <div id="loadingHeading" class="panel-heading">
+           <div class="row">
+              <div class="col-xs-6 col-md-4 col-lg-8 vcenter">
+                 <div>
+                    <h4>Loading</h4>
+                 </div>
               </div>
-           </h4>
+              <div class="col-xs-6 col-md-4 col-lg-2 vcenter">
+                 <div id="spinner"> </div>
+              </div>
+           </div>
         </div>
      </div>
 
@@ -769,6 +772,7 @@
      </div>
 
      <div id="latlong">
+        Mouse cursor (lat, lon)
      </div>
 
      <div id="lastUpdated">
