@@ -1,9 +1,7 @@
-html
-{
+html {
 	height: 100%;
 }
-body
-{
+body {
 	height: 100%;
 	margin: 0px;
 	overflow: hidden;
@@ -114,8 +112,7 @@ body
     max-height: 34px;
     width: 350px;
 }
-#stats
-{
+#stats {
 	background: transparent;
 	border: 0px solid transparent;
 	bottom: 50px;
@@ -143,8 +140,7 @@ body
     -1px 1px 0 #000,
     1px 1px 0 #000;
 }
-#busy_indicator
-{
+#busy_indicator {
 	background: transparent;
 	border: 0px solid transparent;
 	bottom: 65px;
@@ -155,8 +151,7 @@ body
 	right: 35px;
 	text-align: right;
 }
-#geocodepanel
-{
+#geocodepanel {
 	background-color: #fff;
 	border: 1px solid #999;
 	left: 5px;
@@ -245,23 +240,19 @@ body
    -1px 1px 0 #FFF,
    1px 1px 0 #FFF;
 }
-#content
-{
+#content {
 	font-size: 10px;
 	padding: 0;
 }
-#content b
-{
+#content b {
 	color: #205c6f;
 }
-#content-left
-{
+#content-left {
 	display: inline-block;
 	float: left;
 	padding: 2px;
 }
-#content-right
-{
+#content-right {
 	border: 0px solid #cccccc;
 	display: inline-block;
 	float: left;
@@ -270,15 +261,16 @@ body
 	overflow: hidden;
 	padding: 2px;
 }
-#content-sub
-{
+#content-sub {
 	border: 1px solid #cccccc;
 	padding: 2px;
 }
-#content-port
-{
+#content-port {
 	border: 1px solid #cccccc;
 	display: block;
 	max-width: 174px;
 	padding: 2px;
+}
+.layerHeading:hover {
+    cursor: move;
 }

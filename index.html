@@ -101,8 +101,8 @@
 
            panelList.sortable({
               // Only make the .layer-heading child elements support dragging.
-              // Omit this to make then entire <li>...</li> draggable.
-              handle: '.layer-heading', 
+              handle: '.layerHeading',
+              cursor: 'move',
               update: function() {
                  $('.panel', panelList).each(function(index, elem) {
                     var $listItem = $(elem),
@@ -113,10 +113,19 @@
               }
            });
            //Control the behavior of layer heading clicking
-           $('.layerHeading').on('click', function(e) {
-              var panelToToggle = $(this).parents('.panel').children('.layerBody');
-              //var glyphiconToToggle = $(this).children('.btn').children('.glyphicon-menu');
+           $('.layersOptionsBtn').on('click', function(e) {
+              var panelToToggle = $(this).parents('.layerHeading').parents('.panel').children('.layerBody');
+              var glyphiconToToggle = $(this).children('.glyphicon-menu');
 
+              //Flip the icon
+              if (panelToToggle.hasClass('in')) {
+                 glyphiconToToggle.removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+              }
+              else {
+                 glyphiconToToggle.removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+              }
+
+              //Toggle the options panel
               panelToToggle.collapse('toggle');
            });
         });
@@ -439,7 +448,13 @@
                        Data layers currently displayed:
                        <ul id="draggablePanelList" class="list-unstyled">
                           <li class="panel panel-success">
-                          <div class="layerHeading panel-heading">AIS Layer</div>
+                          <div class="layerHeading panel-heading">
+                             AIS Layer
+                             <button class="layersOptionsBtn btn btn-success btn-xs">
+                                Options      
+                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
+                             </button>
+                          </div>
                           <div class="layerBody panel-body panel-collapse collapse">
                              <h4 class="text-center">AIS Sources</h4>
                              <form role="form">
@@ -449,6 +464,7 @@
                              </form>
 
                              <hr>
+                             <h4 class="text-center">History Trail</h4>
                              <form role="form">
                                 <label>History trail length:</label>
                                 <select id="history_trail_length" onChange="history_trail_length_changed();">
@@ -485,18 +501,58 @@
                              </div>
                              
                              <hr>
+                             <h4 class="text-center">Visual Options</h4>
                              <form role="form">
                                 <label>Vessel Icon Size:</label>
                                 <input type="button" onclick="decreaseVesselIconSize()" value="-"></input>
                                 <input type="button" onclick="increaseVesselIconSize()" value="+"></input>
                                 <input type="button" onclick="resetVesselIconSize()" value="Reset"></input>
                              </form>
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="enableCluster" name="Enable Clusters" type="checkbox" checked="checked" onclick="toggleCluster(true);"> Enable Clusters when zoomed out
+                                </label>
+                             </div>
 
                           </div>
                           </li>
                           <li class="panel panel-success">
-                          <div class="layerHeading panel-heading">RADAR Layer</div>
+                          <div class="layerHeading panel-heading">
+                             RADAR Layer
+                             <button class="layersOptionsBtn btn btn-success btn-xs">
+                                Options      
+                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
+                             </button>
+                          </div>
                           <div class="layerBody panel-body panel-collapse collapse">Options...</div>
+                          </li>
+
+                          <hr>
+                          Data layers not displayed:
+                          <li class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             TMACS Layer
+                             <button class="layersOptionsBtn btn btn-success btn-xs">
+                                Options      
+                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
+                             </button>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <div id="tmacslayer">
+                                <center><b>TMACS WMS</b></center>
+
+                                <div class="checkbox">
+                                   <label>
+                                      <input class="checkbox" id="TMACShead" name="TMACShead" type="checkbox" onclick="toggleTMACSHeadWMSLayer();"> TMAC Trackheads
+                                   </label>
+                                </div>
+                                <div class="checkbox">
+                                   <label>
+                                      <input class="checkbox" id="TMACShistory" name="TMACShistory" type="checkbox" onclick="toggleTMACSHistoryWMSLayer();"> Track History
+                                   </label>
+                                </div>
+                             </div>
+                          </div>
                           </li>
                        </ul>
                     </div>
@@ -515,30 +571,9 @@
                  </div>
                  <div id="layers-collapse" class="menuBody panel-collapse collapse">
                     <div id="layers-body" class="panel-body text-left">
-                       <div id="tmacslayer">
-                          <center><b>TMACS WMS</b></center>
-
-                          <div class="checkbox">
-                             <label>
-                                <input class="checkbox" id="TMACShead" name="TMACShead" type="checkbox" onclick="toggleTMACSHeadWMSLayer();"> TMAC Trackheads
-                             </label>
-                          </div>
-                          <div class="checkbox">
-                             <label>
-                                <input class="checkbox" id="TMACShistory" name="TMACShistory" type="checkbox" onclick="toggleTMACSHistoryWMSLayer();"> Track History
-                             </label>
-                          </div>
-                       </div>
-                       <hr>
-                       <center><b>Other Information</b></center>
                        <div class="checkbox">
                           <label>
                              <input class="checkbox" id="enableCountryBorders" name="enableCountryBorders" type="checkbox" onclick="toggleCountryBorders();"> Enable country borders
-                          </label>
-                       </div>
-                       <div class="checkbox">
-                          <label>
-                             <input class="checkbox" id="enableCluster" name="Enable Clusters" type="checkbox" checked="checked" onclick="toggleCluster(true);"> Enable Clusters when zoomed out
                           </label>
                        </div>
                        <div class="checkbox">
