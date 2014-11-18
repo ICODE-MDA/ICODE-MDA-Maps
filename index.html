@@ -37,7 +37,6 @@
      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet">
      <link rel="stylesheet" href="css/bootstrap.css"> <!-- include again to override certain styles -->
      <link rel="stylesheet" href="css/bootstrapmap.css">
-
      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
 
 
@@ -48,96 +47,10 @@
      <!-- Google Webfonts -->
      <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'  type='text/css'>
 
-     <script>
-        //Initialization scripts on page load
-        $(document).ready(function() {
-           //Query bar text control
-           //Select all text if query bar comes into focus
-           $('#query:text').focus(function() { 
-              $(this).one('mouseup', function(event){
-                 event.preventDefault();
-              }).select();
-           });
+ 
+     <!-- Initialization script -->
+     <script type="text/javascript" src="scripts/initialization.js"></script>
 
-           //Geocoding text box control
-           $('#geocodeAddress').focus(function() { 
-              $(this).one('mouseup', function(event){
-                 event.preventDefault();
-              }).select();
-           });
-
-           //Initialize the menuDiv panels' collapsing behavior
-           $('.panel-collapse').collapse({'toggle': false});
-
-           //Control the behavior of menu heading clicking
-           $('.menuHeading').on('click', function(e) {
-              var panelToToggle = $(this).parents('.panel').children('.menuBody');
-              var glyphiconToToggle = $(this).children('.btn').children('.glyphicon-menu');
-
-              //Flip the icon
-              if (panelToToggle.hasClass('in')) {
-                 glyphiconToToggle.removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
-              }
-              else {
-                 glyphiconToToggle.removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
-              }
-
-              //Hide all others, then toggle the one that was clicked
-              $('.menuBody').collapse('hide');
-              panelToToggle.collapse('toggle');
-           });
-
-           //Data reload progress bar style behavior initialization
-           NProgress.configure({ 
-              ease: 'ease', 
-              trickleRate: 0.02,
-              trickleSpeed: 50,
-              showSpinner: false,
-              minimum: 0.3,
-           });
-
-           //Sortable
-           var panelList = $('#draggablePanelList');
-
-           panelList.sortable({
-              // Only make the .layer-heading child elements support dragging.
-              handle: '.layerHeading',
-              cursor: 'move',
-              update: function() {
-                 $('.panel', panelList).each(function(index, elem) {
-                    var $listItem = $(elem),
-                    newIndex = $listItem.index();
-
-                    // Persist the new indices.
-                 });
-              }
-           });
-           //Control the behavior of layer heading clicking
-           $('.layersOptionsBtn').on('click', function(e) {
-              var panelToToggle = $(this).parents('.layerHeading').parents('.panel').children('.layerBody');
-              var glyphiconToToggle = $(this).children('.glyphicon-menu');
-
-              //Flip the icon
-              if (panelToToggle.hasClass('in')) {
-                 glyphiconToToggle.removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
-              }
-              else {
-                 glyphiconToToggle.removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
-              }
-
-              //Toggle the options panel
-              panelToToggle.collapse('toggle');
-           });
-        });
-     </script>   
-     <script>
-        //Main userid global setting
-        var userid = 'icodeuser';   //temporarily set to icodeuser for testing
-
-        $(document).ready(function() {
-           $('#username').text(userid);
-        });
-     </script>   
 
      <!-- Main JavaScript for controlling map -->
      <script type="text/javascript" src="scripts/icode-maps-google.js"></script>
@@ -219,7 +132,7 @@
                     <h4 class="panel-title">
                        <span data-toggle="collapse" data-parent="#accordion">Legend</span>
                     </h4>
-                    <button id="legend-chevron" class="btn btn-primary btn-xs">      
+                    <button id="legend-chevron" class="btn btn-primary btn-xs btn-expand">      
                        <span id="legend-icon" class="glyphicon glyphicon-chevron-up glyphicon-menu"></span>
                     </button>
                  </div>
@@ -439,18 +352,21 @@
                     <h4 class="panel-title">
                        <span data-toggle="collapse" data-parent="#accordion">Data Layers</span>
                     </h4>
-                    <button id="data-chevron" class="btn btn-primary btn-xs">      
+                    <button id="data-chevron" class="btn btn-primary btn-xs btn-expand">      
                        <span id="data-icon" class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                     </button>
                  </div>
                  <div id="data-collapse" class="menuBody panel-collapse collapse">
                     <div class="panel-body text-left">
-                       Data layers currently displayed:
-                       <ul id="draggablePanelList" class="list-unstyled">
+                       <h4 class="text-center">Layers Shown:</h4>
+                       <ul id="displayedLayersList" class="list-unstyled connectedSortable">
                           <li class="panel panel-success">
                           <div class="layerHeading panel-heading">
+                             <!-- <button class="btn btn-success btn-xs btn-left"> -->
+                                <span class="hideShowLayerBtn glyphicon glyphicon-minus"></span>
+                                <!-- </button> -->
                              AIS Layer
-                             <button class="layersOptionsBtn btn btn-success btn-xs">
+                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
                                 Options      
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                              </button>
@@ -510,7 +426,12 @@
                              </form>
                              <div class="checkbox">
                                 <label>
-                                   <input class="checkbox" id="enableCluster" name="Enable Clusters" type="checkbox" checked="checked" onclick="toggleCluster(true);"> Enable Clusters when zoomed out
+                                   <input class="checkbox" id="enableCluster" name="Enable Clusters" type="checkbox" checked="checked" onclick="toggleCluster(true);"> Enable Clusters
+                                </label>
+                             </div>
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="HeatmapLayer" name="HeatmapLayer" type="checkbox" onclick="toggleHeatmapLayer();"> Enable Heatmap
                                 </label>
                              </div>
 
@@ -518,21 +439,65 @@
                           </li>
                           <li class="panel panel-success">
                           <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-minus"></span>
                              RADAR Layer
-                             <button class="layersOptionsBtn btn btn-success btn-xs">
-                                Options      
+                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
+                                Options
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                              </button>
                           </div>
                           <div class="layerBody panel-body panel-collapse collapse">Options...</div>
                           </li>
 
-                          <hr>
-                          Data layers not displayed:
                           <li class="panel panel-success">
                           <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-minus"></span>
+                             Day/Night Layer
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="showdaynightoverlay" name="Show Day/Night Overlay" type="checkbox" onclick="toggleDayNightOverlay();" checked="checked"> Show Day/Night Overlay
+                                </label>
+                             </div>
+                          </div>
+                          </li>
+                       </ul> <!-- END shown layers -->
+
+                       <hr>
+                       <h4 class="text-center">Available Layers:</h4>
+                       <ul id="hiddenLayersList" class="list-unstyled connectedSortable">
+                          <li class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                             LAISIC Layer
+                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
+                                Options      
+                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
+                             </button>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <div class="btn-group">
+                                <button id="vesselstablenewwindowbutton" class="btn btn-success" onClick="window.open('icode-table.html'); return false;">Open Vessels Tables</button>
+                             </div>                             
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="LAISIC_TARGETS" name="LAISIC_TARGETS" type="checkbox" onclick="refreshMaps(true);"> Display LAISIC targets
+                                </label>
+                             </div>
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="error ellipses" name="error ellipses" type="checkbox" checked="checked" onclick=";"> Draw error ellipses on trackicons
+                                </label>
+                             </div>
+                          </div>
+                          </li>
+
+                          <li class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
                              TMACS Layer
-                             <button class="layersOptionsBtn btn btn-success btn-xs">
+                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
                                 Options      
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                              </button>
@@ -554,85 +519,97 @@
                              </div>
                           </div>
                           </li>
-                       </ul>
+
+                          <li class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                             Full Motion Video Layer
+                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
+                                Options      
+                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
+                             </button>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="FMVLayer" name="FMVLayer" type="checkbox" onclick="toggleFMV();"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="16" width="30" viewBox="-10 -9 15 16">
+                                   <path d="M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0" style="fill:#FF0000;stroke:#000000;stroke-width:1;fill-rule:evenodd;">Browser does not support inline SVG.
+                                   </path>
+                                   </svg> FMV Layer
+                                </label>
+                             </div>
+                          </div>
+                          </li>
+
+                          <li class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                             Country Borders Layer
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="enableCountryBorders" name="enableCountryBorders" type="checkbox" onclick="toggleCountryBorders();"> Enable country borders
+                                </label>
+                             </div>
+                          </div>
+                          </li>
+
+                          <li class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                             EEZ Layer
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="EEZLayer" name="EEZLayer" type="checkbox" onclick="toggleEEZLayer();"> EEZ Layer
+                                </label>
+                             </div>
+                          </div>
+                          </li>
+
+                          <li class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                             Weather Layer
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="WeatherLayer" name="WeatherLayer" type="checkbox" onclick="toggleWeatherLayer();"> <img align="top" width="20px" src="icons/weather_icon.png" style="padding-bottom: 4px; vertical-align: middle;"> Weather Layer
+                                </label>
+                             </div>
+                          </div>
+                          </li>
+
+                          <li class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                             Port Layer
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <div class="checkbox">
+                                <label>                 
+                                   <input class="checkbox" id="PortLayer" name="PortLayer" type="checkbox" onclick="togglePortLayer();"> <img align="top" height="20px" src="icons/anchor_port.png" style="padding-bottom: 4px; vertical-align: middle;"> Port Layer
+                                </label>
+                             </div>
+                          </div>
+                          </li>
+
+                          <li class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                             Skeleton Layer
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             
+                          </div>
+                          </li>
+                       </ul> <!-- END hidden layers -->
                     </div>
                  </div>
               </div> <!-- END data-panel -->
-
-              <!-- LAYERS PANEL ========================================================================== -->
-              <div id="layers-panel" class="panel panel-primary">
-                 <div id="layers-heading" class="menuHeading panel-heading">
-                    <h4 class="panel-title">
-                       <span data-toggle="collapse" data-parent="#accordion">Layers</span>
-                    </h4>
-                    <button id="layers-chevron" class="btn btn-primary btn-xs">      
-                       <span id="layers-icon" class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
-                    </button>
-                 </div>
-                 <div id="layers-collapse" class="menuBody panel-collapse collapse">
-                    <div id="layers-body" class="panel-body text-left">
-                       <div class="checkbox">
-                          <label>
-                             <input class="checkbox" id="enableCountryBorders" name="enableCountryBorders" type="checkbox" onclick="toggleCountryBorders();"> Enable country borders
-                          </label>
-                       </div>
-                       <div class="checkbox">
-                          <label>
-                             <input class="checkbox" id="EEZLayer" name="EEZLayer" type="checkbox" onclick="toggleEEZLayer();"> EEZ Layer
-                          </label>
-                       </div>
-                       <div class="checkbox">
-                          <label>
-                             <input class="checkbox" id="WeatherLayer" name="WeatherLayer" type="checkbox" onclick="toggleWeatherLayer();"> <img align="top" width="20px" src="icons/weather_icon.png" style="padding-bottom: 4px; vertical-align: middle;"> Weather Layer
-                          </label>
-                       </div>
-                       <div class="checkbox">
-                          <label>                 
-                             <input class="checkbox" id="PortLayer" name="PortLayer" type="checkbox" onclick="togglePortLayer();"> <img align="top" height="20px" src="icons/anchor_port.png" style="padding-bottom: 4px; vertical-align: middle;"> Port Layer
-                          </label>
-                       </div>
-                       <div class="checkbox">
-                          <label>
-                             <input class="checkbox" id="HeatmapLayer" name="HeatmapLayer" type="checkbox" onclick="toggleHeatmapLayer();"> Heatmap Layer
-                          </label>
-                       </div>
-                       <hr>
-                       <div class="checkbox">
-                          <label>
-                             <input class="checkbox" id="FMVLayer" name="FMVLayer" type="checkbox" onclick="toggleFMV();"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="16" width="30" viewBox="-10 -9 15 16">
-                             <path d="M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0" style="fill:#FF0000;stroke:#000000;stroke-width:1;fill-rule:evenodd;">Browser does not support inline SVG.
-                             </path>
-                             </svg> FMV Layer
-                          </label>
-                       </div>
-                       </p>
-
-                       <hr>
-                       <div class="btn-group">
-                          <button id="vesselstablenewwindowbutton" class="btn btn-success" onClick="window.open('icode-table.html'); return false;">Open Vessels Tables</button>
-                       </div>
-                       <div class="checkbox">
-                          <label>
-                             <input class="checkbox" id="LAISIC_TARGETS" name="LAISIC_TARGETS" type="checkbox" onclick="refreshMaps(true);"> Display LAISIC targets
-                          </label>
-                       </div>
-                       <div class="checkbox">
-                          <label>
-                             <input class="checkbox" id="error ellipses" name="error ellipses" type="checkbox" checked="checked" onclick=";"> Draw error ellipses on trackicons
-                          </label>
-                       </div>
-
-                       <hr>
-                       <div class="checkbox">
-                          <label>
-                             <input class="checkbox" id="showdaynightoverlay" name="Show Day/Night Overlay" type="checkbox" onclick="toggleDayNightOverlay();" checked="checked"> Show Day/Night Overlay
-                          </label>
-                       </div>
-
-
-                    </div>
-                 </div>
-              </div>
 
               <!-- OPTIONS PANEL ========================================================================== -->
               <div id="options-panel" class="panel panel-primary">
@@ -640,7 +617,7 @@
                     <h4 class="panel-title">
                        <span data-toggle="collapse" data-parent="#accordion">Global Options</span>
                     </h4>
-                    <button id="options-chevron" class="btn btn-primary btn-xs">      
+                    <button id="options-chevron" class="btn btn-primary btn-xs btn-expand">      
                        <span id="options-icon" class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                     </button>
                  </div>

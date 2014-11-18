@@ -36,6 +36,14 @@ body {
 .claro .navbar {
 	background: rgba(0, 0, 0, 0.8);
 }
+.noselect {
+   -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
+}
 #map-container {
 	border: 0px solid gray;
 	height: 100%;
@@ -63,12 +71,15 @@ body {
 .panel-heading {
    position: relative;
 }
-.panel-heading .btn {
+.panel-heading .btn-expand {
    position: absolute;
    top: 9px;
    right: 9px;
    border: none;
    outline: none;
+}
+.hideShowLayerBtn {
+   cursor: pointer;
 }
 #menuDiv {
    right: 10px;
@@ -289,4 +300,8 @@ body {
 }
 .layerHeading:hover {
     cursor: move;
+}
+.panel-title {
+   .noselect;
+   cursor: pointer;
 }
