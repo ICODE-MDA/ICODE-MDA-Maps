@@ -48,7 +48,6 @@
      <!-- Google Webfonts -->
      <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'  type='text/css'>
 
-
      <script>
         //Initialization scripts on page load
         $(document).ready(function() {
@@ -71,11 +70,20 @@
            $('.panel-collapse').collapse({'toggle': false});
 
            //Control the behavior of menu heading clicking
-           $('.panel-heading').on('click', function(e) {
-              var panelToToggle = $(this).parents('.panel').children('.panel-collapse');
+           $('.menuHeading').on('click', function(e) {
+              var panelToToggle = $(this).parents('.panel').children('.menuBody');
               var glyphiconToToggle = $(this).children('.btn').children('.glyphicon-menu');
 
-              $('.panel-collapse').collapse('hide');
+              //Flip the icon
+              if (panelToToggle.hasClass('in')) {
+                 glyphiconToToggle.removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+              }
+              else {
+                 glyphiconToToggle.removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+              }
+
+              //Hide all others, then toggle the one that was clicked
+              $('.menuBody').collapse('hide');
               panelToToggle.collapse('toggle');
            });
 
@@ -86,6 +94,30 @@
               trickleSpeed: 50,
               showSpinner: false,
               minimum: 0.3,
+           });
+
+           //Sortable
+           var panelList = $('#draggablePanelList');
+
+           panelList.sortable({
+              // Only make the .layer-heading child elements support dragging.
+              // Omit this to make then entire <li>...</li> draggable.
+              handle: '.layer-heading', 
+              update: function() {
+                 $('.panel', panelList).each(function(index, elem) {
+                    var $listItem = $(elem),
+                    newIndex = $listItem.index();
+
+                    // Persist the new indices.
+                 });
+              }
+           });
+           //Control the behavior of layer heading clicking
+           $('.layerHeading').on('click', function(e) {
+              var panelToToggle = $(this).parents('.panel').children('.layerBody');
+              //var glyphiconToToggle = $(this).children('.btn').children('.glyphicon-menu');
+
+              panelToToggle.collapse('toggle');
            });
         });
      </script>   
@@ -133,9 +165,9 @@
            <!-- Navigation items -->
            <ul class="nav navbar-nav navbar-right">
               <li class="dropdown">
-                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Alerts<span class="caret"></span></a>
+                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Alerts <span class="badge">0</span><span class="caret"></span></a>
                  <ul class="dropdown-menu" role="menu">
-                    <li><a href="#">View Alerts</a></li>
+                    <li><a href="#">View Alerts <span class="badge">0</span></a></li>
                     <li class="divider"></li>
                     <li><a href="#">Setup New Alerts</a></li>
                     <li><a href="#">Edit Alerts</a></li>
@@ -174,7 +206,7 @@
            <div class="panel-group" id="accordion">
               <!-- LEGEND PANEL ========================================================================== -->
               <div id="legend-panel" class="panel panel-primary">
-                 <div id="legend-heading" class="panel-heading">
+                 <div id="legend-heading" class="menuHeading panel-heading">
                     <h4 class="panel-title">
                        <span data-toggle="collapse" data-parent="#accordion">Legend</span>
                     </h4>
@@ -182,7 +214,7 @@
                        <span id="legend-icon" class="glyphicon glyphicon-chevron-up glyphicon-menu"></span>
                     </button>
                  </div>
-                 <div id="legend-collapse" class="panel-collapse collapse in">
+                 <div id="legend-collapse" class="menuBody panel-collapse collapse in">
                     <div id="legend-body" class="panel-body text-left">
                        <h4 class="text-center">Vessel Types</h4>
                        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
@@ -365,14 +397,6 @@
                              8x - Tankers<br>
                           </label>
                        </div>
-                       <hr>
-
-                       <h4 class="text-center">AIS Sources</h4>
-                       <form role="form">
-                          <div><label><input type="radio" id="allaissources" name="aissources" checked="checked" onclick="refreshMaps(true);"> All AIS Sources</label></div>
-                          <div><label><input type="radio" id="mssisonly" name="aissources" onclick="refreshMaps(true);"> Terrestrial AIS Only</label></div>
-                          <div><label><input type="radio" id="sataisonly" name="aissources" onclick="refreshMaps(true);"> Satellite AIS Only</label></div>
-                       </form>
 
                        <hr>
                        <h4 class="text-center">Risk Level</h4>
@@ -402,7 +426,7 @@
 
               <!-- DATA LAYERS PANEL ===================================================================== -->
               <div id="data-panel" class="panel panel-primary">
-                 <div id="data-heading" class="panel-heading">
+                 <div id="data-heading" class="menuHeading panel-heading">
                     <h4 class="panel-title">
                        <span data-toggle="collapse" data-parent="#accordion">Data Layers</span>
                     </h4>
@@ -410,16 +434,78 @@
                        <span id="data-icon" class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                     </button>
                  </div>
-                 <div id="data-collapse" class="panel-collapse collapse">
+                 <div id="data-collapse" class="menuBody panel-collapse collapse">
                     <div class="panel-body text-left">
-                       
+                       Data layers currently displayed:
+                       <ul id="draggablePanelList" class="list-unstyled">
+                          <li class="panel panel-success">
+                          <div class="layerHeading panel-heading">AIS Layer</div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <h4 class="text-center">AIS Sources</h4>
+                             <form role="form">
+                                <div><label><input type="radio" id="allaissources" name="aissources" checked="checked" onclick="refreshMaps(true);"> All AIS Sources</label></div>
+                                <div><label><input type="radio" id="mssisonly" name="aissources" onclick="refreshMaps(true);"> Terrestrial AIS Only</label></div>
+                                <div><label><input type="radio" id="sataisonly" name="aissources" onclick="refreshMaps(true);"> Satellite AIS Only</label></div>
+                             </form>
+
+                             <hr>
+                             <form role="form">
+                                <label>History trail length:</label>
+                                <select id="history_trail_length" onChange="history_trail_length_changed();">
+                                   <option value="no limit">No limit</option>
+                                   <option value="0.25" selected="selected">6 hours</option>
+                                   <option value="0.5" selected="selected">12 hours</option>
+                                   <option value="1" selected="selected">1 day</option>
+                                   <option value="2">2 days</option>
+                                   <option value="3">3 days</option>
+                                   <option value="4">4 days</option>
+                                   <option value="5">5 days</option>
+                                   <option value="6">6 days</option>
+                                   <option value="7">7 days</option>
+                                   <option value="8">8 days</option>
+                                   <option value="9">9 days</option>
+                                   <option value="10">10 days</option>
+                                   <option value="11">11 days</option>
+                                   <option value="12">12 days</option>
+                                   <option value="13">13 days</option>
+                                   <option value="14">14 days</option>
+                                   <option value="15">15 days</option>
+                                   <option value="31">31 days</option>
+                                </select>
+                             </form>
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="showtrackicons" name="showtrackicons" type="checkbox" checked="checked" onclick="toggleTrackIcons();"> Enable track icons
+                                </label>
+                             </div>
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="queryalltracks" name="queryalltracks" type="checkbox" onclick="toggleQueryAllTracks();"> Query tracks for vessels in view
+                                </label>
+                             </div>
+                             
+                             <hr>
+                             <form role="form">
+                                <label>Vessel Icon Size:</label>
+                                <input type="button" onclick="decreaseVesselIconSize()" value="-"></input>
+                                <input type="button" onclick="increaseVesselIconSize()" value="+"></input>
+                                <input type="button" onclick="resetVesselIconSize()" value="Reset"></input>
+                             </form>
+
+                          </div>
+                          </li>
+                          <li class="panel panel-success">
+                          <div class="layerHeading panel-heading">RADAR Layer</div>
+                          <div class="layerBody panel-body panel-collapse collapse">Options...</div>
+                          </li>
+                       </ul>
                     </div>
                  </div>
               </div> <!-- END data-panel -->
 
               <!-- LAYERS PANEL ========================================================================== -->
               <div id="layers-panel" class="panel panel-primary">
-                 <div id="layers-heading" class="panel-heading">
+                 <div id="layers-heading" class="menuHeading panel-heading">
                     <h4 class="panel-title">
                        <span data-toggle="collapse" data-parent="#accordion">Layers</span>
                     </h4>
@@ -427,7 +513,7 @@
                        <span id="layers-icon" class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                     </button>
                  </div>
-                 <div id="layers-collapse" class="panel-collapse collapse">
+                 <div id="layers-collapse" class="menuBody panel-collapse collapse">
                     <div id="layers-body" class="panel-body text-left">
                        <div id="tmacslayer">
                           <center><b>TMACS WMS</b></center>
@@ -500,21 +586,30 @@
                              <input class="checkbox" id="error ellipses" name="error ellipses" type="checkbox" checked="checked" onclick=";"> Draw error ellipses on trackicons
                           </label>
                        </div>
+
+                       <hr>
+                       <div class="checkbox">
+                          <label>
+                             <input class="checkbox" id="showdaynightoverlay" name="Show Day/Night Overlay" type="checkbox" onclick="toggleDayNightOverlay();" checked="checked"> Show Day/Night Overlay
+                          </label>
+                       </div>
+
+
                     </div>
                  </div>
               </div>
 
               <!-- OPTIONS PANEL ========================================================================== -->
               <div id="options-panel" class="panel panel-primary">
-                 <div id="options-heading" class="panel-heading">
+                 <div id="options-heading" class="menuHeading panel-heading">
                     <h4 class="panel-title">
-                       <span data-toggle="collapse" data-parent="#accordion">Options</span>
+                       <span data-toggle="collapse" data-parent="#accordion">Global Options</span>
                     </h4>
                     <button id="options-chevron" class="btn btn-primary btn-xs">      
                        <span id="options-icon" class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                     </button>
                  </div>
-                 <div id="options-collapse" class="panel-collapse collapse">
+                 <div id="options-collapse" class="menuBody panel-collapse collapse">
                     <div class="panel-body text-left">
                        <!--
                        <form id="distancetoolform" >
@@ -538,7 +633,7 @@
                        </div>
                        <hr>
                        <form role="form">
-                          <label>Only show vessels up to</label>
+                          <label>Only show data up to</label>
                           <select id="vessel_age" onChange="vessel_age_changed(true);">
                              <option value="no limit">No limit</option>
                              <option value="0.0833333333333333">5 mins</option>
@@ -561,42 +656,8 @@
                           </select>
                        </form>
                        <hr>
-                       <form role="form">
-                          <label>History trail length:</label>
-                          <select id="history_trail_length" onChange="history_trail_length_changed();">
-                             <option value="no limit">No limit</option>
-                             <option value="0.25" selected="selected">6 hours</option>
-                             <option value="0.5" selected="selected">12 hours</option>
-                             <option value="1" selected="selected">1 day</option>
-                             <option value="2">2 days</option>
-                             <option value="3">3 days</option>
-                             <option value="4">4 days</option>
-                             <option value="5">5 days</option>
-                             <option value="6">6 days</option>
-                             <option value="7">7 days</option>
-                             <option value="8">8 days</option>
-                             <option value="9">9 days</option>
-                             <option value="10">10 days</option>
-                             <option value="11">11 days</option>
-                             <option value="12">12 days</option>
-                             <option value="13">13 days</option>
-                             <option value="14">14 days</option>
-                             <option value="15">15 days</option>
-                             <option value="31">31 days</option>
-                          </select>
-                       </form>
-                       <div class="checkbox">
-                          <label>
-                             <input class="checkbox" id="showtrackicons" name="showtrackicons" type="checkbox" checked="checked" onclick="toggleTrackIcons();"> Enable track icons
-                          </label>
-                       </div>
-                       <div class="checkbox">
-                          <label>
-                             <input class="checkbox" id="queryalltracks" name="queryalltracks" type="checkbox" onclick="toggleQueryAllTracks();"> Query tracks for vessels in view
-                          </label>
-                       </div>
-                       <hr>
                        <div id="refreshoptions">
+                          <b>Refresh Options:</b><br>
                           <div class="checkbox">
                              <label>
                                 <input class="checkbox" id="autoRefresh" name="autoRefresh" type="checkbox" checked="checked" onclick="toggleAutoRefresh();"> Automatically refresh (1 min)
@@ -624,21 +685,6 @@
                        <div class="checkbox">
                           <label>
                              <input class="checkbox" id="neverRefresh" name="neverRefresh" type="checkbox" onclick="toggleNeverAutoRefresh();"> Never refresh unless manually triggered (by hitting spacebar)
-                          </label>
-                       </div>
-
-                       <hr>
-                       <form role="form">
-                          <label>Vessel Icon Size:</label>
-                          <input type="button" onclick="decreaseVesselIconSize()" value="-"></input>
-                          <input type="button" onclick="increaseVesselIconSize()" value="+"></input>
-                          <input type="button" onclick="resetVesselIconSize()" value="Reset"></input>
-                       </form>
-
-                       <hr>
-                       <div class="checkbox">
-                          <label>
-                             <input class="checkbox" id="showdaynightoverlay" name="Show Day/Night Overlay" type="checkbox" onclick="toggleDayNightOverlay();" checked="checked"> Show Day/Night Overlay
                           </label>
                        </div>
 
