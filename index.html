@@ -17,8 +17,14 @@
      <script src="http://js.arcgis.com/3.11/"></script>
      -->
 
+
+     <!-- Initialization script -->
+     <script type="text/javascript" src="scripts/initialization.js"></script>
+
+
      <!-- Google Maps API v3 -->
      <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=geometry,drawing,weather,visualization&sensor=false"></script>
+     <!-- Other JS libraries -->
      <script type="text/javascript" src='scripts/infobubble.js' ></script>
      <script type="text/javascript" src="scripts/trackTimeSlider.js"></script>     
      <script type="text/javascript" src="scripts/distanceWidget.js"></script>
@@ -28,6 +34,11 @@
      <script type="text/javascript" src="scripts/nprogress.js"></script>
      <link rel="stylesheet" type="text/css" href="css/nprogress.css">
      <script type="text/javascript" src="scripts/infobox.js"></script>
+     <script type="text/javascript" src="scripts/alertclient.js"></script>
+     <script type="text/javascript" src="scripts/alertsetup.js"></script>
+     <script type="text/javascript" src="scripts/dragdrop.js"></script>
+
+     <!-- JQueryUI -->
      <!-- Theme downloaded from http://jqueryui.com/download/#!zThemeParams=5d00000100f405000000000000003d8888d844329a8dfe02723de3e5701fa198449035fc0613ff729a37dd818cf92b1f6938fefa90282d04ae436bb72367f5909357c629e832248af2c086db4ab730aa4cced933a88449eca61db9f7f3b23d47f58a712d809b6088edfb34ad39fdc365386d0fa05a1ac3ecd320d2c989729f79ebdc6c6c1efbdad4c8411d498f009ffe98fe129da7602fb950113abdae4a76a6c41a4b54b4f82bb8821d6d431cd3fdd76b9d621596a2728b93385f2e7aaf8ea6603553343d43829941536e2bdd3ed7d7d3207364bf351633b31b934a71523a88fa2058cdd4c2e0778cd56d6ccac254ddace19ff4460a100e2e6a52830d9063c6e328cc3cb5e3d6dbe1077ae8b7cc5fa6414eafd15883b40c6c3e71647031ce3da7038a945a5628669fbe0e5139dad7ce99c00f25c2cd40569bd2fe1b2caed45bf2b8943f6ac17215bd54437a0f739009848e80f1d5c00d99870e7258d07402af6b22872fdf8f2892a7e9274aaa9181573ddd8cd7788511b4459e736d76b3e64e015809712e904499648868a11e35b3bb8ee1168d6039c5a86eee8cf545c877dbdd0111ab04ede46a85a17baed0958026fe23d2e490cfa504ab598731d779a2434fa164085379d31e1ff08e2eeb9475cce3d5b3e9b2fd4df43dffe6cf0eda -->
      <script type="text/javascript" src="scripts/jquery-ui-1.10.3.custom.js"></script>
      <link rel="stylesheet" href="css/custom-jquery-ui-theme/jquery-ui-1.10.3.custom.css">
@@ -46,10 +57,6 @@
 
      <!-- Google Webfonts -->
      <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet'  type='text/css'>
-
- 
-     <!-- Initialization script -->
-     <script type="text/javascript" src="scripts/initialization.js"></script>
 
 
      <!-- Main JavaScript for controlling map -->
@@ -87,16 +94,16 @@
            <!-- Navigation items -->
            <ul class="nav navbar-nav navbar-right">
               <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-bell"></span> Alerts <span class="badge">0</span><span class="caret"></span></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-bell"></span> Alerts <span class="alertCountLabel badge">0</span><span class="caret"></span></a>
                  <ul class="dropdown-menu" role="menu">
-                    <li><a href="#">View Alerts <span class="badge">0</span></a></li>
+                    <li><a href="#" onclick="toggleAlertsPanel(); return false;">View Alerts <span class="alertCountLabel badge">0</span></a></li>
                     <li class="divider"></li>
                     <li><a href="#">Setup New Alerts</a></li>
                     <li><a href="#">Edit Alerts</a></li>
                  </ul>
               </li>
               <li class="dropdown">
-                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="username"></span><span class="caret"></span></a>
+                 <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="username"></span><img src="icons/loginavatar.gif" alt="Avatar" class="avatar"><span class="caret"></span></a>
                  <ul class="dropdown-menu" role="menu">
                     <li><a href="#"><span class="glyphicon glyphicon-wrench"></span> Settings</a></li>
                     <li><a href="#"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
@@ -788,6 +795,25 @@
            </div>
         </div>
      </form>
+
+     <div id="drop-container"><div id="drop-silhouette"></div></div>
+
+     <div id="alertPanel">
+        <div id="alertAccordion" class="accordion">
+           <h3 id="alertSummaryheading"><b>Real-time Alerts</b></h3>
+           <div id="alertSummary">
+              <div>
+                 <span class="alertLabel">Connecting...</span><br>
+                 <b>Total decoded:</b> <span class="processedCountLabel">0</span><br>
+                 <b>Total messages matching alerts:</b> <span class="alertCountLabel">0</span><br>
+              </div>
+
+              <p align=center>
+              <input id="setupAlert" type="button" onClick="$('#alertSummaryheading').click();setupAlertInitialize(); return false;" value="Setup New Alert">
+              </p>
+           </div>
+        </div>
+     </div>
 
   </body>
 </html>

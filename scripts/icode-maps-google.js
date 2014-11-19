@@ -54,6 +54,8 @@ var infoBubble = new InfoBubble({
        arrowStyle:       2,
        padding:          '8px',
        borderRadius:     10,
+       minWidth: 380,
+       minHeight: 400,
        //maxWidth:         400,
        //minHeight:        360
    });
@@ -1304,11 +1306,6 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                   else {
                      marker.setTitle(vessel.mmsi);
                   }
-
-                  google.maps.event.addListenerOnce(marker, 'mouseout', function() {
-                     //window.clearTimeout(trackMouseoverTimeout);
-                     document.getElementById('shipdetails').style.visibility = 'hidden';
-                  });
                });
 
                //Listen for marker right clicks (to query and display track)
@@ -1808,7 +1805,7 @@ function generateInfoHTML(vessel, vesseltype, title) {
       '<a href="https://marinetraffic.com/ais/shipdetails.aspx?MMSI=' + vessel.mmsi + '"  target="_blank"> '+
       '<img id="marinetrafficimage" title="Click to open MarineTraffic page" width=180px src="' + imgURL + '" onError="this.onerror=null;this.src="icons/noimage.png";>' + 
       '</a><br>' + 
-      '<a href="http://www.sea-web.com/lrupdate.aspx?param1=spatab833&param2=719766&script_name=authenticated/authenticated_handler.aspx&control=list&SearchString=MMSI+=+' + vessel.mmsi + '&ListType=Ships" target="_blank">Sea-Web link (broken)</a><br>' + 
+      '<a href="http://www.sea-web.com/lrupdate.aspx?param1=spatab833&param2=719766&script_name=authenticated/authenticated_handler.aspx&control=list&SearchString=MMSI+=+' + vessel.mmsi + '&ListType=Ships" target="_blank">Sea-Web link</a><br>' + 
       '<div id="content-sub" border=1>' +
       '<b>MMSI</b>: ' + vessel.mmsi + '<br>' +
       '<b>IMO</b>: ' + vessel.imo + (passIMOChecksum(vessel.imo)==true?'':' <font color="red">(invalid)</font>') + '<br>' +

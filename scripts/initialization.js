@@ -1,6 +1,10 @@
 /**
  * Initialization script for maps on page load
  **/
+
+//Global Objects
+var userid;
+
 $(function() { //shorthand for: $(document).ready(function() {
    //Call setup functions
    setupUser();
@@ -9,11 +13,12 @@ $(function() { //shorthand for: $(document).ready(function() {
    menuDivPanels();
    progressBar();
    sortableLayers();
+   setupAlertAccordion();
 
    //Setup functions definitions =========================================================
    function setupUser() {
       //Main userid global setting
-      var userid = 'icodeuser';   //temporarily set to icodeuser for testing
+      userid = 'icodeuser';   //temporarily set to icodeuser for testing
 
       $(document).ready(function() {
          $('#username').text(userid);
@@ -35,15 +40,17 @@ $(function() { //shorthand for: $(document).ready(function() {
       $('#geocodeAddress')
          .focus(function() { 
             $(this).one('mouseup', function(event){
-               event.preventDefault();
+               //event.preventDefault();
             }).select();
 
             //Release focus on input field if clicked outside
+            /*
             $(document).mouseup(function (e) {
                if (!$('#geocodeAddress').is(e.target)) {
                   $('#geocodeAddress').blur();
                }
             });
+            */
          });
    }
 
@@ -146,6 +153,19 @@ $(function() { //shorthand for: $(document).ready(function() {
 
          //Toggle the options panel
          panelToToggle.collapse('toggle');
+      });
+   }
+
+   function setupAlertAccordion() {
+      $("#alertAccordion").accordion({
+         collapsible: true,
+      heightStyle: "content",
+      autoHeight: false,
+      });
+      $(window).resize(function(){
+         if ($("#alertAccordion").accordion != undefined) {
+            $("#alertAccordion").accordion("refresh");
+         }
       });
    }
 });
