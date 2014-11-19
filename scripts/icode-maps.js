@@ -1830,6 +1830,26 @@ function generateInfoHTML(vessel, vesseltype, title) {
       '<div id="query_spinner"><div style="width: 24px; height: 24px;"></div></div>' + 
       '</div>' + //close for port_calls data div
       '</div>': '') + //close for port_calls div (content-sub)
+      (vessel.mmsi==0 && vessel.scoreFail != 0 ?
+      '<div id="score" border=1>' +
+      '<b>Chi Square Score of Closest AIS Track </b>: ' + Number(parseFloat(vessel.scoreFail).toFixed(3)) + '<br>' +
+      '<b>AIS Track MMSI</b>: ' + vessel.scoreMMSI + '<br>' + 
+      '</div>': '') + //close for score
+      (vessel.mmsi==0 && vessel.distFail != 0 ?
+      '<div id="dist" border=1>' +
+      '<b>Closest AIS Track (nm) </b>: ' + Number(parseFloat(vessel.distFail).toFixed(3)) + '<br>' +
+      '<b>Dist Fails: AIS Track MMSI</b>: ' + vessel.distMMSI + '<br>' + 
+      '</div>': '') + //close for dist
+      (vessel.mmsi==0 && vessel.timeFail != 0 ?
+      '<div id="time" border=1>' +
+      '<b>AIS Track within dist but fails time Threshold (hr) </b>: ' + Number(parseFloat(vessel.timeFail).toFixed(3)) + '<br>' +
+      '<b>Time Fails: AIS Track MMSI</b>: ' + vessel.timeMMSI + '<br>' + 
+      '</div>': '') + //close for time
+      (vessel.mmsi==0 && vessel.velocityFail != 0 ?
+      '<div id="velocity" border=1>' +
+      '<b>AIS Track within dist & time but fails speed Threshold (kn) </b>: ' + Number(parseFloat(vessel.velocityFail).toFixed(3)) + '<br>' +
+      '<b>Speed Fails: AIS Track MMSI</b>: ' + vessel.velocityMMSI + '<br>' + 
+      '</div>': '') + //close for velocity
       '</div>';  //close for content-left div
 
    var htmlRight = 
