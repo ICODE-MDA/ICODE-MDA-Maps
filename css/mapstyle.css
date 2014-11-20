@@ -362,3 +362,8 @@ body {
    width: 100%;
    text-align: center;
 }
+.ui-state-highlight { 
+   height: 38px; 
+   line-height: 1.2em;
+   margin: 5px 0px;
+}

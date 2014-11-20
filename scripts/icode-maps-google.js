@@ -195,7 +195,7 @@ var selectionSquare = new google.maps.Marker({
 //var selectionCircle;
 
 //VOLPE's KMZ layers for EEZ and country borders
-var EEZ;
+//var EEZ;
 var COUNTRYBORDERS;
 var COMMON_PATH = "https://mda.volpe.dot.gov/overlays/";
 var EEZ_PATH = COMMON_PATH + "eez-layer.kmz";
@@ -364,8 +364,9 @@ function initialize() {
       google.maps.event.trigger(map, 'resize'); 
       var idleTimeout = window.setTimeout(
          function() { 
-            //refreshMaps(false);
             refreshMaps(true);
+            //Beta:
+            refreshLayers();
          }, 
          reloadDelay);   //milliseconds to pause after bounds change
 
@@ -446,11 +447,11 @@ function initialize() {
          togglePanel();
       }
 
-      toggleEEZLayer();
+      //toggleEEZLayer();
 
       reload_delay_changed();
 
-      toggleDayNightOverlay();
+      //toggleDayNightOverlay();
 
       initializeBrowserFocus();
    });
@@ -488,6 +489,8 @@ function initialize() {
             break;
          case 32: // spacebar
             refreshMaps(true);
+            //Beta:
+            refreshLayers();
             break;
          case 65: // a
             if (document.getElementById("autoRefresh") != null &&
@@ -799,7 +802,7 @@ function refreshMaps(forceRedraw) {
 
    toggleCountryBorders();
 
-   refreshDayNightOverlay();
+   //refreshDayNightOverlay();
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -2669,15 +2672,6 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
 }
 
 /* -------------------------------------------------------------------------------- */
-/*
-function refreshLayers() {
-	clearOverlays();
-	clearVesselMarkerArray();
-   refreshMaps(true);
-}
-*/
-
-/* -------------------------------------------------------------------------------- */
 function toggleShowNames() {
    if (document.getElementById("showvesselnames") != null &&
        document.getElementById("showvesselnames").checked) {
@@ -2695,75 +2689,6 @@ function toggleShowNames() {
       for (var i=0; i < markersDisplayed.length; i++) {
          markersDisplayed[i].vesselnameLabel.setMap(null);
       }
-   }
-}
-
-/* -------------------------------------------------------------------------------- */
-function toggleDayNightOverlay() {
-   if (document.getElementById("showdaynightoverlay") != null &&
-       document.getElementById("showdaynightoverlay").checked) {
-      console.log('Showing day/night overlay');
-
-      if (typeof daynightlayer === 'undefined') {
-         daynightlayer = new DayNightOverlay({
-            map: map
-         });
-      }
-      else {
-         daynightlayer.setMap(map);
-      }
-
-      if (map.getZoom() > 9) {
-         console.log('Zoomed in, hide day/night layer');
-
-         if (typeof daynightlayer !== 'undefined') {
-            daynightlayer.setMap(null);
-         }
-         map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
-
-         return;
-      }
-      else {
-         map.setMapTypeId(google.maps.MapTypeId.HYBRID);         
-      }
-   }
-   else {
-      console.log('Hiding day/night overlay');
-
-      if (typeof daynightlayer !== 'undefined') {
-         daynightlayer.setMap(null);
-      }
-   }
-}
-
-/* -------------------------------------------------------------------------------- */
-function refreshDayNightOverlay() {
-   if (document.getElementById("showdaynightoverlay") != null &&
-       document.getElementById("showdaynightoverlay").checked) {
-
-      if (map.getZoom() > 9) {
-         console.log('Zoomed in, hide day/night layer');
-
-         if (typeof daynightlayer !== 'undefined') {
-            daynightlayer.setMap(null);
-         }
-         map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
-
-         return;
-      }
-
-      map.setMapTypeId(google.maps.MapTypeId.HYBRID);
-
-
-      console.log('Refreshing day/night overlay');
-
-      if (typeof daynightlayer !== 'undefined') {
-         daynightlayer.setMap(null);
-      }
-
-      daynightlayer = new DayNightOverlay({
-         map: map
-      });
    }
 }
 
@@ -4680,37 +4605,6 @@ function detectMobileBrowser() {
 
 
 /* -------------------------------------------------------------------------------- */
-function toggleEEZLayer() {
-   if (document.getElementById("EEZLayer") && document.getElementById("EEZLayer").checked) {
-      showEEZ();
-   }
-   else {
-      hideEEZ();
-   }
-}
-
-/**
- * Display VOLPE's EEZ KML
- **/
-function showEEZ() {
-   EEZ = new google.maps.KmlLayer({
-      url: EEZ_PATH,
-      preserveViewport: true,
-      map: map
-   });
-}
-
-/**
- * Hide VOLPE's EEZ KML
- **/
-function hideEEZ() {
-   if (EEZ != null) {
-      EEZ.setMap(null);
-   }
-}
-
-
-/* -------------------------------------------------------------------------------- */
 /**
  * Display VOLPE's country border KML
  **/
@@ -5052,4 +4946,153 @@ function hideBusyIndicator() {
    $('#spinner').activity(false); //hide spinner
    NProgress.done();   //JS library top progress bar
     return;
+}
+
+
+
+
+/* -------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------- */
+
+//Global Objects and definitions
+var dataLayers = [];                //array of dataLayerObject, each layer to be displayed on map
+function dataLayerObject(id, showFunction, hideFunction) {       //dataLayerObject prototype
+   this.layerID = id;
+   this.showLayer = showFunction;      //show function
+   this.hideLayer = hideFunction;      //hide function
+   this.updateLayer = this.showLayer;  //just point to the show function
+   //this.dataLayer; //optional, will depend on data type.  Good to use for simple layers.
+};
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Initialize the layers on start up
+ **/
+$(function initializeLayers() {
+   //--------------------------------------------------------------
+   //AIS layer
+   var aisLayer = new dataLayerObject('aisLayer', 
+      function showaisLayer() {
+         //console.log('showing AIS layer');
+      }, 
+      function hideaisLayer() {
+         //console.log('hiding AIS layer');
+      });
+   dataLayers.push(aisLayer);
+
+   //--------------------------------------------------------------
+   //RADAR layer
+   var radarLayer = new dataLayerObject('radarLayer', 
+      function showradarLayer() {
+         //console.log('showing RADAR layer');
+      }, 
+      function hideradarLayer() {
+         //console.log('hiding RADAR layer');
+      });
+   dataLayers.push(radarLayer);
+
+   //--------------------------------------------------------------
+   //Day/night layer
+   var daynightLayer = new dataLayerObject('daynightLayer', 
+      function showdaynightLayer() {
+         //console.log('showing daynight layer');
+         this.dataLayer.setMap(map);
+
+         //TODO: testing
+         if (map.getZoom() > 9) {
+            //console.log('Zoomed in, hide day/night layer and change map type');
+            this.dataLayer.setMap(null);
+            map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+         }
+         else {
+            map.setMapTypeId(google.maps.MapTypeId.HYBRID);         
+         }
+      }, 
+      function hidedaynightLayer() {
+         //console.log('hiding daynight layer');
+         this.dataLayer.setMap(null);
+      }
+      );
+
+   //Define the day night layer object, append to a dataLayer to dataLayerObject
+   daynightLayer.dataLayer = new DayNightOverlay({
+      map: null      //keep it hidden initially
+   });
+   dataLayers.push(daynightLayer);
+
+   //--------------------------------------------------------------
+   //EEZ layer
+   var eezLayer = new dataLayerObject('eezLayer', 
+      function showeezLayer() {
+         this.dataLayer.setMap(map);
+      }, 
+      function hideeezLayer() {
+         this.dataLayer.setMap(null);
+      }
+      );
+
+   //Define the day night layer object, append to a dataLayer to dataLayerObject
+   eezLayer.dataLayer = new google.maps.KmlLayer({
+      url: EEZ_PATH,
+      preserveViewport: true,
+      map: null
+   });
+   dataLayers.push(eezLayer);
+});
+
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Refresh all layers here, based on sortable lists in UI
+ **/
+function refreshLayers(newShownLayerID, newHiddenLayerID) {
+   if (typeof newShownLayerID !== 'undefined' || typeof newHiddenLayerID !== 'undefined') {
+      //One layer was moved, so update that single layer (either show or hide)
+
+      //Find the layer to be shown, and show it
+      dataLayers.forEach( function(dataLayer) {
+         if (dataLayer.layerID == newShownLayerID) {
+            //console.debug('*********** calling showLayer function');
+            dataLayer.showLayer();
+         }
+      });
+
+      //Find the layer to be hidden, and hide it
+      dataLayers.forEach( function(dataLayer) {
+         if (dataLayer.layerID == newHiddenLayerID) {
+            //console.debug('*********** calling showLayer function');
+            dataLayer.hideLayer();
+         }
+      });
+   }
+   else {
+      //Perform normal refresh of all layers
+
+      //Loop through layers to be shown and show them
+      var layersToShow = $('#displayedLayersList').sortable('toArray');
+      //console.log(layersToShow);
+
+      layersToShow.forEach( function(layerToShow) {
+         dataLayers.forEach( function(dataLayer) {
+            if (dataLayer.layerID == layerToShow) {
+               //console.debug('*********** calling showLayer function');
+               dataLayer.showLayer();
+            }
+         });
+      });
+
+      //Loop through layers to be hidden and hide them
+      var layersToHide = $('#hiddenLayersList').sortable('toArray');
+      //console.log(layersToHide);
+
+      layersToHide.forEach( function(layerToHide) {
+         dataLayers.forEach( function(dataLayer) {
+            if (dataLayer.layerID == layerToHide) {
+               //console.debug('*********** calling hideLayer function');
+               dataLayer.hideLayer();
+            }
+         });
+      });
+   }
 }

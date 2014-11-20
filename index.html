@@ -365,13 +365,14 @@
                  </div>
                  <div id="data-collapse" class="menuBody panel-collapse collapse">
                     <div class="panel-body text-left">
+
                        <h4 class="text-center">Layers Shown:</h4>
                        <ul id="displayedLayersList" class="list-unstyled connectedSortable">
-                          <li class="panel panel-success">
+
+                          <!-- AIS Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="aisLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
-                             <!-- <button class="btn btn-success btn-xs btn-left"> -->
-                                <span class="hideShowLayerBtn glyphicon glyphicon-minus"></span>
-                                <!-- </button> -->
+                             <span class="hideShowLayerBtn glyphicon glyphicon-minus"></span>
                              AIS Layer
                              <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
                                 Options      
@@ -444,7 +445,9 @@
 
                           </div>
                           </li>
-                          <li class="panel panel-success">
+
+                          <!-- RADAR Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="radarLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
                              <span class="hideShowLayerBtn glyphicon glyphicon-minus"></span>
                              RADAR Layer
@@ -456,17 +459,14 @@
                           <div class="layerBody panel-body panel-collapse collapse">Options...</div>
                           </li>
 
-                          <li class="panel panel-success">
+                          <!-- Day/Night Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="daynightLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
                              <span class="hideShowLayerBtn glyphicon glyphicon-minus"></span>
                              Day/Night Layer
                           </div>
                           <div class="layerBody panel-body panel-collapse collapse">
-                             <div class="checkbox">
-                                <label>
-                                   <input class="checkbox" id="showdaynightoverlay" name="Show Day/Night Overlay" type="checkbox" onclick="toggleDayNightOverlay();" checked="checked"> Show Day/Night Overlay
-                                </label>
-                             </div>
+                             <!-- Options here -->
                           </div>
                           </li>
                        </ul> <!-- END shown layers -->
@@ -474,7 +474,8 @@
                        <hr>
                        <h4 class="text-center">Available Layers:</h4>
                        <ul id="hiddenLayersList" class="list-unstyled connectedSortable">
-                          <li class="panel panel-success">
+                          <!-- LAISIC Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="laisicLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
                              <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
                              LAISIC Layer
@@ -500,7 +501,8 @@
                           </div>
                           </li>
 
-                          <li class="panel panel-success">
+                          <!-- TMACS Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="tmacsLayer" class="panel panel-success ui-state-disabled">
                           <div class="layerHeading panel-heading">
                              <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
                              TMACS Layer
@@ -527,7 +529,8 @@
                           </div>
                           </li>
 
-                          <li class="panel panel-success">
+                          <!-- FMV Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="fmvLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
                              <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
                              Full Motion Video Layer
@@ -548,7 +551,8 @@
                           </div>
                           </li>
 
-                          <li class="panel panel-success">
+                          <!-- Country Border Layer +++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="countryBordersLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
                              <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
                              Country Borders Layer
@@ -562,7 +566,8 @@
                           </div>
                           </li>
 
-                          <li class="panel panel-success">
+                          <!-- EEZ Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="eezLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
                              <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
                              EEZ Layer
@@ -576,7 +581,8 @@
                           </div>
                           </li>
 
-                          <li class="panel panel-success">
+                          <!-- Weather Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="weatherLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
                              <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
                              Weather Layer
@@ -590,7 +596,8 @@
                           </div>
                           </li>
 
-                          <li class="panel panel-success">
+                          <!-- Port Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="portLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
                              <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
                              Port Layer
@@ -604,13 +611,14 @@
                           </div>
                           </li>
 
-                          <li class="panel panel-success">
+                          <!-- Custom Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="customlayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
                              <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
-                             Skeleton Layer
+                             Custom Defined Layer
                           </div>
                           <div class="layerBody panel-body panel-collapse collapse">
-                             
+                             <!-- Options here -->
                           </div>
                           </li>
                        </ul> <!-- END hidden layers -->

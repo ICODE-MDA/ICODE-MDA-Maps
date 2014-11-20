@@ -528,7 +528,7 @@ function alertClient() {
       }
       else {
          //$('#alertsCountBubble').css('background-color', 'gray');
-         alertCountBadge.Class('progress-bar-danger');
+         alertCountBadge.removeClass('progress-bar-danger');
       }
    }
 
