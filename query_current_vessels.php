@@ -75,7 +75,7 @@ if(count($_GET) > 0) {
             $sourceStr = "(SELECT trkguid, trknum, updateguid, srcguid, datetime, lat as Latitude, lon as Longitude, cog, sog, stage, semimajor, semiminor, orientation, holdtime, hitscount, quality, source, inttype, callsign, mmsi, vesselname, imo FROM $laisic_database.trackdata_mem_track_heads) VESSELS";
             break;
          case "LAISIC_RADAR":
-            $sourceStr = "(SELECT mmsi, scoreMMSI, scoreFail, distMMSI, distFail, timeMMSI, timeFail, velocityMMSI, velocityFail, sog, lon as Longitude, lat as Latitude, cog, datetime, streamid, target_status, target_acq, trknum, sourceid FROM $laisic_database.radar_laisic_output_mem_track_heads) VESSELS";
+            $sourceStr = "(SELECT mmsi, scoreMMSI, scoreFail, distMMSI, distFail, timeMMSI, timeFail, velocityMMSI, velocityFail, sog, lon as Longitude, lat as Latitude, cog, datetime, streamid, target_status, target_acq, radarname, trknum, sourceid FROM $laisic_database.radar_laisic_output_mem_track_heads) VESSELS";
             break;
          case "LAISIC_AIS_OBS":
             $sourceStr = "(SELECT obsguid, lat as Latitude, lon as Longitude, semimajor, semiminor, orientation, cog, sog, datetime, callsign, mmsi, vesselname, imo, streamid FROM $laisic_database.aisobservation_mem_track_heads) VESSELS";
@@ -346,6 +346,7 @@ while (odbc_fetch_row($result)){
                    target_status=>htmlspecialchars(odbc_result($result,"target_status")),
                    target_acq=>htmlspecialchars(odbc_result($result,"target_acq")),
                    trknum=>odbc_result($result,"trknum"),
+                   radarName=>htmlspecialchars(odbc_result($result,"radarname")),
                    sourceid=>htmlspecialchars(odbc_result($result,"sourceid"))
            );
     }
