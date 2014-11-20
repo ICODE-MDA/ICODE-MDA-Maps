@@ -4923,9 +4923,11 @@ function getFMVTargets(bounds) {
 }
 
 function showBusyIndicator() {
+   //Show the loading panel
    $('#loadingPanel').show();
 
-   $('#spinner').activity({
+   //Find the spinner within the loadingPanel and activate it
+   $('#loadingPanel').find('.spinner').activity({
       segments: 8, 
       steps: 3, 
       opacity: 0.3, 
@@ -4936,6 +4938,7 @@ function showBusyIndicator() {
       speed: 3.0,
    }); //show spinner
 
+   //Also show the top progress bar at the same time
    NProgress.start();   //JS library top progress bar
 
    return;
@@ -4943,7 +4946,7 @@ function showBusyIndicator() {
 
 function hideBusyIndicator() {
    $('#loadingPanel').hide();
-   $('#spinner').activity(false); //hide spinner
+   $('#loadingPanel').find('.spinner').activity(false); //hide spinner
    NProgress.done();   //JS library top progress bar
     return;
 }
@@ -4957,13 +4960,42 @@ function hideBusyIndicator() {
 
 //Global Objects and definitions
 var dataLayers = [];                //array of dataLayerObject, each layer to be displayed on map
-function dataLayerObject(id, showFunction, hideFunction) {       //dataLayerObject prototype
+function dataLayerObject(id, showFunction, hideFunction, updateIfShown) {       //dataLayerObject prototype
    this.layerID = id;
-   this.showLayer = showFunction;      //show function
+   this.showLayer = function() {       //wrap showFunction with spinner handler
+      console.log('Showing ' + this.layerID);
+
+      //Start the spinner
+      var spinner = $('#'+this.layerID).find('.spinner');
+      if (typeof spinner !== 'undefined') {
+         spinner.activity({
+            segments: 8, 
+            steps: 3, 
+            opacity: 0.3, 
+            width: 4, 
+            space: 0, 
+            length: 5, 
+            color: '#3C763D', 
+            speed: 5.0,
+            width: 2,
+         }); //show spinner
+      }
+
+      showFunction(this,                  //need to pass this dataLayerObject into the show function
+            function callback(thislayer) {    //callback function to stop the spinner
+               //Stop the progress indicator for this layer
+               if (typeof spinner !== 'undefined') {
+                  $('#'+thislayer.layerID).find('.spinner').activity(false);
+               }
+            });
+   };      
+
    this.hideLayer = hideFunction;      //hide function
    this.updateLayer = this.showLayer;  //just point to the show function
-   //this.dataLayer; //optional, will depend on data type.  Good to use for simple layers.
+   this.updateIfShown = updateIfShown;
+   //this.data; //optional, will depend on data type.  Good to use for simple layers.
 };
+
 
 /* -------------------------------------------------------------------------------- */
 /**
@@ -4973,50 +5005,64 @@ $(function initializeLayers() {
    //--------------------------------------------------------------
    //AIS layer
    var aisLayer = new dataLayerObject('aisLayer', 
-      function showaisLayer() {
-         //console.log('showing AIS layer');
+      function showaisLayer(thislayer, callback) {
+         //console.log('Displaying AIS layer');
+
+         //Done drawing method for EEZ
+         callback(thislayer);
       }, 
       function hideaisLayer() {
          //console.log('hiding AIS layer');
-      });
+      },
+      true
+      );
    dataLayers.push(aisLayer);
 
    //--------------------------------------------------------------
    //RADAR layer
    var radarLayer = new dataLayerObject('radarLayer', 
-      function showradarLayer() {
-         //console.log('showing RADAR layer');
+      function showradarLayer(thislayer, callback) {
+         //console.log('Displaying RADAR layer');
+
+         //Done drawing method for EEZ
+         callback(thislayer);
       }, 
       function hideradarLayer() {
          //console.log('hiding RADAR layer');
-      });
+      },
+      true
+      );
    dataLayers.push(radarLayer);
 
    //--------------------------------------------------------------
    //Day/night layer
    var daynightLayer = new dataLayerObject('daynightLayer', 
-      function showdaynightLayer() {
-         //console.log('showing daynight layer');
-         this.dataLayer.setMap(map);
+      function showdaynightLayer(thislayer, callback) {
+         //console.log('Displaying daynight layer');
+         thislayer.data.setMap(map);
 
          //TODO: testing
          if (map.getZoom() > 9) {
             //console.log('Zoomed in, hide day/night layer and change map type');
-            this.dataLayer.setMap(null);
+            thislayer.data.setMap(null);
             map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
          }
          else {
             map.setMapTypeId(google.maps.MapTypeId.HYBRID);         
          }
+         //END testing
+
+         callback(thislayer);
       }, 
       function hidedaynightLayer() {
          //console.log('hiding daynight layer');
-         this.dataLayer.setMap(null);
-      }
+         this.data.setMap(null);
+      },
+      true
       );
 
    //Define the day night layer object, append to a dataLayer to dataLayerObject
-   daynightLayer.dataLayer = new DayNightOverlay({
+   daynightLayer.data = new DayNightOverlay({
       map: null      //keep it hidden initially
    });
    dataLayers.push(daynightLayer);
@@ -5024,19 +5070,29 @@ $(function initializeLayers() {
    //--------------------------------------------------------------
    //EEZ layer
    var eezLayer = new dataLayerObject('eezLayer', 
-      function showeezLayer() {
-         this.dataLayer.setMap(map);
-      }, 
+      function showeezLayer(thislayer, callback) {
+         //console.log('Displaying EEZ layer');
+         thislayer.data.setMap(map);
+
+         //Done drawing method for EEZ
+         var dataDisplayedListener = google.maps.event.addListener(thislayer.data, "metadata_changed", 
+            function() {
+               //console.log('EEZ done displaying');
+               google.maps.event.removeListener(dataDisplayedListener);
+               callback(thislayer);
+            });
+      },
       function hideeezLayer() {
-         this.dataLayer.setMap(null);
-      }
+         this.data.setMap(null);
+      },
+      false
       );
 
    //Define the day night layer object, append to a dataLayer to dataLayerObject
-   eezLayer.dataLayer = new google.maps.KmlLayer({
+   eezLayer.data = new google.maps.KmlLayer({
       url: EEZ_PATH,
       preserveViewport: true,
-      map: null
+      map: null      //keep it hidden initially
    });
    dataLayers.push(eezLayer);
 });
@@ -5075,7 +5131,7 @@ function refreshLayers(newShownLayerID, newHiddenLayerID) {
 
       layersToShow.forEach( function(layerToShow) {
          dataLayers.forEach( function(dataLayer) {
-            if (dataLayer.layerID == layerToShow) {
+            if (dataLayer.layerID == layerToShow && dataLayer.updateIfShown) {
                //console.debug('*********** calling showLayer function');
                dataLayer.showLayer();
             }

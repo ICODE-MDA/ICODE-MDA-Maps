@@ -137,7 +137,7 @@ $(function() { //shorthand for: $(document).ready(function() {
       });
 
       //Control the behavior of sorting manipulation via buttons
-      $('.hideShowLayerBtn').on('click', function(e) {
+      $('.hideShowLayerBtn').on('mousedown', function(e) {
          //Look for the clicked panel's li element
          var thisLiElement = $(this).parent('.layerHeading').parent('.panel');
 

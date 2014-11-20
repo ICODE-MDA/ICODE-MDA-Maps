@@ -171,16 +171,13 @@ body {
     vertical-align: middle;
     float: none;
 }
-#spinnerContainer {
-	display: inline-block;
-	border: 1px solid red;
-	padding: 20px;
-   height: 20px;
-   width: 40px;
-}
-#spinner {
+.spinner {
 	background: transparent;
 	opacity: 1;
+}
+.spinnerForLayers {
+   display: inline;
+   padding: 0px 15px;
 }
 #geocodepanel {
    opacity: 0.2;
