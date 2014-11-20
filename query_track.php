@@ -28,19 +28,21 @@ if (!$connection) {
    exit("Connection Failed: " . $conn);
 }
 
+$limitRadarTracks = 60;
 //Count the number of arguments
 if(count($_GET) > 0) {
    /* Check target source, start building the query */
    if(!empty($_GET["source"]) and (string)$_GET["source"] == "LAISIC_AIS_TRACK") {
-      $query = "SELECT trkguid, updateguid, trknum, srcguid, datetime as TimeOfFix, lat as Latitude, lon as Longitude, cog, sog, stage, semimajor, semiminor, orientation, holdtime, hitscount, quality, source, inttype, callsign, mmsi, vesselname, imo FROM icodemaps.trackdata WHERE trknum=";
+      $query = "SELECT trkguid, updateguid, trknum, srcguid, datetime as TimeOfFix, lat as Latitude, lon as Longitude, cog, sog, stage, semimajor, semiminor, orientation, holdtime, hitscount, quality, source, inttype, callsign, mmsi, vesselname, imo FROM $laisic_database.trackdata WHERE trknum=";
       if (!empty($_GET["trknum"])) {
          $query = $query . (string)$_GET["trknum"];
       }      
    }
    else if(!empty($_GET["source"]) and (string)$_GET["source"] == "LAISIC_RADAR") {
-      $query = "SELECT messagetype, mmsi, navstatus, rot, sog, lon as Longitude, lat as Latitude, cog, true_heading, datetime as TimeOfFix, imo, vesselname, vesseltypeint, length, shipwidth, bow, stern, port, starboard, draught, destination, callsign, posaccuracy, eta, posfixtype, streamid, target_status, target_acq, trknum, sourceid FROM icodemaps.radar_laisic_output WHERE trknum=";
-      if (!empty($_GET["trknum"])) {
-         $query = $query . (string)$_GET["trknum"];
+      $query = "SELECT messagetype, mmsi, navstatus, rot, sog, lon as Longitude, lat as Latitude, cog, true_heading, datetime as TimeOfFix, imo, vesselname, vesseltypeint, length, shipwidth, bow, stern, port, starboard, draught, destination, callsign, posaccuracy, eta, posfixtype, streamid, target_status, target_acq, trknum, sourceid FROM $laisic_database.radar_laisic_output WHERE trknum=";
+      if (!empty($_GET["trknum"]) && !empty($_GET["radarName"])) {
+      	 $radarName = $_GET["radarName"];
+         $query = $query . (string)$_GET["trknum"] . " AND radarName=" . "'" . $radarName . "'" . " AND datetime mod " . $limitRadarTracks . " = 0";
       }
    }
    else if(!empty($_GET["source"]) and (string)$_GET["source"] == "LAISIC_AIS_OBS") {
