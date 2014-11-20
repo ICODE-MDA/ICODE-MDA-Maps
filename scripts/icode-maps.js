@@ -756,7 +756,7 @@ function refreshMaps(forceRedraw) {
                
          var redrew = getTargetsFromDB(map.getBounds(), null, "LAISIC_AIS_TRACK", forceRedraw);
          getTargetsFromDB(map.getBounds(), null, "LAISIC_RADAR", redrew);
-         getTargetsFromDB(map.getBounds(), null, "LAISIC_AIS_OBS", redrew);
+        // getTargetsFromDB(map.getBounds(), null, "LAISIC_AIS_OBS", redrew);
       }
       else if (!enableCluster || map.getZoom() > 9) {
          // -- Live view mode --
@@ -1158,6 +1158,11 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                }
 
                var iconColor = getIconColor(vessel.vesseltypeint, vessel.streamid);
+               var radarColorFused = '#222200'; //iconColor
+               if (vessel.vesseltypeint == 888 && vessel.mmsi != 0){ //Radar vessel type = 888
+             	  radarColorFused = getRiskColor(vessel.vesseltypeint, vessel.streamid, "M");
+             	  console.log('radar outline color '+ radarColorFused);
+               }
 
                //Slightly different style for vessels with valid risk score
                if (enableRisk && (vessel.risk_score_safety != null || vessel.risk_score_security != null)) {
@@ -1241,8 +1246,8 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                      position: point,
                      icon: {
                         path:         markerpathradar,
-                        strokeColor:  '#222200',//iconColor,
-                        strokeWeight: 1,
+                        strokeColor:  radarColorFused, //change outline color if radar fused,
+                        strokeWeight: vw*3/4,
                         fillColor:    iconColor,
                         fillOpacity:  0.8,
                         rotation:     parseInt(vessel.heading)-90, //-90 degrees to account for SVG drawing rotation
@@ -1310,10 +1315,16 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                   });
                });
 
-               //Listen for marker right clicks (to query and display track)
+               //Listen for marker right clicks (to query and display track)  
+               var trackID;
+               if  (sourceType == "LAISIC_AIS_TRACK" || sourceType == "LAISIC_RADAR") {
+            	   trackID = vessel.trknum;
+               } else {
+            	   trackID = vessel.commsid;
+               }
                google.maps.event.addListener(marker, 'rightclick', function() {
-                  console.log('Getting track for: ' + vessel.mmsi+','+vessel.vesseltypeint+','+sourceType+','+vessel.datetime+','+vessel.streamid+','+vessel.commsid);
-                  getTrack(vessel.mmsi, vessel.vesseltypeint, sourceType, vessel.datetime, vessel.streamid, vessel.commsid);
+            	 console.log('Getting track for: ' + vessel.mmsi+','+vessel.vesseltypeint+','+sourceType+','+vessel.datetime+','+vessel.streamid+','+trackID);
+            	 getTrack(vessel.mmsi, vessel.vesseltypeint, sourceType, vessel.datetime, vessel.streamid, trackID, vessel.radarName);
                   //if LAISIC, use trknum
                });
 
@@ -1326,7 +1337,11 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                   vessellabel = vessel.vesselname;
                }
                else if (vessel.trknum != null && vessel.trknum != '') {
-                  vessellabel = vessel.trknum;
+            	  if (sourceType == "LAISIC_AIS_TRACK"){
+            		  vessellabel = vessel.mmsi;
+            	  } else {
+            		  vessellabel = vessel.trknum;
+            	  }
                }
                else if (sourceType == "RADAR") {
                   vessellabel = vessel.commsid;
@@ -1373,7 +1388,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
 
                markersDisplayed.push({
                   mmsi: vessel.mmsi, 
-                  trknum: vessel.commsid, 
+                  trknum: trackID, 
                   vessellabel: vessel.vesselname,
                   vesseltypeint: vessel.vesseltypeint,
                   source: sourceType,
@@ -1381,6 +1396,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                   datetime: vessel.datetime,
                   lat: vessel.lat,
                   lon: vessel.lon,
+                  radarName: vessel.radarName,
                   vesselnameLabel: vesselnameLabel 
                });
          });
@@ -1820,8 +1836,12 @@ function generateInfoHTML(vessel, vesseltype, title) {
       '<b>Vessel Type</b>: ' + vessel.vesseltypeint + '<br>' +
       '<b>Last Message Type</b>: ' + vessel.messagetype + '<br>' +
       '</div>' +
+     
+      (vesseltype=='LAISIC_AIS_TRACK' || vesseltype=='LAISIC_RADAR'?
       '<div>' + 
-      '<a id="showtracklink" link="" href="javascript:void(0);" onClick="getTrackByTrackIDandSource(\'' + vessel.mmsi + '\', \'' + vesseltype + '\');">Show vessel track history</a>' +
+      '<a id="showtracklink" link="" href="javascript:void(0);" onClick="getTrackByTrackIDandSource(\'' + vessel.trknum + '\', \'' + vesseltype + '\');">Show vessel track history</a>' +
+      '</div>': 
+      '<a id="showtracklink" link="" href="javascript:void(0);" onClick="getTrackByTrackIDandSource(\'' + vessel.mmsi + '\', \'' + vesseltype + '\');">Show vessel track history</a>') +
       '</div>' +
       (vesseltype=='AIS'?
       '<div id="content-port" border=1>' +
@@ -2196,7 +2216,8 @@ function queryAllTracks() {
                   markersDisplayed[i].source, 
                   markersDisplayed[i].datetime,
                   markersDisplayed[i].streamid,
-                  markersDisplayed[i].trknum
+                  markersDisplayed[i].trknum,
+                  markersDisplayed[i].radarName
                   );
       }
    }
@@ -2214,7 +2235,8 @@ function getTrackByTrackIDandSource(trackID, source) {
                   source, 
                   this.datetime,
                   this.streamid,
-                  this.trknum
+                  this.trknum,
+                  this.radarName
                   );
       }
       else if (this.trknum == trackID && this.source == source) {
@@ -2223,7 +2245,8 @@ function getTrackByTrackIDandSource(trackID, source) {
                   source, 
                   this.datetime,
                   this.streamid,
-                  this.trknum
+                  this.trknum,
+                  this.radarName
                   );
       }
       else if (this.commsid == trackID && this.source == source) {
@@ -2232,7 +2255,8 @@ function getTrackByTrackIDandSource(trackID, source) {
                   source, 
                   this.datetime,
                   this.streamid,
-                  this.commsid
+                  this.commsid,
+                  this.radarName
                   );
       }
    });
@@ -2242,7 +2266,7 @@ function getTrackByTrackIDandSource(trackID, source) {
 /**
  * Function to get track from track query PHP script
  */
-function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
+function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum, radarName) {
    //console.log('Is mmsi in tracksDisplayedID? ', $.inArray(mmsi, tracksDisplayedID) == -1);
    console.log('trknum:',trknum);
    //Check if track is already displayed or not
@@ -2253,12 +2277,15 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
       document.getElementById('stats').innerHTML = '';
       $('#busy_indicator').activity({segments: 8, steps: 3, opacity: 0.3, width: 4, space: 0, length: 5, color: '#fff', speed: 2.0}); //show spinner
       NProgress.start();   //JS library top progress bar
-
+      
       var phpWithArg = "query_track.php?source=" + source;
 
       if (trknum == "undefined" || trknum == null) {
          phpWithArg += "&mmsi=" + mmsi;
       }
+      else if (trknum != null && source == "LAISIC_RADAR"){
+    	  phpWithArg += "&trknum=" + trknum + "&radarName=" + radarName;
+      }	  
       else {
          phpWithArg += "&trknum=" + trknum;
       }
