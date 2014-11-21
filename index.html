@@ -477,23 +477,39 @@
                        <hr>
                        <h4 class="text-center">Available Layers:</h4>
                        <ul id="hiddenLayersList" class="list-unstyled connectedSortable">
+                          <!-- Traffic Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="trafficLayer" class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                             Traffic Layer
+                             <div class="spinner spinnerForLayers"></div>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <!-- Options here -->
+                          </div>
+                          </li>
+
+                          <!-- Weather Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="weatherLayer" class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                             Weather Layer
+                             <div class="spinner spinnerForLayers"></div>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <!-- Options here -->
+                          </div>
+                          </li>
+
                           <!-- Port Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="portsLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
                              <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
                              Port Layer
                              <div class="spinner spinnerForLayers"></div>
-                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
-                                Options      
-                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
-                             </button>
                           </div>
                           <div class="layerBody panel-body panel-collapse collapse">
-                             <div class="checkbox">
-                                <label>                 
-                                   <input class="checkbox" id="PortLayer" name="PortLayer" type="checkbox" onclick="togglePortLayer();"> <img align="top" height="20px" src="icons/anchor_port.png" style="padding-bottom: 4px; vertical-align: middle;"> Port Layer
-                                </label>
-                             </div>
+                             <!-- Options here -->
                           </div>
                           </li>
 
@@ -600,22 +616,6 @@
                              <div class="checkbox">
                                 <label>
                                    <input class="checkbox" id="enableCountryBorders" name="enableCountryBorders" type="checkbox" onclick="toggleCountryBorders();"> Enable country borders
-                                </label>
-                             </div>
-                          </div>
-                          </li>
-
-                          <!-- Weather Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="weatherLayer" class="panel panel-success">
-                          <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
-                             Weather Layer
-                             <div class="spinner spinnerForLayers"></div>
-                          </div>
-                          <div class="layerBody panel-body panel-collapse collapse">
-                             <div class="checkbox">
-                                <label>
-                                   <input class="checkbox" id="WeatherLayer" name="WeatherLayer" type="checkbox" onclick="toggleWeatherLayer();"> <img align="top" width="20px" src="icons/weather_icon.png" style="padding-bottom: 4px; vertical-align: middle;"> Weather Layer
                                 </label>
                              </div>
                           </div>

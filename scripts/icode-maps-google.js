@@ -116,10 +116,6 @@ var tracklineIconsOptionsL = {
                fillOpacity:   1
             };
 
-//Weather layer objects
-var weatherLayer;
-var cloudLayer;
-
 //Heatmap objects
 var HEATMAP = true;
 var heatmapLayer;
@@ -203,10 +199,6 @@ var COUNTRY_BORDERS_PATH = COMMON_PATH + "Country_Borders.kmz";
 
 //Geocoder
 var geocoder;
-
-//Port labels
-var portLabel;
-var portPolygons = [];
 
 //Traffic layer
 var trafficLayer;
@@ -415,7 +407,7 @@ function initialize() {
       //togglePortLayer();
 
       //Weather
-      toggleWeatherLayer();
+      //toggleWeatherLayer();
 
       //Heatmap layer
       toggleHeatmapLayer();
@@ -601,6 +593,7 @@ function initialize() {
             location.reload();
             break;
          case 84: // t
+            /*
             if (trafficLayer == null) {
                trafficLayer = new google.maps.TrafficLayer();
                trafficLayer.setMap(map);
@@ -609,18 +602,25 @@ function initialize() {
                trafficLayer.setMap(null);
                trafficLayer = null;
             }
-            break;
-         case 87: // w
-            //Weather layer
-            if (document.getElementById("WeatherLayer") != null &&
-                document.getElementById("WeatherLayer").checked) {
-               document.getElementById("WeatherLayer").checked = false;
-               document.getElementById("WeatherLayer").removeAttribute("checked");
+            */
+            if ($('#trafficLayer').children('.layerHeading').children('.hideShowLayerBtn').hasClass('glyphicon-plus')) {
+               $('#trafficLayer').insertAfter('#displayedLayersList li:last');
+               listUpdated();
             }
             else {
-               document.getElementById("WeatherLayer").checked = true;
+               $('#trafficLayer').insertBefore('#hiddenLayersList li:first');
+               listUpdated();
+            }            
+            break;
+         case 87: // w
+            if ($('#weatherLayer').children('.layerHeading').children('.hideShowLayerBtn').hasClass('glyphicon-plus')) {
+               $('#weatherLayer').insertAfter('#displayedLayersList li:last');
+               listUpdated();
             }
-            toggleWeatherLayer();
+            else {
+               $('#weatherLayer').insertBefore('#hiddenLayersList li:first');
+               listUpdated();
+            }
             break;
          case 37: // leftArrow
             map.panBy(-o,0);
@@ -3146,33 +3146,6 @@ function addHeatmap() {
 }
 
 /* -------------------------------------------------------------------------------- */
-function toggleWeatherLayer() {
-   if (document.getElementById("WeatherLayer") && document.getElementById("WeatherLayer").checked) {
-      addWeatherLayer();
-   }
-   else if (document.getElementById("WeatherLayer")) {
-      if (typeof weatherLayer != 'undefined' && weatherLayer != null) {
-         weatherLayer.setMap(null);
-         cloudLayer.setMap(null);
-      }
-   }
-   else {
-      //Do nothing, no WeatherLayer div found
-   }
-}
-
-/* -------------------------------------------------------------------------------- */
-function addWeatherLayer() {
-	weatherLayer = new google.maps.weather.WeatherLayer({
-		temperatureUnits: google.maps.weather.TemperatureUnit.FAHRENHEIT
-	});
-	weatherLayer.setMap(map);
-
-	cloudLayer = new google.maps.weather.CloudLayer();
-	cloudLayer.setMap(map);	
-}
-
-/* -------------------------------------------------------------------------------- */
 //Adds a drawing manager to the map for adding custom shapes and placemarks
 //to your map
 function addDrawingManager() {
@@ -3268,20 +3241,6 @@ function setSelection(shape) {
    clearSelection();
    selectedShape = shape;
    shape.setEditable(true);
-}
-
-/* -------------------------------------------------------------------------------- */
-function setMapCenterToCenterOfMass(map, tips) {
-   lat_mean=0;
-   lon_mean=0;
-   N=tips.length;
-   for(var i=0;i<N;i++)
-	{
-		lat_mean = lat_mean+tips[i].lat/N;
-		lon_mean = lon_mean+tips[i].lon/N;
-	}
-	var centerCoord = new google.maps.LatLng(lat_mean, lon_mean);
-	map.setCenter(centerCoord);
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -4363,7 +4322,7 @@ $(function initializeLayers() {
       function hideaisLayer() {
          //console.log('hiding AIS layer');
       },
-      true
+      true  //force refresh this layer
       );
    dataLayers.push(aisLayer);
 
@@ -4379,7 +4338,7 @@ $(function initializeLayers() {
       function hideradarLayer() {
          //console.log('hiding RADAR layer');
       },
-      true
+      true  //force refresh this layer
       );
    dataLayers.push(radarLayer);
 
@@ -4407,7 +4366,7 @@ $(function initializeLayers() {
          //console.log('hiding daynight layer');
          this.data.setMap(null);
       },
-      true
+      true  //force refresh this layer
       );
 
    //Define the day night layer object, append to a dataLayer to dataLayerObject
@@ -4434,7 +4393,7 @@ $(function initializeLayers() {
       function hideeezLayer() {
          this.data.setMap(null);
       },
-      false
+      false //don't refresh this layer
       );
 
    //Define the day night layer object, append to a dataLayer to dataLayerObject
@@ -4460,7 +4419,7 @@ $(function initializeLayers() {
          //Clearing all previous markers
          emptyArray(this.data);
       },
-      true
+      true  //force refresh this layer
       );
 
    //Define the day night layer object, append to a dataLayer to dataLayerObject
@@ -4473,7 +4432,7 @@ $(function initializeLayers() {
       function showportsLayer(thislayer, callback) {
          //console.log('Displaying ports layer');
          //Function handles setMap of data
-         showPorts(thislayer.portIcons, thislayer.portCircles, callback);
+         showPorts(thislayer.portIcons, thislayer.portCircles, thislayer.portLabel, thislayer.portPolygons, callback);
       },
       function hideportsLayer() {
          var portIcons = this.portIcons;
@@ -4489,13 +4448,60 @@ $(function initializeLayers() {
          emptyArray(portIcons);
          emptyArray(portCircles);
       },
-      true
+      true  //force refresh this layer
       );
 
    //Define the day night layer object, append to a dataLayer to dataLayerObject
    portsLayer.portIcons = [];
    portsLayer.portCircles = [];
+   portsLayer.portLabel;
+   portsLayer.portPolygons = [];
    dataLayers.push(portsLayer);
+
+   //--------------------------------------------------------------
+   //Weather layer
+   var weatherLayer = new dataLayerObject('weatherLayer', 
+      function showweatherLayer(thislayer, callback) {
+         //console.log('Displaying weather layer');
+         thislayer.weatherLayer.setMap(map);
+         thislayer.cloudLayer.setMap(map);
+
+         //Done drawing for weather
+         callback();
+      },
+      function hideweatherLayer() {
+         this.weatherLayer.setMap(null);
+         this.cloudLayer.setMap(null);
+      },
+      false //don't refresh this layer
+      );
+
+   //Define the day night layer object, append to a dataLayer to dataLayerObject
+   weatherLayer.weatherLayer = new google.maps.weather.WeatherLayer({
+		temperatureUnits: google.maps.weather.TemperatureUnit.FAHRENHEIT
+	});
+   weatherLayer.cloudLayer = new google.maps.weather.CloudLayer();
+   dataLayers.push(weatherLayer);
+
+   //--------------------------------------------------------------
+   //Traffic layer
+   var trafficLayer = new dataLayerObject('trafficLayer', 
+      function showtrafficLayer(thislayer, callback) {
+         //console.log('Displaying traffic layer');
+         thislayer.data.setMap(map);
+
+         //Done drawing for traffic
+         callback();
+      },
+      function hidetrafficLayer() {
+         this.data.setMap(null);
+      },
+      false //don't refresh this layer
+      );
+
+   //Define the day night layer object, append to a dataLayer to dataLayerObject
+   trafficLayer.data = new google.maps.TrafficLayer();
+   dataLayers.push(trafficLayer);
 });
 
 
@@ -4682,7 +4688,7 @@ function getFMVTargets(bounds, fmvtargets, callback) {
 /** 
  * Get ports from database, with bounds.
  */
-function showPorts(portIcons, portCircles, callback) {
+function showPorts(portIcons, portCircles, portLabel, portPolygons, callback) {
    //TODO: separate the 3 port call getJSONs into separate functions with callbacks
    /*
    document.getElementById("query").value = "QUERY RUNNING FOR PORTS...";
