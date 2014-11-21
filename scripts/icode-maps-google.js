@@ -81,8 +81,8 @@ var queryid;                  //ID of query based on timestamp to keep track of 
 var enableRisk;               //Flag to enable or disable risk information in info bubbles
 
 //Enable FMV data
-var enableFMV;               //Flag to enable or disable risk information in info bubbles
-var fmvtargets = [];
+//var enableFMV;               //Flag to enable or disable risk information in info bubbles
+//var fmvtargets = [];
 var fmvinfowindow = new google.maps.InfoWindow({});;
 
 //IHS Tabs global
@@ -138,8 +138,8 @@ var tempKMLcount = 0;
 
 //Port objects
 var Ports = false;
-var portIcons = [];
-var portCircles = [];
+//var portIcons = [];
+//var portCircles = [];
 
 //Distance measurement
 var latLng;
@@ -412,7 +412,7 @@ function initialize() {
       toggleKMLLayer();
 
       //Check for port layers
-      togglePortLayer();
+      //togglePortLayer();
 
       //Weather
       toggleWeatherLayer();
@@ -442,18 +442,13 @@ function initialize() {
 
       geocoder = new google.maps.Geocoder();
 
-      initializePanel();   
-      if (detectMobileBrowser()) {
-         togglePanel();
-      }
-
       //toggleEEZLayer();
 
       reload_delay_changed();
 
       //toggleDayNightOverlay();
 
-      initializeBrowserFocus();
+      //initializeBrowserFocus();
    });
 
    //Keyboard shortcuts/
@@ -536,7 +531,7 @@ function initialize() {
             refreshMaps(true);
             break;
          case 72: // h
-            togglePanel();
+            
             break;
          case 73: // i
             if (document.getElementById("IHSTabs") != null &&
@@ -795,10 +790,12 @@ function refreshMaps(forceRedraw) {
    //------------------------ Update other layers ---------------------------
 
    //Update ports displayed
+   /*
    if (Ports) {
       hidePorts();
       showPorts();
    }
+   */
 
    toggleCountryBorders();
 
@@ -3100,288 +3097,6 @@ function showKML() {
 }
 
 /* -------------------------------------------------------------------------------- */
-function togglePortLayer() {
-   if (document.getElementById("PortLayer") && document.getElementById("PortLayer").checked) {
-      Ports = true;
-      showPorts();
-   }
-   else {
-      Ports = false;
-      hidePorts();
-   }
-}
-
-/* -------------------------------------------------------------------------------- */
-function showPorts() {
-   document.getElementById("query").value = "QUERY RUNNING FOR PORTS...";
-   document.getElementById('stats').innerHTML = '';
-   showBusyIndicator(); //show spinner
-
-   var bounds = map.getBounds();
-   var ne = bounds.getNorthEast();
-   var sw = bounds.getSouthWest();
-   var minLat = sw.lat();
-   var maxLat = ne.lat();
-   var minLon = sw.lng();
-   var maxLon = ne.lng();
-   var boundStr = "&minlat=" + Math.round(minLat*1000)/1000 + "&maxlat=" + Math.round(maxLat*1000)/1000 + "&minlon=" + Math.round(minLon*1000)/1000 + "&maxlon=" + Math.round(maxLon*1000)/1000
-
-   var phpWithArg = "query_ports.php?" + boundStr;
-   //Debug query output
-   console.log('SHOWPORTS(): ' + phpWithArg);
-
-   $.getJSON(
-      phpWithArg, // The server URL 
-      { }
-   ) //end .getJSON()
-   .done(function (response) {
-      document.getElementById("query").value = response.query;
-      console.log('SHOWPORTS(): ' + response.query);
-      console.log('SHOWPORTS(): ' + 'number of ports = ' + response.resultcount);
-
-      $.each(response.ports, function(key,port) {
-         var port_name = port.port_name;
-         var country_name = port.country_code;
-         var lat = port.latitude;
-         var lon = port.longitude;
-
-         port_location = new google.maps.LatLng(lat, lon);
-         var portIcon = new google.maps.Marker({icon: 'icons/anchor_port.png'});
-         portIcon.setPosition(port_location);
-         portIcon.setMap(map);
-         portIcon.setTitle('Port Name: ' + port_name + '\nCountry: ' + country_name + '\nLat: ' + lat + '\nLon: ' + lon);
-
-         portCircle = new google.maps.Circle({
-            center:  port_location,
-                     radius: 2500,
-                     strokeColor: "#FF0000",
-                     strokeOpacity: 0.5,
-                     strokeWeight: 2,
-                     fillColor: "#FF0000",
-                     fillOpacity: 0.05,
-                     map: map
-         });
-
-         portIcons.push(portIcon);
-         portCircles.push(portCircle);
-
-         google.maps.event.addListener(portIcon, 'mouseover', function() {
-            portLabel = new MapLabel({
-               text: port_name,
-               position: portIcon.getPosition(),
-               map: map,
-               fontSize: 16,
-               fontColor: "#FF0000",
-               align: 'center',
-               zIndex: 0
-            });
-         });
-
-         google.maps.event.addListener(portIcon, 'mouseout', function() {
-            if (portLabel != null) {
-               portLabel.setMap(null);
-            }
-         });
-      });
-
-      hideBusyIndicator();
-      document.getElementById('stats').innerHTML = response.resultcount + " results<br>Retreived in " + Math.round(response.exectime*1000)/1000 + " secs";
-   }) //end .done()
-   .fail(function() { 
-      console.log('SHOWPORTS(): ' +  'No response from port query; error in php?'); 
-      document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
-      hideBusyIndicator();
-      return; 
-   }); //end .fail()
-
-
-
-
-   //Testing other/WROS port table
-   phpWithArg += "&wrosports=1";
-   $.getJSON(
-      phpWithArg, // The server URL 
-      { }
-   ) //end .getJSON()
-   .done(function (response) {
-      document.getElementById("query").value = response.query;
-      console.log('SHOWPORTS() part 2: ' + response.query);
-      console.log('SHOWPORTS() part 2: ' + 'number of ports = ' + response.resultcount);
-
-      $.each(response.ports, function(key,port) {
-         var port_name = port.port_name;
-         var country_name = port.country_code;
-         var lat = port.latitude;
-         var lon = port.longitude;
-
-         port_location = new google.maps.LatLng(lat, lon);
-         var portIcon = new google.maps.Marker({icon: 'icons/anchor_port_blue.png'});
-         portIcon.setPosition(port_location);
-         portIcon.setMap(map);
-         portIcon.setTitle('Port Name: ' + port_name + '\nCountry: ' + country_name + '\nLat: ' + lat + '\nLon: ' + lon);
-
-         portCircle = new google.maps.Circle({
-            center:  port_location,
-                     radius: 2500,
-                     strokeColor: "#0000FF",
-                     strokeOpacity: 0.5,
-                     strokeWeight: 2,
-                     fillColor: "#0000FF",
-                     fillOpacity: 0.05,
-                     map: map
-         });
-
-         portIcons.push(portIcon);
-         portCircles.push(portCircle);
-
-         google.maps.event.addListener(portIcon, 'mouseover', function() {
-            portLabel = new MapLabel({
-               text: port_name,
-               position: portIcon.getPosition(),
-               map: map,
-               fontSize: 16,
-               fontColor: "#0000FF",
-               align: 'center',
-               zIndex: 0
-            });
-         });
-
-         google.maps.event.addListener(portIcon, 'mouseout', function() {
-            if (portLabel != null) {
-               portLabel.setMap(null);
-            }
-         });
-      });
-
-      hideBusyIndicator();
-      document.getElementById('stats').innerHTML = response.resultcount + " results<br>Retreived in " + Math.round(response.exectime*1000)/1000 + " secs";
-   }) //end .done()
-   .fail(function() { 
-      console.log('SHOWPORTS() part 2: ' +  'No response from port query; error in php?'); 
-      document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
-      hideBusyIndicator();
-      return; 
-   }); //end .fail()
-
-
-
-
-   //Testing IHS port polygons
-   var phpWithArg = "query_ihsports.php?" + boundStr;
-   $.getJSON(
-      phpWithArg, // The server URL 
-      { }
-   ) //end .getJSON()
-   .done(function (response) {
-      document.getElementById("query").value = response.query;
-      console.log('SHOWPORTS() part 3: ' + response.query);
-      console.log('SHOWPORTS() part 3: ' + 'number of ports = ' + response.resultcount);
-
-      var prevPortName = null;
-      var portPolygon;
-      var portCoords;
-
-      if (portPolygons.length > 0) {
-         for (var i=0; i < portPolygons.length; i++) {
-            portPolygons[i].portPolygonShape.setMap(null);
-         }
-      }
-
-      $.each(response.ports, function(key,port) {
-         var PortGeoId = port.PortGeoId;
-         var zoneid = port.zoneid;
-         var port_name = port.PortName;
-         var seq = port.seq;
-         var lat = port.lat;
-         var lon = port.lon;
-
-         //Start of all ports
-         if (prevPortName == null) {
-            portPolygon = null;
-            emptyArray(portCoords);
-            //Set to new name
-            prevPortName = port_name;
-         }
-
-         //Push to existing portCoords array
-         if (port_name == prevPortName) {
-            portCoords.push(new google.maps.LatLng(lat, lon));
-         }
-         //Push to new portCoords array for new port
-         else {
-            // Construct the polygon
-            portPolygonShape = new google.maps.Polygon({
-                             paths: portCoords,
-                             strokeColor: '#00FFFF',
-                             strokeOpacity: 0.8,
-                             strokeWeight: 2,
-                             fillColor: '#00FFFF',
-                             fillOpacity: 0.2,
-                             map: map
-            });
-
-            portPolygon = {
-               portCoords: portCoords,
-               portName: port_name,
-               portPolygonShape: portPolygonShape
-            };
-            portPolygons.push(portPolygon);
-
-            portPolygon = null;
-            emptyArray(portCoords);
-
-            portCoords.push(new google.maps.LatLng(lat, lon));
-            prevPortName = port_name;
-         }
-      });
-
-      if (portCoords != null) {
-         //Draw the last portPolygon
-         portPolygonShape = new google.maps.Polygon({
-                          paths: portCoords,
-                          strokeColor: '#00FFFF',
-                          strokeOpacity: 0.8,
-                          strokeWeight: 2,
-                          fillColor: '#00FFFF',
-                          fillOpacity: 0.2,
-                          map: map
-         });
-
-         portPolygon = {
-            portCoords: portCoords,
-            portName: prevPortName,
-            portPolygonShape: portPolygonShape
-         };
-         portPolygons.push(portPolygon);
-      }
-
-
-      hideBusyIndicator();
-      document.getElementById('stats').innerHTML = response.resultcount + " results<br>Retreived in " + Math.round(response.exectime*1000)/1000 + " secs";
-   }) //end .done()
-   .fail(function() { 
-      console.log('SHOWPORTS() part 3: ' +  'No response from port query; error in php?'); 
-      document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
-      hideBusyIndicator();
-      return; 
-   }); //end .fail()   
-}
-
-/* -------------------------------------------------------------------------------- */
-function hidePorts() {
-   var portIcon;
-   var portCircle;
-   for (i=0; i< portIcons.length; i++) {
-      portIcon = portIcons[i];
-      portIcon.setMap(null);
-      portCircle = portCircles[i];
-      portCircle.setMap(null);
-   }
-   emptyArray(portIcons);
-   emptyArray(portCircles);
-}
-
-/* -------------------------------------------------------------------------------- */
 function toggleHeatmapLayer() {
    if (document.getElementById("HeatmapLayer") && document.getElementById("HeatmapLayer").checked) {
       console.log('Adding heatmap layer');
@@ -3570,146 +3285,6 @@ function setMapCenterToCenterOfMass(map, tips) {
 }
 
 /* -------------------------------------------------------------------------------- */
-function toggleDistanceTool() {
-   if (document.getElementById("distancetooltoggle") 
-       && document.getElementById("distancetooltoggle").checked) {
-      enableDistanceTool();
-   }
-   else {
-      disableDistanceTool();
-   }
-}
-
-/* -------------------------------------------------------------------------------- */
-function enableDistanceTool() {
-   //NEW METHOD
-   //Distance label
-   distanceLabel = new MapLabel({
-            text: '',
-            //position: new google.maps.LatLng(5.9,1.30),
-            map: map,
-            fontSize: 14,
-            align: 'left',
-            map: map
-   });
-   
-   initializeDistanceWidget();
-
-   //OLD METHOD by right-clicking two points
-   /*
-   google.maps.event.addListener(map,'rightclick',function(event) {
-      prevlatLng = latLng;
-      latLng = new google.maps.LatLng(event.latLng.lat(), event.latLng.lng());
-      //Delete previous marker
-      if (prevdistIcon != null) {
-         prevdistIcon.setMap(null);
-      }
-      prevdistIcon = distIcon;
-      distIcon = new google.maps.Marker({
-         position: latLng, 
-         map: map, 
-         icon: distIconsOptions
-      });
-
-      //Get the distance on second click
-      if (prevlatLng != null) {
-         var dist = google.maps.geometry.spherical.computeDistanceBetween(prevlatLng, latLng);
-         distIcon.setTitle('' + Math.round(dist*100)/100 + 'm');
-         prevdistIcon.setTitle('' + Math.round(dist*100)/100 + 'm');
-         if (distPath != null) {
-            distPath.setMap(null);
-         }
-         distPath = new google.maps.Polyline({
-            map:           map,
-            path:          [prevlatLng, latLng],
-            strokeColor:   "#04B4AE",
-            strokeOpacity: 1.0,
-            strokeWeight:  5,
-            geodesic: true
-         });
-         console.log('Distance between two clicks: ' + Math.round(dist*100)/100 + ' meters');
-
-         //Set distance label
-         distanceLabel.set('text', Math.round((dist/1000)*1000)/1000 + ' km (' + Math.round((dist/1000)/1.852*1000)/1000 + ' nm)');
-         distanceLabel.set('map', map);
-         distanceLabel.bindTo('position', distIcon);
-
-         google.maps.event.addListener(distPath,'click',function() {
-            deleteDistTool();
-         });
-         google.maps.event.addListener(distIcon,'click',function() {
-            deleteDistTool();
-         });
-         google.maps.event.addListener(prevdistIcon,'click',function() {
-            deleteDistTool();
-         });
-         google.maps.event.addListener(distPath,'rightclick',function() {
-            deleteDistTool();
-         });
-         google.maps.event.addListener(distIcon,'rightclick',function() {
-            deleteDistTool();
-         });
-         google.maps.event.addListener(prevdistIcon,'rightclick',function() {
-            deleteDistTool();
-         });
-
-         function deleteDistTool() {
-            distPath.setMap(null);
-            distPath = null;
-            distIcon.setMap(null);
-            prevdistIcon.setMap(null);
-            distIcon = null;
-            prevdistIcon = null;
-            prevlatLng = null;
-            latLng = null;
-            distanceLabel.set('map', null);
-         }
-      }
-   });
-   */
-}
-
-/* -------------------------------------------------------------------------------- */
-function disableDistanceTool() {
-   //NEW METHOD
-   //Check for global object distanceWidget
-   if (distanceWidget != null) {
-      //Destroy the object to remove from maps
-      distanceWidget.destructor();
-   }
-
-   //Separately hide the distanceLabel
-   // Not done in distanceWidget.js to retain compability with old distance method
-   if (distanceLabel != null) {
-      distanceLabel.setMap(null);
-   }
-
-
-   //OLD METHOD
-   /*
-   if (distPath != null) {
-      distPath.setMap(null);
-      distPath = null;
-   }
-   if (distIcon != null) {
-      distIcon.setMap(null);
-      distIcon = null;
-   }
-   if (prevdistIcon != null) {
-      prevdistIcon.setMap(null);
-      prevdistIcon = null;
-   }
-   prevlatLng = null;
-   latLng = null;
-   if (distanceLabel != null) {
-      distanceLabel.set('map', null);
-      distanceLabel.setMap(null);
-   }
-   google.maps.event.clearListeners(map,'rightclick');
-   */
-}
-
-/* -------------------------------------------------------------------------------- */
 function WMSOpenLayersGetTileUrl(tile, zoom) {
    var projection = window.map.getProjection();
    var zpow = Math.pow(2, zoom);
@@ -3879,6 +3454,7 @@ function vessel_age_changed(refresh) {
    //console.log(vessel_age);
    if (refresh) {
       refreshMaps(true);
+      refreshLayers();
    }
 }
 
@@ -3918,6 +3494,7 @@ function refresh_rate_changed(refresh) {
 
    if (refresh) {
       refreshMaps(true);
+      refreshLayers();
    }
 }
 
@@ -3939,6 +3516,7 @@ function autoRefreshOn() {
       autoRefreshHandler = setInterval(function(){
             console.log('calling refreshMaps from interval');
             refreshMaps(true);
+            refreshLayers();
          }, autoRefreshRate*60*1);      //millisecs*secs*min
    }
    else {
@@ -3975,6 +3553,7 @@ function toggleNeverAutoRefresh() {
             function() { 
                //refreshMaps(false);
                refreshMaps(true);
+               refreshLayers();
             }, 
          reloadDelay);   //milliseconds to pause after bounds change
 
@@ -4478,23 +4057,6 @@ function MIDtoCountry(mmsi) {
 }
 
 /* -------------------------------------------------------------------------------- */
-function initializePanel() {
-   $( "#showpanel" ).click(function() {
-      togglePanel();
-   });
-}
-
-/* -------------------------------------------------------------------------------- */
-function togglePanel() {
-   $( "#panel" ).toggle("slide", { direction: 'right' }, 180);
-   //$( "#panel" ).effect('fade').dequeue().toggle("slide", { direction: 'right' }, 180);
-
-   !panelhidden ? $( "#showpanel" ).html("<div class='arrow-left'></div>") : $( "#showpanel" ).html("<div class='arrow-right'></div>");
-   panelhidden = !panelhidden;
-   return false;
-}
-
-/* -------------------------------------------------------------------------------- */
 function toggleIHSTabs() {
    if (document.getElementById("IHSTabs") && document.getElementById("IHSTabs").checked) {
       console.log("Turning on IHS tabs");
@@ -4633,32 +4195,6 @@ function toggleCountryBorders() {
 
 /* -------------------------------------------------------------------------------- */
 /**
- **/
-function codeAddress() {
-  var address = document.getElementById('geocodeAddress').value;
-
-  //Check if user entered a lat/lon pair, separated by comma, i.e. "-118, 32"
-  if (address.match(/^[0-9\-\,\ \.]+$/) != null) {
-     var latlonArray = address.split(',');
-     map.panTo(new google.maps.LatLng(parseFloat(latlonArray[0]), parseFloat(latlonArray[1])));
-     return;
-  }
-
-  geocoder.geocode({
-     'address': address,
-     'bounds':  map.getBounds()
-  }, function(results, status) {
-    if (status == google.maps.GeocoderStatus.OK) {
-      map.panTo(results[0].geometry.location);
-    } 
-    else {
-      alert('Geocode was not successful for the following reason: ' + status);
-    }
-  });
-}
-
-/* -------------------------------------------------------------------------------- */
-/**
  *
  **/
 function disableCustomQuery() {
@@ -4724,51 +4260,6 @@ function resetVesselIconSize() {
 
 /* -------------------------------------------------------------------------------- */
 /**
- * 
- **/
-function initializeBrowserFocus() {
-   function onBlur() {
-      document.body.className = 'blurred';
-      console.log('Browser tab out of focus');
-      browserFocus = false;
-   };
-
-   function onFocus(){
-      document.body.className = 'focused';
-      console.log('Browser tab in focus');
-      browserFocus = true;
-      //Refresh the maps on focus if an attempt to refresh was made while out of focus
-      if (queuedRefresh) {
-         queuedRefresh = false;  //reset flag
-         refreshMaps(true);
-      }
-   };
-
-   if (/*@cc_on!@*/false) { // check for Internet Explorer
-      document.onfocusin = onFocus;
-      document.onfocusout = onBlur;
-   }
-   else {
-      window.onfocus = onFocus;
-      window.onblur = onBlur;
-   }
-}
-
-/* -------------------------------------------------------------------------------- */
-/**
- * Function to empty out an array and set length to zero
- **/
-function emptyArray(arr) {
-   if (typeof array !== 'undefined') {
-      while(arr.length > 0) {
-         arr.pop();
-      }
-   }
-   arr.length = 0;
-}
-
-/* -------------------------------------------------------------------------------- */
-/**
  * Function returns a vessel object from vesselArray that matches given MMSI
  **/
 function fetchVesselArray(mmsiToSearch) {
@@ -4781,34 +4272,293 @@ function fetchVesselArray(mmsiToSearch) {
 }
 
 
-/* -------------------------------------------------------------------------------- */
-/**
- * Function to check if display FMV data
- **/
-function toggleFMV() {
-   if (document.getElementById("FMVLayer") && document.getElementById("FMVLayer").checked) {
-      console.log("Turning on fmv information");
-      enableFMV = true;
-      getFMVTargets(map.getBounds());
-   }
-   else {
-      console.log("Turning off fmv information");
-      enableFMV = false;
+function showBusyIndicator() {
+   //Show the loading panel
+   $('#loadingPanel').show();
 
-      $.each(fmvtargets, function(key, target) {
-         target.setMap(null);
-      });
-      //Clearing all previous markers
-      emptyArray(fmvtargets);
-   }
+   //Find the spinner within the loadingPanel and activate it
+   $('#loadingPanel').find('.spinner').activity({
+      segments: 8, 
+      steps: 3, 
+      opacity: 0.3, 
+      width: 4, 
+      space: 0, 
+      length: 5, 
+      color: '#4D708F', 
+      speed: 3.0,
+   }); //show spinner
+
+   //Also show the top progress bar at the same time
+   NProgress.start();   //JS library top progress bar
+
+   return;
+}
+
+function hideBusyIndicator() {
+   $('#loadingPanel').hide();
+   $('#loadingPanel').find('.spinner').activity(false); //hide spinner
+   NProgress.done();   //JS library top progress bar
+    return;
 }
 
 
+
+
+/* -------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------- */
+
+//Global Objects and definitions
+var dataLayers = [];                //array of dataLayerObject, each layer to be displayed on map
+function dataLayerObject(id, showFunction, hideFunction, updateIfShown) {       //dataLayerObject prototype
+   this.layerID = id;
+   this.showLayer = function() {       //wrap showFunction with spinner handler
+      console.log('Showing ' + this.layerID);
+
+      //Start the spinner
+      var spinner = $('#'+this.layerID).find('.spinner');
+      if (typeof spinner !== 'undefined') {
+         spinner.activity({
+            segments: 8, 
+            steps: 3, 
+            opacity: 0.5, 
+            width: 4, 
+            space: 0, 
+            length: 4, 
+            color: '#3C763D', 
+            speed: 3.0,
+         }); //show spinner
+      }
+
+      showFunction(this,                  //need to pass this dataLayerObject into the show function
+            function callback() {    //callback function to stop the spinner
+               //Stop the progress indicator for this layer
+               if (typeof spinner !== 'undefined') {
+                  $('#'+id).find('.spinner').activity(false);
+               }
+            });
+   };      
+
+   this.hideLayer = hideFunction;      //hide function
+   this.updateLayer = this.showLayer;  //just point to the show function
+   this.updateIfShown = updateIfShown;
+   //this.data; //optional, will depend on data type.  Good to use for simple layers.
+};
+
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Initialize the layers on start up
+ **/
+$(function initializeLayers() {
+   //--------------------------------------------------------------
+   //AIS layer
+   var aisLayer = new dataLayerObject('aisLayer', 
+      function showaisLayer(thislayer, callback) {
+         //console.log('Displaying AIS layer');
+
+         //Done drawing method for EEZ
+         callback();
+      }, 
+      function hideaisLayer() {
+         //console.log('hiding AIS layer');
+      },
+      true
+      );
+   dataLayers.push(aisLayer);
+
+   //--------------------------------------------------------------
+   //RADAR layer
+   var radarLayer = new dataLayerObject('radarLayer', 
+      function showradarLayer(thislayer, callback) {
+         //console.log('Displaying RADAR layer');
+
+         //Done drawing method for EEZ
+         callback();
+      }, 
+      function hideradarLayer() {
+         //console.log('hiding RADAR layer');
+      },
+      true
+      );
+   dataLayers.push(radarLayer);
+
+   //--------------------------------------------------------------
+   //Day/night layer
+   var daynightLayer = new dataLayerObject('daynightLayer', 
+      function showdaynightLayer(thislayer, callback) {
+         //console.log('Displaying daynight layer');
+         thislayer.data.setMap(map);
+
+         //TODO: testing
+         if (map.getZoom() > 9) {
+            //console.log('Zoomed in, hide day/night layer and change map type');
+            thislayer.data.setMap(null);
+            map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+         }
+         else {
+            map.setMapTypeId(google.maps.MapTypeId.HYBRID);         
+         }
+         //END testing
+
+         callback();
+      }, 
+      function hidedaynightLayer() {
+         //console.log('hiding daynight layer');
+         this.data.setMap(null);
+      },
+      true
+      );
+
+   //Define the day night layer object, append to a dataLayer to dataLayerObject
+   daynightLayer.data = new DayNightOverlay({
+      map: null      //keep it hidden initially
+   });
+   dataLayers.push(daynightLayer);
+
+   //--------------------------------------------------------------
+   //EEZ layer
+   var eezLayer = new dataLayerObject('eezLayer', 
+      function showeezLayer(thislayer, callback) {
+         //console.log('Displaying EEZ layer');
+         thislayer.data.setMap(map);
+
+         //Done drawing method for EEZ
+         var dataDisplayedListener = google.maps.event.addListener(thislayer.data, "metadata_changed", 
+            function() {
+               //console.log('EEZ done displaying');
+               google.maps.event.removeListener(dataDisplayedListener);
+               callback();
+            });
+      },
+      function hideeezLayer() {
+         this.data.setMap(null);
+      },
+      false
+      );
+
+   //Define the day night layer object, append to a dataLayer to dataLayerObject
+   eezLayer.data = new google.maps.KmlLayer({
+      url: EEZ_PATH,
+      preserveViewport: true,
+      map: null      //keep it hidden initially
+   });
+   dataLayers.push(eezLayer);
+
+   //--------------------------------------------------------------
+   //FMV layer
+   var fmvLayer = new dataLayerObject('fmvLayer', 
+      function showfmvLayer(thislayer, callback) {
+         //console.log('Displaying FMV layer');
+         //Function handles setMap of data
+         getFMVTargets(map.getBounds(), thislayer.data, callback);
+      },
+      function hidefmvLayer() {
+         $.each(this.data, function(key, target) {
+            target.setMap(null);
+         });
+         //Clearing all previous markers
+         emptyArray(this.data);
+      },
+      true
+      );
+
+   //Define the day night layer object, append to a dataLayer to dataLayerObject
+   fmvLayer.data = [];           //formerly fmvtargets[]
+   dataLayers.push(fmvLayer);
+
+   //--------------------------------------------------------------
+   //Ports layer
+   var portsLayer = new dataLayerObject('portsLayer', 
+      function showportsLayer(thislayer, callback) {
+         //console.log('Displaying ports layer');
+         //Function handles setMap of data
+         showPorts(thislayer.portIcons, thislayer.portCircles, callback);
+      },
+      function hideportsLayer() {
+         var portIcons = this.portIcons;
+         var portCircles = this.portCircles;
+         var portIcon;
+         var portCircle;
+         for (i=0; i< portIcons.length; i++) {
+            portIcon = portIcons[i];
+            portIcon.setMap(null);
+            portCircle = portCircles[i];
+            portCircle.setMap(null);
+         }
+         emptyArray(portIcons);
+         emptyArray(portCircles);
+      },
+      true
+      );
+
+   //Define the day night layer object, append to a dataLayer to dataLayerObject
+   portsLayer.portIcons = [];
+   portsLayer.portCircles = [];
+   dataLayers.push(portsLayer);
+});
+
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Refresh all layers here, based on sortable lists in UI
+ **/
+function refreshLayers(newShownLayerID, newHiddenLayerID) {
+   if (typeof newShownLayerID !== 'undefined' || typeof newHiddenLayerID !== 'undefined') {
+      //One layer was moved, so update that single layer (either show or hide)
+
+      //Find the layer to be shown, and show it
+      dataLayers.forEach( function(dataLayer) {
+         if (dataLayer.layerID == newShownLayerID) {
+            //console.debug('*********** calling showLayer function');
+            dataLayer.showLayer();
+         }
+      });
+
+      //Find the layer to be hidden, and hide it
+      dataLayers.forEach( function(dataLayer) {
+         if (dataLayer.layerID == newHiddenLayerID) {
+            //console.debug('*********** calling showLayer function');
+            dataLayer.hideLayer();
+         }
+      });
+   }
+   else {
+      //Perform normal refresh of all layers
+
+      //Loop through layers to be shown and show them
+      var layersToShow = $('#displayedLayersList').sortable('toArray');
+      //console.log(layersToShow);
+
+      layersToShow.forEach( function(layerToShow) {
+         dataLayers.forEach( function(dataLayer) {
+            if (dataLayer.layerID == layerToShow && dataLayer.updateIfShown) {
+               //console.debug('*********** calling showLayer function');
+               dataLayer.showLayer();
+            }
+         });
+      });
+
+      //Loop through layers to be hidden and hide them
+      var layersToHide = $('#hiddenLayersList').sortable('toArray');
+      //console.log(layersToHide);
+
+      layersToHide.forEach( function(layerToHide) {
+         dataLayers.forEach( function(dataLayer) {
+            if (dataLayer.layerID == layerToHide) {
+               //console.debug('*********** calling hideLayer function');
+               dataLayer.hideLayer();
+            }
+         });
+      });
+   }
+}
+
 /* -------------------------------------------------------------------------------- */
 /** 
- * Get AIS data from JSON, which is from database, with bounds.
+ * Get FMV data from JSON, which is from database, with bounds.
  */
-function getFMVTargets(bounds) {
+function getFMVTargets(bounds, fmvtargets, callback) {
    //Set buffer around map bounds to expand queried area slightly outside viewable area
    var latLonBuffer = expandFactor / Math.pow(map.getZoom(),3);
    console.log('Current zoom: ' + map.getZoom());
@@ -4907,6 +4657,8 @@ function getFMVTargets(bounds) {
                   fmvtargets.push(marker);
                });
 
+               //Notify that this layer is done retrieving data and drawing
+               callback();
             }) //END .done()
          .fail(function(d, textStatus, error) { 
             if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
@@ -4918,237 +4670,343 @@ function getFMVTargets(bounds) {
                console.log('getTargetsFromDB(): ' +  'No response from track query; error in php?'); 
                document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
             }
-         }); //END .fail()
-         return true;
+
+            //Notify that this layer is done retrieving data and drawing
+            callback();
+         }) //END .fail()
+         .always(function() {
+         });
 }
 
-function showBusyIndicator() {
-   //Show the loading panel
-   $('#loadingPanel').show();
-
-   //Find the spinner within the loadingPanel and activate it
-   $('#loadingPanel').find('.spinner').activity({
-      segments: 8, 
-      steps: 3, 
-      opacity: 0.3, 
-      width: 4, 
-      space: 0, 
-      length: 5, 
-      color: '#4D708F', 
-      speed: 3.0,
-   }); //show spinner
-
-   //Also show the top progress bar at the same time
-   NProgress.start();   //JS library top progress bar
-
-   return;
-}
-
-function hideBusyIndicator() {
-   $('#loadingPanel').hide();
-   $('#loadingPanel').find('.spinner').activity(false); //hide spinner
-   NProgress.done();   //JS library top progress bar
-    return;
-}
-
-
-
-
 /* -------------------------------------------------------------------------------- */
-/* -------------------------------------------------------------------------------- */
-/* -------------------------------------------------------------------------------- */
+/** 
+ * Get ports from database, with bounds.
+ */
+function showPorts(portIcons, portCircles, callback) {
+   //TODO: separate the 3 port call getJSONs into separate functions with callbacks
+   /*
+   document.getElementById("query").value = "QUERY RUNNING FOR PORTS...";
+   document.getElementById('stats').innerHTML = '';
+   showBusyIndicator(); //show spinner
+   */
 
-//Global Objects and definitions
-var dataLayers = [];                //array of dataLayerObject, each layer to be displayed on map
-function dataLayerObject(id, showFunction, hideFunction, updateIfShown) {       //dataLayerObject prototype
-   this.layerID = id;
-   this.showLayer = function() {       //wrap showFunction with spinner handler
-      console.log('Showing ' + this.layerID);
+   var bounds = map.getBounds();
+   var ne = bounds.getNorthEast();
+   var sw = bounds.getSouthWest();
+   var minLat = sw.lat();
+   var maxLat = ne.lat();
+   var minLon = sw.lng();
+   var maxLon = ne.lng();
+   var boundStr = "&minlat=" + Math.round(minLat*1000)/1000 + "&maxlat=" + Math.round(maxLat*1000)/1000 + "&minlon=" + Math.round(minLon*1000)/1000 + "&maxlon=" + Math.round(maxLon*1000)/1000
 
-      //Start the spinner
-      var spinner = $('#'+this.layerID).find('.spinner');
-      if (typeof spinner !== 'undefined') {
-         spinner.activity({
-            segments: 8, 
-            steps: 3, 
-            opacity: 0.3, 
-            width: 4, 
-            space: 0, 
-            length: 5, 
-            color: '#3C763D', 
-            speed: 5.0,
-            width: 2,
-         }); //show spinner
+   var phpWithArg = "query_ports.php?" + boundStr;
+   //Debug query output
+   console.log('SHOWPORTS(): ' + phpWithArg);
+
+   $.getJSON(
+      phpWithArg, // The server URL 
+      { }
+   ) //end .getJSON()
+   .done(function (response) {
+      document.getElementById("query").value = response.query;
+      console.log('SHOWPORTS(): ' + response.query);
+      console.log('SHOWPORTS(): ' + 'number of ports = ' + response.resultcount);
+
+      $.each(response.ports, function(key,port) {
+         var port_name = port.port_name;
+         var country_name = port.country_code;
+         var lat = port.latitude;
+         var lon = port.longitude;
+
+         port_location = new google.maps.LatLng(lat, lon);
+         var portIcon = new google.maps.Marker({icon: 'icons/anchor_port.png'});
+         portIcon.setPosition(port_location);
+         portIcon.setMap(map);
+         portIcon.setTitle('Port Name: ' + port_name + '\nCountry: ' + country_name + '\nLat: ' + lat + '\nLon: ' + lon);
+
+         portCircle = new google.maps.Circle({
+            center:  port_location,
+                     radius: 2500,
+                     strokeColor: "#FF0000",
+                     strokeOpacity: 0.5,
+                     strokeWeight: 2,
+                     fillColor: "#FF0000",
+                     fillOpacity: 0.05,
+                     map: map
+         });
+
+         portIcons.push(portIcon);
+         portCircles.push(portCircle);
+
+         google.maps.event.addListener(portIcon, 'mouseover', function() {
+            portLabel = new MapLabel({
+               text: port_name,
+               position: portIcon.getPosition(),
+               map: map,
+               fontSize: 16,
+               fontColor: "#FF0000",
+               align: 'center',
+               zIndex: 0
+            });
+         });
+
+         google.maps.event.addListener(portIcon, 'mouseout', function() {
+            if (portLabel != null) {
+               portLabel.setMap(null);
+            }
+         });
+      });
+
+      //callback();
+   }) //end .done()
+   .fail(function() {
+      console.log('SHOWPORTS(): ' +  'No response from port query; error in php?'); 
+
+      callback();
+   }); //end .fail()
+
+
+   //Testing other/WROS port table
+   phpWithArg += "&wrosports=1";
+   $.getJSON(
+      phpWithArg, // The server URL 
+      { }
+   ) //end .getJSON()
+   .done(function (response) {
+      document.getElementById("query").value = response.query;
+      console.log('SHOWPORTS() part 2: ' + response.query);
+      console.log('SHOWPORTS() part 2: ' + 'number of ports = ' + response.resultcount);
+
+      $.each(response.ports, function(key,port) {
+         var port_name = port.port_name;
+         var country_name = port.country_code;
+         var lat = port.latitude;
+         var lon = port.longitude;
+
+         port_location = new google.maps.LatLng(lat, lon);
+         var portIcon = new google.maps.Marker({icon: 'icons/anchor_port_blue.png'});
+         portIcon.setPosition(port_location);
+         portIcon.setMap(map);
+         portIcon.setTitle('Port Name: ' + port_name + '\nCountry: ' + country_name + '\nLat: ' + lat + '\nLon: ' + lon);
+
+         portCircle = new google.maps.Circle({
+            center:  port_location,
+                     radius: 2500,
+                     strokeColor: "#0000FF",
+                     strokeOpacity: 0.5,
+                     strokeWeight: 2,
+                     fillColor: "#0000FF",
+                     fillOpacity: 0.05,
+                     map: map
+         });
+
+         portIcons.push(portIcon);
+         portCircles.push(portCircle);
+
+         google.maps.event.addListener(portIcon, 'mouseover', function() {
+            portLabel = new MapLabel({
+               text: port_name,
+               position: portIcon.getPosition(),
+               map: map,
+               fontSize: 16,
+               fontColor: "#0000FF",
+               align: 'center',
+               zIndex: 0
+            });
+         });
+
+         google.maps.event.addListener(portIcon, 'mouseout', function() {
+            if (portLabel != null) {
+               portLabel.setMap(null);
+            }
+         });
+      });
+
+      //callback();
+   }) //end .done()
+   .fail(function() { 
+      console.log('SHOWPORTS() part 2: ' +  'No response from port query; error in php?'); 
+
+      callback();
+   }); //end .fail()
+
+
+
+
+   //Testing IHS port polygons
+   var phpWithArg = "query_ihsports.php?" + boundStr;
+   $.getJSON(
+      phpWithArg, // The server URL 
+      { }
+   ) //end .getJSON()
+   .done(function (response) {
+      document.getElementById("query").value = response.query;
+      console.log('SHOWPORTS() part 3: ' + response.query);
+      console.log('SHOWPORTS() part 3: ' + 'number of ports = ' + response.resultcount);
+
+      var prevPortName = null;
+      var portPolygon;
+      var portCoords;
+
+      if (portPolygons.length > 0) {
+         for (var i=0; i < portPolygons.length; i++) {
+            portPolygons[i].portPolygonShape.setMap(null);
+         }
       }
 
-      showFunction(this,                  //need to pass this dataLayerObject into the show function
-            function callback(thislayer) {    //callback function to stop the spinner
-               //Stop the progress indicator for this layer
-               if (typeof spinner !== 'undefined') {
-                  $('#'+thislayer.layerID).find('.spinner').activity(false);
-               }
-            });
-   };      
+      $.each(response.ports, function(key,port) {
+         var PortGeoId = port.PortGeoId;
+         var zoneid = port.zoneid;
+         var port_name = port.PortName;
+         var seq = port.seq;
+         var lat = port.lat;
+         var lon = port.lon;
 
-   this.hideLayer = hideFunction;      //hide function
-   this.updateLayer = this.showLayer;  //just point to the show function
-   this.updateIfShown = updateIfShown;
-   //this.data; //optional, will depend on data type.  Good to use for simple layers.
-};
-
-
-/* -------------------------------------------------------------------------------- */
-/**
- * Initialize the layers on start up
- **/
-$(function initializeLayers() {
-   //--------------------------------------------------------------
-   //AIS layer
-   var aisLayer = new dataLayerObject('aisLayer', 
-      function showaisLayer(thislayer, callback) {
-         //console.log('Displaying AIS layer');
-
-         //Done drawing method for EEZ
-         callback(thislayer);
-      }, 
-      function hideaisLayer() {
-         //console.log('hiding AIS layer');
-      },
-      true
-      );
-   dataLayers.push(aisLayer);
-
-   //--------------------------------------------------------------
-   //RADAR layer
-   var radarLayer = new dataLayerObject('radarLayer', 
-      function showradarLayer(thislayer, callback) {
-         //console.log('Displaying RADAR layer');
-
-         //Done drawing method for EEZ
-         callback(thislayer);
-      }, 
-      function hideradarLayer() {
-         //console.log('hiding RADAR layer');
-      },
-      true
-      );
-   dataLayers.push(radarLayer);
-
-   //--------------------------------------------------------------
-   //Day/night layer
-   var daynightLayer = new dataLayerObject('daynightLayer', 
-      function showdaynightLayer(thislayer, callback) {
-         //console.log('Displaying daynight layer');
-         thislayer.data.setMap(map);
-
-         //TODO: testing
-         if (map.getZoom() > 9) {
-            //console.log('Zoomed in, hide day/night layer and change map type');
-            thislayer.data.setMap(null);
-            map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+         //Start of all ports
+         if (prevPortName == null) {
+            portPolygon = null;
+            emptyArray(portCoords);
+            //Set to new name
+            prevPortName = port_name;
          }
+
+         //Push to existing portCoords array
+         if (port_name == prevPortName) {
+            portCoords.push(new google.maps.LatLng(lat, lon));
+         }
+         //Push to new portCoords array for new port
          else {
-            map.setMapTypeId(google.maps.MapTypeId.HYBRID);         
-         }
-         //END testing
-
-         callback(thislayer);
-      }, 
-      function hidedaynightLayer() {
-         //console.log('hiding daynight layer');
-         this.data.setMap(null);
-      },
-      true
-      );
-
-   //Define the day night layer object, append to a dataLayer to dataLayerObject
-   daynightLayer.data = new DayNightOverlay({
-      map: null      //keep it hidden initially
-   });
-   dataLayers.push(daynightLayer);
-
-   //--------------------------------------------------------------
-   //EEZ layer
-   var eezLayer = new dataLayerObject('eezLayer', 
-      function showeezLayer(thislayer, callback) {
-         //console.log('Displaying EEZ layer');
-         thislayer.data.setMap(map);
-
-         //Done drawing method for EEZ
-         var dataDisplayedListener = google.maps.event.addListener(thislayer.data, "metadata_changed", 
-            function() {
-               //console.log('EEZ done displaying');
-               google.maps.event.removeListener(dataDisplayedListener);
-               callback(thislayer);
+            // Construct the polygon
+            portPolygonShape = new google.maps.Polygon({
+                             paths: portCoords,
+                             strokeColor: '#00FFFF',
+                             strokeOpacity: 0.8,
+                             strokeWeight: 2,
+                             fillColor: '#00FFFF',
+                             fillOpacity: 0.2,
+                             map: map
             });
-      },
-      function hideeezLayer() {
-         this.data.setMap(null);
-      },
-      false
-      );
 
-   //Define the day night layer object, append to a dataLayer to dataLayerObject
-   eezLayer.data = new google.maps.KmlLayer({
-      url: EEZ_PATH,
-      preserveViewport: true,
-      map: null      //keep it hidden initially
-   });
-   dataLayers.push(eezLayer);
-});
+            portPolygon = {
+               portCoords: portCoords,
+               portName: port_name,
+               portPolygonShape: portPolygonShape
+            };
+            portPolygons.push(portPolygon);
 
+            portPolygon = null;
+            emptyArray(portCoords);
+
+            portCoords.push(new google.maps.LatLng(lat, lon));
+            prevPortName = port_name;
+         }
+      });
+
+      if (portCoords != null) {
+         //Draw the last portPolygon
+         portPolygonShape = new google.maps.Polygon({
+                          paths: portCoords,
+                          strokeColor: '#00FFFF',
+                          strokeOpacity: 0.8,
+                          strokeWeight: 2,
+                          fillColor: '#00FFFF',
+                          fillOpacity: 0.2,
+                          map: map
+         });
+
+         portPolygon = {
+            portCoords: portCoords,
+            portName: prevPortName,
+            portPolygonShape: portPolygonShape
+         };
+         portPolygons.push(portPolygon);
+      }
+
+      callback();    //final getJSON does the callback
+   }) //end .done()
+   .fail(function() { 
+      console.log('SHOWPORTS() part 3: ' +  'No response from port query; error in php?'); 
+
+      callback();
+   }); //end .fail()   
+}
 
 /* -------------------------------------------------------------------------------- */
 /**
- * Refresh all layers here, based on sortable lists in UI
+ * Function to empty out an array and set length to zero
  **/
-function refreshLayers(newShownLayerID, newHiddenLayerID) {
-   if (typeof newShownLayerID !== 'undefined' || typeof newHiddenLayerID !== 'undefined') {
-      //One layer was moved, so update that single layer (either show or hide)
+function emptyArray(arr) {
+   if (typeof array !== 'undefined') {
+      while(arr.length > 0) {
+         arr.pop();
+      }
+   }
+   arr.length = 0;
+}
 
-      //Find the layer to be shown, and show it
-      dataLayers.forEach( function(dataLayer) {
-         if (dataLayer.layerID == newShownLayerID) {
-            //console.debug('*********** calling showLayer function');
-            dataLayer.showLayer();
-         }
-      });
+/* -------------------------------------------------------------------------------- */
+/**
+ **/
+function codeAddress() {
+  var address = document.getElementById('geocodeAddress').value;
 
-      //Find the layer to be hidden, and hide it
-      dataLayers.forEach( function(dataLayer) {
-         if (dataLayer.layerID == newHiddenLayerID) {
-            //console.debug('*********** calling showLayer function');
-            dataLayer.hideLayer();
-         }
-      });
+  //Check if user entered a lat/lon pair, separated by comma, i.e. "-118, 32"
+  if (address.match(/^[0-9\-\,\ \.]+$/) != null) {
+     var latlonArray = address.split(',');
+     map.panTo(new google.maps.LatLng(parseFloat(latlonArray[0]), parseFloat(latlonArray[1])));
+     return;
+  }
+
+  geocoder.geocode({
+     'address': address,
+     'bounds':  map.getBounds()
+  }, function(results, status) {
+    if (status == google.maps.GeocoderStatus.OK) {
+      map.panTo(results[0].geometry.location);
+    } 
+    else {
+      alert('Geocode was not successful for the following reason: ' + status);
+    }
+  });
+}
+
+/* -------------------------------------------------------------------------------- */
+function toggleDistanceTool() {
+   if (document.getElementById("distancetooltoggle") 
+       && document.getElementById("distancetooltoggle").checked) {
+      enableDistanceTool();
    }
    else {
-      //Perform normal refresh of all layers
+      disableDistanceTool();
+   }
+}
 
-      //Loop through layers to be shown and show them
-      var layersToShow = $('#displayedLayersList').sortable('toArray');
-      //console.log(layersToShow);
+/* -------------------------------------------------------------------------------- */
+function enableDistanceTool() {
+   //Distance label
+   distanceLabel = new MapLabel({
+            text: '',
+            //position: new google.maps.LatLng(5.9,1.30),
+            map: map,
+            fontSize: 14,
+            align: 'left',
+            map: map
+   });
+   
+   initializeDistanceWidget();
+}
 
-      layersToShow.forEach( function(layerToShow) {
-         dataLayers.forEach( function(dataLayer) {
-            if (dataLayer.layerID == layerToShow && dataLayer.updateIfShown) {
-               //console.debug('*********** calling showLayer function');
-               dataLayer.showLayer();
-            }
-         });
-      });
+/* -------------------------------------------------------------------------------- */
+function disableDistanceTool() {
+   //Check for global object distanceWidget
+   if (distanceWidget != null) {
+      //Destroy the object to remove from maps
+      distanceWidget.destructor();
+   }
 
-      //Loop through layers to be hidden and hide them
-      var layersToHide = $('#hiddenLayersList').sortable('toArray');
-      //console.log(layersToHide);
-
-      layersToHide.forEach( function(layerToHide) {
-         dataLayers.forEach( function(dataLayer) {
-            if (dataLayer.layerID == layerToHide) {
-               //console.debug('*********** calling hideLayer function');
-               dataLayer.hideLayer();
-            }
-         });
-      });
+   //Separately hide the distanceLabel
+   // Not done in distanceWidget.js to retain compability with old distance method
+   if (distanceLabel != null) {
+      distanceLabel.setMap(null);
    }
 }

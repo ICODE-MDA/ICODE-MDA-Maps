@@ -14,6 +14,7 @@ $(function() { //shorthand for: $(document).ready(function() {
    progressBar();
    sortableLayers();
    setupAlertAccordion();
+   initializeBrowserFocus();
 
    //Setup functions definitions =========================================================
    function setupUser() {
@@ -190,5 +191,38 @@ $(function() { //shorthand for: $(document).ready(function() {
             $("#alertAccordion").accordion("refresh");
          }
       });
+   }
+
+   /* -------------------------------------------------------------------------------- */
+   /**
+    * 
+    **/
+   function initializeBrowserFocus() {
+      function onBlur() {
+         document.body.className = 'blurred';
+         console.log('Browser tab out of focus');
+         browserFocus = false;
+      };
+
+      function onFocus(){
+         document.body.className = 'focused';
+         console.log('Browser tab in focus');
+         browserFocus = true;
+         //Refresh the maps on focus if an attempt to refresh was made while out of focus
+         if (queuedRefresh) {
+            queuedRefresh = false;  //reset flag
+            refreshMaps(true);
+            refreshLayers();
+         }
+      };
+
+      if (/*@cc_on!@*/false) { // check for Internet Explorer
+         document.onfocusin = onFocus;
+         document.onfocusout = onBlur;
+      }
+      else {
+         window.onfocus = onFocus;
+         window.onblur = onBlur;
+      }
    }
 });

@@ -37,6 +37,7 @@
      <script type="text/javascript" src="scripts/alertclient.js"></script>
      <script type="text/javascript" src="scripts/alertsetup.js"></script>
      <script type="text/javascript" src="scripts/dragdrop.js"></script>
+     <script type="text/javascript" src="scripts/maplabel-compiled.js"></script> <!-- for distance tool -->
 
      <!-- JQueryUI -->
      <!-- Theme downloaded from http://jqueryui.com/download/#!zThemeParams=5d00000100f405000000000000003d8888d844329a8dfe02723de3e5701fa198449035fc0613ff729a37dd818cf92b1f6938fefa90282d04ae436bb72367f5909357c629e832248af2c086db4ab730aa4cced933a88449eca61db9f7f3b23d47f58a712d809b6088edfb34ad39fdc365386d0fa05a1ac3ecd320d2c989729f79ebdc6c6c1efbdad4c8411d498f009ffe98fe129da7602fb950113abdae4a76a6c41a4b54b4f82bb8821d6d431cd3fdd76b9d621596a2728b93385f2e7aaf8ea6603553343d43829941536e2bdd3ed7d7d3207364bf351633b31b934a71523a88fa2058cdd4c2e0778cd56d6ccac254ddace19ff4460a100e2e6a52830d9063c6e328cc3cb5e3d6dbe1077ae8b7cc5fa6414eafd15883b40c6c3e71647031ce3da7038a945a5628669fbe0e5139dad7ce99c00f25c2cd40569bd2fe1b2caed45bf2b8943f6ac17215bd54437a0f739009848e80f1d5c00d99870e7258d07402af6b22872fdf8f2892a7e9274aaa9181573ddd8cd7788511b4459e736d76b3e64e015809712e904499648868a11e35b3bb8ee1168d6039c5a86eee8cf545c877dbdd0111ab04ede46a85a17baed0958026fe23d2e490cfa504ab598731d779a2434fa164085379d31e1ff08e2eeb9475cce3d5b3e9b2fd4df43dffe6cf0eda -->
@@ -476,6 +477,61 @@
                        <hr>
                        <h4 class="text-center">Available Layers:</h4>
                        <ul id="hiddenLayersList" class="list-unstyled connectedSortable">
+                          <!-- Port Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="portsLayer" class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                             Port Layer
+                             <div class="spinner spinnerForLayers"></div>
+                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
+                                Options      
+                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
+                             </button>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <div class="checkbox">
+                                <label>                 
+                                   <input class="checkbox" id="PortLayer" name="PortLayer" type="checkbox" onclick="togglePortLayer();"> <img align="top" height="20px" src="icons/anchor_port.png" style="padding-bottom: 4px; vertical-align: middle;"> Port Layer
+                                </label>
+                             </div>
+                          </div>
+                          </li>
+
+                          <!-- FMV Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="fmvLayer" class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                             FMV Layer
+                             <div class="spinner spinnerForLayers"></div>
+                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
+                                Options      
+                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
+                             </button>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="FMVLayer" name="FMVLayer" type="checkbox" onclick="toggleFMV();"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="16" width="30" viewBox="-10 -9 15 16">
+                                   <path d="M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0" style="fill:#FF0000;stroke:#000000;stroke-width:1;fill-rule:evenodd;">Browser does not support inline SVG.
+                                   </path>
+                                   </svg> FMV Layer
+                                </label>
+                             </div>
+                          </div>
+                          </li>
+
+                          <!-- EEZ Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="eezLayer" class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                             EEZ Layer
+                             <div class="spinner spinnerForLayers"></div>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <!-- Options here -->
+                          </div>
+                          </li>
+
                           <!-- LAISIC Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="laisicLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
@@ -533,29 +589,6 @@
                           </div>
                           </li>
 
-                          <!-- FMV Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="fmvLayer" class="panel panel-success">
-                          <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
-                             Full Motion Video Layer
-                             <div class="spinner spinnerForLayers"></div>
-                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
-                                Options      
-                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
-                             </button>
-                          </div>
-                          <div class="layerBody panel-body panel-collapse collapse">
-                             <div class="checkbox">
-                                <label>
-                                   <input class="checkbox" id="FMVLayer" name="FMVLayer" type="checkbox" onclick="toggleFMV();"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="16" width="30" viewBox="-10 -9 15 16">
-                                   <path d="M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0" style="fill:#FF0000;stroke:#000000;stroke-width:1;fill-rule:evenodd;">Browser does not support inline SVG.
-                                   </path>
-                                   </svg> FMV Layer
-                                </label>
-                             </div>
-                          </div>
-                          </li>
-
                           <!-- Country Border Layer +++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="countryBordersLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
@@ -572,18 +605,6 @@
                           </div>
                           </li>
 
-                          <!-- EEZ Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="eezLayer" class="panel panel-success">
-                          <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
-                             EEZ Layer
-                             <div class="spinner spinnerForLayers"></div>
-                          </div>
-                          <div class="layerBody panel-body panel-collapse collapse">
-                             <!-- Options here -->
-                          </div>
-                          </li>
-
                           <!-- Weather Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="weatherLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
@@ -595,22 +616,6 @@
                              <div class="checkbox">
                                 <label>
                                    <input class="checkbox" id="WeatherLayer" name="WeatherLayer" type="checkbox" onclick="toggleWeatherLayer();"> <img align="top" width="20px" src="icons/weather_icon.png" style="padding-bottom: 4px; vertical-align: middle;"> Weather Layer
-                                </label>
-                             </div>
-                          </div>
-                          </li>
-
-                          <!-- Port Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="portLayer" class="panel panel-success">
-                          <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
-                             Port Layer
-                             <div class="spinner spinnerForLayers"></div>
-                          </div>
-                          <div class="layerBody panel-body panel-collapse collapse">
-                             <div class="checkbox">
-                                <label>                 
-                                   <input class="checkbox" id="PortLayer" name="PortLayer" type="checkbox" onclick="togglePortLayer();"> <img align="top" height="20px" src="icons/anchor_port.png" style="padding-bottom: 4px; vertical-align: middle;"> Port Layer
                                 </label>
                              </div>
                           </div>
