@@ -68,6 +68,7 @@ var prevSourceType;
 
 //Viewing bounds objects
 var queryBounds;              //map bounds of query
+var viewBounds;               //map bounds object with min/max lat/lon
 var expandFactor = 300;       //factor to expand bounds by outside of viewable area
 var boundRectangle = null;    //rectangle map object to draw query bounds
 
@@ -567,42 +568,31 @@ function initialize() {
             refreshMaps(true);
             break;
          case 78: // n
-            if (document.getElementById("showvesselnames") != null &&
-                document.getElementById("showvesselnames").checked) {
-               document.getElementById("showvesselnames").checked = false;
-               document.getElementById("showvesselnames").removeAttribute("checked");
+            if (document.getElementById("showtargetlabels") != null &&
+                document.getElementById("showtargetlabels").checked) {
+               document.getElementById("showtargetlabels").checked = false;
+               document.getElementById("showtargetlabels").removeAttribute("checked");
             }
             else {
-               document.getElementById("showvesselnames").checked = true;
+               document.getElementById("showtargetlabels").checked = true;
             }
             toggleShowNames();
             break;
          case 80: // p
             //Port layer
-            if (document.getElementById("PortLayer") != null &&
-                document.getElementById("PortLayer").checked) {
-               document.getElementById("PortLayer").checked = false;
-               document.getElementById("PortLayer").removeAttribute("checked");
+            if ($('#portsLayer').children('.layerHeading').children('.hideShowLayerBtn').hasClass('glyphicon-plus')) {
+               $('#portsLayer').insertAfter('#displayedLayersList li:last');
+               listUpdated();
             }
             else {
-               document.getElementById("PortLayer").checked = true;
-            }
-            togglePortLayer();
+               $('#portsLayer').insertBefore('#hiddenLayersList li:first');
+               listUpdated();
+            }  
             break;
          case 82: // r
             location.reload();
             break;
          case 84: // t
-            /*
-            if (trafficLayer == null) {
-               trafficLayer = new google.maps.TrafficLayer();
-               trafficLayer.setMap(map);
-            }
-            else {
-               trafficLayer.setMap(null);
-               trafficLayer = null;
-            }
-            */
             if ($('#trafficLayer').children('.layerHeading').children('.hideShowLayerBtn').hasClass('glyphicon-plus')) {
                $('#trafficLayer').insertAfter('#displayedLayersList li:last');
                listUpdated();
@@ -634,10 +624,12 @@ function initialize() {
          case 40: // downArrow
             map.panBy(0,o);
             break;
+         case 173: // keyboard -
          case 109: // numpad -
          case 189: // -
             map.setZoom(map.getZoom()-1);
             break;
+         case 61:  // keyboard + (=)
          case 107: // numpad +
          case 187: // =
             map.setZoom(map.getZoom()+1);
@@ -770,10 +762,12 @@ function refreshMaps(forceRedraw) {
          //Most queries will default here
          getTargetsFromDB(map.getBounds(), null, "AIS", forceRedraw, queryid);
 
+         /*
          if (document.getElementById("radarvessels") != null && 
              document.getElementById("radarvessels").checked) {
             getTargetsFromDB(map.getBounds(), null, "RADAR", forceRedraw, queryid);
          }
+         */
          if (document.getElementById("livelaisic") != null && 
              document.getElementById("livelaisic").checked) {
             getTargetsFromDB(map.getBounds(), null, "LIVE_LAISIC", forceRedraw, queryid);
@@ -928,7 +922,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
 
    //Read sourceType (AIS, LAISIC stuff, etc) from global variable, set previous right before this calling this function.  This one used to notify PHP script which table to query from.
    var sourceStr = "source=" + sourceType;
-   var boundStr = "&minlat=" + Math.round(minLat*1000)/1000 + "&maxlat=" + Math.round(maxLat*1000)/1000 + "&minlon=" + Math.round(minLon*1000)/1000 + "&maxlon=" + Math.round(maxLon*1000)/1000;
+   //var boundStr = "&minlat=" + Math.round(minLat*1000)/1000 + "&maxlat=" + Math.round(maxLat*1000)/1000 + "&minlon=" + Math.round(minLon*1000)/1000 + "&maxlon=" + Math.round(maxLon*1000)/1000;
 
    //Check if a query has been previously made, and use it to preserve previous query but just change the bounds to current view now
    if (!customQuery && customQuery !== '') {     //No custom query
@@ -957,7 +951,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
          phpWithArg += "&vessel_age=" + vessel_age;
       }
 
-      phpWithArg += boundStr;
+      phpWithArg += viewBounds.boundStr;
 
       enableCustomQuery = false;
    }
@@ -965,7 +959,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
       //TODO: need a more robust condition for keyword search
       if (customQuery.length < 20) {
          //customQuery is really a keyword search
-         phpWithArg = "query_current_vessels.php?" + sourceStr + boundStr + "&keyword=" + customQuery;
+         phpWithArg = "query_current_vessels.php?" + sourceStr + viewBounds.boundStr + "&keyword=" + customQuery;
       }
       //TODO for handling case when trying to display specific vessels or LAISIC outputs
       /*
@@ -984,7 +978,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
          }
          else {
             //Custom SQL query statement
-            phpWithArg = "query_current_vessels.php?query=" + customQuery + boundStr;
+            phpWithArg = "query_current_vessels.php?query=" + customQuery + viewBounds.boundStr;
          }
 
          console.log('Performing custom query on: ' + customQuery);
@@ -1023,7 +1017,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
    //For LAISIC points, need to clear markers before executing PHP request
    if (sourceType.indexOf('LAISIC') == 0) {//sourceType != "AIS" && sourceType != "RADAR" && sourceType != "LIVE_LAISIC") {
       //Delete previous markers
-      if (boundStr != null) {
+      if (viewBounds.boundStr != null) {
          clearMarkerAndClusters();
          localStorage.clear();
          for (var i=0; i < markersDisplayed.length; i++) {
@@ -1070,7 +1064,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
          console.log('PHP returned for ' + sourceType + ', ' + thisqueryid + ', ' + queryid);
          if (thisqueryid == queryid) {
             //Clearing all previous markers
-            if (boundStr != null) {
+            if (viewBounds.boundStr != null) {
                clearMarkerAndClusters();
                localStorage.clear();
                for (var i=0; i < markersDisplayed.length; i++) {
@@ -1364,8 +1358,8 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
                vesselnameLabel.open(map);
                
                //Check if labels should be displayed or not
-               if (document.getElementById("showvesselnames") == null || 
-                   !document.getElementById("showvesselnames").checked) {
+               if (document.getElementById("showtargetlabels") == null || 
+                   !document.getElementById("showtargetlabels").checked) {
                   vesselnameLabel.setMap(null);
                }
 
@@ -1637,7 +1631,7 @@ function getClustersFromDB(bounds, customQuery) {
             "<br>Retrieved in " + Math.round(response.exectime*1000)/1000 + " secs";
       }) //end .done()
       .fail(function(d, textStatus, error) { 
-         if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+         if (typeof d !== 'undefined' && d.responseText.indexOf("Can't connect to MySQL server") > -1) {
             console.log('getClustersFromDB(): ' +  'Database is down'); 
             document.getElementById("query").value = "DATABASE IS DOWN.";
          }
@@ -2669,27 +2663,6 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
 }
 
 /* -------------------------------------------------------------------------------- */
-function toggleShowNames() {
-   if (document.getElementById("showvesselnames") != null &&
-       document.getElementById("showvesselnames").checked) {
-      console.log('Showing vessel names');
-
-      //loop through markersDisplayed
-      for (var i=0; i < markersDisplayed.length; i++) {
-         markersDisplayed[i].vesselnameLabel.setMap(map);
-      }
-   }
-   else {
-      console.log('Hiding vessel names');
-
-      //loop through markersDisplayed
-      for (var i=0; i < markersDisplayed.length; i++) {
-         markersDisplayed[i].vesselnameLabel.setMap(null);
-      }
-   }
-}
-
-/* -------------------------------------------------------------------------------- */
 function toggleTrackIcons() {
    if (document.getElementById("showtrackicons") != null &&
        document.getElementById("showtrackicons").checked) {
@@ -3138,8 +3111,8 @@ function addHeatmap() {
       data: heatmapData
    });
 
-   document.getElementById("showvesselnames").checked = false;
-   document.getElementById("showvesselnames").removeAttribute("checked");
+   document.getElementById("showtargetlabels").checked = false;
+   document.getElementById("showtargetlabels").removeAttribute("checked");
    toggleShowNames();
 
    heatmapLayer.setMap(map);
@@ -4304,6 +4277,18 @@ function dataLayerObject(id, showFunction, hideFunction, updateIfShown) {       
    //this.data; //optional, will depend on data type.  Good to use for simple layers.
 };
 
+function clearLayerMarkers(thislayer) {
+   thislayer.data.markerArray.forEach( function (marker) {
+      marker.setMap(null);
+   });
+   thislayer.data.markerlabelArray.forEach( function (markerlabel) {
+      markerlabel.setMap(null);
+   });
+   emptyArray(thislayer.data.dataArray);
+   emptyArray(thislayer.data.markerArray);
+   emptyArray(thislayer.data.markerlabelArray);
+}
+
 
 /* -------------------------------------------------------------------------------- */
 /**
@@ -4331,15 +4316,25 @@ $(function initializeLayers() {
    var radarLayer = new dataLayerObject('radarLayer', 
       function showradarLayer(thislayer, callback) {
          //console.log('Displaying RADAR layer');
-
-         //Done drawing method for EEZ
-         callback();
+         getRadarFromDB(null, thislayer, callback);  //parameters: (customQuery, callback when done)
       }, 
       function hideradarLayer() {
          //console.log('hiding RADAR layer');
+         clearLayerMarkers(this);
       },
       true  //force refresh this layer
       );
+   //Data object of arrays
+   radarLayer.data = {
+      dataArray: [],
+      markerArray: [],
+      markerlabelArray: []
+   };
+   radarLayer.dataType = "RADAR";
+   //Marker path definition for this layer: Circle with line for direction (intended for RADAR)
+   //TODO: incorporate marker size with vw or vl
+   radarLayer.markerpath = 'M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0';
+   radarLayer.phpfile = 'query_current_vessels.php';
    dataLayers.push(radarLayer);
 
    //--------------------------------------------------------------
@@ -4410,20 +4405,22 @@ $(function initializeLayers() {
       function showfmvLayer(thislayer, callback) {
          //console.log('Displaying FMV layer');
          //Function handles setMap of data
-         getFMVTargets(map.getBounds(), thislayer.data, callback);
+         getFMVTargets(null, thislayer, callback);
       },
       function hidefmvLayer() {
-         $.each(this.data, function(key, target) {
-            target.setMap(null);
-         });
-         //Clearing all previous markers
-         emptyArray(this.data);
+         clearLayerMarkers(this);
       },
       true  //force refresh this layer
       );
 
    //Define the day night layer object, append to a dataLayer to dataLayerObject
-   fmvLayer.data = [];           //formerly fmvtargets[]
+   fmvLayer.data = {
+      dataArray: [],
+      markerArray: [],
+      markerlabelArray: []
+   };
+   fmvLayer.markerpath = 'M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0';
+   fmvLayer.phpfile = 'query_fmv_data.php';
    dataLayers.push(fmvLayer);
 
    //--------------------------------------------------------------
@@ -4504,12 +4501,69 @@ $(function initializeLayers() {
    dataLayers.push(trafficLayer);
 });
 
+/* -------------------------------------------------------------------------------- */
+/** 
+ * Return the current map view bounds
+ */
+function updateViewBounds() {
+   var bounds = map.getBounds();
+
+   //Set buffer around map bounds to expand queried area slightly outside viewable area
+   var latLonBuffer = expandFactor / Math.pow(map.getZoom(),3);
+   //console.log('Current zoom: ' + map.getZoom());
+
+   var ne = bounds.getNorthEast();
+   var sw = bounds.getSouthWest();
+
+   var viewMinLat = sw.lat();
+   var viewMaxLat = ne.lat();
+   var viewMinLon = sw.lng();
+   var viewMaxLon = ne.lng();
+
+   var minLat = viewMinLat;// - latLonBuffer;
+   var maxLat = viewMaxLat;// + latLonBuffer;
+   var minLon = viewMinLon;// - latLonBuffer;
+   var maxLon = viewMaxLon;// + latLonBuffer;
+
+   latlonbounds = new google.maps.LatLngBounds(
+         new google.maps.LatLng(minLat, minLon), 
+         new google.maps.LatLng(maxLat, maxLon));
+
+   //Draw bounds rectangle to let user know they are zooming outside of the bounds
+   if (boundRectangle == null) {
+      boundRectangle = new google.maps.Rectangle({
+         strokeColor: '#FF0000',
+         strokeOpacity: 0.8,
+         strokeWeight: 1,
+         fillColor: '#FF0000',
+         fillOpacity: 0,
+         map: map,
+         bounds: latlonbounds,
+         clickable: false,
+      });
+   }
+   else {
+      boundRectangle.setBounds(latlonbounds);
+   }
+
+   //Update global view bounds
+   viewBounds = {
+      minLat: minLat, 
+      maxLat: maxLat, 
+      minLon: minLon, 
+      maxLon: maxLon,
+      boundStr: "&minlat=" + Math.round(minLat*1000)/1000 + "&maxlat=" + Math.round(maxLat*1000)/1000 + "&minlon=" + Math.round(minLon*1000)/1000 + "&maxlon=" + Math.round(maxLon*1000)/1000,
+   };
+}
 
 /* -------------------------------------------------------------------------------- */
 /**
  * Refresh all layers here, based on sortable lists in UI
  **/
 function refreshLayers(newShownLayerID, newHiddenLayerID) {
+   //Update view bounds object (viewBounds), global for all layers
+   updateViewBounds();
+
    if (typeof newShownLayerID !== 'undefined' || typeof newHiddenLayerID !== 'undefined') {
       //One layer was moved, so update that single layer (either show or hide)
 
@@ -4562,50 +4616,218 @@ function refreshLayers(newShownLayerID, newHiddenLayerID) {
 
 /* -------------------------------------------------------------------------------- */
 /** 
+ * Get RADAR data from JSON, which is from database, with bounds.
+ */
+function getRadarFromDB(customQuery, thislayer, callback) {
+   //Check the data type of this layer (i.e. "AIS", "RADAR", "LAISIC_RADAR", etc.)
+   var sourceType = thislayer.dataType;
+
+   console.log(thislayer.layerID + ': Refreshing targets...');
+   $('#' + thislayer.layerID + ' .queryStatement').val('QUERY RUNNING...');
+
+   var phpWithArg = thislayer.phpfile + '?';
+
+   //set data source type for PHP
+   var sourceStr = "source=" + sourceType;
+
+   //Check if a query has been previously made, and use it to preserve previous query but just change the bounds to current view now
+   if (customQuery == null && customQuery !== '') {     //No custom query
+      phpWithArg += sourceStr;
+
+      //if vessel age limit was chosen, then add option
+      if (vessel_age != -1) {
+         phpWithArg += "&vessel_age=" + vessel_age;
+      }
+
+      phpWithArg += viewBounds.boundStr;
+
+      enableCustomQuery = false;
+   }
+   else {   //Something was typed into query bar
+      //TODO: need a more robust condition for keyword search
+      if (customQuery.length < 20) {
+         //customQuery is really a keyword search
+         phpWithArg += sourceStr + viewBounds.boundStr + "&keyword=" + customQuery;
+      }
+      else {
+         console.log(thislayer.layerID + ': Entered custom query: ' + customQuery);
+
+         //If custom query supplies a lat/lon bound, then don't append
+         if (customQuery.toLowerCase().indexOf('where l') != -1) {
+            console.log(thislayer.layerID + ': Not appending anything to custom query');
+            phpWithArg += 'query=' + customQuery + '&noappend=1';
+         }
+         else {
+            //Custom SQL query statement
+            phpWithArg += 'query=' + customQuery + viewBounds.boundStr;
+         }
+
+         console.log(thislayer.layerID + ': Performing custom query on: ' + customQuery);
+         
+         //if vessel age limit was chosen, then add option
+         if (vessel_age != -1) {
+            phpWithArg += "&vessel_age=" + vessel_age;
+         }
+      }
+   }
+
+
+   //Debug query output
+   console.log(thislayer.layerID + ': ' + phpWithArg);
+
+   //Call PHP and get results as markers
+   $.getJSON(
+         phpWithArg, // The server URL 
+         { }
+      ) //end .getJSON()
+      .done(function (response) {
+         console.log(thislayer.layerID + ': ' + response.query);
+         //Show the query and show it in the query bar of this layer
+         $('#' + thislayer.layerID + ' .queryStatement').val(response.query);
+
+         //Clear previous data and markers
+         clearLayerMarkers(thislayer);
+
+         // TODO: clear local storage stuff for this layer
+
+         if (!customQuery) {
+            mainQuery = response.basequery;
+         }
+
+         //Prepare to grab PHP results as JSON objects
+         $.each(response.vessels, function(key,vessel) {
+            // TODO: Push to localStorage for tables to know of change
+
+            var latlon = new google.maps.LatLng(
+               parseFloat(vessel.lat),
+               parseFloat(vessel.lon));
+
+            var iconColor = getIconColor(vessel.vesseltypeint, vessel.streamid);
+
+            //marker style
+            var marker = new google.maps.Marker({
+               position: latlon,
+                icon: {
+                   path:         thislayer.markerpath,
+                strokeColor:  '#222200',
+                strokeWeight: 1,
+                fillColor:    iconColor,
+                fillOpacity:  0.8,
+                rotation:     parseInt(vessel.heading)-90,
+                optimized:    false,
+                },
+                map: map
+            });
+
+
+            //Listener for click on marker to display infoBubble
+            google.maps.event.addListener(marker, 'click', function () {
+               //Associate the infoBubble to the marker
+               clearInterval(vesselLastUpdated);
+
+               //Draw the selection square
+               selectionSquare.setPosition(latlon);
+               selectionSquare.setMap(map);
+
+               //Setup the infoBubble and show it
+               markerInfoBubble(marker, vessel, infoBubble);
+
+               //Close the infoBubble if user clicks outside of infoBubble area
+               google.maps.event.addListenerOnce(map, 'click', function() {
+                  if (enableIHSTabs) {
+                     for (var i=0; i < NUM_INFO_BUBBLE; i++) {
+                        console.log('Removing tab ' + i);
+                        infoBubble.removeTab(0);
+                     }
+                  }
+                  clearInterval(vesselLastUpdated);
+                  selectionSquare.setMap(null);
+                  infoBubble.setMap(null);
+                  infoBubble.close(); 
+               });
+            });
+
+            //Listener for mouseover marker to display tracks
+            google.maps.event.addListener(marker, 'mouseover', function() {
+               //Hover display name
+               marker.setTitle(vessel.commsid);
+            });
+
+            //Listen for marker right clicks (to query and display track)
+            google.maps.event.addListener(marker, 'rightclick', function() {
+               console.log(thislayer.layerID + ': Getting track for: ' + vessel.mmsi+','+vessel.vesseltypeint+','+sourceType+','+vessel.datetime+','+vessel.streamid+','+vessel.commsid);
+               getTrack(vessel.mmsi, vessel.vesseltypeint, sourceType, vessel.datetime, vessel.streamid, vessel.commsid);
+            });
+
+            var vessellabel = vessel.commsid;      //TODO: find vessel label field in data
+            //Trying InfoBox to display many labels with no problems
+            vesselnameLabel = new InfoBox({
+               content: vessellabel,
+                            boxStyle: {
+                               border: "0px dashed black",
+                            textAlign: "center",
+                            //fontSize: "10pt",  //Define text styling properties in CSS file
+                            width: "120px"
+                            },
+                            disableAutoPan: true,
+                            pixelOffset: new google.maps.Size(-60, 10),
+                            position: new google.maps.LatLng(vessel.lat, vessel.lon),
+                            closeBoxURL: "",
+                            isHidden: false,
+                            pane: "mapPane",
+                            enableEventPropagation: true
+            });
+            //Associate label to map
+            vesselnameLabel.open(map);
+
+            //Check if labels should be displayed or not
+            if ($('#showtargetlabels') == null || $('#showtargetlabels:checked').length == 0) {
+               vesselnameLabel.setMap(null);
+            }
+
+            //Push data and marker objects into this layer's data arrays
+            thislayer.data.dataArray.push(vessel);
+            thislayer.data.markerArray.push(marker);
+            thislayer.data.markerlabelArray.push(vesselnameLabel);
+         });
+
+         //TODO: handle if user wants to display tracks for all currently displayed RADAR targets
+
+         //Update activity status spinner and results
+         console.log(thislayer.layerID + ': Total number of targets = ' + thislayer.data.markerArray.length);
+
+         callback();
+      }) //END .done()
+      .fail(function(d, textStatus, error) { 
+         if (typeof d !== 'undefined' && d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+            console.log(thislayer.layerID + ': Database is down'); 
+            $('#' + thislayer.layerID + ' .queryStatement').val('DATABASE IS DOWN.');
+         }
+         else {
+            console.log(thislayer.layerID + ': No response from track query; error in php?'); 
+            $('#' + thislayer.layerID + ' .queryStatement').val('ERROR IN QUERY.  PLEASE TRY AGAIN.');
+         }
+
+         callback();
+      }); //END .fail()
+}
+
+/* -------------------------------------------------------------------------------- */
+/** 
  * Get FMV data from JSON, which is from database, with bounds.
  */
-function getFMVTargets(bounds, fmvtargets, callback) {
-   //Set buffer around map bounds to expand queried area slightly outside viewable area
-   var latLonBuffer = expandFactor / Math.pow(map.getZoom(),3);
-   console.log('Current zoom: ' + map.getZoom());
-
-   var ne = bounds.getNorthEast();
-   var sw = bounds.getSouthWest();
-
-   var viewMinLat = sw.lat();
-   var viewMaxLat = ne.lat();
-   var viewMinLon = sw.lng();
-   var viewMaxLon = ne.lng();
-
-   var minLat = viewMinLat;// - latLonBuffer;
-   var maxLat = viewMaxLat;// + latLonBuffer;
-   var minLon = viewMinLon;// - latLonBuffer;
-   var maxLon = viewMaxLon;// + latLonBuffer;
-
-
-   queryBounds = new google.maps.LatLngBounds(
-         new google.maps.LatLng(minLat, minLon), 
-         new google.maps.LatLng(maxLat, maxLon));
-
-   var phpWithArg;
-
-   var boundStr = "&minlat=" + Math.round(minLat*1000)/1000 + "&maxlat=" + Math.round(maxLat*1000)/1000 + "&minlon=" + Math.round(minLon*1000)/1000 + "&maxlon=" + Math.round(maxLon*1000)/1000;
-
-   phpWithArg = "query_fmv_data.php?";
+function getFMVTargets(customQuery, thislayer, callback) {
+   var phpWithArg = thislayer.phpfile + '?';
 
    //if vessel age limit was chosen, then add option
    if (vessel_age != -1) {
       phpWithArg += "&contact_age=" + vessel_age;
    }
 
-   phpWithArg += boundStr;
-
+   phpWithArg += viewBounds.boundStr;
 
    //Debug query output
-   console.log('getFMVTargets(): ' + phpWithArg);
-
-   //Ship shape
-   var markerpathFMV = 'M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0';
+   console.log(thislayer.layerID + ': ' + phpWithArg);
 
    //Call PHP and get results as markers
    $.getJSON(
@@ -4616,18 +4838,18 @@ function getFMVTargets(bounds, fmvtargets, callback) {
                console.log('Received data from FMV php');
 
                //Clearing all previous markers
-               emptyArray(fmvtargets);
+               clearLayerMarkers(thislayer);
               
                //Prepare to grab PHP results as JSON objects
                $.each(response.vessels, function(key,vessel) {
-                  var point = new google.maps.LatLng(
+                  var latlon = new google.maps.LatLng(
                      parseFloat(vessel.lat),
                      parseFloat(vessel.lon));
 
                   var marker = new google.maps.Marker({
-                     position: point,
+                     position: latlon,
                       icon: {
-                         path:         markerpathFMV,
+                         path:         thislayer.markerpath,
                       strokeColor:  '#000000',
                       strokeWeight: 1,
                       fillColor:    '#ff0000',
@@ -4635,7 +4857,6 @@ function getFMVTargets(bounds, fmvtargets, callback) {
                       },
                       map: map
                   });
-
 
                   //Listener for click on marker to display infoBubble
                   google.maps.event.addListener(marker, 'click', function () {
@@ -4652,36 +4873,66 @@ function getFMVTargets(bounds, fmvtargets, callback) {
 
                      fmvinfowindow.open(map,marker);
 
+                     //Draw the selection square
+                     selectionSquare.setPosition(latlon);
+                     selectionSquare.setMap(map);
+
                      //Close the infoBubble if user clicks outside of infoBubble area
                      google.maps.event.addListenerOnce(map, 'click', function() {
                         fmvinfowindow.setMap(null);
-                        fmvinfowindow.close(); 
+                        fmvinfowindow.close();
                      });
                   });
 
-                  //Prepare data for creating marker infoWindows/infoBubbles later
-                  fmvtargets.push(marker);
+                  var vessellabel = vessel.id;      //TODO: find vessel label field in data
+                  //Trying InfoBox to display many labels with no problems
+                  vesselnameLabel = new InfoBox({
+                     content: vessellabel,
+                                  boxStyle: {
+                                     border: "0px dashed black",
+                                  textAlign: "center",
+                                  //fontSize: "10pt",  //Define text styling properties in CSS file
+                                  width: "120px"
+                                  },
+                                  disableAutoPan: true,
+                                  pixelOffset: new google.maps.Size(-60, 10),
+                                  position: new google.maps.LatLng(vessel.lat, vessel.lon),
+                                  closeBoxURL: "",
+                                  isHidden: false,
+                                  pane: "mapPane",
+                                  enableEventPropagation: true
+                  });
+                  //Associate label to map
+                  vesselnameLabel.open(map);
+
+                  //Check if labels should be displayed or not
+                  if ($('#showtargetlabels') == null || $('#showtargetlabels:checked').length == 0) {
+                     vesselnameLabel.setMap(null);
+                  }
+
+                  //Push data and marker objects into this layer's data arrays
+                  thislayer.data.dataArray.push(vessel);
+                  thislayer.data.markerArray.push(marker);
+                  thislayer.data.markerlabelArray.push(vesselnameLabel);
                });
 
                //Notify that this layer is done retrieving data and drawing
                callback();
             }) //END .done()
          .fail(function(d, textStatus, error) { 
-            if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
-               console.log('getTargetsFromDB(): ' +  'Database is down'); 
+            if (typeof d !== 'undefined' && d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+               console.log('getFMVTargets(): ' +  'Database is down'); 
                document.getElementById("query").value = "DATABASE IS DOWN.";
             }
             else {
                //Update activity status spinner and results
-               console.log('getTargetsFromDB(): ' +  'No response from track query; error in php?'); 
+               console.log('getFMVTargets(): ' +  'No response from track query; error in php?'); 
                document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
             }
 
             //Notify that this layer is done retrieving data and drawing
             callback();
-         }) //END .fail()
-         .always(function() {
-         });
+         }); //END .fail()
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -4690,22 +4941,8 @@ function getFMVTargets(bounds, fmvtargets, callback) {
  */
 function showPorts(portIcons, portCircles, portLabel, portPolygons, callback) {
    //TODO: separate the 3 port call getJSONs into separate functions with callbacks
-   /*
-   document.getElementById("query").value = "QUERY RUNNING FOR PORTS...";
-   document.getElementById('stats').innerHTML = '';
-   showBusyIndicator(); //show spinner
-   */
+   var phpWithArg = "query_ports.php?" + viewBounds.boundStr;
 
-   var bounds = map.getBounds();
-   var ne = bounds.getNorthEast();
-   var sw = bounds.getSouthWest();
-   var minLat = sw.lat();
-   var maxLat = ne.lat();
-   var minLon = sw.lng();
-   var maxLon = ne.lng();
-   var boundStr = "&minlat=" + Math.round(minLat*1000)/1000 + "&maxlat=" + Math.round(maxLat*1000)/1000 + "&minlon=" + Math.round(minLon*1000)/1000 + "&maxlon=" + Math.round(maxLon*1000)/1000
-
-   var phpWithArg = "query_ports.php?" + boundStr;
    //Debug query output
    console.log('SHOWPORTS(): ' + phpWithArg);
 
@@ -4828,113 +5065,13 @@ function showPorts(portIcons, portCircles, portLabel, portPolygons, callback) {
          });
       });
 
-      //callback();
+      callback();
    }) //end .done()
    .fail(function() { 
       console.log('SHOWPORTS() part 2: ' +  'No response from port query; error in php?'); 
 
       callback();
    }); //end .fail()
-
-
-
-
-   //Testing IHS port polygons
-   var phpWithArg = "query_ihsports.php?" + boundStr;
-   $.getJSON(
-      phpWithArg, // The server URL 
-      { }
-   ) //end .getJSON()
-   .done(function (response) {
-      document.getElementById("query").value = response.query;
-      console.log('SHOWPORTS() part 3: ' + response.query);
-      console.log('SHOWPORTS() part 3: ' + 'number of ports = ' + response.resultcount);
-
-      var prevPortName = null;
-      var portPolygon;
-      var portCoords;
-
-      if (portPolygons.length > 0) {
-         for (var i=0; i < portPolygons.length; i++) {
-            portPolygons[i].portPolygonShape.setMap(null);
-         }
-      }
-
-      $.each(response.ports, function(key,port) {
-         var PortGeoId = port.PortGeoId;
-         var zoneid = port.zoneid;
-         var port_name = port.PortName;
-         var seq = port.seq;
-         var lat = port.lat;
-         var lon = port.lon;
-
-         //Start of all ports
-         if (prevPortName == null) {
-            portPolygon = null;
-            emptyArray(portCoords);
-            //Set to new name
-            prevPortName = port_name;
-         }
-
-         //Push to existing portCoords array
-         if (port_name == prevPortName) {
-            portCoords.push(new google.maps.LatLng(lat, lon));
-         }
-         //Push to new portCoords array for new port
-         else {
-            // Construct the polygon
-            portPolygonShape = new google.maps.Polygon({
-                             paths: portCoords,
-                             strokeColor: '#00FFFF',
-                             strokeOpacity: 0.8,
-                             strokeWeight: 2,
-                             fillColor: '#00FFFF',
-                             fillOpacity: 0.2,
-                             map: map
-            });
-
-            portPolygon = {
-               portCoords: portCoords,
-               portName: port_name,
-               portPolygonShape: portPolygonShape
-            };
-            portPolygons.push(portPolygon);
-
-            portPolygon = null;
-            emptyArray(portCoords);
-
-            portCoords.push(new google.maps.LatLng(lat, lon));
-            prevPortName = port_name;
-         }
-      });
-
-      if (portCoords != null) {
-         //Draw the last portPolygon
-         portPolygonShape = new google.maps.Polygon({
-                          paths: portCoords,
-                          strokeColor: '#00FFFF',
-                          strokeOpacity: 0.8,
-                          strokeWeight: 2,
-                          fillColor: '#00FFFF',
-                          fillOpacity: 0.2,
-                          map: map
-         });
-
-         portPolygon = {
-            portCoords: portCoords,
-            portName: prevPortName,
-            portPolygonShape: portPolygonShape
-         };
-         portPolygons.push(portPolygon);
-      }
-
-      callback();    //final getJSON does the callback
-   }) //end .done()
-   .fail(function() { 
-      console.log('SHOWPORTS() part 3: ' +  'No response from port query; error in php?'); 
-
-      callback();
-   }); //end .fail()   
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -5014,5 +5151,48 @@ function disableDistanceTool() {
    // Not done in distanceWidget.js to retain compability with old distance method
    if (distanceLabel != null) {
       distanceLabel.setMap(null);
+   }
+}
+
+/* -------------------------------------------------------------------------------- */
+function toggleShowTargetLabels() {
+   if (document.getElementById("showtargetlabels") != null &&
+       document.getElementById("showtargetlabels").checked) {
+      console.log('Showing vessel names');
+
+      //TODO: remove OLD
+      //loop through markersDisplayed
+      for (var i=0; i < markersDisplayed.length; i++) {
+         markersDisplayed[i].vesselnameLabel.setMap(map);
+      }
+
+      //NEW
+      dataLayers.forEach( function (dataLayer) {
+         if (typeof dataLayer.data !== 'undefined' 
+            && typeof dataLayer.data.markerlabelArray !== 'undefined') {
+            dataLayer.data.markerlabelArray.forEach( function (markerlabel) {
+               markerlabel.setMap(map);
+            });
+         }
+      });
+   }
+   else {
+      console.log('Hiding vessel names');
+
+      //TODO: remove OLD
+      //loop through markersDisplayed
+      for (var i=0; i < markersDisplayed.length; i++) {
+         markersDisplayed[i].vesselnameLabel.setMap(null);
+      }
+
+      //NEW
+      dataLayers.forEach( function (dataLayer) {
+         if (typeof dataLayer.data !== 'undefined' 
+            && typeof dataLayer.data.markerlabelArray !== 'undefined') {
+            dataLayer.data.markerlabelArray.forEach( function (markerlabel) {
+               markerlabel.setMap(null);
+            });
+         }
+      });
    }
 }

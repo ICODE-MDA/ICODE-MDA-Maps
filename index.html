@@ -162,7 +162,6 @@
                        <br>
                        <div class="checkbox">
                           <label>
-                             <input class="checkboxtype" id="radarvessels" name="radarvessels" checked="checked" type="checkbox" onclick="refreshMaps(true);">
                              <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="16" width="30" viewBox="-6 -12 15 16">
                              <path d="M 0, -3 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0" style="fill:#F078FF;stroke:#222200;stroke-width:1;fill-rule:evenodd;">Browser does not support inline SVG.
                              </path>
@@ -350,6 +349,12 @@
                        </svg>
                        High Risk<br>
 
+                       <hr>
+                       <div class="checkbox">
+                          <label>
+                             <input class="checkbox" id="IHSTabs" name="IHSTabs" type="checkbox" onclick="toggleIHSTabs();"> Enable IHS Tabs<br>
+                          </label>
+                       </div>
                     </div>
                  </div>
               </div>
@@ -459,7 +464,12 @@
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                              </button>
                           </div>
-                          <div class="layerBody panel-body panel-collapse collapse">Options...</div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <div class="input-group input-group-sm">
+                                <span class="input-group-addon queryButton">Query</span>
+                                <input type="text" class="form-control queryStatement">
+                             </div>                             
+                          </div>
                           </li>
 
                           <!-- Day/Night Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
@@ -656,7 +666,7 @@
                        -->
                        <div class="checkbox">
                           <label>
-                             <input class="checkbox" id="showvesselnames" name="Show Vessel Names" type="checkbox" checked="checked" onclick="toggleShowNames();"> Show vessel names
+                             <input class="checkbox" id="showtargetlabels" name="Show Target Names" type="checkbox" checked="checked" onclick="toggleShowTargetLabels();"> Show target names
                           </label>
                        </div>
                        <div class="checkbox">
@@ -664,11 +674,7 @@
                              <input class="checkbox" id="distancetooltoggle" name="distancetooltoggle" type="checkbox" onclick="toggleDistanceTool();"> Enable distance tool
                           </label>
                        </div>
-                       <div class="checkbox">
-                          <label>
-                             <input class="checkbox" id="IHSTabs" name="IHSTabs" type="checkbox" onclick="toggleIHSTabs();"> Enable IHS Tabs<br>
-                          </label>
-                       </div>
+                       
                        <hr>
                        <form role="form">
                           <label>Only show data up to</label>

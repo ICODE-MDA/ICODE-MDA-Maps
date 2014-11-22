@@ -15,6 +15,7 @@ $(function() { //shorthand for: $(document).ready(function() {
    sortableLayers();
    setupAlertAccordion();
    initializeBrowserFocus();
+   queryStatementBehavior();
 
    //Setup functions definitions =========================================================
    function setupUser() {
@@ -203,29 +204,39 @@ $(function() { //shorthand for: $(document).ready(function() {
          window.onblur = onBlur;
       }
    }
+
+   /* -------------------------------------------------------------------------------- */
+   /**
+    * 
+    **/
+   function queryStatementBehavior() {
+      $('.queryStatement').click(function() {
+         $(this).select();
+      });
+   }
 });
 
 //Globally exposed functions
-      //Function to control what happens after list is updated
-      function listUpdated() {
-         $('.panel', displayedLayersList).each(function(index, elem) {
-            var $listItem = $(elem);
-            var newIndex = $listItem.index();   //updated indices
-         });
-         $('.panel', hiddenLayersList).each(function(index, elem) {
-            var $listItem = $(elem);
-            var newIndex = $listItem.index();   //updated indices
-         });
+//Function to control what happens after list is updated
+function listUpdated() {
+   $('.panel', displayedLayersList).each(function(index, elem) {
+      var $listItem = $(elem);
+      var newIndex = $listItem.index();   //updated indices
+   });
+   $('.panel', hiddenLayersList).each(function(index, elem) {
+      var $listItem = $(elem);
+      var newIndex = $listItem.index();   //updated indices
+   });
 
-         var newShownLayerID = $('#displayedLayersList').children('.panel').children('.layerHeading').children('.glyphicon-plus').parent('.layerHeading').parent('.panel').attr('id');
-         var newHiddenLayerID = $('#hiddenLayersList').children('.panel').children('.layerHeading').children('.glyphicon-minus').parent('.layerHeading').parent('.panel').attr('id');
+   var newShownLayerID = $('#displayedLayersList').children('.panel').children('.layerHeading').children('.glyphicon-plus').parent('.layerHeading').parent('.panel').attr('id');
+   var newHiddenLayerID = $('#hiddenLayersList').children('.panel').children('.layerHeading').children('.glyphicon-minus').parent('.layerHeading').parent('.panel').attr('id');
 
-         //Update hideShow button icons
-         $('#displayedLayersList').children('.panel').children('.layerHeading').children('.hideShowLayerBtn').removeClass('glyphicon-plus').addClass('glyphicon-minus');
-         //Update hideShow button icons
-         $('#hiddenLayersList').children('.panel').children('.layerHeading').children('.hideShowLayerBtn').removeClass('glyphicon-minus').addClass('glyphicon-plus');
-         
-         //Refresh layers on the map
-         //TODO: pass in exactly the layer that was changed
-         refreshLayers(newShownLayerID, newHiddenLayerID);
-      }
+   //Update hideShow button icons
+   $('#displayedLayersList').children('.panel').children('.layerHeading').children('.hideShowLayerBtn').removeClass('glyphicon-plus').addClass('glyphicon-minus');
+   //Update hideShow button icons
+   $('#hiddenLayersList').children('.panel').children('.layerHeading').children('.hideShowLayerBtn').removeClass('glyphicon-minus').addClass('glyphicon-plus');
+
+   //Refresh layers on the map
+   //TODO: pass in exactly the layer that was changed
+   refreshLayers(newShownLayerID, newHiddenLayerID);
+}
