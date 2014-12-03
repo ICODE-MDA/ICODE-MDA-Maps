@@ -1059,6 +1059,7 @@ function getTargetsFromDB(bounds, customQuery, sourceType, forceRedraw, thisquer
          console.log('getTargetsFromDB(): ' + response.query);
          //Show the query and put it in the form
          document.getElementById("query").value = response.query;
+         //TODO: $('#' + thislayer.layerID + ' .queryStatement').val(response.query);
 
 
          console.log('PHP returned for ' + sourceType + ', ' + thisqueryid + ', ' + queryid);
@@ -1997,6 +1998,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
        ($.inArray(trknum, tracksDisplayedID) == -1 || source == "LAISIC_AIS_TRACK") && 
        $.inArray(trknum, tracksDisplayedID) == -1) {
       document.getElementById("query").value = "QUERY RUNNING FOR TRACK...";
+      //TODO: $('#' + thislayer.layerID + ' .queryStatement').val("QUERY RUNNING FOR TRACK...");
       document.getElementById('stats').innerHTML = '';
       showBusyIndicator();
 
@@ -2030,6 +2032,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
             ) //end .getJSON()
                .done(function (response) {
                   document.getElementById("query").value = response.query;
+         //TODO: $('#' + thislayer.layerID + ' .queryStatement').val(response.query);
                   console.log('GETTRACK(): ' + response.query);
                   console.log('GETTRACK(): ' + 'track history size = ' + response.resultcount);
 
@@ -4453,7 +4456,7 @@ function getClustersFromDB(thislayer, callback) {
 
          console.log(thislayer.layerID + ': ' + response.query);
          //Show the query and put it in the form
-         document.getElementById("query").value = response.query;
+         $('#' + thislayer.layerID + ' .queryStatement').val(response.query);
 
          //Push query to localStorage
          localStorage.clear();
@@ -4557,7 +4560,6 @@ function getClustersFromDB(thislayer, callback) {
 
          console.log(thislayer.layerID + ': ' + "Total number of clusters = " + response.resultcount);
          console.log(thislayer.layerID + ': ' + "Total number of vessels = " + totalsum);
-
 
          document.getElementById('stats').innerHTML = 
             totalsum + " results" + 

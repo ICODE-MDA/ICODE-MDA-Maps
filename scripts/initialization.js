@@ -119,7 +119,7 @@ $(function() { //shorthand for: $(document).ready(function() {
       //Control the behavior of sorting manipulation via buttons
       $('.hideShowLayerBtn').on('mousedown', function(e) {
          //Look for the clicked panel's li element
-         var thisLiElement = $(this).parent('.layerHeading').parent('.panel');
+         var thisLiElement = $(this).closest('.layerHeading').parent('.panel');
 
          //Skip disabled elements
          if (thisLiElement.hasClass('ui-state-disabled')) {
@@ -143,7 +143,7 @@ $(function() { //shorthand for: $(document).ready(function() {
 
       //Control the behavior of layer options button clicking
       $('.layersOptionsBtn').on('click', function(e) {
-         var panelToToggle = $(this).parents('.layerHeading').parents('.panel').children('.layerBody');
+         var panelToToggle = $(this).closest('.layerHeading').parents('.panel').children('.layerBody');
          var glyphiconToToggle = $(this).children('.glyphicon-menu');
 
          //Flip the icon
@@ -228,13 +228,15 @@ function listUpdated() {
       var newIndex = $listItem.index();   //updated indices
    });
 
-   var newShownLayerID = $('#displayedLayersList').children('.panel').children('.layerHeading').children('.glyphicon-plus').parent('.layerHeading').parent('.panel').attr('id');
-   var newHiddenLayerID = $('#hiddenLayersList').children('.panel').children('.layerHeading').children('.glyphicon-minus').parent('.layerHeading').parent('.panel').attr('id');
+   //Traverse down the elements, then back up to find the identity of the new shown panel
+   var newShownLayerID = $('#displayedLayersList').find('.glyphicon-plus').closest('.layerHeading').parent('.panel').attr('id');
+   //Traverse down the elements, then back up to find the identity of the new hidden panel
+   var newHiddenLayerID = $('#hiddenLayersList').find('.glyphicon-minus').closest('.layerHeading').parent('.panel').attr('id');
 
    //Update hideShow button icons
-   $('#displayedLayersList').children('.panel').children('.layerHeading').children('.hideShowLayerBtn').removeClass('glyphicon-plus').addClass('glyphicon-minus');
+   $('#displayedLayersList').children('.panel').children('.layerHeading').find('.hideShowLayerBtn').removeClass('glyphicon-plus').addClass('glyphicon-minus');
    //Update hideShow button icons
-   $('#hiddenLayersList').children('.panel').children('.layerHeading').children('.hideShowLayerBtn').removeClass('glyphicon-minus').addClass('glyphicon-plus');
+   $('#hiddenLayersList').children('.panel').children('.layerHeading').find('.hideShowLayerBtn').removeClass('glyphicon-minus').addClass('glyphicon-plus');
 
    //Refresh layers on the map
    //TODO: pass in exactly the layer that was changed

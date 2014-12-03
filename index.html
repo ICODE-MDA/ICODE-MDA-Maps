@@ -87,7 +87,7 @@
               <div class="form-group" style="width:100%">
                  <div class="input-group">
                     <span class="input-group-addon"><span id="search-icon" class="glyphicon glyphicon-search"></span></span>
-                    <input id="query" class="form-control" type="text" name="query" onkeypress="if (event.which == 13) {enteredQuery();return false;}" value="QUERY RUNNING..."><input hidden="true" type="hidden">
+                    <input id="search" class="form-control" type="text" name="query" onkeypress="if (event.which == 13) {search();return false;}" placeholder="Search for Specific Vessels"><input hidden="true" type="hidden">
                  </div>
               </div>
            </form>
@@ -378,11 +378,17 @@
                           <!-- AIS Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="aisLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-minus"></span>
-                             AIS Layer
-                             <div class="spinner spinnerForLayers"></div>
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-minus"></span>
+                                   AIS Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
                              <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
-                                Options      
+                                Options
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                              </button>
                           </div>
@@ -462,9 +468,15 @@
                           <!-- RADAR Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="radarLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-minus"></span>
-                             RADAR Layer
-                             <div class="spinner spinnerForLayers"></div>
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-minus"></span>
+                                   RADAR Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
                              <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
                                 Options
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
@@ -482,8 +494,15 @@
                           <!-- Day/Night Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="daynightLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-minus"></span>
-                             Day/Night Layer
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-minus"></span>
+                                   Day/Night Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
                           </div>
                           <div class="layerBody panel-body panel-collapse collapse">
                              <!-- Options here -->
@@ -497,9 +516,15 @@
                           <!-- Traffic Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="trafficLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
-                             Traffic Layer
-                             <div class="spinner spinnerForLayers"></div>
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                                   Traffic Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
                           </div>
                           <div class="layerBody panel-body panel-collapse collapse">
                              <!-- Options here -->
@@ -509,9 +534,15 @@
                           <!-- Weather Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="weatherLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
-                             Weather Layer
-                             <div class="spinner spinnerForLayers"></div>
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                                   Weather
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
                           </div>
                           <div class="layerBody panel-body panel-collapse collapse">
                              <!-- Options here -->
@@ -521,9 +552,15 @@
                           <!-- Port Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="portsLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
-                             Port Layer
-                             <div class="spinner spinnerForLayers"></div>
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                                   Port Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
                              <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
                                 Options
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
@@ -541,9 +578,15 @@
                           <!-- FMV Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="fmvLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
-                             FMV Layer
-                             <div class="spinner spinnerForLayers"></div>
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                                   FMV Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
                              <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
                                 Options      
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
@@ -569,9 +612,15 @@
                           <!-- EEZ Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="eezLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
-                             EEZ Layer
-                             <div class="spinner spinnerForLayers"></div>
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                                   EEZ Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
                           </div>
                           <div class="layerBody panel-body panel-collapse collapse">
                              <!-- Options here -->
@@ -581,9 +630,15 @@
                           <!-- LAISIC Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="laisicLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
-                             LAISIC Layer
-                             <div class="spinner spinnerForLayers"></div>
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                                   LAISIC Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
                              <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
                                 Options      
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
@@ -609,9 +664,15 @@
                           <!-- TMACS Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="tmacsLayer" class="panel panel-success ui-state-disabled">
                           <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
-                             TMACS Layer
-                             <div class="spinner spinnerForLayers"></div>
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                                   TMACS Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
                              <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
                                 Options      
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
@@ -638,9 +699,15 @@
                           <!-- Country Border Layer +++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="countryBordersLayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
-                             Country Borders Layer
-                             <div class="spinner spinnerForLayers"></div>
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                                   Country Borders
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
                           </div>
                           <div class="layerBody panel-body panel-collapse collapse">
                              <div class="checkbox">
@@ -654,9 +721,19 @@
                           <!-- Custom Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="customlayer" class="panel panel-success">
                           <div class="layerHeading panel-heading">
-                             <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
-                             Custom Defined Layer
-                             <div class="spinner spinnerForLayers"></div>
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus"></span>
+                                   Custom Defined
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
+                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
+                                Options      
+                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
+                             </button>
                           </div>
                           <div class="layerBody panel-body panel-collapse collapse">
                              <!-- Options here -->
@@ -780,12 +857,14 @@
         <!-- Loading panel and spinning activity indicator visible when queries are running -->
         <div id="loadingHeading" class="panel-heading">
            <div class="row">
-              <div class="col-xs-6 col-md-4 col-lg-8 vcenter">
+              <div class="col-md-1 vcenter">
+              </div>
+              <div class="col-md-6 vcenter">
                  <div>
                     <h4>Loading</h4>
                  </div>
               </div>
-              <div class="col-xs-6 col-md-4 col-lg-2 vcenter">
+              <div class="col-md-2 vcenter">
                  <div class="spinner"> </div>
               </div>
            </div>
