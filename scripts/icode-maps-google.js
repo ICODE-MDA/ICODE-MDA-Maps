@@ -791,7 +791,7 @@ function refreshMaps(forceRedraw) {
    }
    */
 
-   toggleCountryBorders();
+   //toggleCountryBorders();
 
    //refreshDayNightOverlay();
 }
@@ -3881,32 +3881,6 @@ function detectMobileBrowser() {
 }
 
 
-/* -------------------------------------------------------------------------------- */
-/**
- * Display VOLPE's country border KML
- **/
-function toggleCountryBorders() {
-//   if (map.getZoom() < 9) {
-   if (document.getElementById("enableCountryBorders") != null &&
-       document.getElementById("enableCountryBorders").checked) {
-      if (COUNTRYBORDERS != null) {
-         COUNTRYBORDERS.setMap(null);
-         COUNTRYBORDERS = null;
-      }
-      COUNTRYBORDERS = new google.maps.KmlLayer({
-         url: COUNTRY_BORDERS_PATH,
-         preserveViewport: true,
-         map: map
-      });
-   }
-   else {
-      console.log('Hiding country borders');
-      if (COUNTRYBORDERS != null) {
-         COUNTRYBORDERS.setMap(null);
-         COUNTRYBORDERS = null;
-      }
-   }
-}
 
 /* -------------------------------------------------------------------------------- */
 /**
@@ -4172,6 +4146,34 @@ $(function initializeLayers() {
       map: null      //keep it hidden initially
    });
    dataLayers.push(eezLayer);
+
+   //--------------------------------------------------------------
+   //Country Borders layer
+   var countryBordersLayer = new dataLayerObject('countryBordersLayer', 
+      function showCountryBordersLayer(thislayer, callback) {
+         thislayer.data.setMap(map);
+
+         //Done drawing method for Country Borders
+         var dataDisplayedListener = google.maps.event.addListener(thislayer.data, "metadata_changed", 
+            function() {
+               //console.log('Country Borders done displaying');
+               google.maps.event.removeListener(dataDisplayedListener);
+               callback();
+            });
+      },
+      function hideCountryBordersLayer() {
+         this.data.setMap(null);
+      },
+      false //don't refresh this layer
+      );
+
+   //Define the day night layer object, append to a dataLayer to dataLayerObject
+   countryBordersLayer.data = new google.maps.KmlLayer({
+      url: COUNTRY_BORDERS_PATH,
+      preserveViewport: true,
+      map: null      //keep it hidden initially
+   });
+   dataLayers.push(countryBordersLayer);
 
    //--------------------------------------------------------------
    //FMV layer

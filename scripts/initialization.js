@@ -238,6 +238,12 @@ function listUpdated() {
    //Update hideShow button icons
    $('#hiddenLayersList').children('.panel').children('.layerHeading').find('.hideShowLayerBtn').removeClass('glyphicon-minus').addClass('glyphicon-plus');
 
+   //Update panel color based on layer visibility
+   $('#displayedLayersList').children('.panel-default').removeClass('panel-default').addClass('panel-success');
+   $('#displayedLayersList').find('.btn-default').removeClass('btn-default').addClass('btn-success');
+   $('#hiddenLayersList').children('.panel-success').removeClass('panel-success').addClass('panel-default');
+   $('#hiddenLayersList').find('.btn-success').removeClass('btn-success').addClass('btn-default');
+
    //Refresh layers on the map
    //TODO: pass in exactly the layer that was changed
    refreshLayers(newShownLayerID, newHiddenLayerID);

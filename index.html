@@ -360,7 +360,7 @@
               </div>
 
               <!-- DATA LAYERS PANEL ===================================================================== -->
-              <div id="data-panel" class="panel panel-primary">
+              <div id="data-panel" class="panel panel-primary noselect">
                  <div id="data-heading" class="menuHeading panel-heading">
                     <h4 class="panel-title">
                        <span data-toggle="collapse" data-parent="#accordion">Data Layers</span>
@@ -514,7 +514,7 @@
                        <h4 class="text-center">Available Layers:</h4>
                        <ul id="hiddenLayersList" class="list-unstyled connectedSortable">
                           <!-- Traffic Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="trafficLayer" class="panel panel-success">
+                          <li id="trafficLayer" class="panel panel-default">
                           <div class="layerHeading panel-heading">
                              <div class="row">
                                 <div class="col-md-7">
@@ -532,7 +532,7 @@
                           </li>
 
                           <!-- Weather Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="weatherLayer" class="panel panel-success">
+                          <li id="weatherLayer" class="panel panel-default">
                           <div class="layerHeading panel-heading">
                              <div class="row">
                                 <div class="col-md-7">
@@ -550,7 +550,7 @@
                           </li>
 
                           <!-- Port Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="portsLayer" class="panel panel-success">
+                          <li id="portsLayer" class="panel panel-default">
                           <div class="layerHeading panel-heading">
                              <div class="row">
                                 <div class="col-md-7">
@@ -561,7 +561,7 @@
                                    <div class="spinner spinnerForLayers"></div>
                                 </div>
                              </div>
-                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
+                             <button class="layersOptionsBtn btn btn-default btn-xs btn-expand">
                                 Options
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                              </button>
@@ -576,7 +576,7 @@
                           </li>
 
                           <!-- FMV Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="fmvLayer" class="panel panel-success">
+                          <li id="fmvLayer" class="panel panel-default">
                           <div class="layerHeading panel-heading">
                              <div class="row">
                                 <div class="col-md-7">
@@ -587,7 +587,7 @@
                                    <div class="spinner spinnerForLayers"></div>
                                 </div>
                              </div>
-                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
+                             <button class="layersOptionsBtn btn btn-default btn-xs btn-expand">
                                 Options      
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                              </button>
@@ -610,7 +610,7 @@
                           </li>
 
                           <!-- EEZ Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="eezLayer" class="panel panel-success">
+                          <li id="eezLayer" class="panel panel-default">
                           <div class="layerHeading panel-heading">
                              <div class="row">
                                 <div class="col-md-7">
@@ -628,7 +628,7 @@
                           </li>
 
                           <!-- LAISIC Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="laisicLayer" class="panel panel-success">
+                          <li id="laisicLayer" class="panel panel-default">
                           <div class="layerHeading panel-heading">
                              <div class="row">
                                 <div class="col-md-7">
@@ -639,7 +639,7 @@
                                    <div class="spinner spinnerForLayers"></div>
                                 </div>
                              </div>
-                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
+                             <button class="layersOptionsBtn btn btn-default btn-xs btn-expand">
                                 Options      
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                              </button>
@@ -662,7 +662,7 @@
                           </li>
 
                           <!-- TMACS Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="tmacsLayer" class="panel panel-success ui-state-disabled">
+                          <li id="tmacsLayer" class="panel panel-default ui-state-disabled">
                           <div class="layerHeading panel-heading">
                              <div class="row">
                                 <div class="col-md-7">
@@ -673,7 +673,7 @@
                                    <div class="spinner spinnerForLayers"></div>
                                 </div>
                              </div>
-                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
+                             <button class="layersOptionsBtn btn btn-default btn-xs btn-expand">
                                 Options      
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                              </button>
@@ -697,7 +697,7 @@
                           </li>
 
                           <!-- Country Border Layer +++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="countryBordersLayer" class="panel panel-success">
+                          <li id="countryBordersLayer" class="panel panel-default">
                           <div class="layerHeading panel-heading">
                              <div class="row">
                                 <div class="col-md-7">
@@ -719,7 +719,7 @@
                           </li>
 
                           <!-- Custom Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="customlayer" class="panel panel-success">
+                          <li id="customlayer" class="panel panel-default">
                           <div class="layerHeading panel-heading">
                              <div class="row">
                                 <div class="col-md-7">
@@ -730,7 +730,7 @@
                                    <div class="spinner spinnerForLayers"></div>
                                 </div>
                              </div>
-                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
+                             <button class="layersOptionsBtn btn btn-default btn-xs btn-expand">
                                 Options      
                                 <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
                              </button>
@@ -774,11 +774,12 @@
                        
                        <hr>
                        <form role="form">
-                          <label>Only show data up to</label>
+                          <label>Show data up to</label>
                           <select id="vessel_age" onChange="vessel_age_changed(true);">
                              <option value="no limit">No limit</option>
                              <option value="0.0833333333333333">5 mins</option>
                              <option value="0.25" selected="selected">15 mins</option>
+                             <option value="0.5">30 mins</option>
                              <option value="1">1 hours</option>
                              <option value="2">2 hours</option>
                              <option value="3">3 hours</option>
@@ -794,6 +795,9 @@
                              <option value="24">24 hours</option>
                              <option value="48">48 hours</option>
                              <option value="72">72 hours</option>
+                             <option value="168">1 week</option>
+                             <option value="730">1 month</option>
+                             <option value="8765">1 year</option>
                           </select>
                        </form>
                        <hr>
