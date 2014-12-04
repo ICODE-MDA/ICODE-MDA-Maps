@@ -128,13 +128,11 @@ $(function() { //shorthand for: $(document).ready(function() {
          }
 
          //Determine element's previous position based on minus icon, then move it to the opposite group
-         if ($(this).hasClass('glyphicon-minus')) {
+         if ($(this).hasClass('glyphicon-minus-sign')) {
             $('#hiddenLayersList').prepend(thisLiElement);
-            //$(this).removeClass('glyphicon-minus').addClass('glyphicon-plus');
          }
          else {
             $('#displayedLayersList').append(thisLiElement);
-            //$(this).removeClass('glyphicon-plus').addClass('glyphicon-minus');
          }
 
          //Then call the normal sortable list update function
@@ -229,14 +227,14 @@ function listUpdated() {
    });
 
    //Traverse down the elements, then back up to find the identity of the new shown panel
-   var newShownLayerID = $('#displayedLayersList').find('.glyphicon-plus').closest('.layerHeading').parent('.panel').attr('id');
+   var newShownLayerID = $('#displayedLayersList').find('.glyphicon-plus-sign').closest('.layerHeading').parent('.panel').attr('id');
    //Traverse down the elements, then back up to find the identity of the new hidden panel
-   var newHiddenLayerID = $('#hiddenLayersList').find('.glyphicon-minus').closest('.layerHeading').parent('.panel').attr('id');
+   var newHiddenLayerID = $('#hiddenLayersList').find('.glyphicon-minus-sign').closest('.layerHeading').parent('.panel').attr('id');
 
    //Update hideShow button icons
-   $('#displayedLayersList').children('.panel').children('.layerHeading').find('.hideShowLayerBtn').removeClass('glyphicon-plus').addClass('glyphicon-minus');
+   $('#displayedLayersList').children('.panel').children('.layerHeading').find('.hideShowLayerBtn').removeClass('glyphicon-plus-sign').addClass('glyphicon-minus-sign');
    //Update hideShow button icons
-   $('#hiddenLayersList').children('.panel').children('.layerHeading').find('.hideShowLayerBtn').removeClass('glyphicon-minus').addClass('glyphicon-plus');
+   $('#hiddenLayersList').children('.panel').children('.layerHeading').find('.hideShowLayerBtn').removeClass('glyphicon-minus-sign').addClass('glyphicon-plus-sign');
 
    //Update panel color based on layer visibility
    $('#displayedLayersList').children('.panel-default').removeClass('panel-default').addClass('panel-success');
@@ -245,6 +243,5 @@ function listUpdated() {
    $('#hiddenLayersList').find('.btn-success').removeClass('btn-success').addClass('btn-default');
 
    //Refresh layers on the map
-   //TODO: pass in exactly the layer that was changed
    refreshLayers(newShownLayerID, newHiddenLayerID);
 }
