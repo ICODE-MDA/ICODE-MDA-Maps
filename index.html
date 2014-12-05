@@ -83,18 +83,21 @@
 
         <!-- Search and other navigation items -->
         <div id="navbar" class="navbar-collapse collapse">
-           <!-- Search bar -->
-           <form id="search-bar-nav" class="navbar-form navbar-nav">
-              <div class="form-group" style="width:100%">
-                 <div class="input-group">
-                    <span class="input-group-addon"><span id="search-icon" class="glyphicon glyphicon-search"></span></span>
-                    <input id="search" class="form-control" type="text" name="query" onkeypress="if (event.which == 13) {search();return false;}" placeholder="Search for Specific Vessels (MMSI, IMO, vessel name, or call sign)"><input hidden="true" type="hidden">
-                 </div>
-              </div>
-           </form>
 
            <!-- Navigation items -->
            <ul class="nav navbar-nav navbar-right">
+              <li>
+              <!-- Search bar nav -->
+              <form id="search-bar-nav" class="navbar-form navbar-nav">
+                 <div class="form-group">
+                    <div class="input-group">
+                       <span class="input-group-addon"><span id="search-icon" class="glyphicon glyphicon-search"></span></span>
+                       <input id="search" class="form-control" type="text" name="query" onkeypress="if (event.which == 13) {search();return false;}" placeholder="Search for Specific Vessels (MMSI, IMO, vessel name, or call sign)"><input hidden="true" type="hidden">
+                    </div>
+                 </div>
+              </form>
+              </li>
+              <!-- Alerts nav --> 
               <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-bell"></span> Alerts <span class="alertCountLabel badge">0</span><span class="caret"></span></a>
                  <ul class="dropdown-menu" role="menu">
@@ -104,6 +107,7 @@
                     <li><a href="#">Edit Alerts</a></li>
                  </ul>
               </li>
+              <!-- User login nav --> 
               <li class="dropdown">
                  <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span id="username"></span><img src="icons/loginavatar.gif" alt="Avatar" class="avatar"><span class="caret"></span></a>
                  <ul class="dropdown-menu" role="menu">
@@ -134,9 +138,9 @@
      <!-- MENU PANEL ===================================================================== -->
      <div class="container">
         <div id="menuDiv" class="panel panel-default panel-fixed">
-           <div class="panel-group" id="accordion">
+           <div id="menuAccordion" class="panel-group">
               <!-- LEGEND PANEL ========================================================================== -->
-              <div id="legend-panel" class="panel panel-primary">
+              <div id="legend-panel" class="menuPanel panel panel-primary">
                  <div id="legend-heading" class="menuHeading panel-heading">
                     <h4 class="panel-title">
                        <span data-toggle="collapse" data-parent="#accordion">Legend</span>
@@ -146,7 +150,7 @@
                     </button>
                  </div>
                  <div id="legend-collapse" class="menuBody panel-collapse collapse in">
-                    <div id="legend-body" class="panel-body text-left">
+                    <div id="legend-body" class="panelBody panel-body text-left">
                        <h4 class="text-center">Vessel Types</h4>
                        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
                        <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#3333FF;stroke:#3333FF;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
@@ -361,7 +365,7 @@
               </div>
 
               <!-- DATA LAYERS PANEL ===================================================================== -->
-              <div id="data-panel" class="panel panel-primary noselect">
+              <div id="data-panel" class="menuPanel panel panel-primary noselect">
                  <div id="data-heading" class="menuHeading panel-heading">
                     <h4 class="panel-title">
                        <span data-toggle="collapse" data-parent="#accordion">Data Layers</span>
@@ -371,7 +375,7 @@
                     </button>
                  </div>
                  <div id="data-collapse" class="menuBody panel-collapse collapse">
-                    <div class="panel-body text-left">
+                    <div class="panelBody panel-body text-left">
 
                        <h4 class="text-center">Layers Shown:</h4>
                        <ul id="displayedLayersList" class="list-unstyled connectedSortable">
@@ -746,7 +750,7 @@
               </div> <!-- END data-panel -->
 
               <!-- GLOBAL OPTIONS PANEL ================================================================== -->
-              <div id="options-panel" class="panel panel-primary">
+              <div id="options-panel" class="menuPanel panel panel-primary">
                  <div id="options-heading" class="menuHeading panel-heading">
                     <h4 class="panel-title">
                        <span data-toggle="collapse" data-parent="#accordion">Global Options</span>
@@ -756,7 +760,7 @@
                     </button>
                  </div>
                  <div id="options-collapse" class="menuBody panel-collapse collapse">
-                    <div class="panel-body text-left">
+                    <div class="panelBody panel-body text-left">
                        <div class="checkbox">
                           <label>
                              <input class="checkbox" id="showtargetlabels" name="Show Target Names" type="checkbox" checked="checked" onclick="toggleShowTargetLabels();"> Show target names

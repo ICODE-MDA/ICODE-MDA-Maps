@@ -69,7 +69,6 @@ body {
    height: 100%;
 	background-color: rgb(229, 227, 223);
 	border: 0px solid transparent;
-	height: 100%;
 	left: 0px;
 	overflow: hidden;
 	position: relative;
@@ -95,11 +94,17 @@ body {
    background: transparent;
    border: none;
 }
-.claro .panel-fixed .panel-body {
-   /*
-   max-height: calc(100% - (500px));
-	max-height: -webkit-calc(100% - (500px));
-   */
+@media (max-height: 840px) {
+   .panelBody {
+      height: 200px;
+   }
+}
+@media (max-height: 880px) {
+   .panelBody {
+      height: 400px;
+   }
+}
+.panelBody {
    max-height: 560px;
 }
 .claro .panel-heading {
@@ -111,25 +116,22 @@ body {
    user-select: none;
 }
 @media (max-width: 760px) {
-   #search {
-      width: 200px;
+   #search-bar-nav {
+      width: 100%; 
    }
-   #navbar > .navbar-form {
-      width: 500px;
+}
+@media (min-width: 994px) {
+   #search {
+      width: 400px; 
    }
 }
 @media (min-width: 1200px) {
    #search {
-      width: 475px;
-   }
-   #navbar > .navbar-form {
-      width: 525px;
+      width: 525px; 
    }
 }
 #search-bar-nav {
-    border: 0px solid red;
-    max-height: 34px;
-    width: 350px;
+   max-height: 34px;
 }
 #stats {
 	background: transparent;
@@ -178,7 +180,6 @@ body {
 }
 .spinnerForLayers {
    display: block;
-   //border: 1px solid red;
 }
 #geocodepanel {
    opacity: 0.2;

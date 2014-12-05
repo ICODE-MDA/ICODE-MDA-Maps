@@ -2,7 +2,7 @@
  * @name ICODE-MDA Maps
  * @author Sparta Cheung, Bryan Bagnall, Lynne Tablewski
  * @fileoverview
- * Uses the Google Maps API to display AIS points at their reported locations
+ * Uses the Google Maps API to display layers of maritime data at their reported locations
  */
 
 /* -------------------------------------------------------------------------------- */
@@ -13,80 +13,9 @@ var map;                      //main Google Map object
 
 var reloadDelay;              //milliseconds to wait before refreshing the markers after map idle
 
-var markerArray = [];         //array to store all markers
-var vesselArray = [];         //array to store all vessel information
-//var markersDisplayed = [];    //array to keep track of all markers currently displayed
-
 //parallel arrays to keep track of displayed tracks
 var tracksDisplayedID = [];   //stores MMSI/trknum of tracks that are displayed
 var tracksDisplayed = [];     //stores track objects of tracks that are displayed 
-
-var latestPHPcall;            //last phpWithArgs call
-var mainQuery;                //main query called
-var prevZoom = null;          //store the last zoom level
-
-//Vessel type filter
-var vesseltypeFilterPHPStr = '';
-
-//Cluster boxes for zoomed out view of vessel count instead of showing markers
-//var clusterBoxes = [];        
-//var clusterBoxesLabels= [];
-var enableCluster;
-
-var autoRefreshHandler;              //interval event handler of map auto refresh
-var autoRefreshRate;          //rate of auto refreshing
-var lastRefresh;              //time of last map refresh
-var vesselLastUpdated;        //time of last vessel report
-
-var distanceLabel;            //text label for distance tool
-
-//Vessel Icon size
-var vw = 4;                   //vessel marker width
-var vl = 10;                  //vessel marker length
-
-//Day/Night Overlay layer
-var daynightlayer;
-
-//info bubble to show vessel particulars (details)
-var infoBubble = new InfoBubble({
-       disableAnimation: true,
-       disableAutoPan:   true,
-       arrowStyle:       2,
-       padding:          '8px',
-       borderRadius:     10,
-       minWidth: 380,
-       minHeight: 400,
-       //maxWidth:         400,
-       //minHeight:        360
-   });
-
-var vessel_age;               //user chosen vessel age, in hours
-
-var history_trail_length;     //user chosen history trail length, in days
-
-var prevSourceType;
-
-//Viewing bounds objects
-var queryBounds;              //map bounds of query
-var viewBounds;               //map bounds object with min/max lat/lon
-var expandFactor = 300;       //factor to expand bounds by outside of viewable area
-var boundRectangle = null;    //rectangle map object to draw query bounds
-
-//Marker timing objects
-//var markerMouseoutTimeout;
-//var trackMouseoverTimeout;
-
-//Enable risk info flag
-var enableRisk;               //Flag to enable or disable risk information in info bubbles
-
-//Enable FMV data
-//var enableFMV;               //Flag to enable or disable risk information in info bubbles
-//var fmvtargets = [];
-var fmvinfowindow = new google.maps.InfoWindow({});;
-
-//IHS Tabs global
-var NUM_INFO_BUBBLE = 4;      //AIS info at Tab=0 and IHS Fairplay data at  Tab = 1 thru 4
-var enableIHSTabs;            //Flag to enable or disable IHS tabs in info bubbles
 
 //Trackline options
 var showtrackicons;
@@ -115,6 +44,62 @@ var tracklineIconsOptionsL = {
                fillOpacity:   1
             };
 
+var latestPHPcall;            //last phpWithArgs call
+var mainQuery;                //main query called
+
+//Vessel type filter
+var vesseltypeFilterPHPStr = '';
+
+//Cluster boxes for zoomed out view of vessel count instead of showing markers
+//var clusterBoxes = [];        
+//var clusterBoxesLabels= [];
+var enableCluster;
+
+var autoRefreshHandler;              //interval event handler of map auto refresh
+var autoRefreshRate;          //rate of auto refreshing
+var lastRefresh;              //time of last map refresh
+var vesselLastUpdated;        //time of last vessel report
+
+var distanceLabel;            //text label for distance tool
+
+//Vessel marker size
+var vw = 4;                   //vessel marker width
+var vl = 10;                  //vessel marker length
+
+//info bubble to show vessel particulars (details)
+var infoBubble = new InfoBubble({
+       disableAnimation: true,
+       disableAutoPan:   true,
+       arrowStyle:       2,
+       padding:          '8px',
+       borderRadius:     10,
+       minWidth: 380,
+       minHeight: 400,
+       //maxWidth:         400,
+       //minHeight:        360
+   });
+
+var vessel_age;               //user chosen vessel age, in hours
+
+var history_trail_length;     //user chosen history trail length, in days
+
+var prevSourceType;
+
+//Viewing bounds objects
+var viewBounds;               //map bounds object with min/max lat/lon
+var expandFactor = 300;       //factor to expand bounds by outside of viewable area
+var boundRectangle = null;    //rectangle map object to draw query bounds
+
+//Enable risk info flag
+var enableRisk;               //Flag to enable or disable risk information in info bubbles
+
+//Enable FMV data
+var fmvinfowindow = new google.maps.InfoWindow({});;
+
+//IHS Tabs global
+var NUM_INFO_BUBBLE = 4;      //AIS info at Tab=0 and IHS Fairplay data at  Tab = 1 thru 4
+var enableIHSTabs;            //Flag to enable or disable IHS tabs in info bubbles
+
 //Heatmap objects
 var HEATMAP = true;
 var heatmapLayer;
@@ -133,8 +118,6 @@ var tempKMLcount = 0;
 
 //Port objects
 var Ports = false;
-//var portIcons = [];
-//var portCircles = [];
 
 //Distance measurement
 var latLng;
@@ -148,9 +131,6 @@ var distIconsOptions = {
                fillColor:     '#04B4AE',
                fillOpacity:   1
             };
-
-//Hide/show panel
-var panelhidden = false;
 
 //Time Machine
 var enableTimeMachine;
@@ -187,20 +167,14 @@ var selectionSquare = new google.maps.Marker({
             title: '',
             zIndex: 0
          });
-//var selectionCircle;
 
-//VOLPE's KMZ layers for EEZ and country borders
-//var EEZ;
-var COUNTRYBORDERS;
+//Volpe's KMZ layers for EEZ and country borders
 var COMMON_PATH = "https://mda.volpe.dot.gov/overlays/";
 var EEZ_PATH = COMMON_PATH + "eez-layer.kmz";
 var COUNTRY_BORDERS_PATH = COMMON_PATH + "Country_Borders.kmz";
 
 //Geocoder
 var geocoder;
-
-//Traffic layer
-var trafficLayer;
 
 //Browser focus
 var browserFocus = true;
@@ -214,7 +188,7 @@ function initialize() {
    //Set up map properties
    //var centerCoord = new google.maps.LatLng(0,0);
    //var centerCoord = new google.maps.LatLng(32.72,-117.2319);   //Point Loma
-   var centerCoord = new google.maps.LatLng(6.0,1.30);   //Lome, Togo
+   //var centerCoord = new google.maps.LatLng(6.0,1.30);   //Lome, Togo
    //var centerCoord = new google.maps.LatLng(2.0,1.30);     //GoG
    //var centerCoord = new google.maps.LatLng(-33.0, -71.6);   //Valparaiso, Chile
    //var centerCoord = new google.maps.LatLng(17.978677, -16.078958);   //Nouakchott, Mauritania
@@ -311,7 +285,7 @@ function initialize() {
       tileSize: new google.maps.Size(256, 256),
       name: "OpenStreetMap",
       maxZoom: 18
-   }));   
+   }));
 
    //Display count up timer from last update
    lastRefresh = new Date();
@@ -319,29 +293,6 @@ function initialize() {
       //console.log("Updated " + (new Date() - lastRefresh)/1000 + " secs ago.");
       document.getElementById('lastUpdatedText').innerHTML = "Last updated " + Math.round((new Date() - lastRefresh)/1000) + " secs ago";
       }, 1000);
-
-   //Clear marker array
-   //markerArray = [];
-   //vesselArray = [];
-   //markersDisplayed = [];
-
-   //var infoWindow = new google.maps.InfoWindow();
-   /*
-   var infoBubble = new google.maps.InfoWindow({ 
-      disableAutoPan: true
-   });
-   */
-   /*
-   infoBubble = new InfoBubble({
-       disableAnimation: true,
-       disableAutoPan:   true,
-       arrowStyle:       2,
-       padding:          '8px',
-       borderRadius:     10,
-       //maxWidth:         400,
-       //minHeight:        360
-   });
-   */
 
    //Add drawing toolbar
    if (!detectMobileBrowser()) {
@@ -402,7 +353,7 @@ function initialize() {
       //toggleWeatherLayer();
 
       //Heatmap layer
-      toggleHeatmapLayer();
+      //toggleHeatmapLayer();
 
       toggleQueryAllTracks();
 
@@ -4076,6 +4027,7 @@ function getAISFromDB(sourceType, thislayer, callback) {
          //Update activity status spinner and results
          console.log('getTargetsFromDB(): ' + "Total number of markers = " + markerArray.length);
 
+         //TODO: change to global count
          document.getElementById('stats').innerHTML = 
             response.resultcount + " results<br>" + 
             "Retrieved in " + Math.round(response.exectime*1000)/1000 + " secs";
@@ -4257,6 +4209,7 @@ function getClustersFromDB(thislayer, callback) {
          console.log(thislayer.layerID + ': ' + "Total number of clusters = " + response.resultcount);
          console.log(thislayer.layerID + ': ' + "Total number of vessels = " + totalsum);
 
+         //TODO: change to global count
          document.getElementById('stats').innerHTML = 
             totalsum + " results" + 
             "<br>Retrieved in " + Math.round(response.exectime*1000)/1000 + " secs";
@@ -4460,6 +4413,9 @@ function getRADARFromDB(customQuery, thislayer, callback) {
          //Update activity status spinner and results
          console.log(thislayer.layerID + ': Total number of targets = ' + thislayer.data.markerArray.length);
 
+         //TODO: add to global count
+         
+
          callback();
       }) //END .done()
       .fail(function(d, textStatus, error) { 
@@ -4585,6 +4541,8 @@ function getFMVTargets(customQuery, thislayer, callback) {
 
                $('#' + thislayer.layerID + ' .queryStatement').val(response.query);
 
+               //TODO: add to global count
+         
                //Notify that this layer is done retrieving data and drawing
                callback();
             }) //END .done()
