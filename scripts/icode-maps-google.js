@@ -141,6 +141,8 @@ var endTimeMachine;
 //Custom search/query
 var enableCustomQuery;
 var queryCustomQuery;
+var searchTerm = '';
+var aisDisplayed = false;
 
 //LAISIC Tables selection
 var selectionCircle = new google.maps.Circle({
@@ -393,12 +395,14 @@ function initialize() {
          return;
       }
 
+      /*
       if ($('#geocodeAddress').is(':focus')) {
          if (event.which == 13) {
             codeAddress();
          }
          return;
       }
+      */
 
       if ($('input[type=text], textarea').is(':focus')) {
          return;
@@ -592,6 +596,7 @@ function initialize() {
       }
    });
 
+   /*
    //Need to use 'Q' for query focus on keyup instead of keydown to prevent typing into query after selection
    $('body').keyup(function(event) {
       if ($('#query').is(':focus')) {
@@ -624,6 +629,7 @@ function initialize() {
          }
       }
    });
+   */
 
    //Trigger localStorage to indicate page refresh or new load
    localStorage.clear();
@@ -3084,6 +3090,11 @@ function fetchVesselArray(mmsiToSearch) {
    return null;
 }
 
+/* -------------------------------------------------------------------------------- */
+function isNumber(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
 
 
 
@@ -3093,6 +3104,8 @@ function fetchVesselArray(mmsiToSearch) {
 
 //Global Objects and definitions
 var dataLayers = [];                //array of dataLayerObject, each layer to be displayed on map
+var globalResultCount;
+
 function dataLayerObject(id, showFunction, hideFunction, updateIfShown) {       //dataLayerObject prototype
    this.layerID = id;
    this.showLayer = function() {       //wrap showFunction with spinner handler
@@ -3172,9 +3185,12 @@ $(function initializeLayers() {
    var aisLayer = new dataLayerObject('aisLayer', 
       function showaisLayer(thislayer, callback) {
          //console.log('Displaying AIS layer');
-         if ($('#enableCluster:checked').length != 0 && map.getZoom() < 9) {
+         
+         //Cluster view
+         if ($('#enableCluster:checked').length != 0 && map.getZoom() < 9 && searchTerm == '') {
             getClustersFromDB(thislayer, callback);            
          }
+         //Individual vessel view
          else {
             getAISFromDB("AIS", thislayer, callback);
          }
@@ -3194,6 +3210,7 @@ $(function initializeLayers() {
    aisLayer.dataType = "AIS";
    aisLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
    aisLayer.phpfile = 'query_current_vessels.php';
+   aisLayer.resultCount = 0;
    dataLayers.push(aisLayer);
 
    //--------------------------------------------------------------
@@ -3220,6 +3237,7 @@ $(function initializeLayers() {
    //TODO: incorporate marker size with vw or vl
    radarLayer.markerpath = 'M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0';
    radarLayer.phpfile = 'query_current_vessels.php';
+   radarLayer.resultCount = 0;
    dataLayers.push(radarLayer);
 
    //--------------------------------------------------------------
@@ -3334,6 +3352,7 @@ $(function initializeLayers() {
    };
    fmvLayer.markerpath = 'M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0';
    fmvLayer.phpfile = 'query_fmv_data.php';
+   fmvLayer.resultCount = 0;
    dataLayers.push(fmvLayer);
 
    //--------------------------------------------------------------
@@ -3504,13 +3523,19 @@ function refreshLayers(newShownLayerID, newHiddenLayerID) {
       //Find the layer to be hidden, and hide it
       dataLayers.forEach( function(dataLayer) {
          if (dataLayer.layerID == newHiddenLayerID) {
-            //console.debug('*********** calling showLayer function');
+            //console.debug('*********** calling hideLayer function');
             dataLayer.hideLayer();
+            if (isNumber(dataLayer.resultCount)) {
+               updateGlobalResultCount(null, dataLayer.resultCount);
+            }
          }
       });
    }
    else {
       //Perform normal refresh of all layers
+
+      //Reset global target count
+      globalResultCount = 0;
 
       //Loop through layers to be shown and show them
       var layersToShow = $('#displayedLayersList').sortable('toArray');
@@ -3521,6 +3546,11 @@ function refreshLayers(newShownLayerID, newHiddenLayerID) {
             if (dataLayer.layerID == layerToShow && dataLayer.updateIfShown) {
                //console.debug('*********** calling showLayer function');
                dataLayer.showLayer();
+            }
+
+            //Flag visibility of aisLayer
+            if (layerToShow == 'aisLayer') {
+               aisDisplayed = true;
             }
          });
       });
@@ -3535,6 +3565,11 @@ function refreshLayers(newShownLayerID, newHiddenLayerID) {
                //console.debug('*********** calling hideLayer function');
                dataLayer.hideLayer();
             }
+
+            //Flag visibility of aisLayer
+            if (layerToHide == 'aisLayer') {
+               aisDisplayed = false;
+            }
          });
       });
    }
@@ -3545,7 +3580,9 @@ function refreshLayers(newShownLayerID, newHiddenLayerID) {
  * Get AIS data from JSON, which is from database, with bounds.
  */
 function getAISFromDB(sourceType, thislayer, callback) {
+   //TODO: fix custom queries
    customQuery = null;
+
    //Store new previous sourceType
    if (sourceType.indexOf('LAISIC') != 0) {//sourceType == "AIS" || sourceType == "RADAR" || sourceType == "LIVE_LAISIC") {
       prevSourceType = sourceType;
@@ -3565,8 +3602,8 @@ function getAISFromDB(sourceType, thislayer, callback) {
    var sourceStr = "source=" + sourceType;
 
    //Check if a query has been previously made, and use it to preserve previous query but just change the bounds to current view now
-   if (!customQuery && customQuery !== '') {     //No custom query
-      phpWithArg = "query_current_vessels.php?" + sourceStr;
+   if (searchTerm == '') {     //No custom search
+      phpWithArg = thislayer.phpfile + '?' + sourceStr;
 
       if (enableRisk) {
          phpWithArg += "&risk=1";
@@ -3596,16 +3633,8 @@ function getAISFromDB(sourceType, thislayer, callback) {
       enableCustomQuery = false;
    }
    else {   //Something was typed into query bar
-      //TODO: need a more robust condition for keyword search
-      if (customQuery.length < 20) {
-         //customQuery is really a keyword search
-         phpWithArg = "query_current_vessels.php?" + sourceStr + viewBounds.boundStr + "&keyword=" + customQuery;
-      }
-      //TODO for handling case when trying to display specific vessels or LAISIC outputs
+      phpWithArg = thislayer.phpfile + '?' + sourceStr + viewBounds.boundStr + "&keyword=" + searchTerm;
       /*
-      else if ( ... ) {
-      }
-      */
       else {
          console.log('Entered custom query: ' + customQuery);
 
@@ -3614,11 +3643,11 @@ function getAISFromDB(sourceType, thislayer, callback) {
             //customQuery = customQuery.substring(0, customQuery.indexOf('WHERE Latitude')-1)
 
             console.log('Not appending anything to custom query');
-            phpWithArg = 'query_current_vessels.php?query=' + customQuery + '&noappend=1';
+            phpWithArg = thislayer.phpfile + '?query=' + customQuery + '&noappend=1';
          }
          else {
             //Custom SQL query statement
-            phpWithArg = "query_current_vessels.php?query=" + customQuery + viewBounds.boundStr;
+            phpWithArg = thislayer.phpfile + '?query=' + customQuery + viewBounds.boundStr;
          }
 
          console.log('Performing custom query on: ' + customQuery);
@@ -3628,6 +3657,7 @@ function getAISFromDB(sourceType, thislayer, callback) {
             phpWithArg += "&vessel_age=" + vessel_age;
          }
       }
+      */
      
       //If not in Time Machine mode, change status display to custom query message
       if (!document.getElementById("enabletimemachine") 
@@ -3689,7 +3719,7 @@ function getAISFromDB(sourceType, thislayer, callback) {
             console.log(latestPHPcall !== phpWithArg);
          */
 
-         console.log('getTargetsFromDB(): ' + response.query);
+         console.log(thislayer.layerID + ': ' + response.query);
          //Show the query and put it in the form
          $('#' + thislayer.layerID + ' .queryStatement').val(response.query);
 
@@ -4024,13 +4054,8 @@ function getAISFromDB(sourceType, thislayer, callback) {
             return true;
          }
 
-         //Update activity status spinner and results
-         console.log('getTargetsFromDB(): ' + "Total number of markers = " + markerArray.length);
-
-         //TODO: change to global count
-         document.getElementById('stats').innerHTML = 
-            response.resultcount + " results<br>" + 
-            "Retrieved in " + Math.round(response.exectime*1000)/1000 + " secs";
+         thislayer.resultCount = response.resultcount;
+         updateGlobalResultCount(thislayer.resultCount);
 
          callback();
       }) //END .done()
@@ -4209,10 +4234,8 @@ function getClustersFromDB(thislayer, callback) {
          console.log(thislayer.layerID + ': ' + "Total number of clusters = " + response.resultcount);
          console.log(thislayer.layerID + ': ' + "Total number of vessels = " + totalsum);
 
-         //TODO: change to global count
-         document.getElementById('stats').innerHTML = 
-            totalsum + " results" + 
-            "<br>Retrieved in " + Math.round(response.exectime*1000)/1000 + " secs";
+         thislayer.resultCount = totalsum;
+         updateGlobalResultCount(thislayer.resultCount);
 
          callback();
       }) //end .done()
@@ -4412,9 +4435,8 @@ function getRADARFromDB(customQuery, thislayer, callback) {
 
          //Update activity status spinner and results
          console.log(thislayer.layerID + ': Total number of targets = ' + thislayer.data.markerArray.length);
-
-         //TODO: add to global count
-         
+         thislayer.resultCount = thislayer.data.markerArray.length;
+         updateGlobalResultCount(thislayer.resultCount);
 
          callback();
       }) //END .done()
@@ -4542,6 +4564,8 @@ function getFMVTargets(customQuery, thislayer, callback) {
                $('#' + thislayer.layerID + ' .queryStatement').val(response.query);
 
                //TODO: add to global count
+               thislayer.resultCount = thislayer.data.markerArray.length;
+               updateGlobalResultCount(thislayer.resultCount);
          
                //Notify that this layer is done retrieving data and drawing
                callback();
@@ -4894,4 +4918,70 @@ function hideBusyIndicator() {
    $('#loadingPanel').find('.spinner').activity(false); //hide spinner
    NProgress.done();   //JS library top progress bar
     return;
+}
+
+/* -------------------------------------------------------------------------------- */
+function updateGlobalResultCount(add, subtract) {
+   if (isNumber(add)) {
+      globalResultCount += add;
+   }
+   if (isNumber(subtract)) {
+      globalResultCount -= subtract;
+   }
+
+   //document.getElementById('stats').innerHTML = 
+   $('#stats').html(
+      globalResultCount + " results<br>" + 
+      "Retrieved in " + (new Date() - lastRefresh)/1000 + " secs"
+      );
+}
+
+/* -------------------------------------------------------------------------------- */
+function search() {
+         //check if AIS layer is currently being displayed
+         if (!isAISLayerDisplayed()) {
+            alert('AIS layer is not being displayed.  Please add layer before performing search');
+            return;
+         }
+
+         //clear previous search
+         if ($('#searchClearBtn').length > 0) {
+            $('#searchClearBtn').remove();
+         }
+
+         //Call the query function located in main script file
+   //Grab search terms and store to global var
+   searchTerm = $('#search').val();
+
+   dataLayers.forEach( function(dataLayer) {
+      if (dataLayer.layerID == 'aisLayer') {
+         dataLayer.showLayer();
+      }
+   });
+
+
+         //Add a search cancel button
+         $('#searchGroup').append('<span class="input-group-btn"> <button id="searchClearBtn" class="btn btn-default" type="button"> <span id="search-icon" class="glyphicon glyphicon-remove"></span> </button> </span>');
+         //$(this).next('span').show();
+
+         //handle search cancel button
+         $('#searchClearBtn').click( function(event) {
+            $('#search').val('');
+            clearSearch();
+            $(this).remove();
+
+            //Get regular AIS layer displayed
+            refreshLayers('aisLayer', null);
+         });
+
+}
+
+/* -------------------------------------------------------------------------------- */
+function clearSearch() {
+   searchTerm = '';
+}
+
+/* -------------------------------------------------------------------------------- */
+function isAISLayerDisplayed() {
+   return aisDisplayed;
 }

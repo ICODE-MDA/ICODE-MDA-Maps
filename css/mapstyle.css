@@ -116,7 +116,7 @@ body {
    user-select: none;
 }
 @media (max-width: 760px) {
-   #search-bar-nav {
+   #search-bar-form {
       width: 100%; 
    }
 }
@@ -130,7 +130,7 @@ body {
       width: 525px; 
    }
 }
-#search-bar-nav {
+#search-bar-form {
    max-height: 34px;
 }
 #stats {

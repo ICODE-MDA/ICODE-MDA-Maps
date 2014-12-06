@@ -78,7 +78,7 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
            </button>
-           <a class="navbar-brand" href="#">ICODE-MDA Maps</a>
+           <a class="navbar-brand" href="#">ICODE-MDA Maps 2.0 (beta)</a>
         </div>
 
         <!-- Search and other navigation items -->
@@ -88,12 +88,17 @@
            <ul class="nav navbar-nav navbar-right">
               <li>
               <!-- Search bar nav -->
-              <form id="search-bar-nav" class="navbar-form navbar-nav">
-                 <div class="form-group">
-                    <div class="input-group">
-                       <span class="input-group-addon"><span id="search-icon" class="glyphicon glyphicon-search"></span></span>
-                       <input id="search" class="form-control" type="text" name="query" onkeypress="if (event.which == 13) {search();return false;}" placeholder="Search for Specific Vessels (MMSI, IMO, vessel name, or call sign)"><input hidden="true" type="hidden">
-                    </div>
+              <form id="search-bar-form" class="navbar-form navbar-nav form-horizontal">
+                 <div id="searchGroup" class="form-group input-group has-feedback">
+                    <!-- <div id="searchGroup" class="input-group has-feedback"> -->
+                       <span class="input-group-btn">
+                          <button id="searchBtn" class="btn btn-default" type="button">
+                             <span id="search-icon" class="glyphicon glyphicon-search"></span>
+                          </button>
+                       </span>
+                       <input id="search" class="form-control" type="text" name="query"placeholder="Search for Specific Vessels (MMSI, IMO, vessel name, or call sign)">
+                       <input hidden="true" type="hidden">
+                       <!-- </div> -->
                  </div>
               </form>
               </li>
@@ -913,7 +918,7 @@
         </p>
      </div>
 
-     <form role="form">
+     <form id="geocode-form" role="form">
         <div id="geocodepanel" class="form-group">
            <div class="input-group">
               <input id="geocodeAddress" class="form-control" type="textbox" placeholder="Enter Location Name or Lat,Lon" value="San Diego, CA">

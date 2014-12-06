@@ -8,7 +8,8 @@ var userid;
 $(function() { //shorthand for: $(document).ready(function() {
    //Call setup functions
    setupUser();
-   queryBar();
+   queryBarBehavior();
+   searchBarBehavior();
    geocodingBox();
    menuDivPanels();
    progressBar();
@@ -27,17 +28,36 @@ $(function() { //shorthand for: $(document).ready(function() {
       });
    }
 
-   function queryBar() {
+   function queryBarBehavior() {
+      /*
       //Query bar text control
       //Select all text if query bar comes into focus
       $('#query:text').focus(function() { 
          $(this).one('mouseup', function(event){
-            event.preventDefault();
+            //event.preventDefault();
          }).select();
+      });
+      */
+   }
+
+   function searchBarBehavior() {
+      $("#search-bar-form").submit(function(e) {
+         e.preventDefault();
+         search();
+      });
+
+      //When search button clicked (or hit 'return' key)
+      $('#searchBtn').click( function() {
+         search();
       });
    }
 
    function geocodingBox() {
+      $("#geocode-form").submit(function(e) {
+         e.preventDefault();
+         codeAddress();
+      });
+
       //Geocoding text box control
       $('#geocodeAddress')
          .focus(function() { 
