@@ -85,7 +85,7 @@
         <div id="navbar" class="navbar-collapse collapse">
 
            <!-- Navigation items -->
-           <ul class="nav navbar-nav navbar-right">
+           <ul id="navRight" class="nav navbar-nav navbar-right">
               <li>
               <!-- Search bar nav -->
               <form id="search-bar-form" class="navbar-form navbar-nav form-horizontal">
@@ -96,7 +96,7 @@
                              <span id="search-icon" class="glyphicon glyphicon-search"></span>
                           </button>
                        </span>
-                       <input id="search" class="form-control" type="text" name="query"placeholder="Search for Specific Vessels (MMSI, IMO, vessel name, or call sign)">
+                       <input id="search" class="form-control" type="text" name="query"placeholder="Search for Vessels (MMSI, IMO, vessel name, call sign, or destination)">
                        <input hidden="true" type="hidden">
                        <!-- </div> -->
                  </div>
@@ -501,12 +501,18 @@
                           </div>
                           </li>
 
+                       </ul> <!-- END shown layers -->
+
+                       <hr>
+                       <h4 class="text-center">Available Layers:</h4>
+                       <ul id="hiddenLayersList" class="list-unstyled connectedSortable">
+                          
                           <!-- Day/Night Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="daynightLayer" class="panel panel-success">
+                          <li id="daynightLayer" class="panel panel-default">
                           <div class="layerHeading panel-heading">
                              <div class="row">
                                 <div class="col-md-7">
-                                   <span class="hideShowLayerBtn glyphicon glyphicon-minus-sign"></span>
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus-sign"></span>
                                    Day/Night Layer
                                 </div>
                                 <div class="col-md-1 vcenter">
@@ -518,11 +524,7 @@
                              <!-- Options here -->
                           </div>
                           </li>
-                       </ul> <!-- END shown layers -->
 
-                       <hr>
-                       <h4 class="text-center">Available Layers:</h4>
-                       <ul id="hiddenLayersList" class="list-unstyled connectedSortable">
                           <!-- Traffic Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="trafficLayer" class="panel panel-default">
                           <div class="layerHeading panel-heading">
