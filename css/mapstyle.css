@@ -115,16 +115,19 @@ body {
    -ms-user-select: none;
    user-select: none;
 }
-@media (max-width: 760px) {
-   #search-bar-form {
-      width: 100%; 
-   }
-}
-@media (min-width: 994px) {
+@media (max-width: 768px) {
+   #navRight {
+      display: 0px;
+   }   
+}  
+@media (max-width: 994px) {
    #search {
-      width: 400px; 
+      width: 75px;
    }
-}
+   #navRight {
+      width: 400px;
+   }
+}  
 @media (min-width: 1200px) {
    #search {
       width: 525px; 
