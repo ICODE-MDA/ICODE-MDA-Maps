@@ -395,16 +395,7 @@ function initialize() {
          return;
       }
 
-      /*
-      if ($('#geocodeAddress').is(':focus')) {
-         if (event.which == 13) {
-            codeAddress();
-         }
-         return;
-      }
-      */
-
-      if ($('input[type=text], textarea').is(':focus')) {
+      if ($('input, input[type=text], textarea').is(':focus')) {
          return;
       }
 
@@ -4774,6 +4765,14 @@ function codeAddress() {
 function increaseVesselIconSize() {
    vw += 2;
    vl += 2;
+
+   //TODO: only update AIS layer for now
+   dataLayers.forEach( function(dataLayer) {
+      if (dataLayer.layerID == 'aisLayer') {
+         dataLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
+      }
+   });
+
    refreshLayers();
 }
 
@@ -4784,6 +4783,14 @@ function increaseVesselIconSize() {
 function decreaseVesselIconSize() {
    vw -= 2;
    vl -= 2;
+
+   //TODO: only update AIS layer for now
+   dataLayers.forEach( function(dataLayer) {
+      if (dataLayer.layerID == 'aisLayer') {
+         dataLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
+      }
+   });
+
    refreshLayers();
 }
 
@@ -4794,6 +4801,14 @@ function decreaseVesselIconSize() {
 function resetVesselIconSize() {
    vw = 4;
    vl = 10;
+
+   //TODO: only update AIS layer for now
+   dataLayers.forEach( function(dataLayer) {
+      if (dataLayer.layerID == 'aisLayer') {
+         dataLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
+      }
+   });
+
    refreshLayers();
 }
 
