@@ -88,7 +88,7 @@
            <ul id="navRight" class="nav navbar-nav navbar-right">
               <li>
               <!-- Search bar nav -->
-              <form id="search-bar-form" class="navbar-form navbar-nav form-horizontal">
+              <form id="searchBarForm" class="navbar-form navbar-nav form-horizontal">
                  <div id="searchGroup" class="form-group input-group">
                     <span class="input-group-btn">
                        <button id="searchBtn" class="btn btn-default" type="button">
@@ -96,7 +96,6 @@
                        </button>
                     </span>
                     <input id="search" class="form-control" type="text" name="query" autocomplete="off" placeholder="Search for Vessels (MMSI, IMO, vessel name, call sign, or destination)">
-                    <input hidden="true" type="hidden">
                     <span id="advancedSearchToggle" class="form-control-feedback noselect glyphicon glyphicon-chevron-down"></span>
                  </div>
               </form>
@@ -105,37 +104,37 @@
                  <div class="panel-body">
                     <h4>Advanced Search</h4>
 
-                    <div class="form-horizontal">
+                    <form id="advancedSearchForm" class="form-horizontal" role="form">
                        <div class="form-group">
                           <label for="searchMMSI" class="control-label col-xs-2">MMSI</label>
                           <div class="col-xs-10">
-                             <input class="form-control" id="searchMMSI" placeholder="123456789">
+                             <input class="form-control" id="searchMMSI" type="text" placeholder="123456789">
                           </div>
                        </div>
                        <div class="form-group">
                           <label for="searchIMO" class="control-label col-xs-2">IMO</label>
                           <div class="col-xs-10">
-                             <input class="form-control" id="searchMMSI" placeholder="1234567">
+                             <input class="form-control" id="searchIMO" type="text" placeholder="1234567">
                           </div>
                        </div>
                        <div class="form-group">
                           <label for="searchCallSign" class="control-label col-xs-2">Call sign</label>
                           <div class="col-xs-10">
-                             <input class="form-control" id="searchCallSign" placeholder="VXE629">
+                             <input class="form-control" id="searchCallSign" type="text" placeholder="VXE629">
                           </div>
                        </div>
                        <div class="form-group">
                           <label for="searchDestination" class="control-label col-xs-2">Destination</label>
                           <div class="col-xs-10">
-                             <input class="form-control" id="searchDestination" placeholder="San Diego">
+                             <input class="form-control" id="searchDestination" type="text" placeholder="San Diego">
                           </div>
                        </div>
                        <div class="form-group">
                           <div class="col-xs-offset-2 col-xs-10">
-                             <button type="submit" class="btn btn-primary">Search</button>
+                             <button id="advancedSearchBtn" type="submit" class="btn btn-primary">Search</button>
                           </div>
                        </div>
-                    </div>
+                    </form>
 
                     </div>
                  </div>

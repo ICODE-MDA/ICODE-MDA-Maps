@@ -9,7 +9,7 @@ $(function() { //shorthand for: $(document).ready(function() {
    //Call setup functions
    setupUser();
    queryBarBehavior();
-   searchBarBehavior();
+   searchBehavior();
    advanceSearch();
    geocodingBox();
    menuDivPanels();
@@ -41,14 +41,24 @@ $(function() { //shorthand for: $(document).ready(function() {
       */
    }
 
-   function searchBarBehavior() {
-      $("#search-bar-form").submit(function(e) {
+   function searchBehavior() {
+      $('#searchBarForm').submit(function(e) {
          e.preventDefault();
+         console.debug('Regular search initiated.');
+         advancedSearchEnabled = false;
+         search();
+      });
+
+      $('#advancedSearchForm').submit(function(e) {
+         e.preventDefault();
+         console.debug('Advanced search initiated.');
+         advancedSearchEnabled = true;
          search();
       });
 
       //When search button clicked (or hit 'return' key)
       $('#searchBtn').click( function() {
+         advancedSearchEnabled = false;
          search();
       });
    }

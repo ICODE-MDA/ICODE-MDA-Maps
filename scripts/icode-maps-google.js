@@ -143,6 +143,7 @@ var enableCustomQuery;
 var queryCustomQuery;
 var searchTerm = '';
 var aisDisplayed = false;
+var advancedSearchEnabled = false;
 
 //LAISIC Tables selection
 var selectionCircle = new google.maps.Circle({
@@ -395,7 +396,7 @@ function initialize() {
          return;
       }
 
-      if ($('input, input[type=text], textarea').is(':focus')) {
+      if ($('input[type=text], textarea').is(':focus')) {
          return;
       }
 
@@ -1837,8 +1838,8 @@ function typeSelectUpdated() {
       vesseltypeFilterPHPStr += '&vthide[]=' + types[i];
    }
 
-   //getTargetsFromDB() will check vesseltypeFilterPHPStr for filtering
-   refreshMaps(true);
+   //getAISFromDB() will check vesseltypeFilterPHPStr for filtering
+   refreshLayers();
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -3694,7 +3695,7 @@ function getAISFromDB(sourceType, thislayer, callback) {
             console.log(latestPHPcall !== phpWithArg);
          */
 
-         console.log(thislayer.layerID + ': ' + response.query);
+         //console.log(thislayer.layerID + ': ' + response.query);
          //Show the query and put it in the form
          $('#' + thislayer.layerID + ' .queryStatement').val(response.query);
 
@@ -4105,7 +4106,7 @@ function getClustersFromDB(thislayer, callback) {
             return;
          }
 
-         console.log(thislayer.layerID + ': ' + response.query);
+         //console.log(thislayer.layerID + ': ' + response.query);
          //Show the query and put it in the form
          $('#' + thislayer.layerID + ' .queryStatement').val(response.query);
 
@@ -4928,6 +4929,10 @@ function updateGlobalResultCount(add, subtract) {
       globalResultCount -= subtract;
    }
 
+   if (globalResultCount < 0) {
+      console.log('ERROR: Global result count not properly deducted.  Please check code.');
+   }
+
    //document.getElementById('stats').innerHTML = 
    $('#stats').html(
       globalResultCount + " results<br>" + 
@@ -4948,15 +4953,27 @@ function search() {
       $('#clearSearch').remove();
    }
 
-   //Call the query function located in main script file
-   //Grab search terms and store to global var
-   searchTerm = $('#search').val();
+   if (advancedSearchEnabled) {
+      $('#search').attr('placeholder', 'Advanced search filtering enabled');
+      searchTerm = $('#searchMMSI').val();
+   }
+   else {
+      $('#search').attr('placeholder', 'Search for Vessels (MMSI, IMO, vessel name, call sign, or destination)');
+      //Grab search terms and store to global var
+      searchTerm = $('#search').val();
+   }
+
+   //Adjust global result count
 
    dataLayers.forEach( function(dataLayer) {
       if (dataLayer.layerID == 'aisLayer') {
-         dataLayer.showLayer();
+         updateGlobalResultCount(null, dataLayer.resultCount);
       }
    });
+
+   //Force update AIS data layer only, which will handle the search mode and search terms
+   refreshLayers('aisLayer', null);
+
 
    //Add a search cancel button
    $('#advancedSearchToggle').before('<span id="clearSearch" class="form-control-feedback noselect glyphicon glyphicon-remove"></span>');
@@ -4964,6 +4981,7 @@ function search() {
    //handle search cancel button
    $('#clearSearch').click( function(event) {
       $('#search').val('');
+      $('#search').attr('placeholder', 'Search for Vessels (MMSI, IMO, vessel name, call sign, or destination)');
       clearSearch();
       $(this).remove();
 
