@@ -89,24 +89,63 @@
               <li>
               <!-- Search bar nav -->
               <form id="search-bar-form" class="navbar-form navbar-nav form-horizontal">
-                 <div id="searchGroup" class="form-group input-group has-feedback">
-                    <!-- <div id="searchGroup" class="input-group has-feedback"> -->
-                       <span class="input-group-btn">
-                          <button id="searchBtn" class="btn btn-default" type="button">
-                             <span id="search-icon" class="glyphicon glyphicon-search"></span>
-                          </button>
-                       </span>
-                       <input id="search" class="form-control" type="text" name="query"placeholder="Search for Vessels (MMSI, IMO, vessel name, call sign, or destination)">
-                       <input hidden="true" type="hidden">
-                       <!-- </div> -->
+                 <div id="searchGroup" class="form-group input-group">
+                    <span class="input-group-btn">
+                       <button id="searchBtn" class="btn btn-default" type="button">
+                          <span id="search-icon" class="glyphicon glyphicon-search"></span>
+                       </button>
+                    </span>
+                    <input id="search" class="form-control" type="text" name="query" autocomplete="off" placeholder="Search for Vessels (MMSI, IMO, vessel name, call sign, or destination)">
+                    <input hidden="true" type="hidden">
+                    <span id="advancedSearchToggle" class="form-control-feedback noselect glyphicon glyphicon-chevron-down"></span>
                  </div>
               </form>
+
+              <div id="advancedSearchDropdown" class="panel" style="display: none">
+                 <div class="panel-body">
+                    <h4>Advanced Search</h4>
+
+                    <div class="form-horizontal">
+                       <div class="form-group">
+                          <label for="searchMMSI" class="control-label col-xs-2">MMSI</label>
+                          <div class="col-xs-10">
+                             <input class="form-control" id="searchMMSI" placeholder="123456789">
+                          </div>
+                       </div>
+                       <div class="form-group">
+                          <label for="searchIMO" class="control-label col-xs-2">IMO</label>
+                          <div class="col-xs-10">
+                             <input class="form-control" id="searchMMSI" placeholder="1234567">
+                          </div>
+                       </div>
+                       <div class="form-group">
+                          <label for="searchCallSign" class="control-label col-xs-2">Call sign</label>
+                          <div class="col-xs-10">
+                             <input class="form-control" id="searchCallSign" placeholder="VXE629">
+                          </div>
+                       </div>
+                       <div class="form-group">
+                          <label for="searchDestination" class="control-label col-xs-2">Destination</label>
+                          <div class="col-xs-10">
+                             <input class="form-control" id="searchDestination" placeholder="San Diego">
+                          </div>
+                       </div>
+                       <div class="form-group">
+                          <div class="col-xs-offset-2 col-xs-10">
+                             <button type="submit" class="btn btn-primary">Search</button>
+                          </div>
+                       </div>
+                    </div>
+
+                    </div>
+                 </div>
+
               </li>
               <!-- Alerts nav --> 
               <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-bell"></span> Alerts <span class="alertCountLabel badge">0</span><span class="caret"></span></a>
-                 <ul class="dropdown-menu" role="menu">
-                    <li><a href="#" onclick="toggleAlertsPanel(); return false;">View Alerts <span class="alertCountLabel badge">0</span></a></li>
+              <ul class="dropdown-menu" role="menu">
+                 <li><a href="#" onclick="toggleAlertsPanel(); return false;">View Alerts <span class="alertCountLabel badge">0</span></a></li>
                     <li class="divider"></li>
                     <li><a href="#">Setup New Alerts</a></li>
                     <li><a href="#">Edit Alerts</a></li>

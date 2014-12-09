@@ -10,6 +10,7 @@ $(function() { //shorthand for: $(document).ready(function() {
    setupUser();
    queryBarBehavior();
    searchBarBehavior();
+   advanceSearch();
    geocodingBox();
    menuDivPanels();
    progressBar();
@@ -49,6 +50,35 @@ $(function() { //shorthand for: $(document).ready(function() {
       //When search button clicked (or hit 'return' key)
       $('#searchBtn').click( function() {
          search();
+      });
+   }
+
+   function advanceSearch() {
+      //Handle toggling advanced search box
+      $('#advancedSearchToggle').mousedown( function() {
+         if ( !$('#advancedSearchDropdown').is(":visible") ) {
+            $('#advancedSearchToggle').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+            //$('#advancedSearchDropdown').show();
+         }
+         else {
+            $('#advancedSearchToggle').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+            //$('#advancedSearchDropdown').hide();
+         }
+         $('#advancedSearchDropdown').toggle();
+      });
+
+      //Hide advanced search if clicked outside of box
+      $(document).mouseup( function(e) {
+         var container = $("#advancedSearchDropdown");
+
+         if ( $('#advancedSearchDropdown').is(":visible")
+            && !container.is(e.target) // if the target of the click isn't the container...
+            && container.has(e.target).length === 0 // ... nor a descendant of the container
+            && !$('#advancedSearchToggle').is(e.target) )
+         {
+            $('#advancedSearchToggle').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+            container.hide();
+         }
       });
    }
 

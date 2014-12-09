@@ -124,6 +124,9 @@ body {
    #search {
       width: 75px;
    }
+   #advancedSearchDropdown {
+      display: none;
+   }
    #navRight {
       width: 400px;
    }
@@ -135,6 +138,19 @@ body {
 }
 #search-bar-form {
    max-height: 34px;
+}
+#advancedSearchToggle {
+   display: inline-block;
+   cursor: pointer;
+   pointer-events: auto;
+}
+#advancedSearchToggle:active {
+   outline: -webkit-focus-ring-color auto 5px;
+}
+#advancedSearchDropdown {
+   position: absolute;
+   top: 44px;
+   width: 100%;
 }
 #stats {
 	background: transparent;
