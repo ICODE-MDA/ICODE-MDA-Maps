@@ -16,7 +16,7 @@ $(function() { //shorthand for: $(document).ready(function() {
    progressBar();
    sortableLayers();
    setupAlertAccordion();
-   initializeBrowserFocus();
+   //initializeBrowserFocus();
    queryStatementBehavior();
 
    //Setup functions definitions =========================================================
@@ -56,15 +56,16 @@ $(function() { //shorthand for: $(document).ready(function() {
    function advanceSearch() {
       //Handle toggling advanced search box
       $('#advancedSearchToggle').mousedown( function() {
+         $('#advancedSearchDropdown').toggle();
+
          if ( !$('#advancedSearchDropdown').is(":visible") ) {
-            $('#advancedSearchToggle').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
-            //$('#advancedSearchDropdown').show();
+            //Show the box
+            $('#advancedSearchToggle').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
          }
          else {
-            $('#advancedSearchToggle').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
-            //$('#advancedSearchDropdown').hide();
+            //Hide the box
+            $('#advancedSearchToggle').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
          }
-         $('#advancedSearchDropdown').toggle();
       });
 
       //Hide advanced search if clicked outside of box

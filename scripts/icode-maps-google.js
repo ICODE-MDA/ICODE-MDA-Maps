@@ -418,8 +418,7 @@ function initialize() {
             refreshLayers();
             break;
          case 65: // a
-            if (document.getElementById("autoRefresh") != null &&
-                document.getElementById("autoRefresh").checked) {
+            if ($('#autoRefresh:checked').length == 1) {
                //$('input[name=autoRefresh]').attr('checked', false);
                document.getElementById("autoRefresh").checked = false;
                document.getElementById("autoRefresh").removeAttribute("checked");
@@ -433,8 +432,7 @@ function initialize() {
             clearAllTracks();
             break;
          case 68: // d
-            if (document.getElementById("distancetooltoggle") != null &&
-                document.getElementById("distancetooltoggle").checked) {
+            if ($('#distancetooltoggle:checked').length == 1) {
                document.getElementById("distancetooltoggle").checked = false;
                document.getElementById("distancetooltoggle").removeAttribute("checked");
             }
@@ -449,8 +447,7 @@ function initialize() {
             }
             break;
          case 71: // g
-            if (document.getElementById("enableCluster") != null &&
-                document.getElementById("enableCluster").checked) {
+            if ($('#enableCluster:checked').length == 1) {
                document.getElementById("enableCluster").checked = false;
                document.getElementById("enableCluster").removeAttribute("checked");
             }
@@ -464,8 +461,7 @@ function initialize() {
             
             break;
          case 73: // i
-            if (document.getElementById("IHSTabs") != null &&
-                document.getElementById("IHSTabs").checked) {
+            if ($('#IHSTabs:checked').length == 1) {
                document.getElementById("IHSTabs").checked = false;
                document.getElementById("IHSTabs").removeAttribute("checked");
             }
@@ -476,8 +472,7 @@ function initialize() {
             break;
          case 75: // k
             //Risk information
-            if (document.getElementById("Risk") != null &&
-                document.getElementById("Risk").checked) {
+            if ($('#Risk:checked').length == 1) {
                document.getElementById("Risk").checked = false;
                document.getElementById("Risk").removeAttribute("checked");
             }
@@ -488,8 +483,7 @@ function initialize() {
             refreshMaps(true);
             break;
          case 76: // l
-            if (document.getElementById("LAISIC_TARGETS") != null &&
-                document.getElementById("LAISIC_TARGETS").checked) {
+            if ($('#LAISIC_TARGETS:checked').length == 1) {
                document.getElementById("LAISIC_TARGETS").checked = false;
                document.getElementById("LAISIC_TARGETS").removeAttribute("checked");
             }
@@ -505,8 +499,7 @@ function initialize() {
             refreshMaps(true);
             break;
          case 78: // n
-            if (document.getElementById("showtargetlabels") != null &&
-                document.getElementById("showtargetlabels").checked) {
+            if ($('#showtargetlabels:checked').length == 1) {
                document.getElementById("showtargetlabels").checked = false;
                document.getElementById("showtargetlabels").removeAttribute("checked");
             }
@@ -517,7 +510,7 @@ function initialize() {
             break;
          case 80: // p
             //Port layer
-            if ($('#portsLayer').children('.layerHeading').children('.hideShowLayerBtn').hasClass('glyphicon-plus')) {
+            if ($('#displayedLayersList').find('#portsLayer').length == 0) {
                $('#portsLayer').insertAfter('#displayedLayersList li:last');
                listUpdated();
             }
@@ -530,17 +523,17 @@ function initialize() {
             location.reload();
             break;
          case 84: // t
-            if ($('#trafficLayer').children('.layerHeading').children('.hideShowLayerBtn').hasClass('glyphicon-plus')) {
+            if ($('#displayedLayersList').find('#trafficLayer').length == 0) {
                $('#trafficLayer').insertAfter('#displayedLayersList li:last');
                listUpdated();
             }
             else {
                $('#trafficLayer').insertBefore('#hiddenLayersList li:first');
                listUpdated();
-            }            
+            }
             break;
          case 87: // w
-            if ($('#weatherLayer').children('.layerHeading').children('.hideShowLayerBtn').hasClass('glyphicon-plus')) {
+            if ($('#displayedLayersList').find('#weatherLayer').length == 0) {
                $('#weatherLayer').insertAfter('#displayedLayersList li:last');
                listUpdated();
             }
@@ -3484,15 +3477,6 @@ function updateViewBounds() {
  * Refresh all layers here, based on sortable lists in UI
  **/
 function refreshLayers(newShownLayerID, newHiddenLayerID) {
-   /* TODO: temporarily disable browser focus check
-   //Check if browser tab is in view before refreshing
-   if (!browserFocus) {
-      console.log('Browser tab not focused; skipping refresh');
-      queuedRefresh = true;
-      return;                 //Jump out of refreshing function
-   }
-   */
-   
    //Update time of refresh
    lastRefresh = new Date();
 
@@ -4953,18 +4937,18 @@ function updateGlobalResultCount(add, subtract) {
 
 /* -------------------------------------------------------------------------------- */
 function search() {
-         //check if AIS layer is currently being displayed
-         if (!isAISLayerDisplayed()) {
-            alert('AIS layer is not being displayed.  Please add layer before performing search');
-            return;
-         }
+   //check if AIS layer is currently being displayed
+   if (!isAISLayerDisplayed()) {
+      alert('AIS layer is not being displayed.  Please add layer before performing search');
+      return;
+   }
 
-         //clear previous search
-         if ($('#searchClearBtn').length > 0) {
-            $('#searchClearBtn').remove();
-         }
+   //clear previous search
+   if ($('#clearSearch').length > 0) {
+      $('#clearSearch').remove();
+   }
 
-         //Call the query function located in main script file
+   //Call the query function located in main script file
    //Grab search terms and store to global var
    searchTerm = $('#search').val();
 
@@ -4974,20 +4958,18 @@ function search() {
       }
    });
 
+   //Add a search cancel button
+   $('#advancedSearchToggle').before('<span id="clearSearch" class="form-control-feedback noselect glyphicon glyphicon-remove"></span>');
 
-         //Add a search cancel button
-         $('#searchGroup').append('<span class="input-group-btn"> <button id="searchClearBtn" class="btn btn-default" type="button"> <span id="search-icon" class="glyphicon glyphicon-remove"></span> </button> </span>');
-         //$(this).next('span').show();
+   //handle search cancel button
+   $('#clearSearch').click( function(event) {
+      $('#search').val('');
+      clearSearch();
+      $(this).remove();
 
-         //handle search cancel button
-         $('#searchClearBtn').click( function(event) {
-            $('#search').val('');
-            clearSearch();
-            $(this).remove();
-
-            //Get regular AIS layer displayed
-            refreshLayers('aisLayer', null);
-         });
+      //Get regular AIS layer displayed
+      refreshLayers('aisLayer', null);
+   });
 
 }
 

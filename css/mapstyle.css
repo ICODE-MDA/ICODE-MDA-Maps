@@ -152,6 +152,17 @@ body {
    top: 44px;
    width: 100%;
 }
+#advancedSearchDropdown > label {
+   //margin-right: -100px;
+}
+#clearSearch {
+   margin-right: 23px;
+   cursor: pointer;
+   pointer-events: auto;
+}
+#clearSearch:active {
+   outline: -webkit-focus-ring-color auto 5px;
+}
 #stats {
 	background: transparent;
 	border: 0px solid transparent;
