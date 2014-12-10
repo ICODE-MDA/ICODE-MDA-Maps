@@ -91,7 +91,7 @@
               <form id="searchBarForm" class="navbar-form navbar-nav form-horizontal">
                  <div id="searchGroup" class="form-group input-group">
                     <span class="input-group-btn">
-                       <button id="searchBtn" class="btn btn-default" type="button">
+                       <button id="searchBtn" class="btn btn-default" type="submit">
                           <span id="search-icon" class="glyphicon glyphicon-search"></span>
                        </button>
                     </span>
@@ -195,35 +195,34 @@
                  <div id="legend-collapse" class="menuBody panel-collapse collapse in">
                     <div id="legend-body" class="panelBody panel-body text-left">
                        <h4 class="text-center">Vessel Types</h4>
-                       <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
-                       <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#3333FF;stroke:#3333FF;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
-                       </path>
-                       </svg>
-                       LAISIC AIS Observation
+                       <label>
+                          <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
+                          <path d="M 0,10 4,10 4,-3 0,-10 -4,-3 -4,10 z" style="fill:#3333FF;stroke:#3333FF;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 0 0)">Browser does not support inline SVG.
+                          </path>
+                          </svg>
+                          LAISIC AIS Observation
+                       </label>
                        <br>
-
-                       <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="20" width="30" viewBox="-5 -10 20 20">
-                       <path d="m -6 0 6 -6 6 6 -6 6 z m 12 0 l 8 0" style="fill:#FFFF00;stroke:#222222;stroke-width:1;fill-rule:evenodd;">Browser does not support inline SVG.
-                       </path>
-                       </svg>
-                       LAISIC AIS Track
+                       <label>
+                          <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="20" width="30" viewBox="-5 -10 20 20">
+                          <path d="m -6 0 6 -6 6 6 -6 6 z m 12 0 l 8 0" style="fill:#FFFF00;stroke:#222222;stroke-width:1;fill-rule:evenodd;">Browser does not support inline SVG.
+                          </path>
+                          </svg>
+                          LAISIC AIS Track
+                       </label>
                        <br>
-                       <div class="checkbox">
-                          <label>
-                             <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="16" width="30" viewBox="-6 -12 15 16">
-                             <path d="M 0, -3 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0" style="fill:#F078FF;stroke:#222200;stroke-width:1;fill-rule:evenodd;">Browser does not support inline SVG.
-                             </path>
-                             </svg>
-                             RADAR Vessels
-                          </label>
-                       </div>
-                       <div class="checkbox">
-                          <label>
-                             <input class="checkboxtype" id="livelaisic" name="livelaisic" checked="checked" type="checkbox" onclick="refreshMaps(true);">
-                             <svg width="26" height="15" version="1.1" xmlns="https://svgwg.org/svg2-draft/"  viewBox="0 3 20 10"><path d="M 12,0 22,15 19,21 12,24 6,21 3,15 Z" fill="#FF0000" stroke="#000000" stroke-width="3" transform="rotate(90 6 6) scale(0.5) translate(5 -4)"></path></svg>
-                             Live LAISIC Correlations
-                          </label>
-                       </div>
+                       <label>
+                          <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="16" width="30" viewBox="-6 -12 20 16">
+                          <path d="M 0, -3 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0" style="fill:#F078FF;stroke:#222200;stroke-width:1;fill-rule:evenodd;">Browser does not support inline SVG.
+                          </path>
+                          </svg>
+                          RADAR Vessels
+                       </label>
+                       <br>
+                       <label>
+                          <svg width="26" height="15" version="1.1" xmlns="https://svgwg.org/svg2-draft/"  viewBox="0 3 20 10"><path d="M 12,0 22,15 19,21 12,24 6,21 3,15 Z" fill="#FF0000" stroke="#000000" stroke-width="3" transform="rotate(90 6 6) scale(0.5) translate(5 -4)"></path></svg>
+                          Live LAISIC Correlations
+                       </label>
                        <div class="checkbox">
                           <label>
                              <input class="checkboxallships" id="All Other Vessels" name="All Other Vessels" checked="false" type="checkbox" onclick="typeSelectUpdated();"> 
@@ -544,7 +543,41 @@
                        <hr>
                        <h4 class="text-center">Available Layers:</h4>
                        <ul id="hiddenLayersList" class="list-unstyled connectedSortable">
-                          
+
+                          <!-- LAISIC Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="laisicLayer" class="panel panel-default">
+                          <div class="layerHeading panel-heading">
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus-sign"></span>
+                                   LAISIC Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
+                             <button class="layersOptionsBtn btn btn-default btn-xs btn-expand">
+                                Options      
+                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
+                             </button>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <div class="btn-group">
+                                <button id="vesselstablenewwindowbutton" class="btn btn-primary" onClick="window.open('icode-table.html'); return false;">Open Vessels Tables</button>
+                             </div>                             
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="LAISIC_TARGETS" name="LAISIC_TARGETS" type="checkbox" onclick="refreshMaps(true);"> Display LAISIC targets
+                                </label>
+                             </div>
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="error ellipses" name="error ellipses" type="checkbox" checked="checked" onclick=";"> Draw error ellipses on trackicons
+                                </label>
+                             </div>
+                          </div>
+                          </li>
+
                           <!-- Day/Night Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="daynightLayer" class="panel panel-default">
                           <div class="layerHeading panel-heading">
@@ -674,40 +707,6 @@
                           </div>
                           <div class="layerBody panel-body panel-collapse collapse">
                              <!-- Options here -->
-                          </div>
-                          </li>
-
-                          <!-- LAISIC Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
-                          <li id="laisicLayer" class="panel panel-default">
-                          <div class="layerHeading panel-heading">
-                             <div class="row">
-                                <div class="col-md-7">
-                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus-sign"></span>
-                                   LAISIC Layer
-                                </div>
-                                <div class="col-md-1 vcenter">
-                                   <div class="spinner spinnerForLayers"></div>
-                                </div>
-                             </div>
-                             <button class="layersOptionsBtn btn btn-default btn-xs btn-expand">
-                                Options      
-                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
-                             </button>
-                          </div>
-                          <div class="layerBody panel-body panel-collapse collapse">
-                             <div class="btn-group">
-                                <button id="vesselstablenewwindowbutton" class="btn btn-success" onClick="window.open('icode-table.html'); return false;">Open Vessels Tables</button>
-                             </div>                             
-                             <div class="checkbox">
-                                <label>
-                                   <input class="checkbox" id="LAISIC_TARGETS" name="LAISIC_TARGETS" type="checkbox" onclick="refreshMaps(true);"> Display LAISIC targets
-                                </label>
-                             </div>
-                             <div class="checkbox">
-                                <label>
-                                   <input class="checkbox" id="error ellipses" name="error ellipses" type="checkbox" checked="checked" onclick=";"> Draw error ellipses on trackicons
-                                </label>
-                             </div>
                           </div>
                           </li>
 

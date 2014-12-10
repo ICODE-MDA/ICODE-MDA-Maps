@@ -10,7 +10,7 @@ $(function() { //shorthand for: $(document).ready(function() {
    setupUser();
    queryBarBehavior();
    searchBehavior();
-   advanceSearch();
+   advanceSearchBehavior();
    geocodingBox();
    menuDivPanels();
    progressBar();
@@ -55,15 +55,9 @@ $(function() { //shorthand for: $(document).ready(function() {
          advancedSearchEnabled = true;
          search();
       });
-
-      //When search button clicked (or hit 'return' key)
-      $('#searchBtn').click( function() {
-         advancedSearchEnabled = false;
-         search();
-      });
    }
 
-   function advanceSearch() {
+   function advanceSearchBehavior() {
       //Handle toggling advanced search box
       $('#advancedSearchToggle').mousedown( function() {
          $('#advancedSearchDropdown').toggle();

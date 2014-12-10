@@ -44,7 +44,6 @@ var tracklineIconsOptionsL = {
                fillOpacity:   1
             };
 
-var latestPHPcall;            //last phpWithArgs call
 var mainQuery;                //main query called
 
 //Vessel type filter
@@ -82,8 +81,6 @@ var infoBubble = new InfoBubble({
 var vessel_age;               //user chosen vessel age, in hours
 
 var history_trail_length;     //user chosen history trail length, in days
-
-var prevSourceType;
 
 //Viewing bounds objects
 var viewBounds;               //map bounds object with min/max lat/lon
@@ -507,7 +504,7 @@ function initialize() {
             else {
                document.getElementById("showtargetlabels").checked = true;
             }
-            toggleShowNames();
+            toggleShowTargetLabels();
             break;
          case 80: // p
             //Port layer
@@ -2132,10 +2129,6 @@ function addHeatmap() {
       data: heatmapData
    });
 
-   document.getElementById("showtargetlabels").checked = false;
-   document.getElementById("showtargetlabels").removeAttribute("checked");
-   toggleShowNames();
-
    heatmapLayer.setMap(map);
 }
 
@@ -3177,11 +3170,10 @@ $(function initializeLayers() {
          }
          //Individual vessel view
          else {
-            getAISFromDB("AIS", thislayer, callback);
+            getAISFromDB(thislayer, callback);
          }
       }, 
       function hideaisLayer() {
-         //console.log('hiding AIS layer');
          clearLayerMarkers(this);
       },
       true  //force refresh this layer
@@ -3192,11 +3184,108 @@ $(function initializeLayers() {
       markerArray: [],
       markerlabelArray: []
    };
-   aisLayer.dataType = "AIS";
+   aisLayer.dataType = 'AIS';
    aisLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
    aisLayer.phpfile = 'query_current_vessels.php';
    aisLayer.resultCount = 0;
+   aisLayer.lastestCall = null;
    dataLayers.push(aisLayer);
+
+   //--------------------------------------------------------------
+   //LAISIC LIVE layer
+   var laisicLiveLayer = new dataLayerObject('laisicLayer', 
+      function showLaisicLayer(thislayer, callback) {
+         getLAISICFromDB('LIVE_LAISIC', thislayer, callback);
+      }, 
+      function hideLaisicLayer() {
+         clearLayerMarkers(this);
+      },
+      true  //force refresh this layer
+      );
+   //Data object of arrays
+   laisicLiveLayer.data = {
+      dataArray: [],
+      markerArray: [],
+      markerlabelArray: []
+   };
+   laisicLiveLayer.dataType = 'LIVE_LAISIC';
+   laisicLiveLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
+   laisicLiveLayer.phpfile = 'query_current_vessels.php';
+   laisicLiveLayer.resultCount = 0;
+   laisicLiveLayer.lastestCall = null;
+   dataLayers.push(laisicLiveLayer);
+
+   //--------------------------------------------------------------
+   //LAISIC AIS Track layer
+   var laisicAisTrackLayer = new dataLayerObject('laisicLayer', 
+      function showLaisicLayer(thislayer, callback) {
+         getLAISICFromDB('LAISIC_AIS_TRACK', thislayer, callback);
+      }, 
+      function hideLaisicLayer() {
+         clearLayerMarkers(this);
+      },
+      true  //force refresh this layer
+      );
+   //Data object of arrays
+   laisicAisTrackLayer.data = {
+      dataArray: [],
+      markerArray: [],
+      markerlabelArray: []
+   };
+   laisicAisTrackLayer.dataType = 'LAISIC_AIS_TRACK';
+   laisicAisTrackLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
+   laisicAisTrackLayer.phpfile = 'query_current_vessels.php';
+   laisicAisTrackLayer.resultCount = 0;
+   laisicAisTrackLayer.lastestCall = null;
+   dataLayers.push(laisicAisTrackLayer);
+
+   //--------------------------------------------------------------
+   //LAISIC RADAR layer
+   var laisicRadarLayer = new dataLayerObject('laisicLayer', 
+      function showLaisicLayer(thislayer, callback) {
+         getLAISICFromDB('LAISIC_RADAR', thislayer, callback);
+      }, 
+      function hideLaisicLayer() {
+         clearLayerMarkers(this);
+      },
+      true  //force refresh this layer
+      );
+   //Data object of arrays
+   laisicRadarLayer.data = {
+      dataArray: [],
+      markerArray: [],
+      markerlabelArray: []
+   };
+   laisicRadarLayer.dataType = 'LAISIC_RADAR';
+   laisicRadarLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
+   laisicRadarLayer.phpfile = 'query_current_vessels.php';
+   laisicRadarLayer.resultCount = 0;
+   laisicRadarLayer.lastestCall = null;
+   dataLayers.push(laisicRadarLayer);
+
+   //--------------------------------------------------------------
+   //LAISIC AIS Observation layer
+   var laisicAisObservationLayer = new dataLayerObject('laisicLayer', 
+      function showLaisicLayer(thislayer, callback) {
+         getLAISICFromDB('LAISIC_AIS_OBS', thislayer, callback);
+      }, 
+      function hideLaisicLayer() {
+         clearLayerMarkers(this);
+      },
+      true  //force refresh this layer
+      );
+   //Data object of arrays
+   laisicAisObservationLayer.data = {
+      dataArray: [],
+      markerArray: [],
+      markerlabelArray: []
+   };
+   laisicAisObservationLayer.dataType = 'LAISIC_AIS_OBS';
+   laisicAisObservationLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
+   laisicAisObservationLayer.phpfile = 'query_current_vessels.php';
+   laisicAisObservationLayer.resultCount = 0;
+   laisicAisObservationLayer.lastestCall = null;
+   dataLayers.push(laisicAisObservationLayer);
 
    //--------------------------------------------------------------
    //RADAR layer
@@ -3217,7 +3306,7 @@ $(function initializeLayers() {
       markerArray: [],
       markerlabelArray: []
    };
-   radarLayer.dataType = "RADAR";
+   radarLayer.dataType = 'RADAR';
    //Marker path definition for this layer: Circle with line for direction (intended for RADAR)
    //TODO: incorporate marker size with vw or vl
    radarLayer.markerpath = 'M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0';
@@ -3555,18 +3644,9 @@ function refreshLayers(newShownLayerID, newHiddenLayerID) {
 /** 
  * Get AIS data from JSON, which is from database, with bounds.
  */
-function getAISFromDB(sourceType, thislayer, callback) {
+function getAISFromDB(thislayer, callback) {
    //TODO: fix custom queries
    customQuery = null;
-
-   //Store new previous sourceType
-   if (sourceType.indexOf('LAISIC') != 0) {//sourceType == "AIS" || sourceType == "RADAR" || sourceType == "LIVE_LAISIC") {
-      prevSourceType = sourceType;
-   }
-   else {
-      prevSourceType = "LAISIC";
-   }
-   
 
    console.log("Refreshing AIS targets...");
    $('#' + thislayer.layerID + ' .queryStatement').val('QUERY RUNNING...');
@@ -3574,7 +3654,290 @@ function getAISFromDB(sourceType, thislayer, callback) {
 
    var phpWithArg;
 
-   //Read sourceType (AIS, LAISIC stuff, etc) from global variable, set previous right before this calling this function.  This one used to notify PHP script which table to query from.
+   //Notify PHP script which table to query from.
+   var sourceStr = 'source=AIS';
+
+   //Look for search
+   if (searchTerm == '') {
+      phpWithArg = thislayer.phpfile + '?' + sourceStr;
+
+      if (enableRisk) {
+         phpWithArg += "&risk=1";
+      }
+
+      if ($('#mssisonly:checked').length != 0) {
+         phpWithArg += "&mssisonly=1";
+      }
+
+      if ($('#sataisonly:checked').length != 0) {
+         phpWithArg += "&sataisonly=1";
+      }
+
+      if (vesseltypeFilterPHPStr != '') {
+         phpWithArg += vesseltypeFilterPHPStr;
+      }
+
+      //if vessel age limit was chosen, then add option
+      if (vessel_age != -1) {
+         phpWithArg += "&vessel_age=" + vessel_age;
+      }
+
+      phpWithArg += viewBounds.boundStr;
+
+      enableCustomQuery = false;
+   }
+   else {   
+      //Something was typed into search bar, entering search mode
+      phpWithArg = thislayer.phpfile + '?' + sourceStr + viewBounds.boundStr + "&keyword=" + searchTerm;
+     
+      //If not in Time Machine mode, change status display to custom query message
+      if (!document.getElementById("enabletimemachine") 
+          || !document.getElementById("enabletimemachine").checked) {
+         enableCustomQuery = true;
+         queryCustomQuery = customQuery;
+         document.getElementById('status-msg').innerHTML = "Custom Query Filtering On: \"" + customQuery + "\" [<a href='' onClick='disableCustomQuery(); return false;'>cancel</a>]";
+         document.getElementById('status-msg').style.opacity = "1";
+      }
+   }
+
+   //Debug query output
+   console.log(thislayer.layerID + ': ' + phpWithArg);
+
+   //Keep track of newest PHP request, current one may not be the newest one by the time data is received
+   thislayer.latestCall = phpWithArg;
+
+   //Call PHP and get results as markers
+   $.getJSON(
+         phpWithArg, // The server URL 
+         { }
+      ) //end .getJSON()
+      .done(function (response) {
+         clearLayerMarkers(thislayer);
+
+         //Check if newer query exists, cancel current operation if newer one does exist
+         if (thislayer.latestCall !== phpWithArg) { 
+            console.log('Newer PHP call exists, canceling this call');
+            console.log(' current call: ' + phpWithArg);
+            console.log(' last call: ' + thislayer.latestCall);
+
+            callback(false);
+            return;
+         }
+         /*
+            console.log(' current call: ' + phpWithArg);
+            console.log(' last call: ' + thislayer.latestCall);
+            console.log(phpWithArg.indexOf('source=LAISIC') == -1);
+            console.log(thislayer.latestCall !== phpWithArg);
+         */
+
+         //Check if user removed layer before this function finished
+         if ($('#'+thislayer.layerID).parent('#displayedLayersList').length == 0) {
+            console.log('Layer was removed; discard retrieved data');
+            clearLayerMarkers(thislayer);
+            
+            callback();
+            return;
+         }
+
+         //console.log(thislayer.layerID + ': ' + response.query);
+         //Show the query and put it in the form
+         $('#' + thislayer.layerID + ' .queryStatement').val(response.query);
+
+         localStorage.setItem('query-timestamp', Math.floor((new Date()).getTime()/1000));
+         localStorage.setItem('query', response.query);
+
+         if (!customQuery) {
+            mainQuery = response.basequery;
+         }
+
+         //Prepare to grab PHP results as JSON objects
+         $.each(response.vessels, function(key,vessel) {
+            //Push to localStorage for tables to know of change
+            localStorage.setItem('vessel-'+vessel.mmsi, "0");
+               
+            var point = new google.maps.LatLng(
+               parseFloat(vessel.lat),
+               parseFloat(vessel.lon));
+
+            var iconColor = getIconColor(vessel.vesseltypeint, vessel.streamid);
+
+            //Slightly different style for vessels with valid risk score
+            if (enableRisk && (vessel.risk_score_safety != null || vessel.risk_score_security != null)) {
+               var riskColorSafety = getRiskColor(vessel.vesseltypeint, vessel.streamid, vessel.safety_rating);
+               var riskColorSecurity = getRiskColor(vessel.vesseltypeint, vessel.streamid, vessel.security_rating);
+                  var marker = new google.maps.Marker({
+                     position: point,
+                     icon: {
+                        path:         thislayer.markerpath, //'M 0,8 4,8 4,-3 0,-8 -4,-3 -4,8 z', //middle rear
+                        strokeColor:  riskColorSafety,
+                        strokeWeight: vw*3/4,
+                        fillColor:    iconColor,
+                        fillOpacity:  0.6,
+                        optimized:    false,
+                        rotation:     parseInt(vessel.heading)
+                     }
+                  });
+            }
+            else {   //regular style for AIS vessels with no risk info
+               var marker = new google.maps.Marker({
+                  position: point,
+                  icon: {
+                     path:         thislayer.markerpath, //'M 0,8 4,8 4,-3 0,-8 -4,-3 -4,8 z', //middle rear
+                  strokeColor:  shadeColor(iconColor,-50),
+                  strokeWeight: vw/4,
+                  fillColor:    iconColor,
+                  fillOpacity:  0.8,
+                  rotation:     parseInt(vessel.heading),
+                  optimized:    false,
+                  }
+               });
+            }               
+
+            //Listener for click on marker to display infoBubble
+            google.maps.event.addListener(marker, 'click', function () {
+               //Associate the infoBubble to the marker
+               clearInterval(vesselLastUpdated);
+
+               //Draw the selection square
+               selectionSquare.setPosition(point);
+               selectionSquare.setMap(map);
+
+               //Setup the infoBubble and show it
+               markerInfoBubble(marker, vessel, infoBubble);
+
+               //Close the infoBubble if user clicks outside of infoBubble area
+               google.maps.event.addListenerOnce(map, 'click', function() {
+                  if (enableIHSTabs) {
+                     for (var i=0; i < NUM_INFO_BUBBLE; i++) {
+                        console.log('Removing tab ' + i);
+                        infoBubble.removeTab(0);
+                     }
+                  }
+                  clearInterval(vesselLastUpdated);
+                  selectionSquare.setMap(null);
+                  infoBubble.setMap(null);
+                  infoBubble.close(); 
+               });
+            });
+
+            //Listener for mouseover marker to display tracks
+            google.maps.event.addListener(marker, 'mouseover', function() {
+               //Hover display name
+               if (vessel.vesselname != null && vessel.vesselname.length != 0) {
+                  marker.setTitle(vessel.vesselname.trim());
+               }
+               else {
+                  marker.setTitle(vessel.mmsi);
+               }
+            });
+
+            //Listen for marker right clicks (to query and display track)
+            google.maps.event.addListener(marker, 'rightclick', function() {
+               console.log('Getting track for: ' + vessel.mmsi+','+vessel.vesseltypeint+',AIS,'+vessel.datetime+','+vessel.streamid+','+vessel.commsid);
+               getTrack(vessel.mmsi, vessel.vesseltypeint, 'AIS', vessel.datetime, vessel.streamid, vessel.commsid);
+            });
+
+            //Prepare vessel labels
+            var vessellabel = '';
+            if (vessel.vesselname != null && vessel.vesselname != '') {
+               vessellabel = vessel.vesselname;
+            }
+            else {
+               vessellabel = vessel.mmsi;
+            }
+
+            //add vesselnameLabel to markersDisplayed array
+            vesselnameLabel = new InfoBox({
+                 content: vessellabel,
+                 boxStyle: {
+                   border: "0px dashed black",
+                   textAlign: "center",
+                   //fontSize: "10pt",  //Define text styling properties in CSS file
+                   width: "120px"
+                 },
+                 disableAutoPan: true,
+                 pixelOffset: new google.maps.Size(-60, 10),
+                 position: new google.maps.LatLng(vessel.lat, vessel.lon),
+                 closeBoxURL: "",
+                 isHidden: false,
+                 pane: "mapPane",
+                 enableEventPropagation: true
+            });
+
+            vesselnameLabel.open(map);
+
+            //Prepare data for creating marker infoWindows/infoBubbles later
+            thislayer.data.dataArray.push(vessel);
+            thislayer.data.markerArray.push(marker);
+            thislayer.data.markerlabelArray.push(vesselnameLabel);
+         });
+
+         //Display the appropriate layer according to the sidebar checkboxes
+         if (document.getElementById("HeatmapLayer") && document.getElementById("HeatmapLayer").checked) {
+            addHeatmap();
+         }
+         else {
+            //Show the individual vessel markers
+            thislayer.data.markerArray.forEach( function (marker) {
+               marker.setMap(map);
+            });
+            if ($('#showtargetlabels') != null || $('#showtargetlabels:checked').length != 0) {
+               thislayer.data.markerlabelArray.forEach( function (markerlabel) {
+                  markerlabel.setMap(map);
+               });
+            }
+            else {
+               thislayer.data.markerlabelArray.forEach( function (markerlabel) {
+                  markerlabel.setMap(null);
+               });
+            }
+         }
+
+         //Check if user wants to display all tracks (from URL request)
+         // Need to be careful if user has "queryTracks=all" in the URL request, 
+         // then starts clicking around on LAISIC outputs, etc.  All tracks will be queried unintentionally.
+         var trackDisplayArgument = Request.QueryString("queryTracks").toString();
+         if (trackDisplayArgument == 'all') {
+            queryAllTracks();
+            document.getElementById("queryalltracks").checked = true;
+         }
+
+         thislayer.resultCount = response.resultcount;
+         updateGlobalResultCount(thislayer.resultCount);
+
+         callback();
+      }) //END .done()
+      .fail(function(d, textStatus, error) { 
+         if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+            console.log(thislayer.layerID + ': ' +  'Database is down'); 
+            $('#' + thislayer.layerID + ' .queryStatement').val('DATABASE IS DOWN.');
+         }
+         else {
+            //Update activity status spinner and results
+            console.log(thislayer.layerID + ': ' +  'No response from track query; error in php?'); 
+            $('#' + thislayer.layerID + ' .queryStatement').val('ERROR IN QUERY.  PLEASE TRY AGAIN.');
+         }
+         
+         callback(false);
+      }); //END .fail()
+}
+
+/* -------------------------------------------------------------------------------- */
+/** 
+ * Get LAISIC data from JSON, which is from database, with bounds.
+ */
+function getLAISICFromDB(sourceType, thislayer, callback) {
+   //sourceType = 'LAISIC';//TODO: LAISIC_AIS_TRACK or other LAISIC layers, not simply LAISIC
+
+   //TODO: fix custom queries
+   customQuery = null;
+
+   console.log("Refreshing LAISIC targets...");
+   $('#' + thislayer.layerID + ' .queryStatement').val('QUERY RUNNING...');
+   $('#stats').empty();
+
+   var phpWithArg;
+
    var sourceStr = "source=" + sourceType;
 
    //Check if a query has been previously made, and use it to preserve previous query but just change the bounds to current view now
@@ -3583,20 +3946,6 @@ function getAISFromDB(sourceType, thislayer, callback) {
 
       if (enableRisk) {
          phpWithArg += "&risk=1";
-      }
-
-      //Check for AIS's source (terrestrial vs SatAIS)
-      if (sourceType == 'AIS') {
-         if ($('#mssisonly:checked').length != 0) {
-            phpWithArg += "&mssisonly=1";
-         }
-         if ($('#sataisonly:checked').length != 0) {
-            phpWithArg += "&sataisonly=1";
-         }
-
-         if (vesseltypeFilterPHPStr != '') {
-            phpWithArg += vesseltypeFilterPHPStr;
-         }
       }
 
       //if vessel age limit was chosen, then add option
@@ -3610,30 +3959,6 @@ function getAISFromDB(sourceType, thislayer, callback) {
    }
    else {   //Something was typed into query bar
       phpWithArg = thislayer.phpfile + '?' + sourceStr + viewBounds.boundStr + "&keyword=" + searchTerm;
-      /*
-      else {
-         console.log('Entered custom query: ' + customQuery);
-
-         //If custom query supplies a lat/lon bound, then don't append
-         if (customQuery.toLowerCase().indexOf('where l') != -1) {
-            //customQuery = customQuery.substring(0, customQuery.indexOf('WHERE Latitude')-1)
-
-            console.log('Not appending anything to custom query');
-            phpWithArg = thislayer.phpfile + '?query=' + customQuery + '&noappend=1';
-         }
-         else {
-            //Custom SQL query statement
-            phpWithArg = thislayer.phpfile + '?query=' + customQuery + viewBounds.boundStr;
-         }
-
-         console.log('Performing custom query on: ' + customQuery);
-         
-         //if vessel age limit was chosen, then add option
-         if (vessel_age != -1) {
-            phpWithArg += "&vessel_age=" + vessel_age;
-         }
-      }
-      */
      
       //If not in Time Machine mode, change status display to custom query message
       if (!document.getElementById("enabletimemachine") 
@@ -3646,27 +3971,10 @@ function getAISFromDB(sourceType, thislayer, callback) {
    }
 
    //Debug query output
-   console.log('getTargetsFromDB(): ' + phpWithArg);
-
-   //For LAISIC points, need to clear markers before executing PHP request
-   if (sourceType.indexOf('LAISIC') == 0) {//sourceType != "AIS" && sourceType != "RADAR" && sourceType != "LIVE_LAISIC") {
-      //Delete previous markers
-      if (viewBounds.boundStr != null) {
-         clearLayerMarkers(thislayer);
-         /*
-         //clearMarkerAndClusters();
-         localStorage.clear();
-         for (var i=0; i < markersDisplayed.length; i++) {
-            markersDisplayed[i].vesselnameLabel.setMap(null);
-         }
-         emptyArray(markersDisplayed);
-         */
-      }
-   }
-
+   console.log(thislayer.layerID + ': ' + phpWithArg);
 
    //Keep track of newest PHP request, current one may not be the newest one by the time data is received
-   latestPHPcall = phpWithArg;
+   thislayer.latestCall = phpWithArg;
 
    //Call PHP and get results as markers
    $.getJSON(
@@ -3677,23 +3985,29 @@ function getAISFromDB(sourceType, thislayer, callback) {
          clearLayerMarkers(thislayer);
 
          //Check if newer query exists, cancel current operation if newer one does exist
-         if (latestPHPcall !== phpWithArg &&
+         if (thislayer.latestCall !== phpWithArg &&
             //allow LAISIC queries to override if last layer was LAISIC related
-            phpWithArg.indexOf('source=LAISIC') == -1 && 
-             //If in LAISIC mode, don't allow AIS to overlay
-            (phpWithArg.indexOf('source=AIS') != -1 && latestPHPcall.indexOf('source=LAISIC') != -1)
-            ) { 
+            phpWithArg.indexOf('source=LAISIC') == -1) { 
             console.log('Newer PHP call exists, canceling this call');
             console.log(' current call: ' + phpWithArg);
-            console.log(' last call: ' + latestPHPcall);
+            console.log(' last call: ' + thislayer.latestCall);
             return;
          }
          /*
             console.log(' current call: ' + phpWithArg);
-            console.log(' last call: ' + latestPHPcall);
+            console.log(' last call: ' + thislayer.latestCall);
             console.log(phpWithArg.indexOf('source=LAISIC') == -1);
-            console.log(latestPHPcall !== phpWithArg);
+            console.log(thislayer.latestCall !== phpWithArg);
          */
+
+         //Check if user removed layer before this function finished
+         if ($('#'+thislayer.layerID).parent('#displayedLayersList').length == 0) {
+            console.log('Layer was removed; discard retrieved data');
+            clearLayerMarkers(thislayer);
+            
+            callback();
+            return;
+         }         
 
          //console.log(thislayer.layerID + ': ' + response.query);
          //Show the query and put it in the form
@@ -3702,11 +4016,7 @@ function getAISFromDB(sourceType, thislayer, callback) {
          localStorage.setItem('query-timestamp', Math.floor((new Date()).getTime()/1000));
 
          //Read global variable sourceType to determine which type to query (AIS, or LAISIC stuff)
-         console.log("sourceType: " + sourceType);
          switch (sourceType) {
-            case "AIS":
-               localStorage.setItem('query', response.query);
-               break;
             case "LAISIC_AIS_TRACK":
                localStorage.setItem('query-LAISIC_AIS_TRACK', response.query);
                break;
@@ -3729,9 +4039,6 @@ function getAISFromDB(sourceType, thislayer, callback) {
          $.each(response.vessels, function(key,vessel) {
                //Push to localStorage for tables to know of change
                switch (sourceType) {
-                  case "AIS":
-                     localStorage.setItem('vessel-'+vessel.mmsi, "0");
-                     break;
                   case "LAISIC_AIS_TRACK":
                      localStorage.setItem('laisicaistrack-'+vessel.trknum, "1");
                      break;
@@ -3768,52 +4075,6 @@ function getAISFromDB(sourceType, thislayer, callback) {
                }
 
                var iconColor = getIconColor(vessel.vesseltypeint, vessel.streamid);
-
-               //Slightly different style for vessels with valid risk score
-               if (enableRisk && (vessel.risk_score_safety != null || vessel.risk_score_security != null)) {
-                  var riskColorSafety = getRiskColor(vessel.vesseltypeint, vessel.streamid, vessel.safety_rating);
-                  var riskColorSecurity = getRiskColor(vessel.vesseltypeint, vessel.streamid, vessel.security_rating);
-                  var marker = new google.maps.Marker({
-                     position: point,
-                     icon: {
-                        path:         thislayer.markerpath, //'M 0,8 4,8 4,-3 0,-8 -4,-3 -4,8 z', //middle rear
-                        strokeColor:  riskColorSafety,
-                        strokeWeight: vw*3/4,
-                        fillColor:    iconColor,
-                        fillOpacity:  0.6,
-                        optimized:    false,
-                        rotation:     parseInt(vessel.heading)
-                     }
-                  });
-               }
-               else if (sourceType == "RADAR") {   //RADAR marker style
-                  var marker = new google.maps.Marker({
-                     position: point,
-                     icon: {
-                        path:         markerpathradar,
-                        strokeColor:  '#222200',
-                        strokeWeight: 1,
-                        fillColor:    iconColor,
-                        fillOpacity:  0.8,
-                        rotation:     parseInt(vessel.heading)-90,
-                        optimized:    false,
-                     }
-                  });
-               }
-               else {   //regular style for AIS vessels with no risk info
-                  var marker = new google.maps.Marker({
-                     position: point,
-                     icon: {
-                        path:         thislayer.markerpath, //'M 0,8 4,8 4,-3 0,-8 -4,-3 -4,8 z', //middle rear
-                        strokeColor:  shadeColor(iconColor,-50),
-                        strokeWeight: vw/4,
-                        fillColor:    iconColor,
-                        fillOpacity:  0.8,
-                        rotation:     parseInt(vessel.heading),
-                        optimized:    false,
-                     }
-                  });
-               }               
 
                if (sourceType == "LIVE_LAISIC") {
                   marker = new google.maps.Marker({
@@ -3901,9 +4162,6 @@ function getAISFromDB(sourceType, thislayer, callback) {
                   else if (sourceType == "LAISIC_RADAR") {
                      marker.setTitle('LAISIC_RADAR\nTrknum: ' + vessel.trknum);
                   }
-                  else if (sourceType == "RADAR") {
-                     marker.setTitle(vessel.commsid);
-                  }
                   else if (sourceType == "LIVE_LAISIC") {
                      marker.setTitle('LAISIC Correlation\nRADAR Track ID: ' + vessel.commsid + '\nAIS MMSI: ' + vessel.mmsi);
                   }
@@ -3930,24 +4188,11 @@ function getAISFromDB(sourceType, thislayer, callback) {
                else if (vessel.trknum != null && vessel.trknum != '') {
                   vessellabel = vessel.trknum;
                }
-               else if (sourceType == "RADAR") {
-                  vessellabel = vessel.commsid;
-               }
                else {
                   vessellabel = vessel.mmsi;
                }
 
-               //add vesselnameLabel to markersDisplayed array
-               /* The MapLabel method causes white map areas when too many MapLabels are displayed
-               vesselnameLabel = new MapLabel({
-                  text: vessellabel,
-                  position: new google.maps.LatLng(vessel.lat, vessel.lon),
-                  map: map,
-                  fontSize: 12,
-                  align: 'left'
-               });
-               */
-               //Trying InfoBox to display many labels with no problems
+               //InfoBox to display many labels with no problems
                vesselnameLabel = new InfoBox({
                     content: vessellabel,
                     boxStyle: {
@@ -3966,28 +4211,6 @@ function getAISFromDB(sourceType, thislayer, callback) {
                });
 
                vesselnameLabel.open(map);
-               
-               /*
-               //Check if labels should be displayed or not
-               if ($('#showtargetlabels') == null || $('#showtargetlabels:checked').length == 0) {
-                  vesselnameLabel.setMap(null);
-               }
-               */
-
-               /*
-               markersDisplayed.push({
-                  mmsi: vessel.mmsi, 
-                  trknum: vessel.commsid, 
-                  vessellabel: vessel.vesselname,
-                  vesseltypeint: vessel.vesseltypeint,
-                  source: sourceType,
-                  streamid: vessel.streamid,
-                  datetime: vessel.datetime,
-                  lat: vessel.lat,
-                  lon: vessel.lon,
-                  vesselnameLabel: vesselnameLabel 
-               });
-               */
 
                //Prepare data for creating marker infoWindows/infoBubbles later
                thislayer.data.dataArray.push(vessel);
@@ -4023,11 +4246,6 @@ function getAISFromDB(sourceType, thislayer, callback) {
          if (trackDisplayArgument == 'all') {
             queryAllTracks();
             document.getElementById("queryalltracks").checked = true;
-         }
-
-         //If RADAR source, then don't update activity status spinner, let AIS do that.
-         if (sourceType == "RADAR" || sourceType == "LIVE_LAISIC") {
-            return true;
          }
 
          thislayer.resultCount = response.resultcount;
@@ -4089,7 +4307,7 @@ function getClustersFromDB(thislayer, callback) {
 
 
    //Keep track of newest PHP request, current one may not be the newest one by the time data is received
-   latestPHPcall = phpWithArg;
+   thislayer.latestCall = phpWithArg;
 
    //Call PHP and get results as markers
    $.getJSON(
@@ -4098,11 +4316,20 @@ function getClustersFromDB(thislayer, callback) {
       ) //end .getJSON()
       .done(function (response) {
          //Check if newer query exists, cancel current operation if newer one does exist
-         if (latestPHPcall !== phpWithArg &&
+         if (thislayer.latestCall !== phpWithArg &&
             phpWithArg.indexOf('source=LAISIC') == -1) { //allow LAISIC queries to override this check
             console.log('Newer PHP call exists, canceling this call');
             console.log(' current call: ' + phpWithArg);
-            console.log(' last call: ' + latestPHPcall);
+            console.log(' last call: ' + thislayer.latestCall);
+            return;
+         }
+
+         //Check if user removed layer before this function finished
+         if ($('#'+thislayer.layerID).parent('#displayedLayersList').length == 0) {
+            console.log('Layer was removed; discard retrieved data');
+            clearLayerMarkers(thislayer);
+            
+            callback();
             return;
          }
 
@@ -4297,7 +4524,16 @@ function getRADARFromDB(customQuery, thislayer, callback) {
          { }
       ) //end .getJSON()
       .done(function (response) {
-         console.log(thislayer.layerID + ': ' + response.query);
+         //Check if user removed layer before this function finished
+         if ($('#'+thislayer.layerID).parent('#displayedLayersList').length == 0) {
+            console.log('Layer was removed; discard retrieved data');
+            clearLayerMarkers(thislayer);
+            
+            callback();
+            return;
+         }
+         
+         //console.log(thislayer.layerID + ': ' + response.query);
          //Show the query and show it in the query bar of this layer
          $('#' + thislayer.layerID + ' .queryStatement').val(response.query);
 
@@ -4840,19 +5076,9 @@ function disableDistanceTool() {
 
 /* -------------------------------------------------------------------------------- */
 function toggleShowTargetLabels() {
-   if (document.getElementById("showtargetlabels") != null &&
-       document.getElementById("showtargetlabels").checked) {
+   if ($('#showtargetlabels:checked').length > 0) {
       console.log('Showing vessel names');
 
-      /*
-      //TODO: remove OLD
-      //loop through markersDisplayed
-      for (var i=0; i < markersDisplayed.length; i++) {
-         markersDisplayed[i].vesselnameLabel.setMap(map);
-      }
-      */
-
-      //NEW
       dataLayers.forEach( function (dataLayer) {
          if (typeof dataLayer.data !== 'undefined' 
             && typeof dataLayer.data.markerlabelArray !== 'undefined') {
@@ -4865,15 +5091,6 @@ function toggleShowTargetLabels() {
    else {
       console.log('Hiding vessel names');
 
-      /*
-      //TODO: remove OLD
-      //loop through markersDisplayed
-      for (var i=0; i < markersDisplayed.length; i++) {
-         markersDisplayed[i].vesselnameLabel.setMap(null);
-      }
-      */
-
-      //NEW
       dataLayers.forEach( function (dataLayer) {
          if (typeof dataLayer.data !== 'undefined' 
             && typeof dataLayer.data.markerlabelArray !== 'undefined') {
@@ -4956,6 +5173,9 @@ function search() {
    if (advancedSearchEnabled) {
       $('#search').attr('placeholder', 'Advanced search filtering enabled');
       searchTerm = $('#searchMMSI').val();
+      
+      //TODO: handle the other advanced search fields
+      
    }
    else {
       $('#search').attr('placeholder', 'Search for Vessels (MMSI, IMO, vessel name, call sign, or destination)');
