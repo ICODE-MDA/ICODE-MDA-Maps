@@ -47,7 +47,7 @@ geoXML3.parser = function (options) {
 
    // Private methods
    //============================================================================
-   var parse = function (urls) {
+   var parse = function (urls, callback) {
       // Process one or more KML documents
 
       if (typeof urls === 'string') {
@@ -71,7 +71,10 @@ geoXML3.parser = function (options) {
          url = urls[i];
          datetime = url.substring(4,14);
          internals.docSet.push(thisDoc);
-         geoXML3.fetchXML(thisDoc.url, function (responseXML) {render(responseXML, thisDoc);});
+         geoXML3.fetchXML(thisDoc.url, function (responseXML) {
+            render(responseXML, thisDoc);
+            callback();
+         });
       }
    };
 
@@ -110,6 +113,11 @@ geoXML3.parser = function (options) {
    //============================================================================
    var setMap = function (map) {
       parserOptions.map = map;
+   };
+
+   //============================================================================
+   var zoomTo = function (doc) {
+      parserOptions.map.fitBounds(doc.internals.bounds);
    };
 
    //============================================================================
@@ -318,15 +326,7 @@ geoXML3.parser = function (options) {
                parserOptions.createOverlay(groundOverlay, doc, rotation);
             }
             else {
-               $.ajax({
-                  async: false,
-                  type: 'GET',
-                  url: 'kmz/rotate.php?dir=' + datetime +'&rotation=' + rot,
-                  success: function(data) {
-                     //callback
-                     createOverlay(groundOverlay, doc, rotation);
-                  }
-               });
+               createOverlay(groundOverlay, doc, rotation);
             }
          }
 
@@ -358,7 +358,7 @@ geoXML3.parser = function (options) {
          }
       }
       
-      createKMLOpacityControl(map, INITIAL_OPACITY);
+      //createKMLOpacityControl(map, INITIAL_OPACITY);
    };
 
    //============================================================================
@@ -490,6 +490,7 @@ geoXML3.parser = function (options) {
             groundOverlay.icon.href, 
             bounds, 
             overlayOptions, 
+            docs.length,   //id for #kmloverlay element
             rotation);
 
       if (!!doc) {
@@ -512,7 +513,18 @@ geoXML3.parser = function (options) {
   http://creativecommons.org/licenses/by/3.0/nz/
  ******************************************************************************/
    var OPACITY_MAX_PIXELS = 57;
+
    function createKMLOpacityControl(map, opacity) {
+      //TODO: redo opacity controller with Bootstrap lib
+      var newLayer = $('li');
+      newLayer.addClass('list-group-item');
+      var deleteKMLDiv = $('div');
+      deleteKMLDiv.appendTo(newLayer);
+
+
+      deleteKMLDiv.append('<a href="#" class="link" onclick="deleteKMLLayer(' + (docs.length-1) + ');">Delete KML Layer</a>');
+
+      /*
       var sliderImageUrl = "icons/opacity-slider3d7.png";
 
       // Create main div to hold the control.
@@ -545,9 +557,13 @@ geoXML3.parser = function (options) {
       deleteKMLDiv.setAttribute("style", "padding:0;margin:0;overflow-x:hidden;overflow-y:hidden;vertical-align:top;width:115px;height:20px;");
 
       deleteKMLDiv.innerHTML = '<a href="#" class="link" onclick="deleteKMLLayer(' + (docs.length-1) + ');">Delete KML Layer</a>';
+      */
 
-      map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(opacityDiv);
-      map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(deleteKMLDiv);
+      //TODO: move options to KMZ layer options
+      //$('#kmzLayer').find('.layerBody').append(opacityDiv);
+      $('#uploadedkmzlayers').append(newLayer);
+      //map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(opacityDiv);
+      //map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(deleteKMLDiv);
 
       // Set initial value
       var initialValue = OPACITY_MAX_PIXELS / (100 / opacity);
@@ -555,7 +571,7 @@ geoXML3.parser = function (options) {
       setOpacity(initialValue);
    }
 
-   function setOpacity(pixelX) {
+   var setOpacity = function setOpacity(pixelX) {
       var overlay = docs[0].overlays[0];
       // Range = 0 to OPACITY_MAX_PIXELS
       var value = (100 / OPACITY_MAX_PIXELS) * pixelX;
@@ -598,6 +614,8 @@ geoXML3.parser = function (options) {
       createMarker:  createMarker,
       createOverlay: createOverlay,
       setMap: setMap,
+      zoomTo: zoomTo,
+      setOpacity: setOpacity,
    };
 };
 // End of KML Parser

@@ -16,7 +16,7 @@
 //
 var rotAngle;
 	
-function ProjectedOverlay(map, imageUrl, bounds, opts, rotation)
+function ProjectedOverlay(map, imageUrl, bounds, opts, layerindex, rotation)
 {
  google.maps.OverlayView.call(this);
 
@@ -29,6 +29,7 @@ function ProjectedOverlay(map, imageUrl, bounds, opts, rotation)
 
  this.setMap(map);
  rotAngle = rotation;
+ this.layerindex = layerindex;
 }
 
 ProjectedOverlay.prototype = new google.maps.OverlayView();
@@ -118,12 +119,14 @@ ProjectedOverlay.prototype.draw = function(firstTime)
   url += this.addZ_ + this.map_.getZoom() ;
  }
 
- this.div_.innerHTML = '<div id="kmloverlay"><img src="' + url + '"  width=' + this.div_.style.width + ' height=' + this.div_.style.height + ' ></div>' ;
+ this.div_.innerHTML = '<div id="kmloverlay' + this.layerindex + '"><img src="' + url + '"  width=' + this.div_.style.width + ' height=' + this.div_.style.height + ' ></div>' ;
 
- $('#kmloverlay').rotate(rotAngle);
+ $('#kmloverlay'+this.layerindex).rotate(rotAngle);
 }
 
-//For above's jQuery rotate call
+/**
+ * Extend jQuery to include a div rotate function, to be used above
+ **/
 jQuery.fn.rotate = function(degrees) {
     $(this).css({'-webkit-transform' : 'rotate('+ degrees +'deg)',
                  '-moz-transform' : 'rotate('+ degrees +'deg)',

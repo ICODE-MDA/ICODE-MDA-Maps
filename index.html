@@ -601,7 +601,7 @@
                           <div class="layerBody panel-body panel-collapse collapse">
 
                              <form id="kmzform" role="form">
-                                <label class="control-label">Select KMZ File</label>
+                                <label class="control-label">Select a KMZ File:</label>
                                 <span class="file-input file-input-new">
                                    <div class="input-group ">
                                       <input class="form-control file-caption kmz-fileinput-caption file-caption-name">
@@ -625,6 +625,10 @@
                                 <div id="kmzprogressbar" class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                                 </div>
                              </div>
+
+                             <label class="control-label">Uploaded KMZ Layers:</label>
+                             <ul id="uploadedkmzlayers" class="list-group">
+                             </ul>
 
                           </div>
                           </li>
@@ -1016,7 +1020,7 @@
      <form id="geocode-form" role="form">
         <div id="geocodepanel" class="form-group">
            <div class="input-group">
-              <input id="geocodeAddress" class="form-control" type="textbox" placeholder="Enter Location Name or Lat,Lon" value="San Diego, CA">
+              <input id="geocodeAddress" class="form-control" type="text" placeholder="Enter Location Name or Lat,Lon" value="San Diego, CA">
               <span class="input-group-btn">
                  <input type="button" class="btn btn-success" value="Set Map Center" onclick="codeAddress()">
               </span>

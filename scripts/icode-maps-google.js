@@ -3245,11 +3245,12 @@ $(function initializeLayers() {
       }, 
       function hidekmzLayer() {
          console.log('Hiding KMZ layer');
-         this.data.docs.forEach(function (doc) {
-            this.data.hideDocument(doc);
+         var parser = this.data;
+         parser.docs.forEach(function (doc) {
+            parser.hideDocument(doc);
          });
       },
-      true  //force refresh this layer
+      false  //force refresh this layer
       );
    //Define the day night layer object, append to a dataLayer to dataLayerObject
    kmzLayer.dataType = 'KMZ';
@@ -4884,30 +4885,75 @@ function showPorts(portIcons, portCircles, portLabel, portPolygons, thislayer, c
 function showUploadedKMZ(datetime) {
    console.log('Showing KMZ');
 
+   var index = dataLayers[getdataLayerIndex('KMZ')].data.docs.length;
+
    //Set the map before the first KMZ display.  During initialization, map setting probably
    // wasn't successful, so set it here after map object has been initiated fully.
    dataLayers[getdataLayerIndex('KMZ')].data.setMap(map);
 
-   dataLayers[getdataLayerIndex('KMZ')].data.parse('kmz/' + datetime + '/doc.kml');
+   dataLayers[getdataLayerIndex('KMZ')].data.parse('kmz/' + datetime + '/doc.kml', function() {
+      //Add KMZ layer controls to options panel
+      var newLayer = $('<li>');
+      newLayer.attr('id','kmz-'+index).addClass('list-group-item').appendTo('#uploadedkmzlayers');
+      var deleteKMLDiv = $('<div>');
+      newLayer.append(deleteKMLDiv);
+
+      var rowDiv = $('<div class="row">');
+      deleteKMLDiv.append(rowDiv);
+
+      var colThumbnailDiv = $('<div class="col-lg-8">');
+      rowDiv.append(colThumbnailDiv);
+      var thumbnail = $('<img id="kmz-'+index+'-thumb" src="'+dataLayers[getdataLayerIndex('KMZ')].data.docs[index].overlays[0].url_+'"  style="max-height: 200px; max-width: 200px;">');
+      thumbnail.appendTo(colThumbnailDiv);
+
+      var colTrashDiv = $('<div class="col-lg-2">');
+      rowDiv.append(colTrashDiv);
+      var trashButton = $('<button>').attr('id','kmz-'+index+'-delete').addClass('btn').addClass('btn-default').append('<span class="glyphicon glyphicon-trash"></span>').appendTo(colTrashDiv);
+      $('#kmz-'+index+'-delete').hide();
+
+      var colNameDiv = $('<div class="col-lg-8">');
+      rowDiv.append(colNameDiv);
+      colNameDiv.append($('.file-caption-name').val());
+
+      $('#kmz-'+index).hover(
+            function() {
+               $('#kmz-'+index+'-delete').show();
+            },
+            function() {
+               $('#kmz-'+index+'-delete').hide();
+            });
+
+      $('#kmz-'+index+'-thumb').click(function() {
+         dataLayers[getdataLayerIndex('KMZ')].data.zoomTo(dataLayers[getdataLayerIndex('KMZ')].data.docs[index]);
+      });
+
+      $('#kmz-'+index+'-delete').click(function() {
+         deleteKMLLayer(index);
+      });
+   });
 }
 
 /* -------------------------------------------------------------------------------- */
 function deleteKMLLayer(index) {
-   if (dataLayers[getdataLayerIndex('KMZ')].data.docs) {
-      for (var i in dataLayers[getdataLayerIndex('KMZ')].data.docs[0].markers) {
-         dataLayers[getdataLayerIndex('KMZ')].data.docs[0].markers[i].setMap(null);
-      }
-      emptyArray(dataLayers[getdataLayerIndex('KMZ')].data.docs[0].markers);
-      dataLayers[getdataLayerIndex('KMZ')].data.docs[0].overlays[0].setMap(null);
-      dataLayers[getdataLayerIndex('KMZ')].data.docs[0].overlays[0] = null;
-      dataLayers[getdataLayerIndex('KMZ')].data.docs[0] = null
-   }
-   //Delete the opacity slider control
-   //TODO: make sure to pop the correct object
-   map.controls[google.maps.ControlPosition.LEFT_BOTTOM].pop();
-   map.controls[google.maps.ControlPosition.LEFT_BOTTOM].pop();
+   var numKMLlayers = dataLayers[getdataLayerIndex('KMZ')].data.docs.length;
 
-   dataLayers[getdataLayerIndex('KMZ')].data.splice(index, 1)
+   if (numKMLlayers > 0 && index <= numKMLlayers-1) {
+      for (var i in dataLayers[getdataLayerIndex('KMZ')].data.docs[index].markers) {
+         dataLayers[getdataLayerIndex('KMZ')].data.docs[index].markers[i].setMap(null);
+      }
+      emptyArray(dataLayers[getdataLayerIndex('KMZ')].data.docs[index].markers);
+      dataLayers[getdataLayerIndex('KMZ')].data.docs[index].overlays[0].setMap(null);
+      dataLayers[getdataLayerIndex('KMZ')].data.docs[index].overlays[0] = null;
+      dataLayers[getdataLayerIndex('KMZ')].data.docs[index] = null
+   }
+   else {
+      console.log('Index' + index + 'is out of range of parser docs');
+   }
+
+   //Don't splice in order to keep indices consistent with delete button id's
+   //dataLayers[getdataLayerIndex('KMZ')].data.docs.splice(index, 1);
+
+   $('#kmz-'+index).remove();
 }
 
 /* -------------------------------------------------------------------------------- */
