@@ -39,6 +39,9 @@
      <script type="text/javascript" src="scripts/dragdrop.js"></script>
      <script type="text/javascript" src="scripts/maplabel-compiled.js"></script> <!-- for distance tool -->
      <script type="text/javascript" src="scripts/shapedrawing.js"></script>
+     <script type="text/javascript" src="scripts/geoxml3.js"></script> <!-- for KMZ extraction and display, req'd by fileUpload.js -->
+     <script type="text/javascript" src="scripts/ExtDraggableObject.js"></script> <!-- req'd by geoxml3.js -->
+     <script type="text/javascript" src="scripts/ProjectedOverlay.js"></script> <!-- req'd by geoxml3.js -->
 
      <!-- JQueryUI -->
      <!-- Theme downloaded from http://jqueryui.com/download/#!zThemeParams=5d00000100f405000000000000003d8888d844329a8dfe02723de3e5701fa198449035fc0613ff729a37dd818cf92b1f6938fefa90282d04ae436bb72367f5909357c629e832248af2c086db4ab730aa4cced933a88449eca61db9f7f3b23d47f58a712d809b6088edfb34ad39fdc365386d0fa05a1ac3ecd320d2c989729f79ebdc6c6c1efbdad4c8411d498f009ffe98fe129da7602fb950113abdae4a76a6c41a4b54b4f82bb8821d6d431cd3fdd76b9d621596a2728b93385f2e7aaf8ea6603553343d43829941536e2bdd3ed7d7d3207364bf351633b31b934a71523a88fa2058cdd4c2e0778cd56d6ccac254ddace19ff4460a100e2e6a52830d9063c6e328cc3cb5e3d6dbe1077ae8b7cc5fa6414eafd15883b40c6c3e71647031ce3da7038a945a5628669fbe0e5139dad7ce99c00f25c2cd40569bd2fe1b2caed45bf2b8943f6ac17215bd54437a0f739009848e80f1d5c00d99870e7258d07402af6b22872fdf8f2892a7e9274aaa9181573ddd8cd7788511b4459e736d76b3e64e015809712e904499648868a11e35b3bb8ee1168d6039c5a86eee8cf545c877dbdd0111ab04ede46a85a17baed0958026fe23d2e490cfa504ab598731d779a2434fa164085379d31e1ff08e2eeb9475cce3d5b3e9b2fd4df43dffe6cf0eda -->
@@ -78,7 +81,7 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
            </button>
-           <a class="navbar-brand" href="#">ICODE-MDA Maps 2.0 (beta)</a>
+           <a class="navbar-brand" href="#" onClick="location.reload(true); return false;">ICODE-MDA Maps 2.0 (beta)</a>
         </div>
 
         <!-- Search and other navigation items -->
@@ -578,6 +581,54 @@
                           </div>
                           </li>
 
+                          <!-- KMZ Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="kmzLayer" class="panel panel-default">
+                          <div class="layerHeading panel-heading">
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus-sign"></span>
+                                   KMZ Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
+                             <button class="layersOptionsBtn btn btn-default btn-xs btn-expand">
+                                Options
+                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
+                             </button>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+
+                             <form id="kmzform" role="form">
+                                <label class="control-label">Select KMZ File</label>
+                                <span class="file-input file-input-new">
+                                   <div class="input-group ">
+                                      <input class="form-control file-caption kmz-fileinput-caption file-caption-name">
+                                      <div class="input-group-btn">
+                                         <!-- remove button goes here -->
+                                         <!--
+                                         <button type="submit" class="btn btn-default fileinput-upload" onclick="fileUpload(this.form,'kmz/kmzextract.php','upload'); return false;">
+                                            <i class="glyphicon glyphicon-upload"></i>
+                                         </button>
+                                         -->
+                                         <div class="btn btn-primary btn-file">
+                                            <i class="glyphicon glyphicon-folder-open"></i>
+                                            <input id="browseKMZ" type="file" class="file" accept=".kmz" data-show-preview="false">
+                                         </div>
+                                      </div>
+                                   </div>
+                                </span>
+                             </form>
+
+                             <div class="progress">
+                                <div id="kmzprogressbar" class="progress-bar progress-bar-striped" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                </div>
+                             </div>
+
+                          </div>
+                          </li>
+
                           <!-- Day/Night Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
                           <li id="daynightLayer" class="panel panel-default">
                           <div class="layerHeading panel-heading">
@@ -813,6 +864,11 @@
                        <div class="checkbox">
                           <label>
                              <input class="checkbox" id="distancetooltoggle" name="distancetooltoggle" type="checkbox" onclick="toggleDistanceTool();"> Enable distance tool
+                          </label>
+                       </div>
+                       <div class="checkbox">
+                          <label>
+                             <input class="checkbox" id="adaptiveMapType" name="adaptiveMapType" type="checkbox" onclick="adaptiveMapType();" checked="checked"> Change map type with zoom
                           </label>
                        </div>
                        

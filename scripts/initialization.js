@@ -18,8 +18,13 @@ $(function() { //shorthand for: $(document).ready(function() {
    setupAlertAccordion();
    //initializeBrowserFocus();
    queryStatementBehavior();
+   fileKMZUploadBehavior();
 
    //Setup functions definitions =========================================================
+   /* -------------------------------------------------------------------------------- */
+   /**
+    * 
+    **/
    function setupUser() {
       //Main userid global setting
       userid = 'icodeuser';   //temporarily set to icodeuser for testing
@@ -29,6 +34,10 @@ $(function() { //shorthand for: $(document).ready(function() {
       });
    }
 
+   /* -------------------------------------------------------------------------------- */
+   /**
+    * 
+    **/
    function queryBarBehavior() {
       /*
       //Query bar text control
@@ -41,6 +50,10 @@ $(function() { //shorthand for: $(document).ready(function() {
       */
    }
 
+   /* -------------------------------------------------------------------------------- */
+   /**
+    * 
+    **/
    function searchBehavior() {
       $('#searchBarForm').submit(function(e) {
          e.preventDefault();
@@ -57,6 +70,10 @@ $(function() { //shorthand for: $(document).ready(function() {
       });
    }
 
+   /* -------------------------------------------------------------------------------- */
+   /**
+    * 
+    **/
    function advanceSearchBehavior() {
       //Handle toggling advanced search box
       $('#advancedSearchToggle').mousedown( function() {
@@ -87,6 +104,10 @@ $(function() { //shorthand for: $(document).ready(function() {
       });
    }
 
+   /* -------------------------------------------------------------------------------- */
+   /**
+    * 
+    **/
    function geocodingBox() {
       $("#geocode-form").submit(function(e) {
          e.preventDefault();
@@ -111,6 +132,10 @@ $(function() { //shorthand for: $(document).ready(function() {
          });
    }
 
+   /* -------------------------------------------------------------------------------- */
+   /**
+    * 
+    **/
    function menuDivPanels() {
       //Initialize the menuDiv panels' collapsing behavior
       $('.panel-collapse').collapse({'toggle': false});
@@ -134,6 +159,10 @@ $(function() { //shorthand for: $(document).ready(function() {
       });
    }
 
+   /* -------------------------------------------------------------------------------- */
+   /**
+    * 
+    **/
    function progressBar() {
       //Data reload progress bar style behavior initialization
       NProgress.configure({ 
@@ -145,6 +174,10 @@ $(function() { //shorthand for: $(document).ready(function() {
       });
    }
 
+   /* -------------------------------------------------------------------------------- */
+   /**
+    * 
+    **/
    function sortableLayers() {
       //Sortable
       var displayedLayersList = $('#displayedLayersList');
@@ -212,6 +245,10 @@ $(function() { //shorthand for: $(document).ready(function() {
       });
    }
 
+   /* -------------------------------------------------------------------------------- */
+   /**
+    * 
+    **/
    function setupAlertAccordion() {
       $("#alertAccordion").accordion({
          collapsible: true,
@@ -267,6 +304,111 @@ $(function() { //shorthand for: $(document).ready(function() {
          $(this).select();
       });
    }
+
+   /* -------------------------------------------------------------------------------- */
+   /**
+    * 
+    **/
+   function fileKMZUploadBehavior() {
+      $(document).on('change', '.btn-file :file', function() {
+         //START upload
+         console.log(this.files[0]);
+         var file = this.files[0];
+         var xhr = new XMLHttpRequest();
+         xhr.file = file; // not necessary if you create scopes like this
+         
+         //Listen for upload progress
+         xhr.addEventListener('progress', function(e) {
+            var done = e.position || e.loaded, total = e.totalSize || e.total;
+            console.log('xhr progress: ' + (Math.floor(done/total*1000)/10) + '%');
+         }, false);
+
+         //Handle upload progress
+         if (xhr.upload) {
+            xhr.upload.onprogress = function(e) {
+               var done = e.position || e.loaded, total = e.totalSize || e.total;
+
+               var percentage = Math.floor(done/total*1000)/10;
+               //console.log('xhr.upload progress: ' + done + ' / ' + total + ' = ' + percentage + '%');
+
+               if (!$('#kmzprogressbar').hasClass('active')) {
+                  $('#kmzprogressbar').addClass('active').addClass('progress-bar-striped');
+               }
+               $('#kmzprogressbar').css('width', percentage+'%').attr('aria-valuenow', percentage).html(percentage+'%');
+            };
+         }
+         
+         //Listen for upload complete
+         xhr.onreadystatechange = function(e) {
+            if ( 4 == this.readyState ) {
+               //console.log(['xhr upload complete', e]);
+               $('#kmzprogressbar').removeClass('active').removeClass('progress-bar-striped');
+               $('#kmzprogressbar').css('width', '100%').attr('aria-valuenow', 100).html('KMZ Uploaded');
+            }
+         };
+
+         xhr.open('POST', 'kmz/kmzextract.php', true);
+
+         var fd = new FormData();
+         fd.append("file", file);
+         xhr.send(fd);
+
+         xhr.onload = function() {
+            if (this.status == 200) {
+               //console.log(this.response);
+
+               var resp = JSON.parse(this.response);
+
+               //console.log('Server got:', resp);
+
+               //Show KML
+               showUploadedKMZ(resp.datetime);
+
+               //move layer to displayed layers sortable list
+               var thisLiElement = $('#kmzLayer');
+               $('#displayedLayersList').append(thisLiElement);
+               listUpdated();
+            };
+         };
+         //END upload
+
+
+         var input = $(this);
+         var numFiles = input.get(0).files ? input.get(0).files.length : 1;
+         var label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+         //Force trigger fileselect
+         input.trigger('fileselect', [numFiles, label]);
+      });
+
+      //Handle file selection
+      $('.btn-file :file').on('fileselect', function(event, numFiles, label) {
+         //Adjust UI buttons
+         if ($('.fileinput-remove-button').length == 0) {
+            $('.btn-file').before('<button type="button" class="btn btn-default fileinput-remove fileinput-remove-button"> <i class="glyphicon glyphicon-ban-circle"></i> </button>');
+         }
+
+         //Handle filename text
+         var input = $(this).parents('.input-group').find(':text');
+         var log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+         //Handle remove file behavior
+         $('.fileinput-remove-button').click(function() {
+            input.val('');
+            $(this).remove();
+            $('#kmzprogressbar').css('width', '0%').attr('aria-valuenow', 0).html('');
+         });
+
+         if(input.length) {
+            input.val(log);
+         }
+         else {
+            if(log) {
+               alert(log);
+            }
+         }
+      });
+   }
+
 });
 
 //Globally exposed functions
@@ -293,9 +435,9 @@ function listUpdated() {
 
    //Update panel color based on layer visibility
    $('#displayedLayersList').children('.panel-default').removeClass('panel-default').addClass('panel-success');
-   $('#displayedLayersList').find('.btn-default').removeClass('btn-default').addClass('btn-success');
+   $('#displayedLayersList').find('.btn-xs').removeClass('btn-default').addClass('btn-success');
    $('#hiddenLayersList').children('.panel-success').removeClass('panel-success').addClass('panel-default');
-   $('#hiddenLayersList').find('.btn-success').removeClass('btn-success').addClass('btn-default');
+   $('#hiddenLayersList').find('.btn-xs').removeClass('btn-success').addClass('btn-default');
 
    //Refresh layers on the map
    refreshLayers(newShownLayerID, newHiddenLayerID);

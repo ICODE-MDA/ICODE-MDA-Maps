@@ -110,7 +110,6 @@ var selectedShape;
 //KML objects
 var KML = false;
 var kmlparser;
-var kmlparsers = [];
 var tempKMLcount = 0;
 
 //Port objects
@@ -303,8 +302,9 @@ function initialize() {
 
    //Map dragged then idle listener
    google.maps.event.addListener(map, 'idle', function() {
-      google.maps.event.trigger(map, 'resize'); 
-      var idleTimeout = window.setTimeout(
+      google.maps.event.trigger(map, 'resize');       //trigger map to refresh
+      adaptiveMapType();                              //trigger map type change if needed
+      var idleTimeout = window.setTimeout(            //refresh layers after a defined delay
          function() { 
             refreshLayers();
          }, 
@@ -344,7 +344,7 @@ function initialize() {
       testWMSLayers();
 
       //KML overlay layer
-      toggleKMLLayer();
+      //toggleKMLLayer();
 
       //Check for port layers
       //togglePortLayer();
@@ -2008,12 +2008,12 @@ function getRiskColor(vesseltypeint, streamid, risk_rating) {
 
 /* -------------------------------------------------------------------------------- */
 function toggleKMLLayer() {
-   if (document.getElementById("KMLLayer") && document.getElementById("KMLLayer").checked) {
-   tempKMLcount++;
+   if ($('#KMLLayer:checked').length != 0) {
+      tempKMLcount++;
       KML = true;
-      showKML();
+      //showKML();
    }
-   else if (document.getElementById("KMLLayer")){
+   else if ($('#KMLLayer').length != 0) {
       //Delete the KML layer
       KML = false;
       //kmlparser.hideDocument(kmlparser.docs);
@@ -2036,23 +2036,37 @@ function toggleKMLLayer() {
 }
 
 /* -------------------------------------------------------------------------------- */
-function showUploadedKML(datetime) {
-   console.log('Showing KML');
+function showUploadedKMZ(datetime) {
+   console.log('Showing KMZ');
+
    kmlparser = new geoXML3.parser({
-      map:               map,
-      singleInfoWindow:  true
+      map: map,
+      processStyles: true,
+      singleInfoWindow: true
    });
-   kmlparser.parse('kml/' + datetime + '/doc.kml');
-   kmlparsers.push(kmlparser);
+
+   kmlparser.parse('kmz/' + datetime + '/doc.kml');
+
+   /*
+   dataLayers.forEach( function(dataLayer) {
+      if (dataLayer.layerID == 'kmzLayer') {
+         dataLayer.data = kmlparser;
+      }
+   });
+   */
 }
 
 /* -------------------------------------------------------------------------------- */
 function deleteKMLLayer(index) {
+   var tempkmlparser;
    console.log('deleting kml layer');
    console.log(index);
-   //while(kmlparsers.length > 0) {
-      //tempkmlparser = kmlparsers.pop();
-      tempkmlparser = kmlparsers[index];
+
+   dataLayers.forEach( function(dataLayer) {
+      if (dataLayer.layerID == 'kmzLayer') {
+         tempkmlparser = dataLayer.data;
+      }
+   });
 
       if (tempkmlparser.docs) {
          for (var i in tempkmlparser.docs[0].markers) {
@@ -2065,26 +2079,14 @@ function deleteKMLLayer(index) {
       }
       //Delete the opacity slider control
       //TODO: make sure to pop the correct object
-      map.controls[google.maps.ControlPosition.RIGHT_TOP].pop();
-      map.controls[google.maps.ControlPosition.RIGHT_TOP].pop();
+      map.controls[google.maps.ControlPosition.LEFT_BOTTOM].pop();
+      map.controls[google.maps.ControlPosition.LEFT_BOTTOM].pop();
 
-      tempkmlparser = kmlparsers.splice(index,1);
-   //}
-}
-
-/* -------------------------------------------------------------------------------- */
-function showKML() {
-   kmlparser = new geoXML3.parser({
-      map:               map,
-      singleInfoWindow:  true,
-   });
-
-   if (tempKMLcount % 2 == 1)
-      kmlparser.parse('kml/tsx.kml');
-   else //if (tempKMLcount % 2 == 2)
-      kmlparser.parse('kml/ghana.kml');
-   //else if (tempKMLcount % 3 == 0)
-   //   kmlparser.parse('kml/doc.kml');
+      dataLayers.forEach( function(dataLayer) {
+         if (dataLayer.layerID == 'kmzLayer') {
+            //TODO: need to fix >> tempkmlparser = dataLayer.data.splice(index,1);
+         }
+      });
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -3165,7 +3167,7 @@ $(function initializeLayers() {
          //console.log('Displaying AIS layer');
          
          //Cluster view
-         if ($('#enableCluster:checked').length != 0 && map.getZoom() < 9 && searchTerm == '') {
+         if ($('#enableCluster:checked').length != 0 && map.getZoom() < 9 && isSearchMode()) {
             getClustersFromDB(thislayer, callback);            
          }
          //Individual vessel view
@@ -3315,22 +3317,37 @@ $(function initializeLayers() {
    dataLayers.push(radarLayer);
 
    //--------------------------------------------------------------
+   //KMZ layer
+   var kmzLayer = new dataLayerObject('kmzLayer', 
+      function showkmzLayer(thislayer, callback) {
+         if (typeof kmlparser !== 'undefined') {
+            //TODO: loop through number of docs
+            kmlparser.showDocument(kmlparser.docs[0]);
+         }
+         callback();
+      }, 
+      function hidekmzLayer() {
+         if (typeof kmlparser !== 'undefined') {
+            kmlparser.hideDocument(kmlparser.docs[0]);
+         }
+      },
+      true  //force refresh this layer
+      );
+   //Define the day night layer object, append to a dataLayer to dataLayerObject
+   kmzLayer.data = [];
+   dataLayers.push(kmzLayer);
+
+   //--------------------------------------------------------------
    //Day/night layer
    var daynightLayer = new dataLayerObject('daynightLayer', 
       function showdaynightLayer(thislayer, callback) {
          //console.log('Displaying daynight layer');
-         thislayer.data.setMap(map);
-
-         //TODO: testing
          if (map.getZoom() > 8) {
-            //console.log('Zoomed in, hide day/night layer and change map type');
             thislayer.data.setMap(null);
-            map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
          }
          else {
-            map.setMapTypeId(google.maps.MapTypeId.HYBRID);         
+            thislayer.data.setMap(map);
          }
-         //END testing
 
          callback();
       }, 
@@ -3658,7 +3675,7 @@ function getAISFromDB(thislayer, callback) {
    var sourceStr = 'source=AIS';
 
    //Look for search
-   if (searchTerm == '') {
+   if (isSearchMode()) {
       phpWithArg = thislayer.phpfile + '?' + sourceStr;
 
       if (enableRisk) {
@@ -3941,7 +3958,7 @@ function getLAISICFromDB(sourceType, thislayer, callback) {
    var sourceStr = "source=" + sourceType;
 
    //Check if a query has been previously made, and use it to preserve previous query but just change the bounds to current view now
-   if (searchTerm == '') {     //No custom search
+   if (isSearchMode()) {     //No custom search
       phpWithArg = thislayer.phpfile + '?' + sourceStr;
 
       if (enableRisk) {
@@ -5217,6 +5234,23 @@ function clearSearch() {
 }
 
 /* -------------------------------------------------------------------------------- */
+function isSearchMode() {
+   return (searchTerm == '');
+}
+
+/* -------------------------------------------------------------------------------- */
 function isAISLayerDisplayed() {
    return aisDisplayed;
+}
+
+/* -------------------------------------------------------------------------------- */
+function adaptiveMapType() {
+   if ($('#adaptiveMapType:checked').length !== 0) {
+      if (map.getZoom() > 8) {
+         map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
+      }
+      else {
+         map.setMapTypeId(google.maps.MapTypeId.HYBRID);         
+      }
+   }
 }

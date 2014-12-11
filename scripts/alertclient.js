@@ -15,7 +15,7 @@ $(function startAlertClient() {
    setTimeout(function delayedStart() {
       console.log('Starting alert client now');
       alertClient();
-   }, 1000);   //adjust this value for delayed amount
+   }, 2000);   //adjust this value for delayed amount
 });
 
 /**
@@ -120,14 +120,20 @@ function alertClient() {
       //---------------------- Server connection response received ----------------
       if (json.type === 'response') {
          var serverResponse = json.data;
-         console.log('Alert server accepted the connection: ', serverResponse);
+         if (DEBUG) {
+            console.log('Alert server accepted the connection: ', serverResponse);
+         }
       }
       else if (json.type === 'resetRules') {
-         console.log('Resetting alert rules as signaled by alert server');
+         if (DEBUG) {
+            console.log('Resetting alert rules as signaled by alert server');
+         }
 
          //Reset received alertRules
          receivedAlertRules = false;
-         console.log('Removing old alert panels');
+         if (DEBUG) {
+            console.log('Removing old alert panels');
+         }
          //TODO: Set focus to be summary panel first to prevent funky behavior
          $('.alertPanel').remove();  //Remove all accordion alert titles
          $('[id^=alert_id]').remove(); //Remove all accordion alert panels
@@ -141,7 +147,9 @@ function alertClient() {
 
          //Create a new menu panel content for the alert accordion panel
          var singleAlertRule = json.data;
-         console.log('Received alert:', singleAlertRule.alert_id);
+         if (DEBUG) {
+            console.log('Received alert:', singleAlertRule.alert_id);
+         }
 
          //store alert rule to array
          alertRulesArray.push(singleAlertRule);
@@ -182,7 +190,9 @@ function alertClient() {
          //reset count on a certain id
          var id = parseInt(json.data);
 
-         console.log('Alert count was reset on alert', id);
+         if (DEBUG) {
+            console.log('Alert count was reset on alert', id);
+         }
 
          fetchAlertsArchiveCount(id);
       }
@@ -244,7 +254,9 @@ function alertClient() {
 
       //Handle button/checkbox clicks
       $('#polygon_alert_id' + id).click(function () {
-         console.log('Show alert polygon toggled');
+         if (DEBUG) {
+            console.log('Show alert polygon toggled');
+         }
          if (this.checked) {
             showPolygon(id);
          }
@@ -258,7 +270,9 @@ function alertClient() {
       });
 
       $('#show_polygon_id' + id).click(function () {
-         console.log('Zooming into polygon ' + id);
+         if (DEBUG) {
+            console.log('Zooming into polygon ' + id);
+         }
          zoomToPolygon(id);
       });
 
@@ -267,7 +281,9 @@ function alertClient() {
       });
 
       $('#delete_alert_button' + id).click(function () {
-         console.log('Deleting alert ' + id);
+         if (DEBUG) {
+            console.log('Deleting alert ' + id);
+         }
 
          hidePolygon();
          $('#alertSummaryheading').click();
@@ -278,7 +294,9 @@ function alertClient() {
 
       $('#alertRule-' + id).css('cursor', 'pointer');
       $('#alertRule-' + id).click(function () {
-         console.log('Zooming into polygon ' + id);
+         if (DEBUG) {
+            console.log('Zooming into polygon ' + id);
+         }
          zoomToPolygon(id);
       });
 
@@ -296,7 +314,9 @@ function alertClient() {
       var divNewMessages = document.getElementById('alertNewMessages-' + matchingAlertRule.alert_id);
 
       if (typeof divNewMessages === 'undefined') {
-         console.log('newAlertReceived(): ERROR - accordion element for received alert does not exist');
+         if (DEBUG) {
+            console.log('newAlertReceived(): ERROR - accordion element for received alert does not exist');
+         }
          return;
       }
 
@@ -390,7 +410,9 @@ function alertClient() {
       var alertCountSpan = document.getElementById('alertCount-' + id);
 
       if (typeof alertCountSpan === 'undefined') {
-         console.log('newAlertReceived(): ERROR - accordion element for received alert id ' + id + ' does not exist');
+         if (DEBUG) {
+            console.log('newAlertReceived(): ERROR - accordion element for received alert id ' + id + ' does not exist');
+         }
          return;
       }
 
@@ -405,7 +427,9 @@ function alertClient() {
    * Display the alert polygon based on alert id
    **/
    function showPolygon(id) {
-      console.log('Displaying alert polygon for id', id);
+      if (DEBUG) {
+         console.log('Displaying alert polygon for id', id);
+      }
       
       //Parse polygon
       //find the right polygon
@@ -457,7 +481,9 @@ function alertClient() {
    * Zoom to the alert polygon based on alert id
    **/
    function zoomToPolygon(id) {
-      console.log('Zooming to alert polygon for id', id);
+      if (DEBUG) {
+         console.log('Zooming to alert polygon for id', id);
+      }
 
       //Draw the polygon on the map
       //map.setCenter(alertPolygon.getCenter());
@@ -536,20 +562,28 @@ function alertClient() {
    function deleteAlertFromDB(id) {
       var phpWithArg = 'query_alert_delete.php?alertid=' + id;
 
-      console.log(phpWithArg);      
+      if (DEBUG) {
+         console.log(phpWithArg);      
+      }
 
       //Call the PHP script to insert new alert row to alert database
-      console.log('Calling PHP script to push new alert_properties element...');
+      if (DEBUG) {
+         console.log('Calling PHP script to push new alert_properties element...');
+      }
       $.getJSON(
             phpWithArg, 
             function (){ 
-               console.log('deleteAlertFromDB(): Success on deleting alert');
+               if (DEBUG) {
+                  console.log('deleteAlertFromDB(): Success on deleting alert');
+               }
             }
             )
          .done(function (response) {
             //console.log('saveAlert(): ' + response.query);
 
-            console.log('deleteAlertFromDB(): Deleted alert id ' + response.alert_id);
+            if (DEBUG) {
+               console.log('deleteAlertFromDB(): Deleted alert id ' + response.alert_id);
+            }
 
             //TODO: Add criteria to database here
 
@@ -571,7 +605,9 @@ function alertClient() {
             alert('Alert ' + id + ' successfully deleted.');
          }) // END .done()
       .fail(function() {
-         console.log('deleteAlertFromDB(): ' +  'No response from alert database; error in php?'); 
+         if (DEBUG) {
+            console.log('deleteAlertFromDB(): ' +  'No response from alert database; error in php?'); 
+         }
 
          //alert('Alert not saved.  Please try again');
 
@@ -583,14 +619,20 @@ function alertClient() {
    function markAsRead(id) {
       var phpWithArg = 'query_alert_archive_mark_read.php?alertid=' + id;
 
-      console.log(phpWithArg);      
+      if (DEBUG) {
+         console.log(phpWithArg);      
+      }
 
       //Call the PHP script to insert new alert row to alert database
-      console.log('Calling PHP script to mark archived messages as read...');
+      if (DEBUG) {
+         console.log('Calling PHP script to mark archived messages as read...');
+      }
       $.getJSON(
             phpWithArg, 
             function (){ 
-               console.log('markAsRead(): Success on marking as read');
+               if (DEBUG) {
+                  console.log('markAsRead(): Success on marking as read');
+               }
 
                //Notify all clients (via server's relay) that count was reset on this id
                connection.send(JSON.stringify({type:'readcountreset', data: id }));
@@ -598,7 +640,9 @@ function alertClient() {
             )
          .done(function (response) {
             //console.log('saveAlert(): ' + response.query);
-            console.log('markAsRead(): Alert id ' + response.alert_id + ' marked as read.');
+            if (DEBUG) {
+               console.log('markAsRead(): Alert id ' + response.alert_id + ' marked as read.');
+            }
 
             //TODO: reset GUI alert count
             var countSpan = $('#alertCount-'+id);
@@ -607,7 +651,9 @@ function alertClient() {
             updateTotalAlertCount();
          }) // END .done()
       .fail(function() {
-         console.log('markAsRead(): ' +  'No response from alert database; error in php?'); 
+         if (DEBUG) {
+            console.log('markAsRead(): ' +  'No response from alert database; error in php?'); 
+         }
 
          //alert('Alert not saved.  Please try again');
 
@@ -634,27 +680,39 @@ function alertClient() {
    function fetchAlertsArchive(id) {
       var phpWithArg = 'query_alert_archive.php?alertid=' + id;
 
-      console.log(phpWithArg);      
+      if (DEBUG) {
+         console.log(phpWithArg);      
+      }
 
       //Call the PHP script to insert new alert row to alert database
-      console.log('Calling PHP script to fetch alert archive...');
+      if (DEBUG) {
+         console.log('Calling PHP script to fetch alert archive...');
+      }
       $.getJSON(
             phpWithArg, 
             function (){ 
-               console.log('fetchAlertsArchive(): Success on fetching archive for alert');
+               if (DEBUG) {
+                  console.log('fetchAlertsArchive(): Success on fetching archive for alert');
+               }
             }
             )
          .done(function (response) {
-            console.log(response);
+            if (DEBUG) {
+               console.log(response);
+            }
 
             $.each(response.alert_array, function(key, alertRow) {
                newAlertReceived(alertRulesArray[alertArrayIndexByID(id)], JSON.parse(alertRow.aisdata), JSON.parse(alertRow.vesseldata), alertRow.timestamp);
             });
 
-            console.log('fetchAlertsArchive(): Fetched archive for alert id ' + response.alert_id);
+            if (DEBUG) {
+               console.log('fetchAlertsArchive(): Fetched archive for alert id ' + response.alert_id);
+            }
          }) // END .done()
       .fail(function() {
-         console.log('fetchAlertsArchive(): ' +  'No response from alert database; error in php?'); 
+         if (DEBUG) {
+            console.log('fetchAlertsArchive(): ' +  'No response from alert database; error in php?'); 
+         }
 
          //alert('Alert not saved.  Please try again');
 
@@ -670,29 +728,41 @@ function alertClient() {
       //Get count only, so add a flag to indicate it
       var phpWithArg = 'query_alert_archive.php?alertid=' + id + '&countOnly=1';
 
-      console.log(phpWithArg);      
+      if (DEBUG) {
+         console.log(phpWithArg);      
+      }
 
       //Call the PHP script to insert new alert row to alert database
-      console.log('Calling PHP script to fetch alert archive count...');
+      if (DEBUG) {
+         console.log('Calling PHP script to fetch alert archive count...');
+      }
       $.getJSON(
             phpWithArg, 
             function (){ 
-               console.log('fetchAlertsArchiveCount(): Success on fetching archive count for alert');
+               if (DEBUG) {
+                  console.log('fetchAlertsArchiveCount(): Success on fetching archive count for alert');
+               }
             }
             )
          .done(function (response) {
-            console.log(response);
+            if (DEBUG) {
+               console.log(response);
+            }
 
             var count = JSON.parse(response.count);
 
             alertCountReceived(id, count);
 
-            console.log('fetchAlertsArchiveCount(): Fetched archive count for alert id ' + response.alert_id);
+            if (DEBUG) {
+               console.log('fetchAlertsArchiveCount(): Fetched archive count for alert id ' + response.alert_id);
+            }
 
             return count;
          }) // END .done()
       .fail(function() {
-         console.log('fetchAlertsArchiveCount(): ' +  'No response from alert database; error in php?'); 
+         if (DEBUG) {
+            console.log('fetchAlertsArchiveCount(): ' +  'No response from alert database; error in php?'); 
+         }
 
          //alert('Alert not saved.  Please try again');
 
