@@ -14,7 +14,6 @@
 //    percentOpacity: Default 50, percent opacity to use when the image is loaded 0-100.
 //    id: Default imageUrl, ID of the div
 //
-var rotAngle;
 	
 function ProjectedOverlay(map, imageUrl, bounds, opts, layerindex, rotation)
 {
@@ -28,7 +27,7 @@ function ProjectedOverlay(map, imageUrl, bounds, opts, layerindex, rotation)
  this.percentOpacity_ = opts.percentOpacity || 50 ;
 
  this.setMap(map);
- rotAngle = rotation;
+ this.rotAngle = rotation;
  this.layerindex = layerindex;
 }
 
@@ -88,7 +87,7 @@ ProjectedOverlay.prototype.draw = function(firstTime)
  //Testing: don't scale image
  var scale = 1;
  /*
- var scale = ((360-rotAngle) % 45)*(-0.00650873819) + 1;
+ var scale = ((360-this.rotAngle) % 45)*(-0.00650873819) + 1;
 
  this.div_.style.width = Math.abs(c2.x - c1.x)*scale + "px";
  this.div_.style.height = Math.abs(c2.y - c1.y)*scale + "px";
@@ -119,9 +118,9 @@ ProjectedOverlay.prototype.draw = function(firstTime)
   url += this.addZ_ + this.map_.getZoom() ;
  }
 
- this.div_.innerHTML = '<div id="kmloverlay' + this.layerindex + '"><img src="' + url + '"  width=' + this.div_.style.width + ' height=' + this.div_.style.height + ' ></div>' ;
+ this.div_.innerHTML = '<div id="kmloverlay-' + this.layerindex + '"><img src="' + url + '"  width=' + this.div_.style.width + ' height=' + this.div_.style.height + ' ></div>' ;
 
- $('#kmloverlay'+this.layerindex).rotate(rotAngle);
+ $('#kmloverlay-'+this.layerindex).rotate(this.rotAngle);
 }
 
 /**
