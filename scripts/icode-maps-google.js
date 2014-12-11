@@ -109,7 +109,6 @@ var selectedShape;
 
 //KML objects
 var KML = false;
-var kmlparser;
 var tempKMLcount = 0;
 
 //Port objects
@@ -2007,89 +2006,6 @@ function getRiskColor(vesseltypeint, streamid, risk_rating) {
 }
 
 /* -------------------------------------------------------------------------------- */
-function toggleKMLLayer() {
-   if ($('#KMLLayer:checked').length != 0) {
-      tempKMLcount++;
-      KML = true;
-      //showKML();
-   }
-   else if ($('#KMLLayer').length != 0) {
-      //Delete the KML layer
-      KML = false;
-      //kmlparser.hideDocument(kmlparser.docs);
-      if (kmlparser.docs) {
-         for (var i in kmlparser.docs[0].markers) {
-            kmlparser.docs[0].markers[i].setMap(null);
-         }
-         emptyArray(kmlparser.docs[0].markers);
-         kmlparser.docs[0].overlays[0].setMap(null);
-         kmlparser.docs[0].overlays[0] = null;
-         kmlparser.docs[0] = null
-      }
-      //Delete the opacity slider control
-      //TODO: make sure to pop the correct object
-      map.controls[google.maps.ControlPosition.RIGHT_TOP].pop();
-   }
-   else {
-      //Do nothing, KMLLayer div not found
-   }
-}
-
-/* -------------------------------------------------------------------------------- */
-function showUploadedKMZ(datetime) {
-   console.log('Showing KMZ');
-
-   kmlparser = new geoXML3.parser({
-      map: map,
-      processStyles: true,
-      singleInfoWindow: true
-   });
-
-   kmlparser.parse('kmz/' + datetime + '/doc.kml');
-
-   /*
-   dataLayers.forEach( function(dataLayer) {
-      if (dataLayer.layerID == 'kmzLayer') {
-         dataLayer.data = kmlparser;
-      }
-   });
-   */
-}
-
-/* -------------------------------------------------------------------------------- */
-function deleteKMLLayer(index) {
-   var tempkmlparser;
-   console.log('deleting kml layer');
-   console.log(index);
-
-   dataLayers.forEach( function(dataLayer) {
-      if (dataLayer.layerID == 'kmzLayer') {
-         tempkmlparser = dataLayer.data;
-      }
-   });
-
-      if (tempkmlparser.docs) {
-         for (var i in tempkmlparser.docs[0].markers) {
-            tempkmlparser.docs[0].markers[i].setMap(null);
-         }
-         emptyArray(tempkmlparser.docs[0].markers);
-         tempkmlparser.docs[0].overlays[0].setMap(null);
-         tempkmlparser.docs[0].overlays[0] = null;
-         tempkmlparser.docs[0] = null
-      }
-      //Delete the opacity slider control
-      //TODO: make sure to pop the correct object
-      map.controls[google.maps.ControlPosition.LEFT_BOTTOM].pop();
-      map.controls[google.maps.ControlPosition.LEFT_BOTTOM].pop();
-
-      dataLayers.forEach( function(dataLayer) {
-         if (dataLayer.layerID == 'kmzLayer') {
-            //TODO: need to fix >> tempkmlparser = dataLayer.data.splice(index,1);
-         }
-      });
-}
-
-/* -------------------------------------------------------------------------------- */
 function toggleHeatmapLayer() {
    if ($('#HeatmapLayer:checked').length != 0) {
       console.log('Adding heatmap layer');
@@ -3091,7 +3007,7 @@ function dataLayerObject(id, showFunction, hideFunction, updateIfShown) {       
    this.showLayer = function() {       //wrap showFunction with spinner handler
       console.log('Showing ' + this.layerID);
 
-      //Start the spinner
+      //Start the spinner for individual layers
       var spinner = $('#'+this.layerID).find('.spinner');
 
       //Remove warning glyphicon in case it was appended in the last call
@@ -3114,6 +3030,7 @@ function dataLayerObject(id, showFunction, hideFunction, updateIfShown) {       
          showBusyIndicator();                   //show global spinner
       }
 
+      //Call individuals layer's show function
       showFunction(this,                  //need to pass this dataLayerObject into the show function
             //Function to be called after layer displaying is processed
             // result is true if successful displaying, false if error (i.e. error in query)
@@ -3320,21 +3237,27 @@ $(function initializeLayers() {
    //KMZ layer
    var kmzLayer = new dataLayerObject('kmzLayer', 
       function showkmzLayer(thislayer, callback) {
-         if (typeof kmlparser !== 'undefined') {
-            //TODO: loop through number of docs
-            kmlparser.showDocument(kmlparser.docs[0]);
-         }
+         thislayer.data.docs.forEach(function (doc) {
+            thislayer.data.showDocument(doc);
+         });
+
          callback();
       }, 
       function hidekmzLayer() {
-         if (typeof kmlparser !== 'undefined') {
-            kmlparser.hideDocument(kmlparser.docs[0]);
-         }
+         console.log('Hiding KMZ layer');
+         this.data.docs.forEach(function (doc) {
+            this.data.hideDocument(doc);
+         });
       },
       true  //force refresh this layer
       );
    //Define the day night layer object, append to a dataLayer to dataLayerObject
-   kmzLayer.data = [];
+   kmzLayer.dataType = 'KMZ';
+   kmzLayer.data = new geoXML3.parser({
+      map: null,
+      processStyles: true,
+      singleInfoWindow: true
+   });
    dataLayers.push(kmzLayer);
 
    //--------------------------------------------------------------
@@ -4958,6 +4881,36 @@ function showPorts(portIcons, portCircles, portLabel, portPolygons, thislayer, c
 }
 
 /* -------------------------------------------------------------------------------- */
+function showUploadedKMZ(datetime) {
+   console.log('Showing KMZ');
+
+   //Set the map before the first KMZ display.  During initialization, map setting probably
+   // wasn't successful, so set it here after map object has been initiated fully.
+   dataLayers[getdataLayerIndex('KMZ')].data.setMap(map);
+
+   dataLayers[getdataLayerIndex('KMZ')].data.parse('kmz/' + datetime + '/doc.kml');
+}
+
+/* -------------------------------------------------------------------------------- */
+function deleteKMLLayer(index) {
+   if (dataLayers[getdataLayerIndex('KMZ')].data.docs) {
+      for (var i in dataLayers[getdataLayerIndex('KMZ')].data.docs[0].markers) {
+         dataLayers[getdataLayerIndex('KMZ')].data.docs[0].markers[i].setMap(null);
+      }
+      emptyArray(dataLayers[getdataLayerIndex('KMZ')].data.docs[0].markers);
+      dataLayers[getdataLayerIndex('KMZ')].data.docs[0].overlays[0].setMap(null);
+      dataLayers[getdataLayerIndex('KMZ')].data.docs[0].overlays[0] = null;
+      dataLayers[getdataLayerIndex('KMZ')].data.docs[0] = null
+   }
+   //Delete the opacity slider control
+   //TODO: make sure to pop the correct object
+   map.controls[google.maps.ControlPosition.LEFT_BOTTOM].pop();
+   map.controls[google.maps.ControlPosition.LEFT_BOTTOM].pop();
+
+   dataLayers[getdataLayerIndex('KMZ')].data.splice(index, 1)
+}
+
+/* -------------------------------------------------------------------------------- */
 /**
  * Function to empty out an array and set length to zero
  **/
@@ -5006,7 +4959,7 @@ function increaseVesselIconSize() {
 
    //TODO: only update AIS layer for now
    dataLayers.forEach( function(dataLayer) {
-      if (dataLayer.layerID == 'aisLayer') {
+      if (dataLayer.dataType = 'AIS') {
          dataLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
       }
    });
@@ -5024,7 +4977,7 @@ function decreaseVesselIconSize() {
 
    //TODO: only update AIS layer for now
    dataLayers.forEach( function(dataLayer) {
-      if (dataLayer.layerID == 'aisLayer') {
+      if (dataLayer.dataType = 'AIS') {
          dataLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
       }
    });
@@ -5042,7 +4995,7 @@ function resetVesselIconSize() {
 
    //TODO: only update AIS layer for now
    dataLayers.forEach( function(dataLayer) {
-      if (dataLayer.layerID == 'aisLayer') {
+      if (dataLayer.dataType = 'AIS') {
          dataLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
       }
    });
@@ -5253,4 +5206,19 @@ function adaptiveMapType() {
          map.setMapTypeId(google.maps.MapTypeId.HYBRID);         
       }
    }
+}
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Returns an array of indices that match dataType in dataLayers
+ **/
+function getdataLayerIndex(dataType) {
+   var indices = [];
+   dataLayers.forEach( function(dataLayer, index) {
+      if (dataLayer.dataType == dataType) {
+         indices.push(index);
+      }
+   });
+
+   return indices;
 }

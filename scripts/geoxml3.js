@@ -108,6 +108,11 @@ geoXML3.parser = function (options) {
    };
 
    //============================================================================
+   var setMap = function (map) {
+      parserOptions.map = map;
+   };
+
+   //============================================================================
    var render = function (responseXML, doc) {
       // Callback for retrieving a KML document: parse the KML and display it on the map
 
@@ -537,16 +542,9 @@ geoXML3.parser = function (options) {
       });
 
       var deleteKMLDiv= document.createElement('DIV');
-   deleteKMLDiv.setAttribute("style", "padding:0;margin:0;overflow-x:hidden;overflow-y:hidden;vertical-align:top;width:115px;height:20px;");
+      deleteKMLDiv.setAttribute("style", "padding:0;margin:0;overflow-x:hidden;overflow-y:hidden;vertical-align:top;width:115px;height:20px;");
 
-   var KMZlength;
-dataLayers.forEach( function(dataLayer) {
-      if (dataLayer.layerID == 'kmzLayer') {
-         KMZlength = dataLayer.data.length;
-      }
-   });
-
-   deleteKMLDiv.innerHTML = '<a href="#" class="link" onclick="deleteKMLLayer(' + (KMZlength-1) + ');">Delete KML Layer</a>';
+      deleteKMLDiv.innerHTML = '<a href="#" class="link" onclick="deleteKMLLayer(' + (docs.length-1) + ');">Delete KML Layer</a>';
 
       map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(opacityDiv);
       map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(deleteKMLDiv);
@@ -593,12 +591,13 @@ dataLayers.forEach( function(dataLayer) {
 
       options: parserOptions,
       docs:    docs,
-         parse:         parse,
-         hideDocument:  hideDocument,
-         showDocument:  showDocument,
-         processStyles: processStyles, 
-         createMarker:  createMarker,
-         createOverlay: createOverlay
+      parse:         parse,
+      hideDocument:  hideDocument,
+      showDocument:  showDocument,
+      processStyles: processStyles, 
+      createMarker:  createMarker,
+      createOverlay: createOverlay,
+      setMap: setMap,
    };
 };
 // End of KML Parser
