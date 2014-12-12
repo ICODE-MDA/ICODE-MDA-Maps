@@ -4903,7 +4903,7 @@ function showUploadedKMZ(datetime) {
 
       var colThumbnailDiv = $('<div class="col-lg-8">');
       rowDiv.append(colThumbnailDiv);
-      var thumbnail = $('<img id="kmz-'+index+'-thumb" src="'+dataLayers[getdataLayerIndex('KMZ')].data.docs[index].overlays[0].url_+'"  style="max-height: 200px; max-width: 200px;">');
+      var thumbnail = $('<img id="kmz-'+index+'-thumb" src="'+dataLayers[getdataLayerIndex('KMZ')].data.docs[index].overlays[0].url_+'"  style="max-height: 200px; max-width: 200px; cursor: pointer">');
       thumbnail.appendTo(colThumbnailDiv);
 
       var colTrashDiv = $('<div class="col-lg-2">');
@@ -4973,26 +4973,37 @@ function emptyArray(arr) {
 /**
  **/
 function codeAddress() {
-  var address = document.getElementById('geocodeAddress').value;
+   var address = document.getElementById('geocodeAddress').value;
 
-  //Check if user entered a lat/lon pair, separated by comma, i.e. "-118, 32"
-  if (address.match(/^[0-9\-\,\ \.]+$/) != null) {
-     var latlonArray = address.split(',');
-     map.panTo(new google.maps.LatLng(parseFloat(latlonArray[0]), parseFloat(latlonArray[1])));
-     return;
-  }
+   //Check if user entered a lat/lon pair, separated by comma, i.e. "-118, 32"
+   if (address.match(/^[0-9\-\,\ \.]+$/) != null) {
+      var latlonArray = address.split(',');
+      map.panTo(new google.maps.LatLng(parseFloat(latlonArray[0]), parseFloat(latlonArray[1])));
+      return;
+   }
 
-  geocoder.geocode({
-     'address': address,
-     'bounds':  map.getBounds()
-  }, function(results, status) {
-    if (status == google.maps.GeocoderStatus.OK) {
-      map.panTo(results[0].geometry.location);
-    } 
-    else {
-      alert('Geocode was not successful for the following reason: ' + status);
-    }
-  });
+   geocoder.geocode({
+      'address': address,
+      'bounds':  map.getBounds()
+   }, function(results, status) {
+      if (status == google.maps.GeocoderStatus.OK) {
+         $('#geocodeWarning').hide();
+         //Pan to location only
+         //map.panTo(results[0].geometry.location);
+
+         //Change entire view
+         if (typeof results[0].geometry.bounds !== 'undefined') {
+            map.fitBounds(results[0].geometry.bounds);
+         }
+         else {
+            $('#geocodeWarning').show();
+         }
+      } 
+      else {
+         alert('Geocode was not successful for the following reason: ' + status);
+         $('#geocodeWarning').show();
+      }
+   });
 }
 
 /* -------------------------------------------------------------------------------- */

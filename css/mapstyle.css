@@ -419,3 +419,6 @@ input[readonly] {
   background-color: white !important;
   cursor: text !important;
 }
+#geocodeWarning {
+   margin-right: 130px;
+}
