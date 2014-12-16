@@ -6,7 +6,7 @@ $ais_database     = 'icodemda';
 $vessels_table    = 'vessels_memory';  //'vessels';
 
 $laisic_database  = 'laisic';
-$laisic_live_database  = 'icodemaps';
+$laisic_live_database  = 'volpe';
 $ihs_database     = 'wros';
 $port_database    = 'risk';
 $alert_database   = 'alerts';

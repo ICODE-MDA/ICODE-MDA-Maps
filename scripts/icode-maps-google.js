@@ -301,6 +301,30 @@ function initialize() {
    
    reloadDelay = 1000;    //set initial delay to 10ms
 
+   //Get requested view and layers from URL
+   if (Request.QueryString('center').Count() > 0) {
+      var center = Request.QueryString('center').toString().split(',');
+      map.panTo(new google.maps.LatLng(center[0], center[1]));
+   }
+   if (Request.QueryString('zoom').Count() > 0) {
+      var zoom = Request.QueryString('zoom').toString();
+      map.setZoom(parseInt(zoom));
+   }
+   if (Request.QueryString('layers').Count() > 0) {
+      var requestedLayers = Request.QueryString('layers').toString().split(',');
+      //Remove all displayed layers
+      $('#hiddenLayersList').prepend($('#displayedLayersList> li'));
+
+      //Move requested layers into displayed list
+      requestedLayers.forEach( function(layer) {
+         var moveLayer = $('#'+layer);
+         $('#displayedLayersList').append(moveLayer);
+      });
+
+      listUpdated();
+   }
+
+
    //Map dragged then idle listener
    google.maps.event.addListener(map, 'idle', function() {
       google.maps.event.trigger(map, 'resize');       //trigger map to refresh
@@ -3181,7 +3205,7 @@ $(function initializeLayers() {
 
    //--------------------------------------------------------------
    //LAISIC LIVE layer
-   var laisicLiveLayer = new dataLayerObject('laisicLayer', 
+   var laisicLiveLayer = new dataLayerObject('livelaisicLayer', 
       function showLaisicLayer(thislayer, callback) {
          getLAISICFromDB('LIVE_LAISIC', thislayer, callback);
       }, 
@@ -3298,7 +3322,8 @@ $(function initializeLayers() {
    //Marker path definition for this layer: Circle with line for direction (intended for RADAR)
    //TODO: incorporate marker size with vw or vl
    //radarLayer.markerpath = 'M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0';
-   radarLayer.markerpath = 'M 10, 0 l -13,-7 l -5,2 l -2,5 l 2,4 l 5,2 l 12,-6 l 1,0 Z';
+   //radarLayer.markerpath = 'M 10, 0 l -13,-7 l -5,2 l -2,5 l 2,4 l 5,2 l 12,-6 l 1,0 Z';
+   radarLayer.markerpath = 'M 0,-9 6,2 4,6 0,8 -4,6 -6,2 Z';
    radarLayer.markercolor = '#FF0000';
    radarLayer.strokecolor = '#000000';
    radarLayer.phpfile = 'query_current_vessels.php';
@@ -3328,7 +3353,8 @@ $(function initializeLayers() {
    //Marker path definition for this layer: Circle with line for direction (intended for RADAR)
    //TODO: incorporate marker size with vw or vl
    //satsarLayer.markerpath = 'M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0';
-   satsarLayer.markerpath = 'M 10, 0 l -13,-7 l -5,2 l -2,5 l 2,4 l 5,2 l 12,-6 l 1,0 Z';
+   //satsarLayer.markerpath = 'M 10, 0 l -13,-7 l -5,2 l -2,5 l 2,4 l 5,2 l 12,-6 l 1,0 Z';
+   satsarLayer.markerpath = 'M 0,-9 6,2 4,6 0,8 -4,6 -6,2 Z';
    satsarLayer.markercolor = '#010101';
    satsarLayer.strokecolor = '#FF0000';
    satsarLayer.phpfile = 'query_current_vessels.php';
@@ -4307,7 +4333,6 @@ function getLAISICFromDB(sourceType, thislayer, callback) {
                   vessel.vesseltypeint = 777;
                }
                else if (sourceType == "LIVE_LAISIC") {
-                  vessel.heading = vessel.cog;
                   vessel.vesseltypeint = 999;
                }
 
@@ -4318,11 +4343,11 @@ function getLAISICFromDB(sourceType, thislayer, callback) {
                      position: point,
                      icon: {
                         path:         'M 0,-9 6,2 4,6 0,8 -4,6 -6,2 Z',
-                        strokeColor:  '#000000',//iconColor,
+                        strokeColor:  '#FFFF00',//iconColor,
                         strokeWeight: 2,
                         fillColor:    '#FF0000',
                         fillOpacity:  0.8,
-                        rotation:     parseInt(vessel.heading),
+                        rotation:     parseFloat(vessel.heading),
                         optimized:    false,
                      },
                      zIndex:       google.maps.Marker.MAX_ZINDEX + 1

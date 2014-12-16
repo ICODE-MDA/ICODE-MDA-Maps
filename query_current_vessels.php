@@ -87,7 +87,7 @@ if(count($_GET) > 0) {
             $sourceStr = "(SELECT * FROM icodemda.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM icodemda.pvol_pdm_memory WHERE PosSource = 'SAT-SAR' GROUP BY `CommsID` )) VESSELS";
             break;
          case "LIVE_LAISIC":
-            $sourceStr = "(SELECT mmsi, sog, lon as Longitude, lat as Latitude, cog, datetime, streamid, target_status, target_acq, trknum, sourceid FROM $laisic_live_database.radar_laisic_output_mem_track_heads WHERE mmsi != 0) VESSELS";
+            $sourceStr = "(SELECT MMSI, CommsID, Latitude, Longitude, SOG, Heading, COG, TimeOfFix, PosSource, Opt1Val, Opt2Val FROM $laisic_live_database.pvol_pdm WHERE mmsi != 0 AND (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $laisic_live_database.pvol_pdm GROUP BY MMSI)) VESSELS";
             break;
          default: //AIS
             if (empty($_GET["risk"])) {
@@ -227,7 +227,7 @@ if(count($_GET) > 0) {
        }
        else if (!empty($_GET["vessel_age"]) && ($source === "LIVE_LAISIC") && !$timemachine) {
           $vessel_age = $_GET["vessel_age"];
-          $query = $query . " AND datetime > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
+          $query = $query . " AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
        }
        else if (!empty($_GET["vessel_age"]) && !startsWith($source,"LAISIC_") && !$timemachine) {
           $vessel_age = $_GET["vessel_age"];
@@ -363,16 +363,23 @@ while (odbc_fetch_row($result)){
     }
     else if ($source === "LIVE_LAISIC") {
         $vessel = array(mmsi=>odbc_result($result,"mmsi"),
-                   sog=>odbc_result($result,"sog"),
-                   lon=>addslashes(odbc_result($result,"Longitude")),
-                   lat=>addslashes(odbc_result($result,"Latitude")),
-                   cog=>odbc_result($result,"cog"),
-                   datetime=>odbc_result($result,"datetime"),
-                   streamid=>htmlspecialchars(odbc_result($result,"streamid")),
-                   target_status=>htmlspecialchars(odbc_result($result,"target_status")),
-                   target_acq=>htmlspecialchars(odbc_result($result,"target_acq")),
-                   trknum=>odbc_result($result,"trknum"),
-                   sourceid=>htmlspecialchars(odbc_result($result,"sourceid"))
+                   commsid=>odbc_result($result,"CommsID"),
+                   name=>odbc_result($result,"Name"),
+                   datetime=>odbc_result($result,"TimeOfFix"),
+                   lat=>odbc_result($result,"Latitude"),
+                   lon=>odbc_result($result,"Longitude"),
+                   sog=>odbc_result($result,"SOG"),
+                   heading=>odbc_result($result,"Heading"),
+                   streamid=>htmlspecialchars(odbc_result($result,"PosSource")),
+                   cog=>odbc_result($result,"COG"),
+                   opt1tag=>odbc_result($result,"Opt1Tag"),
+                   opt1val=>odbc_result($result,"Opt1Val"),
+                   opt2tag=>odbc_result($result,"Opt2Tag"),
+                   opt2val=>odbc_result($result,"Opt2Val"),
+                   opt3tag=>odbc_result($result,"Opt3Tag"),
+                   opt3val=>odbc_result($result,"Opt3Val"),
+                   opt4tag=>odbc_result($result,"Opt4Tag"),
+                   opt4val=>odbc_result($result,"Opt4Val")
            );
     }
     else if ($source === "RADAR" || $source === "SAT-SAR") {

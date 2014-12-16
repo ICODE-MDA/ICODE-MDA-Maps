@@ -567,6 +567,40 @@
                           </div>
                           </li>
 
+                          <!-- LIVE LAISIC Layer ++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="livelaisicLayer" class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-minus-sign"></span>
+                                   Live LAISIC Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
+                             <button class="layersOptionsBtn btn btn-success btn-xs btn-expand">
+                                Options      
+                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
+                             </button>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <div class="btn-group">
+                                <button id="vesselstablenewwindowbutton" class="btn btn-primary" onClick="window.open('icode-table.html'); return false;">Open Vessels Tables</button>
+                             </div>                             
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="LAISIC_TARGETS" name="LAISIC_TARGETS" type="checkbox" onclick="refreshMaps(true);"> Display LAISIC targets
+                                </label>
+                             </div>
+                             <div class="checkbox">
+                                <label>
+                                   <input class="checkbox" id="error ellipses" name="error ellipses" type="checkbox" checked="checked" onclick=";"> Draw error ellipses on trackicons
+                                </label>
+                             </div>
+                          </div>
+                          </li>
+
                        </ul> <!-- END shown layers -->
 
                        <hr>

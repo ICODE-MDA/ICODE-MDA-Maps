@@ -183,8 +183,6 @@ $(function() { //shorthand for: $(document).ready(function() {
       var displayedLayersList = $('#displayedLayersList');
       var hiddenLayersList = $('#hiddenLayersList');
 
-
-
       displayedLayersList.sortable({
          // Only make the .layerHeading child elements support dragging.
          handle: '.layerHeading',
