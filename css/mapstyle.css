@@ -422,3 +422,8 @@ input[readonly] {
 #geocodeWarning {
    margin-right: 130px;
 }
+#firstHeading
+{
+	font-size: 14px;
+	font-weight: bold;
+}

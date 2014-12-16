@@ -498,7 +498,7 @@ function initialize() {
             refreshMaps(true);
             break;
          case 78: // n
-            if ($('#showtargetlabels:checked').length == 1) {
+            if ($('#showtargetlabels:checked').length > 0) {
                document.getElementById("showtargetlabels").checked = false;
                document.getElementById("showtargetlabels").removeAttribute("checked");
             }
@@ -787,10 +787,14 @@ function markerInfoBubble(marker, vessel, infoBubble) {
    var title, vesseltype;
 
    if (vessel.commsid != undefined) {
-      //TODO: distinguish RADAR from Sat-SAR contacts
-      title = 'RADAR or Sat-SAR Contact ' + vessel.commsid;
-      //title = vessel.source + ' ' + vessel.commsid;
-      vesseltype = 'RADAR';
+      if (vessel.streamid == 'RADAR') {
+         title = 'RADAR' + vessel.commsid;
+         vesseltype = 'RADAR';
+      }
+      else if (vessel.streamid == 'SAT-SAR') {
+         title = 'Sat-SAR Contact ' + vessel.commsid;
+         vesseltype = 'SAT-SAR';
+      }
    }
    //else if (vessel.commsid != undefined && vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
    else if (vessel.trknum !== undefined && vessel.vesseltypeint == 999 && vessel.sourceid == 'shore-radar') {
@@ -816,7 +820,7 @@ function markerInfoBubble(marker, vessel, infoBubble) {
 
 
    //Prepare HTML for infoWindow
-   if (vesseltype == 'RADAR') {
+   if (vesseltype == 'RADAR' || vesseltype == 'SAT-SAR') {
       infoBubble.setContent(generateRadarInfoHTML(vessel, title));
    }
    else if (vesseltype == 'LIVE_LAISIC') {
@@ -3293,10 +3297,43 @@ $(function initializeLayers() {
    radarLayer.dataType = 'RADAR';
    //Marker path definition for this layer: Circle with line for direction (intended for RADAR)
    //TODO: incorporate marker size with vw or vl
-   radarLayer.markerpath = 'M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0';
+   //radarLayer.markerpath = 'M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0';
+   radarLayer.markerpath = 'M 10, 0 l -13,-7 l -5,2 l -2,5 l 2,4 l 5,2 l 12,-6 l 1,0 Z';
+   radarLayer.markercolor = '#FF0000';
+   radarLayer.strokecolor = '#000000';
    radarLayer.phpfile = 'query_current_vessels.php';
    radarLayer.resultCount = 0;
    dataLayers.push(radarLayer);
+
+   //--------------------------------------------------------------
+   //SAT-SAR layer
+   var satsarLayer = new dataLayerObject('satsarLayer', 
+      function showradarLayer(thislayer, callback) {
+         //console.log('Displaying RADAR layer');
+         getRADARFromDB(null, thislayer, callback);  //parameters: (customQuery, callback when done)
+      }, 
+      function hideradarLayer() {
+         //console.log('hiding RADAR layer');
+         clearLayerMarkers(this);
+      },
+      true  //force refresh this layer
+      );
+   //Data object of arrays
+   satsarLayer.data = {
+      dataArray: [],
+      markerArray: [],
+      markerlabelArray: []
+   };
+   satsarLayer.dataType = 'SAT-SAR';
+   //Marker path definition for this layer: Circle with line for direction (intended for RADAR)
+   //TODO: incorporate marker size with vw or vl
+   //satsarLayer.markerpath = 'M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0';
+   satsarLayer.markerpath = 'M 10, 0 l -13,-7 l -5,2 l -2,5 l 2,4 l 5,2 l 12,-6 l 1,0 Z';
+   satsarLayer.markercolor = '#010101';
+   satsarLayer.strokecolor = '#FF0000';
+   satsarLayer.phpfile = 'query_current_vessels.php';
+   satsarLayer.resultCount = 0;
+   dataLayers.push(satsarLayer);
 
    //--------------------------------------------------------------
    //KMZ layer
@@ -3889,7 +3926,7 @@ function getAISFromDB(thislayer, callback) {
             thislayer.data.markerArray.forEach( function (marker) {
                marker.setMap(map);
             });
-            if ($('#showtargetlabels') != null || $('#showtargetlabels:checked').length != 0) {
+            if ($('#showtargetlabels:checked').length > 0) {
                thislayer.data.markerlabelArray.forEach( function (markerlabel) {
                   markerlabel.setMap(map);
                });
@@ -4427,7 +4464,7 @@ function getLAISICFromDB(sourceType, thislayer, callback) {
             thislayer.data.markerArray.forEach( function (marker) {
                marker.setMap(map);
             });
-            if ($('#showtargetlabels') != null || $('#showtargetlabels:checked').length != 0) {
+            if ($('#showtargetlabels:checked').length > 0) {
                thislayer.data.markerlabelArray.forEach( function (markerlabel) {
                   markerlabel.setMap(map);
                });
@@ -4754,16 +4791,16 @@ function getRADARFromDB(customQuery, thislayer, callback) {
                parseFloat(vessel.lat),
                parseFloat(vessel.lon));
 
-            var iconColor = getIconColor(vessel.vesseltypeint, vessel.streamid);
+            //var iconColor = getIconColor(vessel.vesseltypeint, vessel.streamid);
 
             //marker style
             var marker = new google.maps.Marker({
                position: latlon,
                 icon: {
                    path:         thislayer.markerpath,
-                strokeColor:  '#222200',
+                strokeColor:  thislayer.strokecolor,
                 strokeWeight: 1,
-                fillColor:    iconColor,
+                fillColor:    thislayer.markercolor,
                 fillOpacity:  0.8,
                 rotation:     parseInt(vessel.heading)-90,
                 optimized:    false,
@@ -4786,12 +4823,6 @@ function getRADARFromDB(customQuery, thislayer, callback) {
 
                //Close the infoBubble if user clicks outside of infoBubble area
                google.maps.event.addListenerOnce(map, 'click', function() {
-                  if (enableIHSTabs) {
-                     for (var i=0; i < NUM_INFO_BUBBLE; i++) {
-                        console.log('Removing tab ' + i);
-                        infoBubble.removeTab(0);
-                     }
-                  }
                   clearInterval(vesselLastUpdated);
                   selectionSquare.setMap(null);
                   infoBubble.setMap(null);
@@ -4833,7 +4864,7 @@ function getRADARFromDB(customQuery, thislayer, callback) {
             vesselnameLabel.open(map);
 
             //Check if labels should be displayed or not
-            if ($('#showtargetlabels') == null || $('#showtargetlabels:checked').length == 0) {
+            if ($('#showtargetlabels:checked').length == 0) {
                vesselnameLabel.setMap(null);
             }
 
@@ -4963,7 +4994,7 @@ function getFMVTargets(customQuery, thislayer, callback) {
                   vesselnameLabel.open(map);
 
                   //Check if labels should be displayed or not
-                  if ($('#showtargetlabels') == null || $('#showtargetlabels:checked').length == 0) {
+                  if ($('#showtargetlabels:checked').length == 0) {
                      vesselnameLabel.setMap(null);
                   }
 

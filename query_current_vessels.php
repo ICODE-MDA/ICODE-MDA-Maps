@@ -81,7 +81,10 @@ if(count($_GET) > 0) {
             $sourceStr = "(SELECT obsguid, lat as Latitude, lon as Longitude, semimajor, semiminor, orientation, cog, sog, datetime, callsign, mmsi, vesselname, imo, streamid FROM $laisic_database.aisobservation_mem_track_heads) VESSELS";
             break;
          case "RADAR":
-            $sourceStr = "(SELECT * FROM icodemda.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM icodemda.pvol_pdm_memory GROUP BY `CommsID` )) VESSELS";
+            $sourceStr = "(SELECT * FROM icodemda.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM icodemda.pvol_pdm_memory WHERE PosSource = 'shore-radar' GROUP BY `CommsID` )) VESSELS";
+            break;
+         case "SAT-SAR":
+            $sourceStr = "(SELECT * FROM icodemda.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM icodemda.pvol_pdm_memory WHERE PosSource = 'SAT-SAR' GROUP BY `CommsID` )) VESSELS";
             break;
          case "LIVE_LAISIC":
             $sourceStr = "(SELECT mmsi, sog, lon as Longitude, lat as Latitude, cog, datetime, streamid, target_status, target_acq, trknum, sourceid FROM $laisic_live_database.radar_laisic_output_mem_track_heads WHERE mmsi != 0) VESSELS";
@@ -218,7 +221,7 @@ if(count($_GET) > 0) {
      */
 
        //Add timestamp constraint, only for AIS tracks
-       if (!empty($_GET["vessel_age"]) && ($source === "AIS" || $source === "RADAR") && !$timemachine) {
+       if (!empty($_GET["vessel_age"]) && ($source === "AIS" || $source === "RADAR" || $source === "SAT-SAR") && !$timemachine) {
           $vessel_age = $_GET["vessel_age"];
           $query = $query . " AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
        }
@@ -372,7 +375,7 @@ while (odbc_fetch_row($result)){
                    sourceid=>htmlspecialchars(odbc_result($result,"sourceid"))
            );
     }
-    else if ($source === "RADAR") {
+    else if ($source === "RADAR" || $source === "SAT-SAR") {
        $vessel = array(mmsi=>odbc_result($result,"mmsi"),
                    commsid=>odbc_result($result,"CommsID"),
                    name=>odbc_result($result,"Name"),
