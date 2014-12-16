@@ -785,7 +785,8 @@ function markerInfoBubble(marker, vessel, infoBubble) {
    var title, vesseltype;
 
    if (vessel.commsid != undefined) {
-      title = 'RADAR Contact ' + vessel.commsid;
+      //TODO: distinguish RADAR from Sat-SAR contacts
+      title = 'RADAR or Sat-SAR Contact ' + vessel.commsid;
       //title = vessel.source + ' ' + vessel.commsid;
       vesseltype = 'RADAR';
    }
@@ -1292,16 +1293,11 @@ function getTrackByTrackIDandSource(trackID, source) {
  * Function to get track from track query PHP script
  */
 function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
-   //console.log('Is mmsi in tracksDisplayedID? ', $.inArray(mmsi, tracksDisplayedID) == -1);
-   console.log('trknum:',trknum);
    //Check if track is already displayed or not
    if (($.inArray(mmsi, tracksDisplayedID) == -1 || source == "LAISIC_AIS_TRACK") && 
        ($.inArray(trknum, tracksDisplayedID) == -1 || source == "LAISIC_AIS_TRACK") && 
        $.inArray(trknum, tracksDisplayedID) == -1) {
-      document.getElementById("query").value = "QUERY RUNNING FOR TRACK...";
       //TODO: $('#' + thislayer.layerID + ' .queryStatement').val("QUERY RUNNING FOR TRACK...");
-      document.getElementById('stats').innerHTML = '';
-      showBusyIndicator();
 
       var phpWithArg = "query_track.php?source=" + source;
 
@@ -1317,13 +1313,15 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
          phpWithArg += "&history_trail_length=" + history_trail_length;
       }
 
+      /*
       if (document.getElementById("enabletimemachine") && document.getElementById("enabletimemachine").checked) {
          phpWithArg += "&timestart=" + startTimeMachine;
          phpWithArg += "&timeend=" + endTimeMachine;
       }
+      */
 
       //Debug query output
-      console.log('GETTRACK(): ' + phpWithArg);
+      console.log('getTrack(): ' + phpWithArg);
 
       var trackline = new google.maps.Polyline();
 
@@ -1332,10 +1330,9 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
             { }
             ) //end .getJSON()
                .done(function (response) {
-                  document.getElementById("query").value = response.query;
-         //TODO: $('#' + thislayer.layerID + ' .queryStatement').val(response.query);
-                  console.log('GETTRACK(): ' + response.query);
-                  console.log('GETTRACK(): ' + 'track history size = ' + response.resultcount);
+                  //TODO: $('#' + thislayer.layerID + ' .queryStatement').val(response.query);
+                  console.log('getTrack(): ' + response.query);
+                  console.log('getTrack(): ' + 'track history size = ' + response.resultcount);
 
                   if (response.resultcount > 0) {
                      var trackHistory = new Array();
@@ -1725,31 +1722,25 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
                         }
                      });
                   }
-
-                  hideBusyIndicator();
-                  document.getElementById('stats').innerHTML = response.resultcount + " results<br>Retreived in " + Math.round(response.exectime*1000)/1000 + " secs";
                }) //end .done()
             .fail(function() { 
-               console.log('GETTRACK(): ' +  'No response from track query; error in php?'); 
-               document.getElementById("query").value = "ERROR IN QUERY.  PLEASE TRY AGAIN.";
-               hideBusyIndicator();
+               console.log('getTrack(): ' +  'No response from track query; error in php?'); 
                return; 
             }); //end .fail()
    }
    else {
       if (trknum == "undefined" || trknum == null) {
-         console.log('Track for ' + mmsi + ' is already displayed.');
+         console.log('getTrack(): Track for ' + mmsi + ' is already displayed.');
       }
       else {
-         console.log('Track for ' + trknum + ' is already displayed.');
+         console.log('getTrack(): Track for ' + trknum + ' is already displayed.');
       }
    }
 }
 
 /* -------------------------------------------------------------------------------- */
 function toggleTrackIcons() {
-   if (document.getElementById("showtrackicons") != null &&
-       document.getElementById("showtrackicons").checked) {
+   if ($('#showtrackicons:checked').length > 0) {
       console.log('Showing trackIcons');
 
       showtrackicons = true;
@@ -3059,16 +3050,25 @@ function dataLayerObject(id, showFunction, hideFunction, updateIfShown) {       
 };
 
 /* -------------------------------------------------------------------------------- */
+/** 
+ * Loops through each property of thislayer.data and remove array elements from map
+ * and also clears the array.
+ **/
 function clearLayerMarkers(thislayer) {
-   thislayer.data.markerArray.forEach( function (marker) {
-      marker.setMap(null);
-   });
-   thislayer.data.markerlabelArray.forEach( function (markerlabel) {
-      markerlabel.setMap(null);
-   });
-   emptyArray(thislayer.data.dataArray);
-   emptyArray(thislayer.data.markerArray);
-   emptyArray(thislayer.data.markerlabelArray);
+   //Robust method
+   for (var property in thislayer.data) {
+      if (thislayer.data.hasOwnProperty(property)) {
+         // do stuff
+
+         //Remove from map if array elements have defined setMap() function
+         thislayer.data[property].forEach( function (marker) {
+            if (typeof marker.setMap !== 'undefined') {
+               marker.setMap(null);
+            }
+         });
+         emptyArray(thislayer.data[property]);
+      }
+   }
 }
 
 
@@ -3109,6 +3109,38 @@ $(function initializeLayers() {
    aisLayer.resultCount = 0;
    aisLayer.lastestCall = null;
    dataLayers.push(aisLayer);
+
+   //--------------------------------------------------------------
+   //AIS Track layer
+   var aisTrackLayer = new dataLayerObject('aisLayer', 
+      function showaisTrackLayer(thislayer, callback) {
+         //console.log('Displaying AIS layer');
+         
+         //Cluster view
+         if ($('#enableCluster:checked').length != 0 && map.getZoom() < 9 && isSearchMode()) {
+            //TODO: Hide tracks
+         }
+         //Individual vessel view
+         else {
+            //getTrack()
+         }
+      }, 
+      function hideaisTrackLayer() {
+         clearLayerMarkers(this);
+      },
+      true  //force refresh this layer
+      );
+   //Data object of arrays
+   aisTrackLayer.data = {
+      dataArray: [],
+      trackMarkerArray: [],
+   };
+   aisTrackLayer.dataType = 'AIS-track';
+   aisTrackLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
+   aisTrackLayer.phpfile = 'query_track.php';
+   aisTrackLayer.resultCount = 0;
+   aisTrackLayer.lastestCall = null;
+   dataLayers.push(aisTrackLayer);
 
    //--------------------------------------------------------------
    //LAISIC LIVE layer
@@ -5015,11 +5047,8 @@ function increaseVesselIconSize() {
    vl += 2;
 
    //TODO: only update AIS layer for now
-   dataLayers.forEach( function(dataLayer) {
-      if (dataLayer.dataType = 'AIS') {
-         dataLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
-      }
-   });
+   //TODO: getdataLayerIndex() returns an array of indices, so need to handle this
+   dataLayers[getdataLayerIndex('AIS')].markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
 
    refreshLayers();
 }
@@ -5033,11 +5062,8 @@ function decreaseVesselIconSize() {
    vl -= 2;
 
    //TODO: only update AIS layer for now
-   dataLayers.forEach( function(dataLayer) {
-      if (dataLayer.dataType = 'AIS') {
-         dataLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
-      }
-   });
+   //TODO: getdataLayerIndex() returns an array of indices, so need to handle this
+   dataLayers[getdataLayerIndex('AIS')].markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
 
    refreshLayers();
 }
@@ -5051,11 +5077,8 @@ function resetVesselIconSize() {
    vl = 10;
 
    //TODO: only update AIS layer for now
-   dataLayers.forEach( function(dataLayer) {
-      if (dataLayer.dataType = 'AIS') {
-         dataLayer.markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
-      }
-   });
+   //TODO: getdataLayerIndex() returns an array of indices, so need to handle this
+   dataLayers[getdataLayerIndex('AIS')].markerpath = 'M 0,'+vl+' '+vw+','+vl+' '+vw+',-3 0,-'+vl+' -'+vw+',-3 -'+vw+','+vl+' z';
 
    refreshLayers();
 }
