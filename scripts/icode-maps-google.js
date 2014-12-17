@@ -130,10 +130,8 @@ var distIconsOptions = {
             };
 
 //Time Machine
-var enableTimeMachine;
-var queryTimeMachine;
-var startTimeMachine;
-var endTimeMachine;
+//var TimeMachineStart;
+var TimeMachineEnd = null;
 
 //Custom search/query
 var enableCustomQuery;
@@ -394,7 +392,7 @@ function initialize() {
 
       toggleRisk();
 
-      toggleTimeMachine();
+      //toggleTimeMachine();
 
       //toggleCluster();
 
@@ -452,7 +450,7 @@ function initialize() {
             toggleAutoRefresh();
             break;
          case 67: // c
-            clearAllTracks();
+            dataLayers[getdataLayerIndex('AIS-track')].hideLayer();
             break;
          case 68: // d
             if ($('#distancetooltoggle:checked').length == 1) {
@@ -514,11 +512,11 @@ function initialize() {
                document.getElementById("LAISIC_TARGETS").checked = true;
 
                //Disable other type of views
-               $('input[id=enabletimemachine]').attr('checked', false);
-               toggleTimeMachine();
+               //$('input[id=enabletimemachine]').attr('checked', false);
+               //toggleTimeMachine();
                disableCustomQuery();
             }
-            clearAllTracks();
+            dataLayers[getdataLayerIndex('AIS-track')].hideLayer();
             refreshMaps(true);
             break;
          case 78: // n
@@ -643,124 +641,18 @@ function initialize() {
    localStorage.setItem('refresh',1);
 }
 
-///* -------------------------------------------------------------------------------- */
-///** 
-// * Handles refreshing map of all markers/clusters/ports layers/day-night layer/etc.
-// */
-//function refreshMaps(forceRedraw) {
-//   //alert("caller is " + arguments.callee.caller.toString()); //Find out who called this function
-//   console.log("Calling refreshMaps");
-//
-//   //Check if browser tab is in view before refreshing
-//   if (!browserFocus) {
-//      console.log('Browser tab not focused; skipping refresh');
-//      queuedRefresh = true;
-//      return;
-//   }
-//
-//   //Update refresh time
-//   if (forceRedraw) {
-//      lastRefresh = new Date();
-//   }
-//   
-//   //------------------------ Update AIS/RADAR/LAISIC ---------------------------
-//
-//   //Check if URL has query
-//   var queryArgument = Request.QueryString("query").toString();
-//   //console.log(queryArgument);
-//
-//   if (enableTimeMachine) {
-//      // -- Time Machine mode --
-//      console.log('Performing Time Machine query');
-//      getTargetsFromDB(map.getBounds(), queryTimeMachine, 'AIS', true); 
-//   }
-//   else if (enableCustomQuery) {
-//      // -- Custom query mode --
-//      console.log('Performing custom query: ' + queryCustomQuery);
-//      getTargetsFromDB(map.getBounds(), queryCustomQuery, 'AIS', true); 
-//   }
-//   //Check if URL has query parameter, and use if it is defined
-//   else if (queryArgument != null) {
-//      // -- URL Query mode --
-//      console.log('Performing URL query');
-//      mainQuery = queryArgument;
-//
-//      //Default to querying from AIS table
-//      getTargetsFromDB(map.getBounds(), queryArgument, "AIS", forceRedraw);
-//   }
-//   else {
-//      //Update vessels displayed
-//      if (document.getElementById("LAISIC_TARGETS").checked) {
-//         // -- LAISIC mode --
-//
-//         //Uncheck auto refresh
-//         $('input[name=autoRefresh]').attr('checked', false);
-//         toggleAutoRefresh();
-//
-//         if (prevSourceType == "AIS") {
-//            forceRedraw = true;     //if type changed, force redrawing even if passed in false
-//            clearMarkerAndClusters();
-//            localStorage.clear();
-//         }
-//               
-//         var redrew = getTargetsFromDB(map.getBounds(), null, "LAISIC_AIS_TRACK", forceRedraw);
-//         getTargetsFromDB(map.getBounds(), null, "LAISIC_RADAR", redrew);
-//         getTargetsFromDB(map.getBounds(), null, "LAISIC_AIS_OBS", redrew);
-//      }
-//      else if (!enableCluster || map.getZoom() > 9) {
-//         // -- Live view mode --
-//
-//         //Create a unique query id to keep track of when to clear map
-//         //  The first layer to return will clear the map and set a new queryid so the other calls don't clear the map again
-//         queryid = new Date().getTime();
-//
-//         //Most queries will default here
-//         getTargetsFromDB(map.getBounds(), null, "AIS", forceRedraw, queryid);
-//
-//         /*
-//         if (document.getElementById("radarvessels") != null && 
-//             document.getElementById("radarvessels").checked) {
-//            getTargetsFromDB(map.getBounds(), null, "RADAR", forceRedraw, queryid);
-//         }
-//         */
-//         if (document.getElementById("livelaisic") != null && 
-//             document.getElementById("livelaisic").checked) {
-//            getTargetsFromDB(map.getBounds(), null, "LIVE_LAISIC", forceRedraw, queryid);
-//         }
-//      }
-//      else {
-//         // -- Clusters mode --
-//
-//         //Only get AIS (no PVOL/radar or LAISIC) for clusters
-//         getClustersFromDB(map.getBounds(), null);
-//      }
-//   }
-//
-//   //------------------------ Update other layers ---------------------------
-//
-//   //Update ports displayed
-//   /*
-//   if (Ports) {
-//      hidePorts();
-//      showPorts();
-//   }
-//   */
-//
-//   //toggleCountryBorders();
-//
-//   //refreshDayNightOverlay();
-//}
-
 /* -------------------------------------------------------------------------------- */
 /** 
  * Handles refreshing map of all tracks
  */
 function refreshTracks() {
-   console.log("Calling refreshTracks");
+   console.log("Calling refreshTracks - (TODO)");
 
+   //TODO
+   /*
    var trackIDtoRequery = tracksDisplayedID.slice(0);
 
-   clearAllTracks();
+   dataLayers[getdataLayerIndex('AIS-track')].hideLayer();
 
    $.each(trackIDtoRequery, function(index, value) {
       console.log('Requerying track for ' + this);
@@ -768,6 +660,7 @@ function refreshTracks() {
       //TODO: also query for existing 'RADAR' tracks
       getTrackByTrackIDandSource(this, "RADAR");   //TEMP: just try for all (even if AIS), since RADAR has different track ID format than AIS's MMSI
    });
+   */
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -810,15 +703,13 @@ function markerInfoBubble(marker, vessel, infoBubble) {
 
    var title, vesseltype;
 
-   if (vessel.commsid != undefined) {
-      if (vessel.streamid == 'RADAR') {
-         title = 'RADAR' + vessel.commsid;
-         vesseltype = 'RADAR';
-      }
-      else if (vessel.streamid == 'SAT-SAR') {
-         title = 'Sat-SAR Contact ' + vessel.commsid;
-         vesseltype = 'SAT-SAR';
-      }
+   if (vessel.streamid == 'RADAR') {
+      title = 'RADAR' + vessel.commsid;
+      vesseltype = 'RADAR';
+   }
+   else if (vessel.streamid == 'SAT-SAR') {
+      title = 'Sat-SAR Contact ' + vessel.commsid;
+      vesseltype = 'SAT-SAR';
    }
    //else if (vessel.commsid != undefined && vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
    else if (vessel.trknum !== undefined && vessel.vesseltypeint == 999 && vessel.sourceid == 'shore-radar') {
@@ -1200,6 +1091,7 @@ function clearTrack(trackline, trackIcons, dashedLines, trackID, errorEllipses) 
 }
 
 /* -------------------------------------------------------------------------------- */
+/*
 function clearTrackByTrackID(trackID) {
    if (trackID != null) {
       $.each(tracksDisplayed, function(index) {
@@ -1225,22 +1117,15 @@ function clearTrackByTrackID(trackID) {
       console.log('Error clearing track by trackID: neither MMSI or trknum is valid');
    }
 }
-
-/* -------------------------------------------------------------------------------- */
-function clearAllTracks() {
-   while (tracksDisplayedID.length > 0) {
-      clearTrackByTrackID(tracksDisplayedID[0]);
-   }
-   deleteTrackTimeControl();
-}
+*/
 
 /* -------------------------------------------------------------------------------- */
 function toggleQueryAllTracks() {
-   if (document.getElementById("queryalltracks") && document.getElementById("queryalltracks").checked) {
+   if ($('#queryalltracks:checked').length > 0) {
       queryAllTracks();
    }
    else {
-      clearAllTracks();
+      dataLayers[getdataLayerIndex('AIS-track')].hideLayer();
    }
 }
 
@@ -2883,7 +2768,7 @@ function toggleCluster(refresh) {
       enableCluster = false;
    }
    if (refresh) {
-      refreshMaps(true);
+      refreshLayers();
    }
 }
 
@@ -2891,11 +2776,12 @@ function toggleCluster(refresh) {
 /**
  * Time Machine tool, function called from index.html
  **/
+/*
 function TimeMachineLookup(timestart, timeend) {
    //Turn on Time Machine feature
    //document.getElementById("enabletimemachine").checked = true;
    $('input[id=enabletimemachine]').attr('checked', true);
-   toggleTimeMachine();
+   //toggleTimeMachine();
 
    startTimeMachine = timestart;
    endTimeMachine = timeend;
@@ -2923,8 +2809,10 @@ function TimeMachineLookup(timestart, timeend) {
    //Use custom query feature to execute Time Machine
    getTargetsFromDB(map.getBounds(), queryTimeMachine, 'AIS', true);
 }
+*/
 
 /* -------------------------------------------------------------------------------- */
+/*
 function toggleTimeMachine() {
    if (document.getElementById("enabletimemachine") && document.getElementById("enabletimemachine").checked) {
       console.log("Turning on Time Machine");
@@ -2947,6 +2835,7 @@ function toggleTimeMachine() {
       document.getElementById('status-msg').style.opacity = "0";
    }
 }
+*/
 
 /* -------------------------------------------------------------------------------- */
 function detectMobileBrowser() {
@@ -3372,7 +3261,7 @@ $(function initializeLayers() {
          callback();
       }, 
       function hidekmzLayer() {
-         console.log('Hiding KMZ layer');
+         //console.log('Hiding KMZ layer');
          var parser = this.data;
          parser.docs.forEach(function (doc) {
             parser.hideDocument(doc);
@@ -3751,6 +3640,12 @@ function getAISFromDB(thislayer, callback) {
          phpWithArg += "&vessel_age=" + vessel_age;
       }
 
+      //Time Machine
+      if (TimeMachineEnd != null) {
+         //Time Machine enabled
+         phpWithArg += "&timeend=" + TimeMachineEnd;
+      }
+
       phpWithArg += viewBounds.boundStr;
 
       enableCustomQuery = false;
@@ -3760,6 +3655,7 @@ function getAISFromDB(thislayer, callback) {
       phpWithArg = thislayer.phpfile + '?' + sourceStr + viewBounds.boundStr + "&keyword=" + searchTerm;
      
       //If not in Time Machine mode, change status display to custom query message
+      /*
       if (!document.getElementById("enabletimemachine") 
           || !document.getElementById("enabletimemachine").checked) {
          enableCustomQuery = true;
@@ -3767,6 +3663,7 @@ function getAISFromDB(thislayer, callback) {
          document.getElementById('status-msg').innerHTML = "Custom Query Filtering On: \"" + customQuery + "\" [<a href='' onClick='disableCustomQuery(); return false;'>cancel</a>]";
          document.getElementById('status-msg').style.opacity = "1";
       }
+      */
    }
 
    //Debug query output
@@ -3979,7 +3876,7 @@ function getAISFromDB(thislayer, callback) {
          callback();
       }) //END .done()
       .fail(function(d, textStatus, error) { 
-         if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+         if (typeof d.responseText !== 'undefined' && d.responseText.indexOf("Can't connect to MySQL server") > -1) {
             console.log(thislayer.layerID + ': ' +  'Database is down'); 
             $('#' + thislayer.layerID + ' .queryStatement').val('DATABASE IS DOWN.');
          }
@@ -4000,6 +3897,8 @@ function getAISFromDB(thislayer, callback) {
 function getAISTrack(mmsi, vesseltypeint) { //mmsi, vesseltypeint, source, datetime, streamid, trknum) {
    var thislayer = dataLayers[getdataLayerIndex('AIS-track')];
    var trackLayerData = thislayer.data;
+
+   showBusyIndicator();
 
    //Check if track is already displayed or not
    if ($.inArray(mmsi, trackLayerData.MMSIArray) == -1) {
@@ -4164,6 +4063,8 @@ function getAISTrack(mmsi, vesseltypeint) { //mmsi, vesseltypeint, source, datet
                         thislayer.deleteTrack(mmsi);
                      });
                   }
+
+                  hideBusyIndicator();
                }) //end .done()
             .fail(function() { 
                console.log('getTrack(): ' +  'No response from track query; error in php?'); 
@@ -4224,6 +4125,7 @@ function getLAISICFromDB(sourceType, thislayer, callback) {
       phpWithArg = thislayer.phpfile + '?' + sourceStr + viewBounds.boundStr + "&keyword=" + searchTerm;
      
       //If not in Time Machine mode, change status display to custom query message
+      /*
       if (!document.getElementById("enabletimemachine") 
           || !document.getElementById("enabletimemachine").checked) {
          enableCustomQuery = true;
@@ -4231,6 +4133,7 @@ function getLAISICFromDB(sourceType, thislayer, callback) {
          document.getElementById('status-msg').innerHTML = "Custom Query Filtering On: \"" + customQuery + "\" [<a href='' onClick='disableCustomQuery(); return false;'>cancel</a>]";
          document.getElementById('status-msg').style.opacity = "1";
       }
+      */
    }
 
    //Debug query output
@@ -4516,7 +4419,7 @@ function getLAISICFromDB(sourceType, thislayer, callback) {
          callback();
       }) //END .done()
       .fail(function(d, textStatus, error) { 
-         if (d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+         if (typeof d.responseText !== 'undefined' && d.responseText.indexOf("Can't connect to MySQL server") > -1) {
             console.log(thislayer.layerID + ': ' +  'Database is down'); 
             $('#' + thislayer.layerID + ' .queryStatement').val('DATABASE IS DOWN.');
          }
@@ -4538,8 +4441,6 @@ function getClustersFromDB(thislayer, callback) {
    console.log(thislayer.layerID + ': Refreshing targets...');
    $('#' + thislayer.layerID + ' .queryStatement').val('QUERY RUNNING...');
 
-   //document.getElementById('stats').innerHTML = '';
-
    var phpWithArg;
 
    phpWithArg = "query_current_vessels_cluster.php?" + viewBounds.boundStr;
@@ -4547,6 +4448,12 @@ function getClustersFromDB(thislayer, callback) {
    //if vessel age limit was chosen, then add option
    if (vessel_age != -1) {
       phpWithArg += "&vessel_age=" + vessel_age;
+   }
+   
+   //Time Machine
+   if (TimeMachineEnd != null) {
+      //Time Machine enabled
+      phpWithArg += "&timeend=" + TimeMachineEnd;
    }
 
    if (detectMobileBrowser()) {
@@ -4705,7 +4612,7 @@ function getClustersFromDB(thislayer, callback) {
          callback();
       }) //end .done()
       .fail(function(d, textStatus, error) { 
-         if (typeof d !== 'undefined' && d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+         if (typeof d.responseText !== 'undefined' && d.responseText.indexOf("Can't connect to MySQL server") > -1) {
             console.log(thislayer.layerID + ': ' +  'Database is down'); 
             $('#' + thislayer.layerID + ' .queryStatement').val('DATABASE IS DOWN.');
          }
@@ -4744,6 +4651,12 @@ function getRADARFromDB(customQuery, thislayer, callback) {
          phpWithArg += "&vessel_age=" + vessel_age;
       }
 
+      //Time Machine
+      if (TimeMachineEnd != null) {
+         //Time Machine enabled
+         phpWithArg += "&timeend=" + TimeMachineEnd;
+      }
+
       phpWithArg += viewBounds.boundStr;
 
       enableCustomQuery = false;
@@ -4772,6 +4685,12 @@ function getRADARFromDB(customQuery, thislayer, callback) {
          //if vessel age limit was chosen, then add option
          if (vessel_age != -1) {
             phpWithArg += "&vessel_age=" + vessel_age;
+         }
+         
+         //Time Machine
+         if (TimeMachineEnd != null) {
+            //Time Machine enabled
+            phpWithArg += "&timeend=" + TimeMachineEnd;
          }
       }
    }
@@ -4909,7 +4828,7 @@ function getRADARFromDB(customQuery, thislayer, callback) {
          callback();
       }) //END .done()
       .fail(function(d, textStatus, error) { 
-         if (typeof d !== 'undefined' && d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+         if (typeof d.responseText !== 'undefined' && d.responseText.indexOf("Can't connect to MySQL server") > -1) {
             console.log(thislayer.layerID + ': Database is down'); 
             $('#' + thislayer.layerID + ' .queryStatement').val('DATABASE IS DOWN.');
          }
@@ -5039,7 +4958,7 @@ function getFMVTargets(customQuery, thislayer, callback) {
                callback();
             }) //END .done()
          .fail(function(d, textStatus, error) { 
-            if (typeof d !== 'undefined' && d.responseText.indexOf("Can't connect to MySQL server") > -1) {
+            if (typeof d.responseText !== 'undefined' && d.responseText.indexOf("Can't connect to MySQL server") > -1) {
                console.log('getFMVTargets(): ' +  'Database is down'); 
                $('#' + thislayer.layerID + ' .queryStatement').val('DATABASE IS DOWN.');
             }

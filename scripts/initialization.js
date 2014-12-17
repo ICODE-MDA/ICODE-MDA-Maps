@@ -19,6 +19,7 @@ $(function() { //shorthand for: $(document).ready(function() {
    //initializeBrowserFocus();
    queryStatementBehavior();
    fileKMZUploadBehavior();
+   setupTimeMachine();
 
    //Setup functions definitions =========================================================
    /* -------------------------------------------------------------------------------- */
@@ -407,6 +408,59 @@ $(function() { //shorthand for: $(document).ready(function() {
       });
    }
 
+   /* -------------------------------------------------------------------------------- */
+   /**
+    * 
+    **/
+   function setupTimeMachine() {
+      /*
+      $('#timemachinestart').datetimepicker({
+         format: 'yyyy-mm-dd hh:ii',
+         autoclose: true,
+         todayBtn: true,
+         minuteStep: 15,
+         todayHighlight: true,
+         forceParse: true,
+         minView: 1
+      });
+      $('#timemachinestart').datetimepicker('setStartDate', '2013-11-19');
+      var yesterday = new Date();
+      yesterday.setDate(yesterday.getDate()-1);
+      yesterday.setHours(0);
+      yesterday.setMinutes(0);
+      $('#timemachinestart').datetimepicker('update', yesterday);
+      */
+
+      $('#timemachineend').datetimepicker({
+         format: 'yyyy-mm-dd hh:ii',
+         autoclose: true,
+         todayBtn: true,
+         minuteStep: 15,
+         todayHighlight: true,
+         forceParse: true,
+         minView: 0
+      })
+      .on('changeDate', function(ev){
+         console.log($(this).val());
+         TimeMachineEnd = $('#timemachineend').datetimepicker('getDate').getTime()/1000 - 60*(new Date()).getTimezoneOffset();
+
+         refreshLayers();
+      });
+
+      if (Request.QueryString('endtime').Count() > 0) {
+         var endtime = Request.QueryString("endtime").toString();
+         $('#timemachineend').datetimepicker('setDate', new Date(endtime * 1000));
+         TimeMachineEnd = parseInt(endtime) - parseInt(60*(new Date()).getTimezoneOffset());
+      }
+      else {
+         $('#timemachineend').val('Now');
+      }
+
+      if (Request.QueryString('age').Count() > 0) {
+         var age = Request.QueryString("age").toString();
+         $('#vessel_age').val(age);
+      }
+   }
 });
 
 //Globally exposed functions

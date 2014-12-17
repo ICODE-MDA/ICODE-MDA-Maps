@@ -7,6 +7,7 @@ $vessels_table    = 'vessels_memory';  //'vessels';
 
 $laisic_database  = 'laisic';
 $laisic_live_database  = 'volpe';
+$radar_database   = 'icodemda';
 $ihs_database     = 'wros';
 $port_database    = 'risk';
 $alert_database   = 'alerts';

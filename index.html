@@ -42,6 +42,7 @@
      <script type="text/javascript" src="scripts/geoxml3.js"></script> <!-- for KMZ extraction and display, req'd by fileUpload.js -->
      <script type="text/javascript" src="scripts/ExtDraggableObject.js"></script> <!-- req'd by geoxml3.js -->
      <script type="text/javascript" src="scripts/ProjectedOverlay.js"></script> <!-- req'd by geoxml3.js -->
+     <script type="text/javascript" src="scripts/bootstrap-datetimepicker.js"></script> <!-- req'd by Time Machine feature -->
 
      <!-- JQueryUI -->
      <!-- Theme downloaded from http://jqueryui.com/download/#!zThemeParams=5d00000100f405000000000000003d8888d844329a8dfe02723de3e5701fa198449035fc0613ff729a37dd818cf92b1f6938fefa90282d04ae436bb72367f5909357c629e832248af2c086db4ab730aa4cced933a88449eca61db9f7f3b23d47f58a712d809b6088edfb34ad39fdc365386d0fa05a1ac3ecd320d2c989729f79ebdc6c6c1efbdad4c8411d498f009ffe98fe129da7602fb950113abdae4a76a6c41a4b54b4f82bb8821d6d431cd3fdd76b9d621596a2728b93385f2e7aaf8ea6603553343d43829941536e2bdd3ed7d7d3207364bf351633b31b934a71523a88fa2058cdd4c2e0778cd56d6ccac254ddace19ff4460a100e2e6a52830d9063c6e328cc3cb5e3d6dbe1077ae8b7cc5fa6414eafd15883b40c6c3e71647031ce3da7038a945a5628669fbe0e5139dad7ce99c00f25c2cd40569bd2fe1b2caed45bf2b8943f6ac17215bd54437a0f739009848e80f1d5c00d99870e7258d07402af6b22872fdf8f2892a7e9274aaa9181573ddd8cd7788511b4459e736d76b3e64e015809712e904499648868a11e35b3bb8ee1168d6039c5a86eee8cf545c877dbdd0111ab04ede46a85a17baed0958026fe23d2e490cfa504ab598731d779a2434fa164085379d31e1ff08e2eeb9475cce3d5b3e9b2fd4df43dffe6cf0eda -->
@@ -58,6 +59,7 @@
 
      <!-- Custom CSS styling -->
      <link rel="stylesheet" type="text/css" href="css/mapstyle.css">
+     <link rel="stylesheet" type="text/css" href="css/bootstrap-datetimepicker.min.css"> <!-- Req'd by Time Machine feature -->
 
 
      <!-- Google Webfonts -->
@@ -216,14 +218,25 @@
                        <br>
                        <label>
                           <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="16" width="30" viewBox="-6 -12 20 16">
-                          <path d="M 0, -3 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0" style="fill:#F078FF;stroke:#222200;stroke-width:1;fill-rule:evenodd;">Browser does not support inline SVG.
+                          <path d="M 0,-9 6,2 4,6 0,8 -4,6 -6,2 Z" style="fill:#FF0000;stroke:#000000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 2 -1)">Browser does not support inline SVG.
                           </path>
                           </svg>
                           RADAR Vessels
                        </label>
                        <br>
                        <label>
-                          <svg width="26" height="15" version="1.1" xmlns="https://svgwg.org/svg2-draft/"  viewBox="0 3 20 10"><path d="M 12,0 22,15 19,21 12,24 6,21 3,15 Z" fill="#FF0000" stroke="#000000" stroke-width="3" transform="rotate(90 6 6) scale(0.5) translate(5 -4)"></path></svg>
+                          <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="16" width="30" viewBox="-6 -12 20 16">
+                          <path d="M 0,-9 6,2 4,6 0,8 -4,6 -6,2 Z" style="fill:#010101;stroke:#FF0000;stroke-width:1;fill-rule:evenodd;" transform="rotate(90 2 -1)">Browser does not support inline SVG.
+                          </path>
+                          </svg>
+                          SAR-SAR Vessels
+                       </label>
+                       <br>
+                       <label>
+                          <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="16" width="30" viewBox="-6 -12 20 16">
+                          <path d="M 0,-9 6,2 4,6 0,8 -4,6 -6,2 Z" style="fill:#FF0000;stroke:#FFFF00;stroke-width:2;fill-rule:evenodd;" transform="rotate(90 2 -1)">Browser does not support inline SVG.
+                          </path>
+                          </svg>
                           Live LAISIC Correlations
                        </label>
                        <div class="checkbox">
@@ -380,7 +393,7 @@
                        <hr>
                        <h4 class="text-center">Risk Level</h4>
                        <form role="form">
-                          <label><input type="checkbox" id="Risk" name="Risk" onclick="toggleRisk();refreshMaps(true);"> Enable risk information</label>
+                          <label><input type="checkbox" id="Risk" name="Risk" onclick="toggleRisk(); refreshLayers();"> Enable risk information</label>
                        </form>
                        <label>Vessel Outline:</label><br>
                        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="14" width="30" viewBox="-5 -10 15 15">
@@ -445,9 +458,9 @@
                           <div class="layerBody panel-body panel-collapse collapse">
                              <h4 class="text-center">AIS Sources</h4>
                              <form role="form">
-                                <div><label><input type="radio" id="allaissources" name="aissources" checked="checked" onclick="refreshMaps(true);"> All AIS Sources</label></div>
-                                <div><label><input type="radio" id="mssisonly" name="aissources" onclick="refreshMaps(true);"> Terrestrial AIS Only</label></div>
-                                <div><label><input type="radio" id="sataisonly" name="aissources" onclick="refreshMaps(true);"> Satellite AIS Only</label></div>
+                                <div><label><input type="radio" id="allaissources" name="aissources" checked="checked" onclick="refreshLayers();"> All AIS Sources</label></div>
+                                <div><label><input type="radio" id="mssisonly" name="aissources" onclick="refreshLayers();"> Terrestrial AIS Only</label></div>
+                                <div><label><input type="radio" id="sataisonly" name="aissources" onclick="refreshLayers();"> Satellite AIS Only</label></div>
                              </form>
 
                              <hr>
@@ -590,7 +603,7 @@
                              </div>                             
                              <div class="checkbox">
                                 <label>
-                                   <input class="checkbox" id="LAISIC_TARGETS" name="LAISIC_TARGETS" type="checkbox" onclick="refreshMaps(true);"> Display LAISIC targets
+                                   <input class="checkbox" id="LAISIC_TARGETS" name="LAISIC_TARGETS" type="checkbox" onclick="refreshLayers();"> Display LAISIC targets
                                 </label>
                              </div>
                              <div class="checkbox">
@@ -630,7 +643,7 @@
                              </div>                             
                              <div class="checkbox">
                                 <label>
-                                   <input class="checkbox" id="LAISIC_TARGETS" name="LAISIC_TARGETS" type="checkbox" onclick="refreshMaps(true);"> Display LAISIC targets
+                                   <input class="checkbox" id="LAISIC_TARGETS" name="LAISIC_TARGETS" type="checkbox" onclick="refreshLayers();"> Display LAISIC targets
                                 </label>
                              </div>
                              <div class="checkbox">
@@ -964,6 +977,8 @@
                              <option value="8765">1 year</option>
                           </select>
                        </form>
+                       from
+                       <input type="text" value"Now" id="timemachineend">
                        <hr>
                        <div id="refreshoptions">
                           <b>Refresh Options:</b><br>

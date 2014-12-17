@@ -66,25 +66,98 @@ $criteriaListStarted = 0;
 
 
 //------------------------ Build the initial base query --------------------------
-if(count($_GET) > 0) { 
+if(count($_GET) > 0) {
+   //============================= CONSTRAINTS ===========================================
+   $geoboundsclause = '';
+   if (!empty($_GET["minlat"]) && !empty($_GET["minlon"]) && !empty($_GET["maxlat"]) && !empty($_GET["maxlon"])) {
+      //Check if flipped, then probably crossed the meridian (> +180, or < -180)
+      if ($_GET["minlon"] > $_GET["maxlon"]) {
+         $meridianflag = true;
+      }
+      else {
+         $meridianflag = false;
+      }
+
+      if ($meridianflag == false) { //Handle normal case
+         $geoboundsclause = "Latitude BETWEEN " . round($_GET["minlat"],3) . " AND " . round($_GET["maxlat"],3) . 
+            " AND Longitude BETWEEN " .  round($_GET["minlon"],3) . " AND " . round($_GET["maxlon"],3);
+      }
+      else {
+         $geoboundsclause = "Latitude BETWEEN " . round($_GET["minlat"],3) . " AND " . round($_GET["maxlat"],3) . 
+            " geoboundsclause (Longitude BETWEEN -180 AND " . round($_GET["maxlon"],3) .
+            " OR Longitude BETWEEN " . round($_GET["minlon"],3) . " AND 180 )";
+      }
+   }
+
+   /*
+   if (!empty($_GET["risk"])) {
+      $query = $query . " AND `risk`.user_ship_risk.user_id = 'jstastny'";
+   }
+   */
+
+   //Vessel age
+   $vesselageclause = '';
+   if (!empty($_GET["vessel_age"])) {
+      $vessel_age = $_GET["vessel_age"];
+
+      //Handle Time Machine case
+      if (!empty($_GET["timeend"])) {
+         $timeend = $_GET["timeend"];
+         $vesselageclause = "AND TimeOfFix BETWEEN ($timeend - 60*60*$vessel_age) AND $timeend";
+      }
+      //non-Time Machine
+      else {
+         $vesselageclause = "AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
+      }
+   }
+
+   //Add keyword search constraint
+   $keywordclause = '';
+   if (!empty($_GET["keyword"]) && $source === "AIS") {
+      $keyword = $_GET["keyword"];
+      $keywordclause = "AND (MMSI like ('%" . $keyword . "%') OR " . 
+         "IMONumber like ('%" . $keyword . "%') OR " . 
+         "Name like ('%" . $keyword . "%') OR " . 
+         "Destination like ('%" . $keyword . "%') OR " . 
+         "CallSign like ('%" . $keyword . "%') OR " . 
+         "RxStnID like ('%" . $keyword . "%'))";
+   }
+
+   //Add limit contraint
+   $limitclause = '';
+   if (!empty($_GET["limit"])) {
+      $limit = $_GET["limit"];
+      $limitclause = "limit " . $limit;
+   }
+
+   $orderbyclause = '';
+   if (empty($_GET["query"])) {
+      $orderbyclause = "ORDER BY VESSELS.MMSI";
+   }
+
+   //============================= Find source case ===========================================
    if (!empty($_GET["source"])) { 
       $source = (string)$_GET["source"];
 
       switch ($source) {
          case "LAISIC_AIS_TRACK":
-            $sourceStr = "(SELECT trkguid, trknum, updateguid, srcguid, datetime, lat as Latitude, lon as Longitude, cog, sog, stage, semimajor, semiminor, orientation, holdtime, hitscount, quality, source, inttype, callsign, mmsi, vesselname, imo FROM $laisic_database.trackdata_mem_track_heads) VESSELS";
+            $sourceStr = "(SELECT trkguid, trknum, updateguid, srcguid, datetime as TimeOfFix, lat as Latitude, lon as Longitude, cog, sog, stage, semimajor, semiminor, orientation, holdtime, hitscount, quality, source, inttype, callsign, mmsi, vesselname, imo FROM $laisic_database.trackdata_mem_track_heads) VESSELS";
             break;
          case "LAISIC_RADAR":
-            $sourceStr = "(SELECT mmsi, sog, lon as Longitude, lat as Latitude, cog, datetime, streamid, target_status, target_acq, trknum, sourceid FROM $laisic_database.radar_laisic_output_mem_track_heads) VESSELS";
+            $sourceStr = "(SELECT mmsi, sog, lon as Longitude, lat as Latitude, cog, datetime as TimeOfFix, streamid, target_status, target_acq, trknum, sourceid FROM $laisic_database.radar_laisic_output_mem_track_heads) VESSELS";
             break;
          case "LAISIC_AIS_OBS":
-            $sourceStr = "(SELECT obsguid, lat as Latitude, lon as Longitude, semimajor, semiminor, orientation, cog, sog, datetime, callsign, mmsi, vesselname, imo, streamid FROM $laisic_database.aisobservation_mem_track_heads) VESSELS";
+            $sourceStr = "(SELECT obsguid, lat as Latitude, lon as Longitude, semimajor, semiminor, orientation, cog, sog, datetime as TimeOfFix, callsign, mmsi, vesselname, imo, streamid FROM $laisic_database.aisobservation_mem_track_heads) VESSELS";
             break;
          case "RADAR":
-            $sourceStr = "(SELECT * FROM icodemda.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM icodemda.pvol_pdm_memory WHERE PosSource = 'shore-radar' GROUP BY `CommsID` )) VESSELS";
+            $sourceStr = "(SELECT * FROM $radar_database.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM $radar_database.pvol_pdm_memory WHERE PosSource = 'shore-radar' GROUP BY `CommsID` )) VESSELS";
+            if (!empty($_GET["timeend"])) {
+               $timeend = $_GET["timeend"];
+               $sourceStr = "(SELECT * FROM $radar_database.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM $radar_database.pvol_pdm_memory WHERE PosSource = 'shore-radar' AND TimeOfFix BETWEEN ($timeend - 60*60*$vessel_age) AND $timeend GROUP BY `CommsID` )) VESSELS";
+            }
             break;
          case "SAT-SAR":
-            $sourceStr = "(SELECT * FROM icodemda.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM icodemda.pvol_pdm_memory WHERE PosSource = 'SAT-SAR' GROUP BY `CommsID` )) VESSELS";
+            $sourceStr = "(SELECT * FROM $radar_database.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM $radar_database.pvol_pdm_memory WHERE PosSource = 'SAT-SAR' GROUP BY `CommsID` )) VESSELS";
             break;
          case "LIVE_LAISIC":
             $sourceStr = "(SELECT MMSI, CommsID, Latitude, Longitude, SOG, Heading, COG, TimeOfFix, PosSource, Opt1Val, Opt2Val FROM $laisic_live_database.pvol_pdm WHERE mmsi != 0 AND (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $laisic_live_database.pvol_pdm GROUP BY MMSI)) VESSELS";
@@ -98,6 +171,8 @@ if(count($_GET) > 0) {
 
                //TODO: Faster query below that could display the same vessel multiple times if it exists with different RxStnID
                $sourceStr = "$ais_database.$vessels_table VESSELS";
+
+               //Filter source type
                if (!empty($_GET["mssisonly"])) {
                   $sourceStr = "$ais_database.$vessels_table VESSELS WHERE RxStnID not like ('%ORBCOMM%') AND RxStnID not like ('%EXACT%')";
                   $criteriaListStarted = 1;
@@ -144,6 +219,13 @@ if(count($_GET) > 0) {
                      }
                   }
                }
+
+               //Time Machine
+               if (!empty($_GET["timeend"])) {
+                  $timeend = $_GET["timeend"];
+                  $vessel_age = $_GET["vessel_age"];
+                  $sourceStr = "(SELECT * FROM ( SELECT MMSI as mmsi2, TimeOfFix, Latitude, Longitude, SOG, Heading, RxStnID from icodemda.vessel_history_full WHERE $geoboundsclause AND TimeOfFix BETWEEN ($timeend - 60*60*$vessel_age) AND $timeend GROUP BY mmsi2) VESSEL_HISTORY LEFT OUTER JOIN ( SELECT MMSI, CommsID, IMONumber, CallSign, Name, VesType, Cargo, AISClass, Length, Beam, Draft, AntOffsetBow, AntOffsetPort from icodemda.vessels_memory WHERE (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM icodemda.vessels_memory GROUP BY MMSI)) VESSELS_MEMORY ON VESSEL_HISTORY.mmsi2 = VESSELS_MEMORY.mmsi) VESSELS";
+               }
             }
             else {
                //With risk query:
@@ -157,128 +239,40 @@ if(count($_GET) > 0) {
             }
       }
    }
+
+   //================================ Build the query =========================================
+   if (empty($_GET["noappend"]) && empty($_GET["timeend"])) {
+      //Query statement - default statement unless user inputs custom statement
+      $query = "SELECT * FROM $sourceStr WHERE $geoboundsclause $vesselageclause $keywordclause $orderbyclause $limitclause";
+   }
+   else {
+      if ($source === "AIS") {
+         $query = "SELECT * FROM $sourceStr $keywordclause $orderbyclause $limitclause";
+      }
+      else {
+         $query = "SELECT * FROM $sourceStr WHERE $geoboundsclause $vesselageclause $keywordclause $orderbyclause $limitclause";
+      }
+   }
+
+
+   //custom query, erase everything else and use this query
+   if (!empty($_GET["query"])) {
+      //TODO: add security checks against SQL injections
+      $query = $_GET["query"];
+   }
+
+   $basequery = $query;
 }
-
-//Query statement - default statement unless user inputs custom statement
-$query = "SELECT * FROM " . $sourceStr;
-
-
-//Count the number of arguments
-if(count($_GET) > 0) {
-    //custom query, erase everything else and use this query
-    if (!empty($_GET["query"])) {
-       //TODO: add security checks against SQL injections
-       $query = $_GET["query"];
-    }
-
-    $basequery = $query;
-
-    //-------------------- Add geo bounding box constraint --------------------------
-    if (strpos($query, "WHERE Latitude") !== FALSE || !empty($_GET["noappend"])) {
-       //don't add anything to query
-    }
-    else {
-       if (!empty($_GET["minlat"]) && !empty($_GET["minlon"]) &&
-          !empty($_GET["maxlat"]) && !empty($_GET["maxlon"])) {
-          //Check if flipped, then probably crossed the meridian (> +180, or < -180)
-          if ($_GET["minlon"] > $_GET["maxlon"]) {
-             $meridianflag = true;
-          }
-          else {
-             $meridianflag = false;
-          }
-          
-          //Check for Time Machine
-          $timemachine = 0;
-          // "WHERE TimeOfFix" is for Time Machine queries
-          if (strpos($query, "WHERE TimeOfFix") !== FALSE) {
-             $timemachine = 1;
-          }
-
-          //Check if the filter/criteria list has been started 
-          if ($timemachine || $criteriaListStarted) {
-             $query = $query . " AND";
-          }
-          else {  //Append 'WHERE' since there is no previous WHERE
-             $query = $query . " WHERE";
-          }
-
-          if ($meridianflag == false) { //Handle normal case
-             $query = $query . " Latitude BETWEEN " . round($_GET["minlat"],3) . " AND " . round($_GET["maxlat"],3) . 
-                " AND Longitude BETWEEN " .  round($_GET["minlon"],3) . " AND " . round($_GET["maxlon"],3);
-          }
-          else {
-             $query = $query . " Latitude BETWEEN " . round($_GET["minlat"],3) . " AND " . round($_GET["maxlat"],3) . 
-                  " AND (Longitude BETWEEN -180 AND " . round($_GET["maxlon"],3) .
-                  " OR Longitude BETWEEN " . round($_GET["minlon"],3) . " AND 180 )";
-          }
-       }
-
-    /*
-       if (!empty($_GET["risk"])) {
-          $query = $query . " AND `risk`.user_ship_risk.user_id = 'jstastny'";
-       }
-     */
-
-       //Add timestamp constraint, only for AIS tracks
-       if (!empty($_GET["vessel_age"]) && ($source === "AIS" || $source === "RADAR" || $source === "SAT-SAR") && !$timemachine) {
-          $vessel_age = $_GET["vessel_age"];
-          $query = $query . " AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
-       }
-       else if (!empty($_GET["vessel_age"]) && ($source === "LIVE_LAISIC") && !$timemachine) {
-          $vessel_age = $_GET["vessel_age"];
-          $query = $query . " AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
-       }
-       else if (!empty($_GET["vessel_age"]) && !startsWith($source,"LAISIC_") && !$timemachine) {
-          $vessel_age = $_GET["vessel_age"];
-          $query = $query . " AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
-       }
-    }
-
-    //Add keyword search constraint
-    if (!empty($_GET["keyword"]) && $source === "AIS") {
-       $keyword = $_GET["keyword"];
-       $query = $query . " AND (MMSI like ('%" . $keyword . "%') OR " . 
-                         "IMONumber like ('%" . $keyword . "%') OR " . 
-                         "Name like ('%" . $keyword . "%') OR " . 
-                         "Destination like ('%" . $keyword . "%') OR " . 
-                         "CallSign like ('%" . $keyword . "%') OR " . 
-                         "RxStnID like ('%" . $keyword . "%'))";
-    }
-
-    //Add limit contraint
-    if (!empty($_GET["limit"])) {
-       $limit = $_GET["limit"];
-       $query = $query . " limit " . $limit;
-    }
-
-    /*
-    //Limit to messages that show unique RxStnID fields (requires TV32-Seavision.EXE)
-    if ($source == 'AIS') {
-       $query = $query . " AND Source='vdm0'";
-    }
-    */
-
-    //?
-    if (empty($_GET["query"])) {
-       $query = $query . " ORDER BY VESSELS.MMSI";
-    }
-
-    //For Time Machine
-    if ($timemachine) {
-       //$query = $query . " GROUP BY MMSI) B ON A.mmsi = B.mmsi GROUP BY MMSI";
-       $query = $query . " GROUP BY MMSI) vm2 ON (vm1.MMSI = vm2.MMSI AND vm1.TimeOfFix = vm2.maxtime)) B ON A.MMSI = B.MMSI GROUP BY MMSI";
-    }
-}
+//No arguments provided
 else {
-    //Default query, just limit to 10 row results
-    $limit = 10;
-    $query = $query . " limit " . $limit;
+   //Default query, just limit to 10 row results
+   $limit = 10;
+   $query = $query . " limit " . $limit;
 }
 
 
 //Execute the query
-$result = @odbc_exec($connection, $query) or die('Query error: '.htmlspecialchars(odbc_errormsg()).' // '.$query);;
+$result = @odbc_exec($connection, $query) or die('Query error: '.htmlspecialchars(odbc_errormsg()).' // '.$query);
 //-----------------------------------------------------------------------------
 
 
@@ -290,11 +284,11 @@ $endtime = $mtime;
 $totaltime = ($endtime - $starttime); 
 
 
-// Prevent caching.
+// Prevent caching
 header('Cache-Control: no-cache, must-revalidate');
 header('Expires: Mon, 01 Jan 1996 00:00:00 GMT');
 
-// The JSON standard MIME header.
+// The JSON standard MIME header
 header('Content-type: application/json');
 
 //echo json_encode(array(query => $query));
@@ -310,7 +304,7 @@ while (odbc_fetch_row($result)){
                    trknum=>odbc_result($result,"trknum"),
                    updateguid=>htmlspecialchars(odbc_result($result,"updateguid")),
                    srcguid=>htmlspecialchars(odbc_result($result,"srcguid")),
-                   datetime=>odbc_result($result,"datetime"),
+                   datetime=>odbc_result($result,"TimeOfFix"),
                    lat=>addslashes(odbc_result($result,"Latitude")),
                    lon=>addslashes(odbc_result($result,"Longitude")),
                    cog=>odbc_result($result,"cog"),
@@ -336,7 +330,7 @@ while (odbc_fetch_row($result)){
                    lon=>addslashes(odbc_result($result,"Longitude")),
                    lat=>addslashes(odbc_result($result,"Latitude")),
                    cog=>odbc_result($result,"cog"),
-                   datetime=>odbc_result($result,"datetime"),
+                   datetime=>odbc_result($result,"TimeOfFix"),
                    streamid=>htmlspecialchars(odbc_result($result,"streamid")),
                    target_status=>htmlspecialchars(odbc_result($result,"target_status")),
                    target_acq=>htmlspecialchars(odbc_result($result,"target_acq")),
@@ -353,7 +347,7 @@ while (odbc_fetch_row($result)){
                    orientation=>odbc_result($result,"orientation"),  
                    cog=>odbc_result($result,"cog"),
                    sog=>odbc_result($result,"sog"),
-                   datetime=>odbc_result($result,"datetime"),
+                   datetime=>odbc_result($result,"TimeOfFix"),
                    callsign=>htmlspecialchars(odbc_result($result,"callsign")),
                    mmsi=>odbc_result($result,"mmsi"),
                    vesselname=>htmlspecialchars(odbc_result($result,"vesselname")),
