@@ -4,7 +4,7 @@ $odbc_driver      = 'MySQL ODBC 5.3 Unicode Driver';
 $ais_database     = 'icodemda';
 //Switch between vessels_memory or vessels table
 $vessels_table    = 'vessels_memory';  //'vessels';
-
+$vessels_history_table    = 'vessel_history_full';
 $laisic_database  = 'laisic';
 $laisic_live_database  = 'volpe';
 $radar_database   = 'icodemda';

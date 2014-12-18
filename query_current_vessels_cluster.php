@@ -75,13 +75,20 @@ $criteriaListStarted = 0;
 $iMinClusterSize = 10;
 
 
-$latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local')";
+//Setup vessel table to use based on Time Machine functionality state
+$table = $vessels_table;
+if (!empty($_GET["endtime"])) {
+   $table = $vessels_history_table;
+}
+
+
+$latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local')";
 if (!empty($_GET["mssisonly"])) {
-   $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID not like ('%ORBCOMM%') AND RxStnID not like ('%EXACT%'))";
+   $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$table WHERE (RxStnID not like ('%ORBCOMM%') AND RxStnID not like ('%EXACT%'))";
    $criteriaListStarted = 1;
 }
 else if (!empty($_GET["sataisonly"])) {
-   $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID like ('%ORBCOMM%') OR RxStnID like ('%EXACT%'))";
+   $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$table WHERE (RxStnID like ('%ORBCOMM%') OR RxStnID like ('%EXACT%'))";
    $criteriaListStarted = 1;
 }
 
@@ -98,7 +105,7 @@ if (!empty($_GET["vthide"])) {
                $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . ' AND ';
             }
             else {
-         $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local') AND ";
+         $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local') AND ";
 
                $criteriaListStarted = 1;
             }
@@ -116,7 +123,7 @@ if (!empty($_GET["vthide"])) {
             $latestpositionsfrommemorytableStr = $latestpositionsfrommemorytableStr . ' AND ';
          }
          else {
-         $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$vessels_table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local') AND ";
+         $latestpositionsfrommemorytableStr = "SELECT * FROM $ais_database.$table WHERE (RxStnID = 'Local' OR RxStnID <> 'Local') AND ";
 
             $criteriaListStarted = 1;
          }                        
@@ -128,8 +135,16 @@ if (!empty($_GET["vthide"])) {
 //Add timestamp constraint
 if (!empty($_GET["vessel_age"])) {
    $vessel_age = $_GET["vessel_age"];
-   $timeconstraint = " AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
-   $latestpositionsfrommemorytableStr .= $timeconstraint;
+   //Handle Time Machine case
+   if (!empty($_GET["endtime"])) {
+      $endtime = $_GET["endtime"];
+      $vesselageclause = "AND TimeOfFix BETWEEN ($endtime - 60*60*$vessel_age) AND $endtime";
+   }
+   //non-Time Machine
+   else {
+      $vesselageclause = "AND TimeOfFix > (UNIX_TIMESTAMP(NOW()) - 60*60*$vessel_age)";
+   }
+   $latestpositionsfrommemorytableStr .= $vesselageclause;
 }
 
 //Count the number of arguments
@@ -173,8 +188,6 @@ if(count($_GET) > 0) {
       else {
          $geobounds = "Latitude > $minlat AND Latitude < $maxlat AND Longitude > $minlon AND Longitude < $maxlon";
       }
-
-      $vessel_age = $_GET["vessel_age"];
 
       //Build main cluster query
       $query = "

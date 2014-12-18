@@ -52,7 +52,7 @@ if(count($_GET) > 0) {
       $query = $query . "'" . $_GET["trknum"] . "'";
    }
    else {
-      $query = "SELECT * FROM vessel_history WHERE mmsi=";
+      $query = "SELECT * FROM $ais_database.$vessels_history_table WHERE mmsi=";
    }
 
    //Add MMSI to query track for
