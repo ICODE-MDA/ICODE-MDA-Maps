@@ -5443,6 +5443,12 @@ function search() {
 
    //Adjust global result count
 
+   //Easter Egg
+   if (searchTerm.toLowerCase() == '/clippy') {
+      loadClippy();
+      return;
+   }
+
    dataLayers.forEach( function(dataLayer) {
       if (dataLayer.layerID == 'aisLayer') {
          updateGlobalResultCount(null, dataLayer.resultCount);

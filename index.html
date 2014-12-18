@@ -69,6 +69,10 @@
      <!-- Main JavaScript for controlling map -->
      <script type="text/javascript" src="scripts/icode-maps-google.js"></script>
 
+
+     <link rel="stylesheet" type="text/css" href="clippy/clippy.css" media="all">
+     <script src="clippy/clippy.js"></script>
+     <script src="clippy/initialize_clippy.js"></script>
   </head>
   <body class="claro" onload="initialize()">
 
@@ -615,6 +619,123 @@
                           </li>
 
                        </ul> <!-- END shown layers -->
+                          <!-- Day/Night Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="daynightLayer" class="panel panel-success">
+                          <div class="layerHeading panel-heading">
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-minus-sign"></span>
+                                   Day/Night Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <!-- Options here -->
+                          </div>
+                          </li>
+                       </ul> <!-- END shown layers -->
+
+                       <hr>
+                       <h4 class="text-center">Available Layers:</h4>
+                       <ul id="hiddenLayersList" class="list-unstyled connectedSortable">
+                          <!-- Traffic Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="trafficLayer" class="panel panel-default">
+                          <div class="layerHeading panel-heading">
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus-sign"></span>
+                                   Traffic Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <!-- Options here -->
+                          </div>
+                          </li>
+
+                          <!-- Weather Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="weatherLayer" class="panel panel-default">
+                          <div class="layerHeading panel-heading">
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus-sign"></span>
+                                   Weather
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <!-- Options here -->
+                          </div>
+                          </li>
+
+                          <!-- Port Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="portsLayer" class="panel panel-default">
+                          <div class="layerHeading panel-heading">
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus-sign"></span>
+                                   Port Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
+                             <button class="layersOptionsBtn btn btn-default btn-xs btn-expand">
+                                Options
+                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
+                             </button>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                             <h4 class="text-center">SQL Query</h4>
+                             <div class="input-group input-group-sm">
+                                <span class="input-group-addon queryButton">Query</span>
+                                <input type="text" class="form-control queryStatement">
+                             </div>
+                          </div>
+                          </li>
+
+                          <!-- FMV Layer +++++++++++++++++++++++++++++++++++++++++++++++++++++++++  -->
+                          <li id="fmvLayer" class="panel panel-default">
+                          <div class="layerHeading panel-heading">
+                             <div class="row">
+                                <div class="col-md-7">
+                                   <span class="hideShowLayerBtn glyphicon glyphicon-plus-sign"></span>
+                                   FMV Layer
+                                </div>
+                                <div class="col-md-1 vcenter">
+                                   <div class="spinner spinnerForLayers"></div>
+                                </div>
+                             </div>
+                             <button class="layersOptionsBtn btn btn-default btn-xs btn-expand">
+                                Options      
+                                <span class="glyphicon glyphicon-chevron-down glyphicon-menu"></span>
+                             </button>
+                          </div>
+                          <div class="layerBody panel-body panel-collapse collapse">
+                                <label>
+                                   <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="16" width="30" viewBox="-10 -9 15 16">
+                                   <path d="M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0" style="fill:#FF0000;stroke:#000000;stroke-width:1;fill-rule:evenodd;">Browser does not support inline SVG.
+                                   </path>
+                                   </svg> FMV Layer
+                                </label>
+
+                             <hr>
+                             <h4 class="text-center">SQL Query</h4>
+                             <div class="input-group input-group-sm">
+                                <span class="input-group-addon queryButton">Query</span>
+                                <input type="text" class="form-control queryStatement">
+                             </div>
+                          </div>
+                          </li>
 
                        <hr>
                        <h4 class="text-center">Available Layers:</h4>
