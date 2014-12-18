@@ -352,6 +352,7 @@ clippy.Agent.prototype = {
 
     _onClick:function () {
         if (!this.play('ClickedOn')) {
+           this.stop();
             this.speak('Welcome to ICODE-MDA Maps!  I am here to help you and do funny animations.');
         }
     },

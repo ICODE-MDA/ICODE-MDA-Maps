@@ -4953,6 +4953,12 @@ function search() {
    //Grab search terms and store to global var
    searchTerm = $('#search').val();
 
+   //Easter Egg
+   if (searchTerm.toLowerCase() == '/clippy') {
+      loadClippy();
+      return;
+   }
+
    dataLayers.forEach( function(dataLayer) {
       if (dataLayer.layerID == 'aisLayer') {
          dataLayer.showLayer();

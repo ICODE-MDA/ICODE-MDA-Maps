@@ -67,16 +67,7 @@
 
      <link rel="stylesheet" type="text/css" href="clippy/clippy.css" media="all">
      <script src="clippy/clippy.js"></script>
-     <!-- Init script -->
-     <script>
-        clippy.load('Clippy', function(agent){
-           // do anything with the loaded agent
-           agent.show();
-           agent.moveTo(window.innerWidth-400, window.innerHeight-130);
-           agent.speak('Welcome to ICODE-MDA Maps!  I am here to help you and do funny animations.');
-        });
-     </script>
-
+     <script src="clippy/initialize_clippy.js"></script>
   </head>
   <body class="claro" onload="initialize()">
 
