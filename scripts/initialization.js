@@ -414,21 +414,23 @@ $(function() { //shorthand for: $(document).ready(function() {
          yearEnd: new Date().getFullYear(),
          format: 'd M Y h:i a',
          startDate: new Date(),
-      })
-      .on('change', function() {
-         if ($('#timemachineend').val() == '') {
-            TimeMachineEnd = null;
-            //$('#timemachineend').val('Now');
-            refreshLayers();
-         }
-         else {
-            //User selected a datetime, enable Time Machine
-            //Date object automatically grab local time (not UTC), so everytime
-            // we fetch the value from the field, we will need to manually perform
-            // the timezone offset so that TimeMachineEnd will always be UTC times
-            TimeMachineEnd = new Date($('#timemachineend').val()).getTime()/1000 - 60*(new Date()).getTimezoneOffset();
-            refreshLayers();
-         }
+         onSelectTime: function() {
+            if ($('#timemachineend').val() == '') {
+               TimeMachineEnd = null;
+               //$('#timemachineend').val('Now');
+               $('#clearTimeMachine').remove();
+               refreshLayers();
+            }
+            else {
+               //User selected a datetime, enable Time Machine
+               //Date object automatically grab local time (not UTC), so everytime
+               // we fetch the value from the field, we will need to manually perform
+               // the timezone offset so that TimeMachineEnd will always be UTC times
+               TimeMachineEnd = new Date($('#timemachineend').val()).getTime()/1000 - 60*(new Date()).getTimezoneOffset();
+               $('#timemachineend').after('<span id="clearTimeMachine" class="glyphicon glyphicon-ban-circle"></span>');
+               refreshLayers();
+            }
+         },
       });
 
       //Check for URL fed time machine value
