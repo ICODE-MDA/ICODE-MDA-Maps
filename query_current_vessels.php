@@ -101,9 +101,9 @@ if(count($_GET) > 0) {
       $vessel_age = $_GET["vessel_age"];
 
       //Handle Time Machine case
-      if (!empty($_GET["timeend"])) {
-         $timeend = $_GET["timeend"];
-         $vesselageclause = "AND TimeOfFix BETWEEN ($timeend - 60*60*$vessel_age) AND $timeend";
+      if (!empty($_GET["endtime"])) {
+         $endtime = $_GET["endtime"];
+         $vesselageclause = "AND TimeOfFix BETWEEN ($endtime - 60*60*$vessel_age) AND $endtime";
       }
       //non-Time Machine
       else {
@@ -151,9 +151,9 @@ if(count($_GET) > 0) {
             break;
          case "RADAR":
             $sourceStr = "(SELECT * FROM $radar_database.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM $radar_database.pvol_pdm_memory WHERE PosSource = 'shore-radar' GROUP BY `CommsID` )) VESSELS";
-            if (!empty($_GET["timeend"])) {
-               $timeend = $_GET["timeend"];
-               $sourceStr = "(SELECT * FROM $radar_database.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM $radar_database.pvol_pdm_memory WHERE PosSource = 'shore-radar' AND TimeOfFix BETWEEN ($timeend - 60*60*$vessel_age) AND $timeend GROUP BY `CommsID` )) VESSELS";
+            if (!empty($_GET["endtime"])) {
+               $endtime = $_GET["endtime"];
+               $sourceStr = "(SELECT * FROM $radar_database.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM $radar_database.pvol_pdm_memory WHERE PosSource = 'shore-radar' AND TimeOfFix BETWEEN ($endtime - 60*60*$vessel_age) AND $endtime GROUP BY `CommsID` )) VESSELS";
             }
             break;
          case "SAT-SAR":
@@ -221,10 +221,10 @@ if(count($_GET) > 0) {
                }
 
                //Time Machine
-               if (!empty($_GET["timeend"])) {
-                  $timeend = $_GET["timeend"];
+               if (!empty($_GET["endtime"])) {
+                  $endtime = $_GET["endtime"];
                   $vessel_age = $_GET["vessel_age"];
-                  $sourceStr = "(SELECT * FROM ( SELECT MMSI as mmsi2, TimeOfFix, Latitude, Longitude, SOG, Heading, RxStnID from icodemda.vessel_history_full WHERE $geoboundsclause AND TimeOfFix BETWEEN ($timeend - 60*60*$vessel_age) AND $timeend GROUP BY mmsi2) VESSEL_HISTORY LEFT OUTER JOIN ( SELECT MMSI, CommsID, IMONumber, CallSign, Name, VesType, Cargo, AISClass, Length, Beam, Draft, AntOffsetBow, AntOffsetPort from icodemda.vessels_memory WHERE (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM icodemda.vessels_memory GROUP BY MMSI)) VESSELS_MEMORY ON VESSEL_HISTORY.mmsi2 = VESSELS_MEMORY.mmsi) VESSELS";
+                  $sourceStr = "(SELECT * FROM ( SELECT MMSI as mmsi2, TimeOfFix, Latitude, Longitude, SOG, Heading, RxStnID from icodemda.vessel_history_full WHERE $geoboundsclause AND TimeOfFix BETWEEN ($endtime - 60*60*$vessel_age) AND $endtime GROUP BY mmsi2) VESSEL_HISTORY LEFT OUTER JOIN ( SELECT MMSI, CommsID, IMONumber, CallSign, Name, VesType, Cargo, AISClass, Length, Beam, Draft, AntOffsetBow, AntOffsetPort from icodemda.vessels_memory WHERE (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM icodemda.vessels_memory GROUP BY MMSI)) VESSELS_MEMORY ON VESSEL_HISTORY.mmsi2 = VESSELS_MEMORY.mmsi) VESSELS";
                }
             }
             else {
@@ -241,11 +241,12 @@ if(count($_GET) > 0) {
    }
 
    //================================ Build the query =========================================
-   if (empty($_GET["noappend"]) && empty($_GET["timeend"])) {
-      //Query statement - default statement unless user inputs custom statement
+   if (empty($_GET["noappend"]) && empty($_GET["endtime"])) {
+      //Time Machine OFF
       $query = "SELECT * FROM $sourceStr WHERE $geoboundsclause $vesselageclause $keywordclause $orderbyclause $limitclause";
    }
    else {
+      //Time Machine ON
       if ($source === "AIS") {
          $query = "SELECT * FROM $sourceStr $keywordclause $orderbyclause $limitclause";
       }

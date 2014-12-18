@@ -1231,7 +1231,7 @@ function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
       /*
       if (document.getElementById("enabletimemachine") && document.getElementById("enabletimemachine").checked) {
          phpWithArg += "&timestart=" + startTimeMachine;
-         phpWithArg += "&timeend=" + endTimeMachine;
+         phpWithArg += "&endtime=" + endTimeMachine;
       }
       */
 
@@ -3643,7 +3643,7 @@ function getAISFromDB(thislayer, callback) {
       //Time Machine
       if (TimeMachineEnd != null) {
          //Time Machine enabled
-         phpWithArg += "&timeend=" + TimeMachineEnd;
+         phpWithArg += "&endtime=" + TimeMachineEnd;
       }
 
       phpWithArg += viewBounds.boundStr;
@@ -4117,6 +4117,12 @@ function getLAISICFromDB(sourceType, thislayer, callback) {
          phpWithArg += "&vessel_age=" + vessel_age;
       }
 
+      //Time Machine
+      if (TimeMachineEnd != null) {
+         //Time Machine enabled
+         phpWithArg += "&endtime=" + TimeMachineEnd;
+      }
+
       phpWithArg += viewBounds.boundStr;
 
       enableCustomQuery = false;
@@ -4453,7 +4459,7 @@ function getClustersFromDB(thislayer, callback) {
    //Time Machine
    if (TimeMachineEnd != null) {
       //Time Machine enabled
-      phpWithArg += "&timeend=" + TimeMachineEnd;
+      phpWithArg += "&endtime=" + TimeMachineEnd;
    }
 
    if (detectMobileBrowser()) {
@@ -4654,7 +4660,7 @@ function getRADARFromDB(customQuery, thislayer, callback) {
       //Time Machine
       if (TimeMachineEnd != null) {
          //Time Machine enabled
-         phpWithArg += "&timeend=" + TimeMachineEnd;
+         phpWithArg += "&endtime=" + TimeMachineEnd;
       }
 
       phpWithArg += viewBounds.boundStr;
@@ -4690,7 +4696,7 @@ function getRADARFromDB(customQuery, thislayer, callback) {
          //Time Machine
          if (TimeMachineEnd != null) {
             //Time Machine enabled
-            phpWithArg += "&timeend=" + TimeMachineEnd;
+            phpWithArg += "&endtime=" + TimeMachineEnd;
          }
       }
    }
