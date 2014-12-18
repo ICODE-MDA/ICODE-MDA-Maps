@@ -5,10 +5,10 @@
 //Global Objects
 var userid;
 
+//Called when page loads
 $(function() { //shorthand for: $(document).ready(function() {
    //Call setup functions
    setupUser();
-   queryBarBehavior();
    searchBehavior();
    advanceSearchBehavior();
    geocodingBox();
@@ -24,7 +24,7 @@ $(function() { //shorthand for: $(document).ready(function() {
    //Setup functions definitions =========================================================
    /* -------------------------------------------------------------------------------- */
    /**
-    * 
+    * Sets up the user id
     **/
    function setupUser() {
       //Main userid global setting
@@ -37,23 +37,7 @@ $(function() { //shorthand for: $(document).ready(function() {
 
    /* -------------------------------------------------------------------------------- */
    /**
-    * 
-    **/
-   function queryBarBehavior() {
-      /*
-      //Query bar text control
-      //Select all text if query bar comes into focus
-      $('#query:text').focus(function() { 
-         $(this).one('mouseup', function(event){
-            //event.preventDefault();
-         }).select();
-      });
-      */
-   }
-
-   /* -------------------------------------------------------------------------------- */
-   /**
-    * 
+    * Controls the normal search behavior
     **/
    function searchBehavior() {
       $('#searchBarForm').submit(function(e) {
@@ -73,7 +57,7 @@ $(function() { //shorthand for: $(document).ready(function() {
 
    /* -------------------------------------------------------------------------------- */
    /**
-    * 
+    * Controls the advanced search behavior
     **/
    function advanceSearchBehavior() {
       //Handle toggling advanced search box
@@ -107,7 +91,7 @@ $(function() { //shorthand for: $(document).ready(function() {
 
    /* -------------------------------------------------------------------------------- */
    /**
-    * 
+    * Controls the geocoding box behavior
     **/
    function geocodingBox() {
       $("#geocode-form").submit(function(e) {
@@ -135,7 +119,7 @@ $(function() { //shorthand for: $(document).ready(function() {
 
    /* -------------------------------------------------------------------------------- */
    /**
-    * 
+    * Controls the menu panel behavior
     **/
    function menuDivPanels() {
       //Initialize the menuDiv panels' collapsing behavior
@@ -162,7 +146,7 @@ $(function() { //shorthand for: $(document).ready(function() {
 
    /* -------------------------------------------------------------------------------- */
    /**
-    * 
+    * Sets up the NProgress bar
     **/
    function progressBar() {
       //Data reload progress bar style behavior initialization
@@ -177,7 +161,7 @@ $(function() { //shorthand for: $(document).ready(function() {
 
    /* -------------------------------------------------------------------------------- */
    /**
-    * 
+    * Sets up the layer panel sortable list
     **/
    function sortableLayers() {
       //Sortable
@@ -246,7 +230,7 @@ $(function() { //shorthand for: $(document).ready(function() {
 
    /* -------------------------------------------------------------------------------- */
    /**
-    * 
+    * Sets up the alert menu
     **/
    function setupAlertAccordion() {
       $("#alertAccordion").accordion({
@@ -263,7 +247,7 @@ $(function() { //shorthand for: $(document).ready(function() {
 
    /* -------------------------------------------------------------------------------- */
    /**
-    * 
+    * Initializes the browser focus/blur behavior
     **/
    function initializeBrowserFocus() {
       function onBlur() {
@@ -296,7 +280,7 @@ $(function() { //shorthand for: $(document).ready(function() {
 
    /* -------------------------------------------------------------------------------- */
    /**
-    * 
+    * Controls query statment clicking behavior
     **/
    function queryStatementBehavior() {
       $('.queryStatement').click(function() {
@@ -306,7 +290,7 @@ $(function() { //shorthand for: $(document).ready(function() {
 
    /* -------------------------------------------------------------------------------- */
    /**
-    * 
+    * Sets up KMZ upload elements
     **/
    function fileKMZUploadBehavior() {
       $(document).on('change', '.btn-file :file', function() {
@@ -410,7 +394,7 @@ $(function() { //shorthand for: $(document).ready(function() {
 
    /* -------------------------------------------------------------------------------- */
    /**
-    * 
+    * Sets up time machine field
     **/
    function setupTimeMachine() {
       /*
@@ -463,9 +447,11 @@ $(function() { //shorthand for: $(document).ready(function() {
    }
 });
 
+//========================== Globally exposed functions ==========================================
+
 /* -------------------------------------------------------------------------------- */
 /**
- * 
+ * Updates the current view URL with current parameters
  **/
 function getCurrentViewURL() {
    var url;
@@ -514,8 +500,10 @@ function getCurrentViewURL() {
    $('#viewurl').attr('href', url);
 }
 
-//Globally exposed functions
-//Function to control what happens after list is updated
+/* -------------------------------------------------------------------------------- */
+/**
+ * Function to control what happens after list is updated
+ **/
 function listUpdated() {
    $('.panel', displayedLayersList).each(function(index, elem) {
       var $listItem = $(elem);
