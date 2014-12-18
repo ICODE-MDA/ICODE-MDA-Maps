@@ -8,6 +8,7 @@ var userid;
 //Called when page loads
 $(function() { //shorthand for: $(document).ready(function() {
    //Call setup functions
+   setHomeURL();
    setupUser();
    searchBehavior();
    advanceSearchBehavior();
@@ -22,6 +23,15 @@ $(function() { //shorthand for: $(document).ready(function() {
    setupTimeMachine();
 
    //Setup functions definitions =========================================================
+   /* -------------------------------------------------------------------------------- */
+   /**
+    * Sets up URL of the home link
+    **/
+   function setHomeURL() {
+      var url = document.URL.substr(0, document.URL.indexOf('index.html'));
+      $('#brand').attr('href', url);
+   }
+
    /* -------------------------------------------------------------------------------- */
    /**
     * Sets up the user id
@@ -408,6 +418,7 @@ $(function() { //shorthand for: $(document).ready(function() {
       .on('change', function() {
          if ($('#timemachineend').val() == '') {
             TimeMachineEnd = null;
+            //$('#timemachineend').val('Now');
             refreshLayers();
          }
          else {
@@ -439,6 +450,9 @@ $(function() { //shorthand for: $(document).ready(function() {
          //Set global variable
          //set the time with timezone offset
          TimeMachineEnd = parseInt(endtime) - parseInt(60*(new Date()).getTimezoneOffset());
+      }
+      else {
+         $('#timemachineend').val('Now');
       }
 
       if (Request.QueryString('age').Count() > 0) {
