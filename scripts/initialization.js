@@ -397,63 +397,48 @@ $(function() { //shorthand for: $(document).ready(function() {
     * Sets up time machine field
     **/
    function setupTimeMachine() {
-      /*
-      $('#timemachinestart').datetimepicker({
-         format: 'yyyy-mm-dd hh:ii',
-         autoclose: true,
-         todayBtn: true,
-         minuteStep: 15,
-         todayHighlight: true,
-         forceParse: true,
-         minView: 1
-      });
-      $('#timemachinestart').datetimepicker('setStartDate', '2013-11-19');
-      var yesterday = new Date();
-      yesterday.setDate(yesterday.getDate()-1);
-      yesterday.setHours(0);
-      yesterday.setMinutes(0);
-      $('#timemachinestart').datetimepicker('update', yesterday);
-      */
-
-      /*
-      $('#timemachineend').datetimepicker({
-         format: 'yyyy-mm-dd hh:ii',
-         autoclose: true,
-         todayBtn: true,
-         minuteStep: 15,
-         todayHighlight: true,
-         forceParse: true,
-         minView: 0
-      })
-      .on('changeDate', function(ev){
-         console.log($(this).val());
-         TimeMachineEnd = $('#timemachineend').datetimepicker('getDate').getTime()/1000 - 60*(new Date()).getTimezoneOffset();
-
-         refreshLayers();
-      });
-      */
-
+      //Setup datetime input
+      //DateTimePicker library: http://xdsoft.net/jqplugins/datetimepicker/
       $('#timemachineend').datetimepicker({
          yearStart: '2013',
          yearEnd: new Date().getFullYear(),
-         format: 'd M Y h:m a',
+         format: 'd M Y h:i a',
          startDate: new Date(),
-         onClose:function(dp,$input){
-            TimeMachineEnd = new Date($input.val()).getTime()/1000 - 60*(new Date()).getTimezoneOffset();
+      })
+      .on('change', function() {
+         if ($('#timemachineend').val() == '') {
+            TimeMachineEnd = null;
+            refreshLayers();
+         }
+         else {
+            //User selected a datetime, enable Time Machine
+            //Date object automatically grab local time (not UTC), so everytime
+            // we fetch the value from the field, we will need to manually perform
+            // the timezone offset so that TimeMachineEnd will always be UTC times
+            TimeMachineEnd = new Date($('#timemachineend').val()).getTime()/1000 - 60*(new Date()).getTimezoneOffset();
             refreshLayers();
          }
       });
 
+      //Check for URL fed time machine value
       if (Request.QueryString('endtime').Count() > 0) {
+         //Fetch provided value
          var endtime = Request.QueryString("endtime").toString();
 
+         //Set the input field with provided time
          var d = new Date(endtime * 1000);
+         //Format date string
+         var d_str = d.getDate() + ' ' + d.toString().substr(4,3) + ' ' + d.getFullYear();
+         //Format time string, pad hours and minutes with '0' if needed
+         d_str += ' ' + (d.getHours().toString().length == 2 ? d.getHours() : '0'+d.getHours());
+         d_str += ':' + (d.getMinutes().toString().length == 2 ? d.getMinutes() : '0'+d.getMinutes());
+         //Set the field so that it displays the directly interpreted time 
+         // with no timezone offset
+         $('#timemachineend').val(d_str);
 
+         //Set global variable
+         //set the time with timezone offset
          TimeMachineEnd = parseInt(endtime) - parseInt(60*(new Date()).getTimezoneOffset());
-      }
-      else {
-         //Using 'now'
-         //$('#timemachineend').val('Now'); <-- causes time to default to year 1899!
       }
 
       if (Request.QueryString('age').Count() > 0) {
