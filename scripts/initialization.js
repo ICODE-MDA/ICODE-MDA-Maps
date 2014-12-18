@@ -415,6 +415,7 @@ $(function() { //shorthand for: $(document).ready(function() {
       $('#timemachinestart').datetimepicker('update', yesterday);
       */
 
+      /*
       $('#timemachineend').datetimepicker({
          format: 'yyyy-mm-dd hh:ii',
          autoclose: true,
@@ -430,13 +431,28 @@ $(function() { //shorthand for: $(document).ready(function() {
 
          refreshLayers();
       });
+      */
+
+      $('#timemachineend').datetimepicker({
+         yearStart: '2013',
+         yearEnd: new Date().getFullYear(),
+         format: 'd M Y h:m a',
+         startDate: new Date(),
+         onClose:function(dp,$input){
+            TimeMachineEnd = new Date($input.val()).getTime()/1000 - 60*(new Date()).getTimezoneOffset();
+            refreshLayers();
+         }
+      });
 
       if (Request.QueryString('endtime').Count() > 0) {
          var endtime = Request.QueryString("endtime").toString();
-         $('#timemachineend').datetimepicker('setDate', new Date(endtime * 1000));
+
+         var d = new Date(endtime * 1000);
+
          TimeMachineEnd = parseInt(endtime) - parseInt(60*(new Date()).getTimezoneOffset());
       }
       else {
+         //Using 'now'
          //$('#timemachineend').val('Now'); <-- causes time to default to year 1899!
       }
 

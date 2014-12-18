@@ -84,7 +84,7 @@ if(count($_GET) > 0) {
       }
       else {
          $geoboundsclause = "Latitude BETWEEN " . round($_GET["minlat"],3) . " AND " . round($_GET["maxlat"],3) . 
-            " geoboundsclause (Longitude BETWEEN -180 AND " . round($_GET["maxlon"],3) .
+            " AND (Longitude BETWEEN -180 AND " . round($_GET["maxlon"],3) .
             " OR Longitude BETWEEN " . round($_GET["minlon"],3) . " AND 180 )";
       }
    }
