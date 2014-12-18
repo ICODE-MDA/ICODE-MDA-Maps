@@ -453,7 +453,7 @@ $(function() { //shorthand for: $(document).ready(function() {
          TimeMachineEnd = parseInt(endtime) - parseInt(60*(new Date()).getTimezoneOffset());
       }
       else {
-         $('#timemachineend').val('Now');
+         //$('#timemachineend').val('Now'); <-- causes time to default to year 1899!
       }
 
       if (Request.QueryString('age').Count() > 0) {
@@ -462,6 +462,57 @@ $(function() { //shorthand for: $(document).ready(function() {
       }
    }
 });
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * 
+ **/
+function getCurrentViewURL() {
+   var url;
+
+   if (document.URL.indexOf('index.html') != -1) {
+      url = document.URL.substr(0, document.URL.indexOf('index.html')) + 'index.html?';
+   }
+   else {
+      url = document.URL + 'index.html?';
+   }
+
+   //Map center
+   var center = map.getCenter();
+   url += 'center=' + center.lat().toFixed(3).toString() + ',' + center.lng().toFixed(3).toString();
+
+   //Zoom
+   var zoom = map.getZoom();
+   url += '&zoom=' + zoom.toString();
+
+   //Vessel age
+   if (vessel_age != -1) {
+      url += '&age=' + vessel_age;
+   }
+
+   //Time Machine
+   if (TimeMachineEnd != null) {
+      url += '&endtime=' + (parseInt(TimeMachineEnd) + parseInt(60*(new Date()).getTimezoneOffset()));
+   }
+
+   //Layers
+   var layerIDs = [];
+   if ($('#displayedLayersList > li').length > 0) {
+      url +='&layers=';
+      $('#displayedLayersList > li').each( function() {
+         layerIDs.push(this.id);
+      })
+      layerIDs.forEach( function(layerID, index) {
+         url += layerID;
+         if (index != $('#displayedLayersList > li').length - 1) {
+            url += ',';
+         }
+      });
+   }
+
+   //Set the URL
+   $('#viewurl').attr('href', url);
+}
 
 //Globally exposed functions
 //Function to control what happens after list is updated
