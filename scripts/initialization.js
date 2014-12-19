@@ -426,8 +426,20 @@ $(function() { //shorthand for: $(document).ready(function() {
                //Date object automatically grab local time (not UTC), so everytime
                // we fetch the value from the field, we will need to manually perform
                // the timezone offset so that TimeMachineEnd will always be UTC times
-               TimeMachineEnd = new Date($('#timemachineend').val()).getTime()/1000 - 60*(new Date()).getTimezoneOffset();
-               $('#timemachineend').after('<span id="clearTimeMachine" class="glyphicon glyphicon-ban-circle"></span>');
+               TimeMachineEnd = new Date($('#timemachineend').val()).getTime()/1000 - 60*(new Date()).getTimezoneOffset(); 
+               
+               //Add cancel button
+               if ($('#clearTimeMachine').length == 0) {
+                  $('#timemachineend').after('<span id="clearTimeMachine" class="glyphicon glyphicon-remove" style="cursor: pointer; margin-left: -20px;"></span>');
+                  $('#clearTimeMachine').click( function(e) {
+                     e.preventDefault();
+                     $('#timemachineend').val('Now');
+                     $('#clearTimeMachine').remove();
+                     TimeMachineEnd = null;
+                     refreshLayers();
+                  });
+               }
+
                refreshLayers();
             }
          },
@@ -448,6 +460,16 @@ $(function() { //shorthand for: $(document).ready(function() {
          //Set the field so that it displays the directly interpreted time 
          // with no timezone offset
          $('#timemachineend').val(d_str);
+
+         //Add cancel button
+         $('#timemachineend').after('<span id="clearTimeMachine" class="glyphicon glyphicon-remove" style="cursor: pointer; margin-left: -20px;"></span>');
+         $('#clearTimeMachine').click( function(e) {
+            e.preventDefault();
+            $('#timemachineend').val('Now');
+            $('#clearTimeMachine').remove();
+            TimeMachineEnd = null;
+            refreshLayers();
+         });
 
          //Set global variable
          //set the time with timezone offset

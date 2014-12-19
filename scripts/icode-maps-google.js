@@ -141,16 +141,27 @@ var aisDisplayed = false;
 var advancedSearchEnabled = false;
 
 //LAISIC Tables selection
+var selectionCircleInitOption = {
+            center:  new google.maps.LatLng(0,0),
+            radius: 2000,
+            strokeColor: "#FF0000",
+            strokeOpacity: 0.1,
+            strokeWeight: 0,
+            fillColor: "#FF0000",
+            fillOpacity: 0.8,//0.1,
+            map: null
+         };
 var selectionCircle = new google.maps.Circle({
             center:  new google.maps.LatLng(0,0),
             radius: 2000,
             strokeColor: "#FF0000",
-            strokeOpacity: 1.0,
-            strokeWeight: 2,
+            strokeOpacity: 0.1,
+            strokeWeight: 0,
             fillColor: "#FF0000",
-            fillOpacity: 0.1,
+            fillOpacity: 0.8,//0.1,
             map: null
          });
+var fadeInterval;
 //Highlight selection from tables
 //  Need to use MarkerImage object instead of straight icon pointing to image so that
 //  we can set the center point of the image manually
@@ -1017,11 +1028,12 @@ function generateLAISICInfoHTML(vessel, vesseltype, title) {
 function getPortCalls(mmsi) {
    console.log("Obtaining port calls for MMSI " + mmsi);
 
-   document.getElementById('port_calls').innerHTML = '<div id="query_spinner"><div style="width: 24px; height: 24px;"></div></div>';
+   if ($('#port_calls').length > 0) {
+      $('#port_calls').html('<div id="query_spinner"><div style="width: 24px; height: 24px;"></div></div>');
+   }
 
    //Activate the "last 3 port call" spinner
    $('#query_spinner').activity({segments: 8, steps: 3, opacity: 0.3, width: 2, space: 0, length: 5, color: '#000', speed: 2.0});
-
 
 
    var phpWithArg;
@@ -1038,14 +1050,20 @@ function getPortCalls(mmsi) {
       .done(function (response) {
          console.log('getPortCalls(): ' + response.query);
 
-         document.getElementById('port_calls').innerHTML = '';// + response.resultcount + ' total<br>';
+         if ($('#port_calls').length > 0) {
+            $('#port_calls').html('');
+         }
 
          var i=1;
          $.each(response.port_calls, function(key,port_calls) {
             if (i > 3) {
                return false;
             }
-            document.getElementById('port_calls').innerHTML += toHumanTime(port_calls.time_stamp) + ': <br>' + port_calls.PortName + ', ' + port_calls.Country + '<br>';
+
+            if ($('#port_calls').length > 0) {
+               $('#port_calls').append(toHumanTime(port_calls.time_stamp) + ': <br>' + port_calls.PortName + ', ' + port_calls.Country + '<br>');
+            }
+
             i++;
          });
 
@@ -3525,6 +3543,9 @@ function updateViewBounds() {
  * Refresh all layers here, based on sortable lists in UI
  **/
 function refreshLayers(newShownLayerID, newHiddenLayerID) {
+   //Clear console on refresh
+   //console.clear();
+
    //Update time of refresh
    lastRefresh = new Date();
 
@@ -3653,17 +3674,6 @@ function getAISFromDB(thislayer, callback) {
    else {   
       //Something was typed into search bar, entering search mode
       phpWithArg = thislayer.phpfile + '?' + sourceStr + viewBounds.boundStr + "&keyword=" + searchTerm;
-     
-      //If not in Time Machine mode, change status display to custom query message
-      /*
-      if (!document.getElementById("enabletimemachine") 
-          || !document.getElementById("enabletimemachine").checked) {
-         enableCustomQuery = true;
-         queryCustomQuery = customQuery;
-         document.getElementById('status-msg').innerHTML = "Custom Query Filtering On: \"" + customQuery + "\" [<a href='' onClick='disableCustomQuery(); return false;'>cancel</a>]";
-         document.getElementById('status-msg').style.opacity = "1";
-      }
-      */
    }
 
    //Debug query output
@@ -3765,8 +3775,7 @@ function getAISFromDB(thislayer, callback) {
                clearInterval(vesselLastUpdated);
 
                //Draw the selection square
-               selectionSquare.setPosition(point);
-               selectionSquare.setMap(map);
+               selectionIndicator(point);
 
                //Setup the infoBubble and show it
                markerInfoBubble(marker, vessel, infoBubble);
@@ -4129,17 +4138,6 @@ function getLAISICFromDB(sourceType, thislayer, callback) {
    }
    else {   //Something was typed into query bar
       phpWithArg = thislayer.phpfile + '?' + sourceStr + viewBounds.boundStr + "&keyword=" + searchTerm;
-     
-      //If not in Time Machine mode, change status display to custom query message
-      /*
-      if (!document.getElementById("enabletimemachine") 
-          || !document.getElementById("enabletimemachine").checked) {
-         enableCustomQuery = true;
-         queryCustomQuery = customQuery;
-         document.getElementById('status-msg').innerHTML = "Custom Query Filtering On: \"" + customQuery + "\" [<a href='' onClick='disableCustomQuery(); return false;'>cancel</a>]";
-         document.getElementById('status-msg').style.opacity = "1";
-      }
-      */
    }
 
    //Debug query output
@@ -4300,8 +4298,7 @@ function getLAISICFromDB(sourceType, thislayer, callback) {
                   clearInterval(vesselLastUpdated);
 
                   //Draw the selection square
-                  selectionSquare.setPosition(point);
-                  selectionSquare.setMap(map);
+                  selectionIndicator(point);
 
                   //Setup the infoBubble and show it
                   markerInfoBubble(marker, vessel, infoBubble);
@@ -4421,6 +4418,7 @@ function getLAISICFromDB(sourceType, thislayer, callback) {
 
          thislayer.resultCount = response.resultcount;
          updateGlobalResultCount(thislayer.resultCount);
+         console.log(thislayer.layerID + ': ' + "Total number of LAISIC = " + response.resultcount);
 
          callback();
       }) //END .done()
@@ -4765,8 +4763,7 @@ function getRADARFromDB(customQuery, thislayer, callback) {
                clearInterval(vesselLastUpdated);
 
                //Draw the selection square
-               selectionSquare.setPosition(latlon);
-               selectionSquare.setMap(map);
+               selectionIndicator(latlon);
 
                //Setup the infoBubble and show it
                markerInfoBubble(marker, vessel, infoBubble);
@@ -4912,11 +4909,11 @@ function getFMVTargets(customQuery, thislayer, callback) {
                      fmvinfowindow.open(map,marker);
 
                      //Draw the selection square
-                     selectionSquare.setPosition(latlon);
-                     selectionSquare.setMap(map);
+                     selectionIndicator(latlon);
 
                      //Close the infoBubble if user clicks outside of infoBubble area
                      google.maps.event.addListenerOnce(map, 'click', function() {
+                        selectionSquare.setMap(null);
                         fmvinfowindow.setMap(null);
                         fmvinfowindow.close();
                      });
@@ -5515,4 +5512,33 @@ function getdataLayerIndex(dataType) {
    });
 
    return indices;
+}
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Draws the selection indicators on vessel click
+ **/
+function selectionIndicator(latlng) {
+   selectionSquare.setPosition(latlng);
+   selectionSquare.setMap(map);
+   selectionCircle.setOptions(selectionCircleInitOption);
+   selectionCircle.setCenter(latlng);
+   selectionCircle.setMap(map);
+
+   function fadeCircle() {
+      var opacity = selectionCircle.get("fillOpacity");
+      var radius = selectionCircle.get("radius");
+      opacity -= 0.1;
+      radius += 500;
+      if (opacity < 0) {
+         selectionCircle.setMap(null);
+         clearInterval(fadeInterval);
+      }
+      else {
+         selectionCircle.setOptions({fillOpacity:opacity, strokeOpacity:opacity, radius: radius});
+      }
+   }
+
+   clearInterval(fadeInterval);
+   fadeInterval = setInterval(fadeCircle, 100);
 }
