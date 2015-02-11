@@ -358,6 +358,10 @@ function initialize() {
             Math.round(event.latLng.lat()*10000000)/10000000 + ', ' + Math.round(event.latLng.lng()*10000000)/10000000
    });
 
+   google.maps.event.addListener(map,'click',function(event) {
+      console.log(Math.round(event.latLng.lat()*10000000)/10000000 + ', ' + Math.round(event.latLng.lng()*10000000)/10000000);
+   });
+
    google.maps.event.addListenerOnce(map, 'idle', function() {
       //Call all toggle functions on initialize:
 
@@ -389,7 +393,7 @@ function initialize() {
       //Heatmap layer
       //toggleHeatmapLayer();
 
-      toggleQueryAllTracks();
+      //toggleQueryAllTracks();
 
       toggleTrackIcons();
 
@@ -2293,6 +2297,7 @@ function tableUpdated(selected) {
 
    hideHighlightMMSI();
 
+   /* TODO: Need to fix below to handle table update
    //Handle AIS vessels
    if (key.indexOf("vessel-") === 0) {
       var mmsi = parseInt(key.substr(7));
@@ -2302,29 +2307,11 @@ function tableUpdated(selected) {
             //(value == "1") ? markersDisplayed[i].vesselnameLabel.setMap(map) : markersDisplayed[i].vesselnameLabel.setMap(null);
             if (value == "1") {
                selectVessel(mmsi);
-               /*
-               if (selectionCircle != null) {
-                  selectionCircle.setMap(null);
-                  selectionCirle = null;
-               }
-               selectionCircle = new google.maps.Circle({
-                      center:         new google.maps.LatLng(
-                                         markerArray[i].position.d,
-                                         markerArray[i].position.e),
-                      radius:         2000,
-                      strokeColor:    '#FFFF00',
-                      strokeOpacity:  1.0,
-                      strokeWeight:   1,
-                      fillColor:      '#FFFF00',
-                      fillOpacity:    0.5,
-                      map:            map,
-                      zIndex:         0
-                  });
-               */
             }
          }
       });
    }
+   */
 
    //Handle LAISIC_AIS_TRACKS
    if (key.indexOf("laisicaistrack-") === 0) {
@@ -3269,6 +3256,37 @@ $(function initializeLayers() {
    dataLayers.push(satsarLayer);
 
    //--------------------------------------------------------------
+   //SAT-EO layer
+   var sateoLayer = new dataLayerObject('sateoLayer', 
+      function showradarLayer(thislayer, callback) {
+         //console.log('Displaying RADAR layer');
+         getRADARFromDB(null, thislayer, callback);  //parameters: (customQuery, callback when done)
+      }, 
+      function hideradarLayer() {
+         //console.log('hiding RADAR layer');
+         clearLayerMarkers(this);
+      },
+      true  //force refresh this layer
+      );
+   //Data object of arrays
+   sateoLayer.data = {
+      dataArray: [],
+      markerArray: [],
+      markerlabelArray: []
+   };
+   sateoLayer.dataType = 'SAT-EO';
+   //Marker path definition for this layer: Circle with line for direction (intended for RADAR)
+   //TODO: incorporate marker size with vw or vl
+   //sateoLayer.markerpath = 'M 0, 0 m -6, 0 a 6,6 0 1,0 12,0 a 6,6 0 1,0 -12,0 m 8 0 l 10 0';
+   //sateoLayer.markerpath = 'M 10, 0 l -13,-7 l -5,2 l -2,5 l 2,4 l 5,2 l 12,-6 l 1,0 Z';
+   sateoLayer.markerpath = 'M 0,-9 6,2 4,6 0,8 -4,6 -6,2 Z';
+   sateoLayer.markercolor = '#010101';
+   sateoLayer.strokecolor = '#FF0000';
+   sateoLayer.phpfile = 'query_current_vessels.php';
+   sateoLayer.resultCount = 0;
+   dataLayers.push(sateoLayer);
+
+   //--------------------------------------------------------------
    //KMZ layer
    var kmzLayer = new dataLayerObject('kmzLayer', 
       function showkmzLayer(thislayer, callback) {
@@ -3818,6 +3836,7 @@ function getAISFromDB(thislayer, callback) {
             var vessellabel = '';
             if (vessel.vesselname != null && vessel.vesselname != '') {
                vessellabel = vessel.vesselname;
+               //vessellabel = vessel.mmsi;
             }
             else {
                vessellabel = vessel.mmsi;
@@ -5528,7 +5547,7 @@ function selectionIndicator(latlng) {
    function fadeCircle() {
       var opacity = selectionCircle.get("fillOpacity");
       var radius = selectionCircle.get("radius");
-      opacity -= 0.1;
+      opacity -= 0.2;
       radius += 500;
       if (opacity < 0) {
          selectionCircle.setMap(null);

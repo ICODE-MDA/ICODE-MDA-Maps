@@ -159,6 +159,9 @@ if(count($_GET) > 0) {
          case "SAT-SAR":
             $sourceStr = "(SELECT * FROM $radar_database.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM $radar_database.pvol_pdm_memory WHERE PosSource = 'SAT-SAR' GROUP BY `CommsID` )) VESSELS";
             break;
+         case "SAT-EO":
+            $sourceStr = "(SELECT * FROM $radar_database.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM $radar_database.pvol_pdm_memory WHERE PosSource = 'SAT-EO' GROUP BY `CommsID` )) VESSELS";
+            break;
          case "LIVE_LAISIC":
             $sourceStr = "(SELECT MMSI, CommsID, Latitude, Longitude, SOG, Heading, COG, TimeOfFix, PosSource, Opt1Val, Opt2Val FROM $laisic_live_database.pvol_pdm WHERE mmsi != 0 AND (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $laisic_live_database.pvol_pdm GROUP BY MMSI)) VESSELS";
             break;
@@ -377,7 +380,7 @@ while (odbc_fetch_row($result)){
                    opt4val=>odbc_result($result,"Opt4Val")
            );
     }
-    else if ($source === "RADAR" || $source === "SAT-SAR") {
+    else if ($source === "RADAR" || $source === "SAT-SAR" || $source === "SAT-EO") {
        $vessel = array(mmsi=>odbc_result($result,"mmsi"),
                    commsid=>odbc_result($result,"CommsID"),
                    name=>odbc_result($result,"Name"),

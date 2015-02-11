@@ -417,7 +417,7 @@ $(function() { //shorthand for: $(document).ready(function() {
          onSelectTime: function() {
             if ($('#timemachineend').val() == '') {
                TimeMachineEnd = null;
-               //$('#timemachineend').val('Now');
+               //$('#timemachineend').val('Present');
                $('#clearTimeMachine').remove();
                refreshLayers();
             }
@@ -433,7 +433,7 @@ $(function() { //shorthand for: $(document).ready(function() {
                   $('#timemachineend').after('<span id="clearTimeMachine" class="glyphicon glyphicon-remove" style="cursor: pointer; margin-left: -20px;"></span>');
                   $('#clearTimeMachine').click( function(e) {
                      e.preventDefault();
-                     $('#timemachineend').val('Now');
+                     $('#timemachineend').val('Present');
                      $('#clearTimeMachine').remove();
                      TimeMachineEnd = null;
                      refreshLayers();
@@ -465,7 +465,7 @@ $(function() { //shorthand for: $(document).ready(function() {
          $('#timemachineend').after('<span id="clearTimeMachine" class="glyphicon glyphicon-remove" style="cursor: pointer; margin-left: -20px;"></span>');
          $('#clearTimeMachine').click( function(e) {
             e.preventDefault();
-            $('#timemachineend').val('Now');
+            $('#timemachineend').val('Present');
             $('#clearTimeMachine').remove();
             TimeMachineEnd = null;
             refreshLayers();
@@ -476,7 +476,7 @@ $(function() { //shorthand for: $(document).ready(function() {
          TimeMachineEnd = parseInt(endtime) - parseInt(60*(new Date()).getTimezoneOffset());
       }
       else {
-         $('#timemachineend').val('Now');
+         $('#timemachineend').val('Present');
       }
 
       if (Request.QueryString('age').Count() > 0) {
