@@ -3230,6 +3230,8 @@ $(function initializeLayers() {
       function showradarLayer(thislayer, callback) {
          //console.log('Displaying RADAR layer');
          getRADARFromDB(null, thislayer, callback);  //parameters: (customQuery, callback when done)
+
+         //TODO: grab SAT-SAR corners
       }, 
       function hideradarLayer() {
          //console.log('hiding RADAR layer');

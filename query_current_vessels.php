@@ -113,7 +113,7 @@ if(count($_GET) > 0) {
 
    //Add keyword search constraint
    $keywordclause = '';
-   if (!empty($_GET["keyword"]) && $source === "AIS") {
+   if (!empty($_GET["keyword"]) && (string)$_GET["source"] === "AIS") {
       $keyword = $_GET["keyword"];
       $keywordclause = "AND (MMSI like ('%" . $keyword . "%') OR " . 
          "IMONumber like ('%" . $keyword . "%') OR " . 
@@ -157,10 +157,10 @@ if(count($_GET) > 0) {
             }
             break;
          case "SAT-SAR":
-            $sourceStr = "(SELECT * FROM $radar_database.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM $radar_database.pvol_pdm_memory WHERE PosSource = 'SAT-SAR' GROUP BY `CommsID` )) VESSELS";
+            $sourceStr = "(SELECT * FROM $sat_database.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM $sat_database.pvol_pdm_memory WHERE PosSource = 'SAT-SAR' GROUP BY `CommsID` )) VESSELS";
             break;
          case "SAT-EO":
-            $sourceStr = "(SELECT * FROM $radar_database.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM $radar_database.pvol_pdm_memory WHERE PosSource = 'SAT-EO' GROUP BY `CommsID` )) VESSELS";
+            $sourceStr = "(SELECT * FROM $sat_database.pvol_pdm_memory WHERE (`CommsID`, `TimeOfFix`) IN ( SELECT `CommsID`, max(`TimeOfFix`) FROM $sat_database.pvol_pdm_memory WHERE PosSource = 'SAT-EO' GROUP BY `CommsID` )) VESSELS";
             break;
          case "LIVE_LAISIC":
             $sourceStr = "(SELECT MMSI, CommsID, Latitude, Longitude, SOG, Heading, COG, TimeOfFix, PosSource, Opt1Val, Opt2Val FROM $laisic_live_database.pvol_pdm WHERE mmsi != 0 AND (`MMSI`, `TimeOfFix`) IN ( SELECT `MMSI`, max(`TimeOfFix`) FROM $laisic_live_database.pvol_pdm GROUP BY MMSI)) VESSELS";
@@ -258,12 +258,15 @@ if(count($_GET) > 0) {
       }
    }
 
+   /* custom query DISABLED 12FEB2015
 
    //custom query, erase everything else and use this query
    if (!empty($_GET["query"])) {
       //TODO: add security checks against SQL injections
       $query = $_GET["query"];
    }
+
+    */
 
    $basequery = $query;
 }

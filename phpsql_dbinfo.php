@@ -8,6 +8,7 @@ $vessels_history_table    = 'vessel_history_full';
 $laisic_database  = 'laisic';
 $laisic_live_database  = 'volpe';
 $radar_database   = 'icodemda';
+$sat_database     = 'volpe';
 $ihs_database     = 'wros';
 $port_database    = 'risk';
 $alert_database   = 'alerts';
