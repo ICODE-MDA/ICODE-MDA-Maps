@@ -466,6 +466,7 @@ function initialize() {
             break;
          case 67: // c
             dataLayers[getdataLayerIndex('AIS-track')].hideLayer();
+            dataLayers[getdataLayerIndex('RADAR-track')].hideLayer();
             break;
          case 68: // d
             if ($('#distancetooltoggle:checked').length == 1) {
@@ -532,6 +533,7 @@ function initialize() {
                disableCustomQuery();
             }
             dataLayers[getdataLayerIndex('AIS-track')].hideLayer();
+            dataLayers[getdataLayerIndex('RADAR-track')].hideLayer();
             refreshMaps(true);
             break;
          case 78: // n
@@ -663,17 +665,19 @@ function initialize() {
 function refreshTracks() {
    console.log("Calling refreshTracks - (TODO)");
 
-   //TODO
-   /*
    var trackIDtoRequery = tracksDisplayedID.slice(0);
 
+   //Remove existing track layers
    dataLayers[getdataLayerIndex('AIS-track')].hideLayer();
+   dataLayers[getdataLayerIndex('RADAR-track')].hideLayer();
 
+   //TODO: Requery and draw track layers again with new trail length
+
+   /*
    $.each(trackIDtoRequery, function(index, value) {
       console.log('Requerying track for ' + this);
       getTrackByTrackIDandSource(this, "AIS");
-      //TODO: also query for existing 'RADAR' tracks
-      getTrackByTrackIDandSource(this, "RADAR");   //TEMP: just try for all (even if AIS), since RADAR has different track ID format than AIS's MMSI
+      getTrackByTrackIDandSource(this, "RADAR");
    });
    */
 }
@@ -942,7 +946,7 @@ function generateRadarInfoHTML(vessel, title) {
       '<b>Message Type</b>: ' + vessel.opt4val + '<br>' +
       '</div>' +
       '<div>' + 
-      '<a id="showtracklink" link="" href="javascript:void(0);" onClick="getTrackByTrackIDandSource(\'' + vessel.commsid + '\', \'RADAR\');">Show vessel track history</a>' +
+      '<a id="showtracklink" link="" href="javascript:void(0);" onClick="getRADARTrack(\'' + vessel + '\', \'RADAR\');">Show vessel track history</a>' +
       '</div>' +
       '</div>';  //close for content-left div
 
@@ -1150,6 +1154,7 @@ function toggleQueryAllTracks() {
    }
    else {
       dataLayers[getdataLayerIndex('AIS-track')].hideLayer();
+      dataLayers[getdataLayerIndex('RADAR-track')].hideLayer();
    }
 }
 
@@ -1158,523 +1163,8 @@ function toggleQueryAllTracks() {
  * Function to query and show all tracks within view bounds
  **/
 function queryAllTracks() {
-   var bounds = map.getBounds();
-
-   var ne = bounds.getNorthEast();
-   var sw = bounds.getSouthWest();
-
-   var viewMinLat = sw.lat();
-   var viewMaxLat = ne.lat();
-   var viewMinLon = sw.lng();
-   var viewMaxLon = ne.lng();
-
-   var viewBounds = new google.maps.LatLngBounds(
-            new google.maps.LatLng(viewMinLat, viewMinLon), 
-            new google.maps.LatLng(viewMaxLat, viewMaxLon));
-
-   //for (var i=0; i < Math.min(30,markersDisplayed.length); i++) {
-   for (var i=0; i < markersDisplayed.length; i++) {
-      var markerLatLng = new google.maps.LatLng(
-                                    markersDisplayed[i].lat, 
-                                    markersDisplayed[i].lon);
-      console.log(markersDisplayed[i].lat + ' ' + markersDisplayed[i].lon);
-      
-      if (viewBounds.contains(markerLatLng) || Request.QueryString("queryTracks").toString() == 'all') {
-         getTrack(markersDisplayed[i].mmsi, 
-                  markersDisplayed[i].vesseltypeint, 
-                  markersDisplayed[i].source, 
-                  markersDisplayed[i].datetime,
-                  markersDisplayed[i].streamid,
-                  markersDisplayed[i].trknum
-                  );
-      }
-   }
-}
-
-/* -------------------------------------------------------------------------------- */
-/**
- */
-function getTrackByTrackIDandSource(trackID, source) {
-   console.log('Getting track by id', trackID, 'and source', source);
-   $.each(markersDisplayed, function(index, value) {
-      if (this.mmsi == trackID && this.source == source) {
-         getTrack(this.mmsi, 
-                  this.vesseltypeint, 
-                  source, 
-                  this.datetime,
-                  this.streamid,
-                  this.trknum
-                  );
-      }
-      else if (this.trknum == trackID && this.source == source) {
-         getTrack(this.mmsi, 
-                  this.vesseltypeint, 
-                  source, 
-                  this.datetime,
-                  this.streamid,
-                  this.trknum
-                  );
-      }
-      else if (this.commsid == trackID && this.source == source) {
-         getTrack(this.mmsi, 
-                  this.vesseltypeint, 
-                  source, 
-                  this.datetime,
-                  this.streamid,
-                  this.commsid
-                  );
-      }
-   });
-}
-
-/* -------------------------------------------------------------------------------- */
-/**
- * Function to get track from track query PHP script
- */
-function getTrack(mmsi, vesseltypeint, source, datetime, streamid, trknum) {
-   //Check if track is already displayed or not
-   if (($.inArray(mmsi, tracksDisplayedID) == -1 || source == "LAISIC_AIS_TRACK") && 
-       ($.inArray(trknum, tracksDisplayedID) == -1 || source == "LAISIC_AIS_TRACK") && 
-       $.inArray(trknum, tracksDisplayedID) == -1) {
-      //TODO: $('#' + thislayer.layerID + ' .queryStatement').val("QUERY RUNNING FOR TRACK...");
-
-      var phpWithArg = "query_track.php?source=" + source;
-
-      if (trknum == "undefined" || trknum == null) {
-         phpWithArg += "&mmsi=" + mmsi;
-      }
-      else {
-         phpWithArg += "&trknum=" + trknum;
-      }
-
-      //if history trail limit was chosen, then add option
-      if (history_trail_length != -1 && (source == "AIS" || source == "RADAR")) {
-         phpWithArg += "&history_trail_length=" + history_trail_length;
-      }
-
-      /*
-      if (document.getElementById("enabletimemachine") && document.getElementById("enabletimemachine").checked) {
-         phpWithArg += "&timestart=" + startTimeMachine;
-         phpWithArg += "&endtime=" + endTimeMachine;
-      }
-      */
-
-      //Debug query output
-      console.log('getTrack(): ' + phpWithArg);
-
-      var trackline = new google.maps.Polyline();
-
-      $.getJSON(
-            phpWithArg, // The server URL 
-            { }
-            ) //end .getJSON()
-               .done(function (response) {
-                  //TODO: $('#' + thislayer.layerID + ' .queryStatement').val(response.query);
-                  console.log('getTrack(): ' + response.query);
-                  console.log('getTrack(): ' + 'track history size = ' + response.resultcount);
-
-                  if (response.resultcount > 0) {
-                     var trackHistory = new Array();
-                     var trackPath = new Array();
-                     var trackIcons = new Array();
-                     var dashedLines = new Array();
-                     var prev_target_status = null;
-                     var target_status;
-                     var trackTargetStatus = new Array();
-
-                     var errorEllipses = [];
-
-                     //Loop through each time point of the same vessel
-                     $.each(response.vessels, function(key,vessel) {
-                        prev_target_status = null;
-                        trackHistory.push(vessel);
-
-                        var mmsi = vessel.mmsi;
-                        var lat = vessel.lat;
-                        var lon = vessel.lon;
-                        var datetime = vessel.datetime;
-                        var sog = vessel.sog;
-                        var cog = vessel.cog;
-                        //var streamid = vessel.streamid;
-                        var heading = parseFloat(vessel.heading);
-
-                        if (vessel.target_status != null) {
-                           prev_target_status = target_status;
-                           target_status = vessel.target_status;
-                           trackTargetStatus.push(target_status);
-                        }
-
-                        trackPath[key] = new google.maps.LatLng(lat, lon);
-
-                        //Check if previous target was 'lost' radar tracking
-                        if (prev_target_status == 'L' && key > 0) {
-                           //Draw dashed line to indicate disconnected path
-                           var dashedPath = [];
-                           dashedPath.push(trackPath[key-1]);
-                           dashedPath.push(trackPath[key]);
-
-                           var lineSymbol = {
-                              path:         'M 0,-1 0,1',
-                              strokeColor:        '#FFFFFF',
-                              strokeOpacity: 1,
-                              scale:         4
-                           };                           
-
-                           var dashedLine = new google.maps.Polyline({
-                              path: dashedPath,
-                               strokeOpacity: 0,
-                               icons: [{
-                                  icon:   lineSymbol,
-                               offset: '0',
-                               repeat: '20px'
-                               }],
-                               map: map                               
-                           });
-                           dashedLines.push(dashedLine);
-                        }
-
-                        //Display different colored icons for radar target statuses
-                        if (target_status == 'Q') {
-                           if (prev_target_status != null) {
-                              //Draw dashed line to indicate disconnected path
-                              var dashedPath = [];
-                              dashedPath.push(trackPath[key-1]);
-                              dashedPath.push(trackPath[key]);
-
-                              var lineSymbol = {
-                                 path:         'M 0,-1 0,1',
-                                 strokeColor:  '#FFFFFF',
-                                 strokeOpacity: 1,
-                                 scale:         4
-                              };                           
-
-                              var dashedLine = new google.maps.Polyline({
-                                 path: dashedPath,
-                                  strokeOpacity: 0,
-                                  icons: [{
-                                     icon:      lineSymbol,
-                                  offset:    '0',
-                                  repeat:    '20px'
-                                  }],
-                                  map: map                               
-                              });
-                              dashedLines.push(dashedLine);
-                           }
-
-                           var tracklineIcon = new google.maps.Marker({icon: tracklineIconsOptionsQ});
-                        }
-                        else if (target_status == 'T') {
-                           var tracklineIcon = new google.maps.Marker({icon: tracklineIconsOptionsT});
-                        }
-                        else if (target_status == 'L') {
-                           var tracklineIcon = new google.maps.Marker({icon: tracklineIconsOptionsL});
-                        }
-                        else { //Display normal track icon for non-radar tracks
-                           var tracklineIcon = new google.maps.Marker({icon: tracklineIconsOptions});
-                        }
-                        tracklineIcon.setPosition(trackPath[key]);
-                        
-                        if (showtrackicons) {
-                           tracklineIcon.setMap(map);
-                        }
-                        else {
-                           tracklineIcon.setMap(null);
-                        }
-
-                        if (target_status == false) {
-                           tracklineIcon.setTitle('MMSI: ' + mmsi + '\nDatetime: ' + toHumanTime(datetime) + '\nDatatime (unixtime): ' + datetime + '\nLat: ' + lat + '\nLon: ' + lon + '\nHeading: ' + heading + '\nSOG: ' + sog + '\nCOG: ' + cog + '\nSource: ' + source);
-                        }
-                        else {
-                           tracklineIcon.setTitle('MMSI: ' + mmsi + '\nDatetime: ' + toHumanTime(datetime) + '\nDatatime (unixtime): ' + datetime + '\nLat: ' + lat + '\nLon: ' + lon + '\nHeading: ' + heading + '\nSOG: ' + sog + '\nCOG: ' + cog + '\ntarget_status: ' + target_status + '\nSource: ' + source);
-                        }
-
-                        trackIcons.push(tracklineIcon);
-
-
-                        //TODO: temp draw all LAISIC error ellipses
-                        if (source == 'LAISIC_AIS_TRACK' || source == 'LAISIC_AIS_OBS') {
-                           console.log('Drawing error ellipse: ' + vessel.semimajor*1852 + 'm x ' + vessel.semiminor*1852 + 'm, ' + vessel.orientation + ' degree orientation');
-
-                           //var point = new google.maps.LatLng(lat,lon); // new google.maps.LatLng(43,-78);
-                           var errorEllipse = google.maps.Polygon.Ellipse(
-                                 new google.maps.LatLng(lat,lon),
-                                 vessel.semimajor*1852,  //convert from nm to meters
-                                 vessel.semiminor*1852,  //convert from nm to meters
-                                 vessel.orientation,
-                                 '#FFFF00',     //stroke color
-                                 1,
-                                 1,
-                                 '#FFFF00',     //fill color
-                                 0.1);
-
-                           //Set the map for the error ellipse
-                           errorEllipse.setMap(map);
-
-                           errorEllipses.push(errorEllipse);
-
-                           //Draw label to show error ellipse numbers
-                           /*
-                           errorEllipseLabel = new InfoBox({
-                              content: 'Semi-major: ' + vessel.semimajor + '<br>Semi-minor: ' + vessel.semiminor + '<br>Orientation: ' + vessel.orientation,
-                                             boxStyle: {
-                                                border: "0px dashed black",
-                                             textAlign: "center",
-                                             width: "160px"
-                                             },
-                                             disableAutoPan: true,
-                                             pixelOffset: new google.maps.Size(-80, 20),
-                                             position: new google.maps.LatLng(lat,lon),
-                                             closeBoxURL: "",
-                                             isHidden: false,
-                                             pane: "mapPane",
-                                             enableEventPropagation: true,
-                                             zIndex: 9999
-                           });
-
-                           errorEllipseLabel.open(map);
-
-                           //Draw line across semimajor axis
-                           var semimajorAxisPoints = [
-                              new google.maps.LatLng(37.772323, -122.214897),
-                              new google.maps.LatLng(21.291982, -157.821856)
-                           ];
-
-                           var semimajorAxisLine = new google.maps.Polyline({
-                              path: semimajorAxisPoints,
-                               geodesic: true,
-                               strokeColor: '#FF0000',
-                               strokeOpacity: 1.0,
-                               strokeWeight: 1
-                           });
-
-                           semimajorAxisLine.setMap(map);
-                           */
-                        }
-                        //TODO END
-
-                        //Add listener to delete track if right click on icon
-                        google.maps.event.addListener(tracklineIcon, 'rightclick', function() {
-                           var deleteIndex;
-                           if (trknum == "undefined" || trknum == null) {
-                              deleteIndex = $.inArray(mmsi, tracksDisplayedID);
-                              clearTrackByTrackID(mmsi);
-                           }
-                           else {
-                              deleteIndex = $.inArray(trknum, tracksDisplayedID);
-                              clearTrackByTrackID(trknum);
-                           }
-                        });
-
-                        //Add listener to project to predicted location if click on icon (dead reckoning)
-                        google.maps.event.addListener(tracklineIcon, 'mousedown', function() {
-                           if (source == "AIS" && sog != -1 && (key+1) < trackHistory.length) {
-                              //Grab next chronological time and compare time difference
-                              var time = (trackHistory[key+1].datetime - trackHistory[key].datetime)/60/60; 
-                              if (time == 0 && (key+2) < 0) {
-                                 time = (trackHistory[key+2].datetime - trackHistory[key].datetime)/60/60;
-                              }
-                              var d = (sog*1.852)*time; //convert knots/hr to km/hr
-                              var R = 6371; //km
-
-                              var lat1 = parseFloat(lat)*Math.PI/180;
-                              var lon1 = parseFloat(lon)*Math.PI/180;
-                              var brng = parseFloat(heading)*Math.PI/180;
-
-                              var lat2 = Math.asin( Math.sin(lat1)*Math.cos(d/R) + Math.cos(lat1)*Math.sin(d/R)*Math.cos(brng) );
-
-                              var lon2 = lon1 + Math.atan2(
-                                 Math.sin(brng)*Math.sin(d/R)*Math.cos(lat1), 
-                                 Math.cos(d/R)-Math.sin(lat1)*Math.sin(lat2));
-
-                              lat2 = lat2 * 180/Math.PI;
-                              lon2 = lon2 * 180/Math.PI;
-
-                              var prediction = new google.maps.Marker({
-                                 position: new google.maps.LatLng(lat2,lon2),
-                                  map:         map,
-                                  icon: {
-                                     path:        'M 0,8 4,8 0,-8 -4,8 z',
-                                     strokeColor: '#0000FF',
-                                     fillColor:   '#0000FF',
-                                     fillOpacity: 0.6,
-                                     rotation:    heading,
-                                  }
-                              });
-
-                              var predictionCircle = new google.maps.Circle({
-                                  center:         new google.maps.LatLng(lat,lon),
-                                  radius:         d*1000,
-                                  strokeColor:    '#0000FF',
-                                  strokeOpacity:  0.8,
-                                  strokeWeight:   1,
-                                  fillColor:      '#0000FF',
-                                  fillOpacity:    0.2,
-                                  map:            map
-                              });
-
-
-                              google.maps.event.addListener(predictionCircle, 'mouseup', function() {
-                                 prediction.setMap(null);
-                                 predictionCircle.setMap(null);
-                              });
-                              google.maps.event.addListener(prediction, 'mouseup', function() {
-                                 prediction.setMap(null);
-                                 predictionCircle.setMap(null);
-                              });
-                              google.maps.event.addListener(tracklineIcon, 'mouseup', function() {
-                                 prediction.setMap(null);
-                                 predictionCircle.setMap(null);
-                              });
-                              google.maps.event.addListener(map, 'mouseup', function() {
-                                 prediction.setMap(null);
-                                 predictionCircle.setMap(null);
-                              });
-                           }
-                           /*
-                           else { //Draw LAISIC error ellipses instead of dead reckoning
-                              console.log('Drawing error ellipse: ' + vessel.semimajor + ' x ' + vessel.semiminor + ', ' + vessel.orientation);
-
-                              var point = new google.maps.LatLng(lat,lon); // new google.maps.LatLng(43,-78);
-                              var errorEllipse = google.maps.Polygon.Ellipse(
-                                    point,
-                                    vessel.semimajor*1852,
-                                    vessel.semiminor*1852,
-                                    vessel.orientation,
-                                    '#FFFF00',     //stroke color
-                                    1,
-                                    1,
-                                    '#FFFF00',     //fill color
-                                    0.5);
-
-                              //Set the map for the error ellipse
-                              errorEllipse.setMap(map);
-
-                              //Draw label to show error ellipse numbers
-                              errorEllipseLabel = new InfoBox({
-                                 //content: 'Semi-major: ' + vessel.semimajor + '<br>Semi-minor: ' + vessel.semiminor + '<br>Orientation: ' + vessel.orientation,
-                                 content: 'Semi-major: ' + vessel.semimajor + '<br>Semi-minor: ' + vessel.semiminor + '<br>Orientation: ' + vessel.orientation,
-                                  boxStyle: {
-                                     border: "0px dashed black",
-                                  textAlign: "center",
-                                  width: "160px"
-                                  },
-                                  disableAutoPan: true,
-                                  pixelOffset: new google.maps.Size(-80, 20),
-                                  position: new google.maps.LatLng(lat,lon),
-                                  closeBoxURL: "",
-                                  isHidden: false,
-                                  pane: "mapPane",
-                                  enableEventPropagation: true,
-                                  zIndex: 9999
-                              });
-
-                              errorEllipseLabel.open(map);
-
-                              //Draw line across semimajor axis
-                              var semimajorAxisPoints = [
-                                  new google.maps.LatLng(37.772323, -122.214897),
-                                  new google.maps.LatLng(21.291982, -157.821856)
-                              ];
-
-                              var semimajorAxisLine = new google.maps.Polyline({
-                                  path: semimajorAxisPoints,
-                                  geodesic: true,
-                                  strokeColor: '#FF0000',
-                                  strokeOpacity: 1.0,
-                                  strokeWeight: 1
-                              });
-
-                              semimajorAxisLine.setMap(map);
-
-                              google.maps.event.addListener(errorEllipse, 'mouseup', function() {
-                                 errorEllipse.setMap(null);
-                                 errorEllipseLabel.setMap(null);
-                                 semimajorAxisLine.setMap(null);
-                              });
-                              google.maps.event.addListener(tracklineIcon, 'mouseup', function() {
-                                 errorEllipse.setMap(null);
-                                 errorEllipseLabel.setMap(null);
-                                 semimajorAxisLine.setMap(null);
-                              });
-                              google.maps.event.addListener(map, 'mouseup', function() {
-                                 errorEllipse.setMap(null);
-                                 errorEllipseLabel.setMap(null);
-                                 semimajorAxisLine.setMap(null);
-                              });
-                           }
-                           */
-                        });
-                     });
-
-                     var tracklineOptions = {
-                        strokeColor:   getIconColor(vesseltypeint, streamid), 
-                        strokeOpacity: 0.7,
-                        strokeWeight:  4,
-                     };
-
-                     trackline.setOptions(tracklineOptions);
-                     trackline.setPath(trackPath);
-                     trackline.setMap(map);
-
-                     console.log("trackicons: " + trackIcons.length);
-
-                     //Keep track of which MMSI/trknum has tracks displayed
-                     if (trknum == "undefined" || trknum == null) {
-                        tracksDisplayedID.push(mmsi);
-                     }
-                     else {
-                        tracksDisplayedID.push(trknum);
-                     }
-
-                     var track = {
-                        mmsi: mmsi,
-                        trknum: trknum,
-                        trackHistory: trackHistory,
-                        trackline: trackline,
-                        dashedLines: dashedLines,
-                        trackIcons: trackIcons,
-                        trackTargetStatus: trackTargetStatus,
-                        errorEllipses: errorEllipses
-                     };
-
-                     tracksDisplayed.push(track);
-
-                     //Notify tables that history trail was acquired for a vessel
-                     if (source == "AIS" || source == "LAISIC_AIS_TRACK" || source == "LAISIC_AIS_OBS" || source == "LAISIC_RADAR") {
-                        localStorage.setItem('historytrailquery-'+tracksDisplayedID[tracksDisplayedID.length-1], response.query);
-                        localStorage.setItem('historytrailtype-'+tracksDisplayedID[tracksDisplayedID.length-1], source);
-                     }
-
-                     //Set up track time slider
-                     createTrackTimeControl(map, 251, tracksDisplayed);
-
-                     //Add listener to delete track if right click on track line 
-                     google.maps.event.addListener(trackline, 'rightclick', function() {
-                        var deleteIndex;
-                        if (trknum == "undefined" || trknum == null) {
-                           deleteIndex = $.inArray(mmsi, tracksDisplayedID);
-                           clearTrackByTrackID(mmsi);
-                        }
-                        else {
-                           deleteIndex = $.inArray(trknum, tracksDisplayedID);
-                           clearTrackByTrackID(trknum);
-                        }
-                     });
-                  }
-               }) //end .done()
-            .fail(function() { 
-               console.log('getTrack(): ' +  'No response from track query; error in php?'); 
-               return; 
-            }); //end .fail()
-   }
-   else {
-      if (trknum == "undefined" || trknum == null) {
-         console.log('getTrack(): Track for ' + mmsi + ' is already displayed.');
-      }
-      else {
-         console.log('getTrack(): Track for ' + trknum + ' is already displayed.');
-      }
-   }
+   //TODO: reimplement with new layering method
+   console.log('queryAllTracks - (TODO)');
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -2163,7 +1653,9 @@ function history_trail_length_changed() {
    else {
       history_trail_length = parseFloat(history_trail_length_selection);
    }
-   //TODO: update all tracks to reflect new history trail length
+   console.log('History trail length changed to ', history_trail_length);
+
+   //Update all tracks to reflect new history trail length
    refreshTracks();
 }
 
@@ -3227,6 +2719,42 @@ $(function initializeLayers() {
    dataLayers.push(radarLayer);
 
    //--------------------------------------------------------------
+   //RADAR Track layer
+   var radarTrackLayer = new dataLayerObject('radarLayer', 
+      function showradarTrackLayer(thislayer, callback) {
+         //This layer does not execute any displaying at all.
+         //It is called within the getAISFromDB() function when users trigger it
+         callback();
+      }, 
+      function hideradarTrackLayer() {
+         deleteAllTracks(this);
+      },
+      false  //don't force refresh this layer
+      );
+   //Data object of arrays
+   radarTrackLayer.data = {
+      CommsIDArray: [],          //array of RADAR IDs that are currently displayed
+      trackDataArray: []          //array of track data and markers
+   };
+   radarTrackLayer.dataType = 'RADAR-track';
+   radarTrackLayer.source = 'RADAR';
+   radarTrackLayer.phpfile = 'query_track.php';
+   radarTrackLayer.tracklineIconsOptions = {
+               path:          'M -3,0 0,-3 3,0 0,3 z',
+               strokeColor:   '#FF0000',
+               fillColor:     '#FFFFFF',
+               fillOpacity:   1
+            };
+   //Delete track function
+   radarTrackLayer.deleteTrack = function (mmsi) {
+      var index = this.data.MMSIArray.indexOf(mmsi);
+      this.data.MMSIArray.splice(index, 1);
+      clearMarkersAndEmptyArrays(this.data.trackDataArray[index]);
+      this.data.trackDataArray.splice(index, 1);
+   }
+   dataLayers.push(radarTrackLayer);
+
+   //--------------------------------------------------------------
    //SAT-SAR layer
    var satsarLayer = new dataLayerObject('satsarLayer', 
       function showradarLayer(thislayer, callback) {
@@ -3933,7 +3461,7 @@ function getAISTrack(mmsi, vesseltypeint) { //mmsi, vesseltypeint, source, datet
 
    //Check if track is already displayed or not
    if ($.inArray(mmsi, trackLayerData.MMSIArray) == -1) {
-      var phpWithArg = thislayer.phpfile + '?source=' + thislayer.source + "&mmsi=" + mmsi;
+      var phpWithArg = thislayer.phpfile + '?source=' + thislayer.source + "&targetid=" + mmsi;
 
       //if history trail limit was chosen, then add option
       if (history_trail_length != -1) {
@@ -3943,7 +3471,7 @@ function getAISTrack(mmsi, vesseltypeint) { //mmsi, vesseltypeint, source, datet
       //TODO: implement Time Machine tracks
 
       //Debug query output
-      console.log('getTrack(): ' + phpWithArg);
+      console.log('getAISTrack(): ' + phpWithArg);
 
       var trackLine = new google.maps.Polyline();
 
@@ -3952,8 +3480,8 @@ function getAISTrack(mmsi, vesseltypeint) { //mmsi, vesseltypeint, source, datet
             { }
             ) //end .getJSON()
                .done(function (response) {
-                  //console.log('getTrack(): ' + response.query);
-                  console.log('getTrack(): ' + 'track history size = ' + response.resultcount);
+                  //console.log('getAISTrack(): ' + response.query);
+                  console.log('getAISTrack(): ' + 'track history size = ' + response.resultcount);
 
                   if (response.resultcount > 0) {
                      var trackData = new Array();
@@ -4098,11 +3626,11 @@ function getAISTrack(mmsi, vesseltypeint) { //mmsi, vesseltypeint, source, datet
                   hideBusyIndicator();
                }) //end .done()
             .fail(function() { 
-               console.log('getTrack(): ' +  'No response from track query; error in php?'); 
+               console.log('getAISTrack(): ' +  'No response from track query; error in php?'); 
             }); //end .fail()
    }
    else {
-      console.log('getTrack(): Track for ' + mmsi + ' is already displayed.');
+      console.log('getAISTrack(): Track for ' + mmsi + ' is already displayed.');
    }
 }
 
@@ -4366,7 +3894,9 @@ function getLAISICFromDB(sourceType, thislayer, callback) {
                //Listen for marker right clicks (to query and display track)
                google.maps.event.addListener(marker, 'rightclick', function() {
                   console.log('Getting track for: ' + vessel.mmsi+','+vessel.vesseltypeint+','+sourceType+','+vessel.datetime+','+vessel.streamid+','+vessel.commsid);
-                  getTrack(vessel.mmsi, vessel.vesseltypeint, sourceType, vessel.datetime, vessel.streamid, vessel.commsid);
+                  //TODO: transition to new track layer method
+                  console.log('history tracks for LAISIC layers not yet implemented - (TODO)');
+                  //getTrack(vessel.mmsi, vessel.vesseltypeint, sourceType, vessel.datetime, vessel.streamid, vessel.commsid);
                   //if LAISIC, use trknum
                });
 
@@ -4807,8 +4337,8 @@ function getRADARFromDB(customQuery, thislayer, callback) {
 
             //Listen for marker right clicks (to query and display track)
             google.maps.event.addListener(marker, 'rightclick', function() {
-               console.log(thislayer.layerID + ': Getting track for: ' + vessel.mmsi+','+vessel.vesseltypeint+','+sourceType+','+vessel.datetime+','+vessel.streamid+','+vessel.commsid);
-               getTrack(vessel.mmsi, vessel.vesseltypeint, sourceType, vessel.datetime, vessel.streamid, vessel.commsid);
+               console.log(thislayer.layerID + ': Getting track for: ' + vessel.commsid);
+               getRADARTrack(vessel);
             });
 
             var vessellabel = vessel.commsid;      //TODO: find vessel label field in data
@@ -4864,6 +4394,191 @@ function getRADARFromDB(customQuery, thislayer, callback) {
 
          callback(false);
       }); //END .fail()
+}
+
+/* -------------------------------------------------------------------------------- */
+/**
+ * Function to get RADAR track from track query PHP script
+ */
+function getRADARTrack(vessel) {
+   var thislayer = dataLayers[getdataLayerIndex('RADAR-track')];
+   var trackLayerData = thislayer.data;
+
+   showBusyIndicator();
+
+   //Check if track is already displayed or not
+   if ($.inArray(vessel.commsid, trackLayerData.CommsIDArray) == -1) {
+      var phpWithArg = thislayer.phpfile + '?source=' + thislayer.source + "&targetid='" + vessel.commsid + "'";
+
+      //if history trail limit was chosen, then add option
+      if (history_trail_length != -1) {
+         phpWithArg += "&history_trail_length=" + history_trail_length;
+      }
+
+      //TODO: implement Time Machine tracks
+
+      //Debug query output
+      console.log('getRADARTrack(): ' + phpWithArg);
+
+      var trackLine = new google.maps.Polyline();
+
+      $.getJSON(
+            phpWithArg, // The server URL 
+            { }
+            ) //end .getJSON()
+               .done(function (response) {
+                  //console.log('getRADARTrack(): ' + response.query);
+                  console.log('getRADARTrack(): ' + 'track history size = ' + response.resultcount);
+
+                  if (response.resultcount > 0) {
+                     var trackData = new Array();
+                     var trackIcons = new Array();
+                     var trackPath = new Array();
+
+                     //Loop through each time point of the same vessel
+                     $.each(response.vessels, function(index, trackVertex) {
+                        //Save each vertex data
+                        trackData.push(trackVertex);
+
+                        //Save each vertex
+                        trackPath[index] = new google.maps.LatLng(trackVertex.lat, trackVertex.lon);
+
+                        //Set Google Map markers for each vertex
+                        var tracklineIcon = new google.maps.Marker({
+                           icon: thislayer.tracklineIconsOptions
+                        });
+                        tracklineIcon.setPosition(trackPath[index]);
+                        
+                        if ($('#showtrackicons:checked').length > 0) {
+                           tracklineIcon.setMap(map);
+                        }
+                        else {
+                           tracklineIcon.setMap(null);
+                        }
+
+                        tracklineIcon.setTitle('Track ID: ' + vessel.commsid + '\nDatetime: ' + toHumanTime(trackVertex.datetime) + '\nDatatime (unixtime): ' + trackVertex.datetime + '\nLat: ' + trackVertex.lat + '\nLon: ' + trackVertex.lon + '\nHeading: ' + trackVertex.true_heading + '\nSOG: ' + trackVertex.sog + '\nSource: ' + thislayer.source);
+
+                        trackIcons.push(tracklineIcon);
+
+
+                        //Add listener to delete track if right click on icon
+                        google.maps.event.addListener(tracklineIcon, 'rightclick', function(event) {
+                           thislayer.deleteTrack(vessel.commsid);
+                        });
+
+                        //Dead reckoning
+                        //Add listener to project to predicted location if click on icon (dead reckoning)
+                        google.maps.event.addListener(tracklineIcon, 'mousedown', function() {
+                           if (typeof trackData[index+1] === 'undefined') {
+                              return;
+                           }
+                           //Grab next chronological time and compare time difference
+                           var time = (trackData[index+1].datetime - trackData[index].datetime)/60/60; 
+                           if (time == 0 && (index+2) < 0) {
+                              time = (trackData[index+2].datetime - trackData[index].datetime)/60/60;
+                           }
+                           var d = (trackVertex.sog*1.852)*time; //convert knots/hr to km/hr
+                           var R = 6371; //km
+
+                           var lat1 = parseFloat(trackVertex.lat)*Math.PI/180;
+                           var lon1 = parseFloat(trackVertex.lon)*Math.PI/180;
+                           var brng = parseFloat(trackVertex.true_heading)*Math.PI/180;
+
+                           var lat2 = Math.asin( Math.sin(lat1)*Math.cos(d/R) + Math.cos(lat1)*Math.sin(d/R)*Math.cos(brng) );
+
+                           var lon2 = lon1 + Math.atan2(
+                              Math.sin(brng)*Math.sin(d/R)*Math.cos(lat1), 
+                              Math.cos(d/R)-Math.sin(lat1)*Math.sin(lat2));
+
+                           lat2 = lat2 * 180/Math.PI;
+                           lon2 = lon2 * 180/Math.PI;
+
+                           var prediction = new google.maps.Marker({
+                              position: new google.maps.LatLng(lat2,lon2),
+                               map:         map,
+                               icon: {
+                                  path:        'M 0,8 4,8 0,-8 -4,8 z',
+                               strokeColor: '#0000FF',
+                               fillColor:   '#0000FF',
+                               fillOpacity: 0.6,
+                               rotation:    parseFloat(trackVertex.true_heading),
+                               }
+                           });
+
+                           var predictionCircle = new google.maps.Circle({
+                              center:         new google.maps.LatLng(trackVertex.lat, trackVertex.lon),
+                               radius:         d*1000,
+                               strokeColor:    '#0000FF',
+                               strokeOpacity:  0.8,
+                               strokeWeight:   1,
+                               fillColor:      '#0000FF',
+                               fillOpacity:    0.2,
+                               map:            map
+                           });
+
+
+                           google.maps.event.addListener(predictionCircle, 'mouseup', function() {
+                              prediction.setMap(null);
+                              predictionCircle.setMap(null);
+                           });
+                           google.maps.event.addListener(prediction, 'mouseup', function() {
+                              prediction.setMap(null);
+                              predictionCircle.setMap(null);
+                           });
+                           google.maps.event.addListener(tracklineIcon, 'mouseup', function() {
+                              prediction.setMap(null);
+                              predictionCircle.setMap(null);
+                           });
+                           google.maps.event.addListener(map, 'mouseup', function() {
+                              prediction.setMap(null);
+                              predictionCircle.setMap(null);
+                           });
+                        });
+                     });
+
+                     trackLine.setOptions({
+                        strokeColor:   getIconColor(888), 
+                        strokeOpacity: 0.7,
+                        strokeWeight:  4,
+                     });
+                     trackLine.setPath(trackPath);
+                     trackLine.setMap(map);
+
+                     //Keep track of which MMSIs have tracks displayed
+                     trackLayerData.CommsIDArray.push(vessel.commsid);
+                     trackLayerData.trackDataArray.push({
+                        trackData: trackData,               //array of objects
+                        trackIcons: trackIcons,             //array of Google Maps objects
+                        trackPath: trackPath,               //array of Google Maps objects
+                        trackLine: trackLine,               //Google Maps object
+                        resultCount: response.resultcount   //value
+                     });
+
+                     //Notify tables that history trail was acquired for a vessel
+                     //TODO
+                     /*
+                     localStorage.setItem('historytrailquery-'+tracksDisplayedID[tracksDisplayedID.length-1], response.query);
+                     localStorage.setItem('historytrailtype-'+tracksDisplayedID[tracksDisplayedID.length-1], trackLayerData.source);
+                     */
+
+                     //Set up track time slider
+                     //TODO: createTrackTimeControl(map, 251, tracksDisplayed);
+
+                     //Add listener to delete track if right click on track line 
+                     google.maps.event.addListener(trackLine, 'rightclick', function() {
+                        thislayer.deleteTrack(mmsi);
+                     });
+                  }
+
+                  hideBusyIndicator();
+               }) //end .done()
+            .fail(function() { 
+               console.log('getRADARTrack(): ' +  'No response from track query; error in php?'); 
+            }); //end .fail()
+   }
+   else {
+      console.log('getRADARTrack(): Track for ' + vessel.commsid + ' is already displayed.');
+   }
 }
 
 /* -------------------------------------------------------------------------------- */

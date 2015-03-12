@@ -48,16 +48,14 @@ if(count($_GET) > 0) {
    }
    else if(!empty($_GET["source"]) and (string)$_GET["source"] == "RADAR") {
       $query = "SELECT * FROM pvol_pdm_memory WHERE commsid=";
-      //Assume trknum exists
-      $query = $query . "'" . $_GET["trknum"] . "'";
    }
    else {
       $query = "SELECT * FROM $ais_database.$vessels_history_table WHERE mmsi=";
    }
 
    //Add MMSI to query track for
-   if (!empty($_GET["mmsi"])) {
-      $query = $query . $_GET["mmsi"];
+   if (!empty($_GET["targetid"])) {
+      $query = $query . $_GET["targetid"];
    }
 
 
