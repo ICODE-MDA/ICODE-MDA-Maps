@@ -2564,7 +2564,7 @@ $(function initializeLayers() {
          callback();
       }, 
       function hideaisTrackLayer() {
-         deleteAllTracks(this);
+         deleteAISTracks(this);
       },
       false  //don't force refresh this layer
       );
@@ -2723,11 +2723,11 @@ $(function initializeLayers() {
    var radarTrackLayer = new dataLayerObject('radarLayer', 
       function showradarTrackLayer(thislayer, callback) {
          //This layer does not execute any displaying at all.
-         //It is called within the getAISFromDB() function when users trigger it
+         //It is called within the getRADARFromDB() function when users trigger it
          callback();
       }, 
       function hideradarTrackLayer() {
-         deleteAllTracks(this);
+         deleteRADARTracks(this);
       },
       false  //don't force refresh this layer
       );
@@ -2742,13 +2742,13 @@ $(function initializeLayers() {
    radarTrackLayer.tracklineIconsOptions = {
                path:          'M -3,0 0,-3 3,0 0,3 z',
                strokeColor:   '#FF0000',
-               fillColor:     '#FFFFFF',
+               fillColor:     '#FF0000',
                fillOpacity:   1
             };
    //Delete track function
-   radarTrackLayer.deleteTrack = function (mmsi) {
-      var index = this.data.MMSIArray.indexOf(mmsi);
-      this.data.MMSIArray.splice(index, 1);
+   radarTrackLayer.deleteTrack = function (commsid) {
+      var index = this.data.CommsIDArray.indexOf(commsid);
+      this.data.CommsIDArray.splice(index, 1);
       clearMarkersAndEmptyArrays(this.data.trackDataArray[index]);
       this.data.trackDataArray.splice(index, 1);
    }
@@ -3636,10 +3636,11 @@ function getAISTrack(mmsi, vesseltypeint) { //mmsi, vesseltypeint, source, datet
 
 /* -------------------------------------------------------------------------------- */
 /** 
- * Get counts from clusters
+ * Delete all AIS tracks
  */
-function deleteAllTracks(thislayer) {
+function deleteAISTracks(thislayer) {
    thislayer.data.trackDataArray.forEach( function (trackData, index) {
+      //Handle AIS track layer with MMSI array
       thislayer.deleteTrack(thislayer.data.MMSIArray[index]);
    });
    thislayer.data.MMSIArray = [];
@@ -4566,7 +4567,7 @@ function getRADARTrack(vessel) {
 
                      //Add listener to delete track if right click on track line 
                      google.maps.event.addListener(trackLine, 'rightclick', function() {
-                        thislayer.deleteTrack(mmsi);
+                        thislayer.deleteTrack(vessel.commsid);
                      });
                   }
 
@@ -4579,6 +4580,21 @@ function getRADARTrack(vessel) {
    else {
       console.log('getRADARTrack(): Track for ' + vessel.commsid + ' is already displayed.');
    }
+}
+
+/* -------------------------------------------------------------------------------- */
+/** 
+ * Delete all RADAR tracks
+ */
+function deleteRADARTracks(thislayer) {
+   console.log(thislayer.data.trackDataArray);
+   thislayer.data.trackDataArray.forEach( function (trackData, index) {
+      console.log(trackData);
+      //Handle RADAR track layer with CommsID array
+      console.log('Deleting track ', index, ' ', thislayer.data.CommsIDArray[index]);
+      thislayer.deleteTrack(thislayer.data.CommsIDArray[index]);
+   });
+   thislayer.data.CommsIDArray = [];
 }
 
 /* -------------------------------------------------------------------------------- */
