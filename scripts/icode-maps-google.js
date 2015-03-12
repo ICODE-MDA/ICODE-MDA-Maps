@@ -946,7 +946,7 @@ function generateRadarInfoHTML(vessel, title) {
       '<b>Message Type</b>: ' + vessel.opt4val + '<br>' +
       '</div>' +
       '<div>' + 
-      '<a id="showtracklink" link="" href="javascript:void(0);" onClick="getRADARTrack(\'' + vessel + '\', \'RADAR\');">Show vessel track history</a>' +
+      '<a id="showtracklink" link="" href="javascript:void(0);" onClick="getRADARTrack(\'' + vessel.commsid + '\');">Show vessel track history</a>' +
       '</div>' +
       '</div>';  //close for content-left div
 
@@ -2749,6 +2749,7 @@ $(function initializeLayers() {
    radarTrackLayer.deleteTrack = function (commsid) {
       var index = this.data.CommsIDArray.indexOf(commsid);
       this.data.CommsIDArray.splice(index, 1);
+      console.log('index is ', index);
       clearMarkersAndEmptyArrays(this.data.trackDataArray[index]);
       this.data.trackDataArray.splice(index, 1);
    }
@@ -4339,7 +4340,7 @@ function getRADARFromDB(customQuery, thislayer, callback) {
             //Listen for marker right clicks (to query and display track)
             google.maps.event.addListener(marker, 'rightclick', function() {
                console.log(thislayer.layerID + ': Getting track for: ' + vessel.commsid);
-               getRADARTrack(vessel);
+               getRADARTrack(vessel.commsid);
             });
 
             var vessellabel = vessel.commsid;      //TODO: find vessel label field in data
@@ -4401,15 +4402,15 @@ function getRADARFromDB(customQuery, thislayer, callback) {
 /**
  * Function to get RADAR track from track query PHP script
  */
-function getRADARTrack(vessel) {
+function getRADARTrack(commsid) {
    var thislayer = dataLayers[getdataLayerIndex('RADAR-track')];
    var trackLayerData = thislayer.data;
 
    showBusyIndicator();
 
    //Check if track is already displayed or not
-   if ($.inArray(vessel.commsid, trackLayerData.CommsIDArray) == -1) {
-      var phpWithArg = thislayer.phpfile + '?source=' + thislayer.source + "&targetid='" + vessel.commsid + "'";
+   if ($.inArray(commsid, trackLayerData.CommsIDArray) == -1) {
+      var phpWithArg = thislayer.phpfile + '?source=' + thislayer.source + "&targetid='" + commsid + "'";
 
       //if history trail limit was chosen, then add option
       if (history_trail_length != -1) {
@@ -4457,14 +4458,14 @@ function getRADARTrack(vessel) {
                            tracklineIcon.setMap(null);
                         }
 
-                        tracklineIcon.setTitle('Track ID: ' + vessel.commsid + '\nDatetime: ' + toHumanTime(trackVertex.datetime) + '\nDatatime (unixtime): ' + trackVertex.datetime + '\nLat: ' + trackVertex.lat + '\nLon: ' + trackVertex.lon + '\nHeading: ' + trackVertex.true_heading + '\nSOG: ' + trackVertex.sog + '\nSource: ' + thislayer.source);
+                        tracklineIcon.setTitle('Track ID: ' + commsid + '\nDatetime: ' + toHumanTime(trackVertex.datetime) + '\nDatatime (unixtime): ' + trackVertex.datetime + '\nLat: ' + trackVertex.lat + '\nLon: ' + trackVertex.lon + '\nHeading: ' + trackVertex.true_heading + '\nSOG: ' + trackVertex.sog + '\nSource: ' + thislayer.source);
 
                         trackIcons.push(tracklineIcon);
 
 
                         //Add listener to delete track if right click on icon
                         google.maps.event.addListener(tracklineIcon, 'rightclick', function(event) {
-                           thislayer.deleteTrack(vessel.commsid);
+                           thislayer.deleteTrack(commsid);
                         });
 
                         //Dead reckoning
@@ -4546,7 +4547,7 @@ function getRADARTrack(vessel) {
                      trackLine.setMap(map);
 
                      //Keep track of which MMSIs have tracks displayed
-                     trackLayerData.CommsIDArray.push(vessel.commsid);
+                     trackLayerData.CommsIDArray.push(commsid);
                      trackLayerData.trackDataArray.push({
                         trackData: trackData,               //array of objects
                         trackIcons: trackIcons,             //array of Google Maps objects
@@ -4554,6 +4555,7 @@ function getRADARTrack(vessel) {
                         trackLine: trackLine,               //Google Maps object
                         resultCount: response.resultcount   //value
                      });
+
 
                      //Notify tables that history trail was acquired for a vessel
                      //TODO
@@ -4567,7 +4569,7 @@ function getRADARTrack(vessel) {
 
                      //Add listener to delete track if right click on track line 
                      google.maps.event.addListener(trackLine, 'rightclick', function() {
-                        thislayer.deleteTrack(vessel.commsid);
+                        thislayer.deleteTrack(commsid);
                      });
                   }
 
@@ -4578,7 +4580,7 @@ function getRADARTrack(vessel) {
             }); //end .fail()
    }
    else {
-      console.log('getRADARTrack(): Track for ' + vessel.commsid + ' is already displayed.');
+      console.log('getRADARTrack(): Track for ' + commsid + ' is already displayed.');
    }
 }
 
@@ -4587,14 +4589,22 @@ function getRADARTrack(vessel) {
  * Delete all RADAR tracks
  */
 function deleteRADARTracks(thislayer) {
-   console.log(thislayer.data.trackDataArray);
+   /*
    thislayer.data.trackDataArray.forEach( function (trackData, index) {
-      console.log(trackData);
       //Handle RADAR track layer with CommsID array
       console.log('Deleting track ', index, ' ', thislayer.data.CommsIDArray[index]);
       thislayer.deleteTrack(thislayer.data.CommsIDArray[index]);
    });
+   */
+
+   var numToDelete = thislayer.data.trackDataArray.length;
+   for (var i=0; i < numToDelete; i++) {
+      console.log('Deleting track ', i, ' ', thislayer.data.CommsIDArray[0]);
+      thislayer.deleteTrack(thislayer.data.CommsIDArray[0]);
+   }
+
    thislayer.data.CommsIDArray = [];
+   thislayer.data.trackDataArray = [];
 }
 
 /* -------------------------------------------------------------------------------- */
