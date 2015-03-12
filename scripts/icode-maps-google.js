@@ -703,7 +703,7 @@ function checkImageExistOrReplace(url) {
  * fetcher to get track line
  */
 //function markerInfoBubble(marker, infoBubble, html, mmsi, vesselname, vesseltypeint, streamid, datetime) {
-function markerInfoBubble(marker, vessel, infoBubble) {
+function markerInfoBubble(marker, vessel, infoBubble, layertype) {
    //Prepare vessel image from Marine Traffic
    if (passIMOChecksum(vessel.imo)) {
       imgURL = 'http://photos.marinetraffic.com/ais/showphoto.aspx?mmsi=' + vessel.mmsi + '&imo=' + vessel.imo;
@@ -718,8 +718,8 @@ function markerInfoBubble(marker, vessel, infoBubble) {
 
    var title, vesseltype;
 
-   if (vessel.streamid == 'RADAR') {
-      title = 'RADAR' + vessel.commsid;
+   if (layertype == 'RADAR') {
+      title = 'RADAR Target: ' + vessel.commsid;
       vesseltype = 'RADAR';
    }
    else if (vessel.streamid == 'SAT-SAR') {
@@ -731,15 +731,15 @@ function markerInfoBubble(marker, vessel, infoBubble) {
       title = 'LAISIC Fusion: ' + vessel.trknum + ' (MMSI ' + vessel.mmsi + ')';
       vesseltype = 'LIVE_LAISIC';
    }
-   else if (vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999)) {
+   else if (layertype == 'LAISIC' && (vessel.streamid == 'shore-radar' || vessel.vesseltypeint == 888 || (vessel.streamid == 'r166710001' && vessel.vesseltypeint != 999))) {
       title = 'RADAR Trknum: ' + vessel.trknum + ' (' + vessel.mmsi + ')';
       vesseltype = 'LAISIC_RADAR';
    }
-   else if (vessel.vesseltypeint == 999) {
+   else if (layertype == 'LAISIC' && vessel.vesseltypeint == 999) {
       title = 'LAISIC AIS Trknum: ' + vessel.trknum + ' (' + vessel.mmsi + ')';
       vesseltype = 'LAISIC_AIS_TRACK';
    }
-   else if (vessel.vesseltypeint == 777) {
+   else if (layertype == 'LAISIC' && vessel.vesseltypeint == 777) {
       title = 'MMSI or RADAR ID: ' + vessel.mmsi;
       vesseltype = 'LAISIC_AIS_OBS';
    }
@@ -758,9 +758,11 @@ function markerInfoBubble(marker, vessel, infoBubble) {
    }
    else {
       if (!detectMobileBrowser()) {
+         //Default info for AIS bubble
          infoBubble.setContent(generateInfoHTML(vessel, vesseltype, title));
       }
       else {
+         //Mobile version of info for AIS bubble
          infoBubble.setContent(generateInfoHTMLmobile(vessel, vesseltype, title));
          infoBubble.setMaxWidth(190);
       }
@@ -827,7 +829,7 @@ function generateInfoHTML(vessel, vesseltype, title) {
       '<b>Last Message Type</b>: ' + vessel.messagetype + '<br>' +
       '</div>' +
       '<div>' + 
-      '<a id="showtracklink" link="" href="javascript:void(0);" onClick="getTrackByTrackIDandSource(\'' + vessel.mmsi + '\', \'' + vesseltype + '\');">Show vessel track history</a>' +
+      '<a id="showtracklink" link="" href="javascript:void(0);" onClick="getAISTrack(\'' + vessel.mmsi + '\', \'' + vessel.vesseltypeint + '\');">Show vessel track history</a>' +
       '</div>' +
       (vesseltype=='AIS'?
       '<div id="content-port" border=1>' +
@@ -893,7 +895,7 @@ function generateInfoHTMLmobile(vessel, vesseltype, title) {
       '<b>Vessel Type</b>: ' + vessel.vesseltypeint + '<br>' +
       '</div>' +
       '<div>' + 
-      '<a id="showtracklink" link="" href="javascript:void(0);" onClick="getTrackByTrackIDandSource(\'' + vessel.mmsi + '\', \'' + vesseltype + '\');">Show vessel track history</a>' +
+      '<a id="showtracklink" link="" href="javascript:void(0);" onClick="getAISTrack(\'' + vessel.mmsi + '\', \'' + vessel.vesseltypeint + '\');">Show vessel track history</a>' +
       '</div>' +
       '</div>';  //close for content-left div
 
@@ -3798,7 +3800,7 @@ function getAISFromDB(thislayer, callback) {
                selectionIndicator(point);
 
                //Setup the infoBubble and show it
-               markerInfoBubble(marker, vessel, infoBubble);
+               markerInfoBubble(marker, vessel, infoBubble, 'AIS');
 
                //Close the infoBubble if user clicks outside of infoBubble area
                google.maps.event.addListenerOnce(map, 'click', function() {
@@ -3831,7 +3833,6 @@ function getAISFromDB(thislayer, callback) {
                console.log('Getting track for: ' + vessel.mmsi+','+vessel.vesseltypeint+',AIS,'+vessel.datetime+','+vessel.streamid+','+vessel.commsid);
 
                getAISTrack(vessel.mmsi, vessel.vesseltypeint);
-               //getTrack(vessel.mmsi, vessel.vesseltypeint, 'AIS', vessel.datetime, vessel.streamid, vessel.commsid);
             });
 
             //Prepare vessel labels
@@ -4322,7 +4323,7 @@ function getLAISICFromDB(sourceType, thislayer, callback) {
                   selectionIndicator(point);
 
                   //Setup the infoBubble and show it
-                  markerInfoBubble(marker, vessel, infoBubble);
+                  markerInfoBubble(marker, vessel, infoBubble, 'LAISIC');
 
                   //Close the infoBubble if user clicks outside of infoBubble area
                   google.maps.event.addListenerOnce(map, 'click', function() {
@@ -4787,7 +4788,7 @@ function getRADARFromDB(customQuery, thislayer, callback) {
                selectionIndicator(latlon);
 
                //Setup the infoBubble and show it
-               markerInfoBubble(marker, vessel, infoBubble);
+               markerInfoBubble(marker, vessel, infoBubble, 'RADAR');
 
                //Close the infoBubble if user clicks outside of infoBubble area
                google.maps.event.addListenerOnce(map, 'click', function() {
@@ -5434,11 +5435,26 @@ function updateGlobalResultCount(add, subtract) {
 }
 
 /* -------------------------------------------------------------------------------- */
-function search() {
+/**
+ * Function to handle vessel search on AIS data.  Triggered by GUI search bar, advanced
+ * search, or via OWF advanced search widget.
+ *
+ * Input:
+ *    params - optional input parameter with search parameters intended to be used by search OWF widget
+ **/
+function search(params) {
    //check if AIS layer is currently being displayed
    if (!isAISLayerDisplayed()) {
       alert('AIS layer is not being displayed.  Please add layer before performing search');
       return;
+   }
+
+   //TODO: handle searches incoming from OWF search widget, indicated by defined params object
+   if (typeof params !== 'undefined') {
+      //incoming search from OWF widget
+      //TODO: parse parameters
+
+      //TODO: pan map to requested search region
    }
 
    //clear previous search
