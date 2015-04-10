@@ -1008,13 +1008,13 @@
                           </select>
                        </form>
                        from
-                       <input type="text" value"Now" id="timemachineend">
+                       <input type="text" value"Now" id="timemachineend"> UTC
                        <hr>
                        <div id="refreshoptions">
                           <b>Refresh Options:</b><br>
                           <div class="checkbox">
                              <label>
-                                <input class="checkbox" id="autoRefresh" name="autoRefresh" type="checkbox" checked="checked" onclick="toggleAutoRefresh();"> Automatically refresh (1 min)
+                                <input class="checkbox" id="autoRefresh" name="autoRefresh" type="checkbox" checked="checked" onclick="toggleAutoRefresh();"> Automatically refresh
                              </label>
                           </div>
                           <form role="form">
@@ -1024,6 +1024,8 @@
                                 <option value="0.5">30 seconds</option>
                                 <option value="1" selected="selected">1 minute</option>
                                 <option value="5">5 minutes</option>
+                                <option value="10">10 minutes</option>
+                                <option value="30">30 minutes</option>
                              </select>
                           </form>
                           <form role="form">
