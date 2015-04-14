@@ -12,10 +12,10 @@ $sat_database     = 'volpe';
 $ihs_database     = 'wros';
 $port_database    = 'risk';
 $alert_database   = 'alerts';
-$odbc_host        = '128.49.79.26';
-$odbc_user        = 'icode';
-$odbc_password    = 'icode';
+$odbc_host        = 'LOCALHOST';
+$odbc_user        = 'ODBCUSERNAME';
+$odbc_password    = 'ODBCPASSWORD';
 $fmv_database     = 'fmv';
-$fmv_user         = 'fmvuser';
-$fmv_password     = 'fmvuser';
+$fmv_user         = 'FMVUSERNAME';
+$fmv_password     = 'FMVPASSWORD';
 ?>
