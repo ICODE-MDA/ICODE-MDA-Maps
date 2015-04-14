@@ -315,7 +315,7 @@ function saveAlert(){
       console.log('saveAlert(): Added new alert id ' + response.alert_id);
       
       //Notify server about newly added alert so that it can be added for monitoring
-      var connection = new WebSocket('ws://128.49.79.26:2412');
+      var connection = new WebSocket('ws://' + WS_ADDRESS + ':' + WS_PORT);
 
       //==================== Opened connection to the server =========================
       connection.onopen = function () {

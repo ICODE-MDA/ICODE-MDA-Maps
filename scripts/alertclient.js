@@ -9,6 +9,13 @@
 
 /* -------------------------------------------------------------------------------- */
 /**
+ *  Global objects 
+ */
+WS_ADDRESS = '127.0.0.1';     //IP address of WebSocket server
+WS_PORT = '2412';                //Port of WebSocket server
+
+/* -------------------------------------------------------------------------------- */
+/**
  * Starts on page load using jQuery $() operator
  **/
 $(function startAlertClient() {
@@ -58,7 +65,7 @@ function alertClient() {
    }
 
    //Open socket connection to server
-   var connection = new WebSocket('ws://128.49.79.26:2412');
+   var connection = new WebSocket('ws://' + WS_ADDRESS + ':' + WS_PORT);
 
    //==================== Opened connection to the server =========================
    connection.onopen = function () {
@@ -588,7 +595,7 @@ function alertClient() {
             //TODO: Add criteria to database here
 
             //TODO: notify server about newly added alert so that it can be added for monitoring
-            var connection = new WebSocket('ws://128.49.79.26:2412');
+            var connection = new WebSocket('ws://' + WS_ADDRESS + ':' + WS_PORT);
 
             //==================== Opened connection to the server =========================
             connection.onopen = function () {
